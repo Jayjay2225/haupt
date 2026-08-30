@@ -1,0 +1,266 @@
+[
+  {
+    "id": "glas-wasser",
+    "beduerfnis": "energie",
+    "label": "Ein Glas Wasser, langsam",
+    "dauer_min": 2
+  },
+  {
+    "id": "tageslicht",
+    "beduerfnis": "energie",
+    "label": "5 Minuten vor die Tür, Tageslicht tanken",
+    "dauer_min": 5
+  },
+  {
+    "id": "obst-nuesse",
+    "beduerfnis": "energie",
+    "label": "Ein Apfel oder eine Handvoll Nüsse",
+    "dauer_min": 3
+  },
+  {
+    "id": "strecken",
+    "beduerfnis": "energie",
+    "label": "Aufstehen, strecken, Schultern kreisen",
+    "dauer_min": 2
+  },
+  {
+    "id": "kaltes-wasser",
+    "beduerfnis": "energie",
+    "label": "Kaltes Wasser über Gesicht und Handgelenke",
+    "dauer_min": 1
+  },
+  {
+    "id": "drei-minuten-atmen",
+    "beduerfnis": "pause",
+    "label": "3 Minuten atmen, Augen zu",
+    "dauer_min": 3
+  },
+  {
+    "id": "runde-um-den-block",
+    "beduerfnis": "pause",
+    "label": "Eine kurze Runde um den Block",
+    "dauer_min": 10
+  },
+  {
+    "id": "tee-ohne-nebenbei",
+    "beduerfnis": "pause",
+    "label": "Einen Tee kochen und nur den Tee trinken",
+    "dauer_min": 7
+  },
+  {
+    "id": "hinlegen-mit-timer",
+    "beduerfnis": "pause",
+    "label": "10 Minuten hinlegen, Timer stellen",
+    "dauer_min": 10
+  },
+  {
+    "id": "fenster-blick",
+    "beduerfnis": "pause",
+    "label": "Aus dem Fenster schauen, sonst nichts",
+    "dauer_min": 3
+  },
+  {
+    "id": "jemanden-anrufen",
+    "beduerfnis": "trost",
+    "label": "Jemanden anrufen, der dir guttut",
+    "dauer_min": 10
+  },
+  {
+    "id": "lied-das-versteht",
+    "beduerfnis": "trost",
+    "label": "Ein Lied hören, das dich versteht",
+    "dauer_min": 5
+  },
+  {
+    "id": "warm-duschen",
+    "beduerfnis": "trost",
+    "label": "Warm duschen oder ein kurzes Bad",
+    "dauer_min": 15
+  },
+  {
+    "id": "aufschreiben-was-schwer-ist",
+    "beduerfnis": "trost",
+    "label": "Aufschreiben, was gerade schwer ist",
+    "dauer_min": 5
+  },
+  {
+    "id": "sofa-und-decke",
+    "beduerfnis": "trost",
+    "label": "Sofa, Decke, fünf Minuten nichts müssen",
+    "dauer_min": 5
+  },
+  {
+    "id": "lieblingslied-laut",
+    "beduerfnis": "belohnung",
+    "label": "Ein Lieblingslied, ruhig laut",
+    "dauer_min": 4
+  },
+  {
+    "id": "geschafft-liste",
+    "beduerfnis": "belohnung",
+    "label": "Aufschreiben, was heute schon geschafft ist",
+    "dauer_min": 3
+  },
+  {
+    "id": "sonnenrunde",
+    "beduerfnis": "belohnung",
+    "label": "Eine Runde draußen, nur für dich",
+    "dauer_min": 10
+  },
+  {
+    "id": "belohnung-planen",
+    "beduerfnis": "belohnung",
+    "label": "Eine echte Belohnung für später planen",
+    "dauer_min": 3
+  },
+  {
+    "id": "lesen-was-gefaellt",
+    "beduerfnis": "belohnung",
+    "label": "10 Minuten lesen, was dir gefällt",
+    "dauer_min": 10
+  },
+  {
+    "id": "eine-sache-aufraeumen",
+    "beduerfnis": "ablenkung",
+    "label": "Eine Sache aufräumen, nur eine",
+    "dauer_min": 5
+  },
+  {
+    "id": "haende-beschaeftigen",
+    "beduerfnis": "ablenkung",
+    "label": "Etwas mit den Händen tun: spülen, gießen, sortieren",
+    "dauer_min": 10
+  },
+  {
+    "id": "treppe-oder-kniebeugen",
+    "beduerfnis": "ablenkung",
+    "label": "20 Kniebeugen oder zweimal die Treppe",
+    "dauer_min": 3
+  },
+  {
+    "id": "drei-dinge-benennen",
+    "beduerfnis": "ablenkung",
+    "label": "Rausgehen und drei Dinge benennen, die du siehst",
+    "dauer_min": 5
+  },
+  {
+    "id": "raetsel-auf-papier",
+    "beduerfnis": "ablenkung",
+    "label": "Ein Rätsel oder Sudoku auf Papier",
+    "dauer_min": 10
+  },
+  {
+    "id": "freund-fragen",
+    "beduerfnis": "naehe",
+    "label": "Einem lieben Menschen schreiben: Wie geht es dir gerade?",
+    "dauer_min": 3
+  },
+  {
+    "id": "kurz-anrufen",
+    "beduerfnis": "naehe",
+    "label": "Kurz jemanden anrufen, einfach so",
+    "dauer_min": 10
+  },
+  {
+    "id": "umarmung",
+    "beduerfnis": "naehe",
+    "label": "Wenn jemand da ist: eine Umarmung",
+    "dauer_min": 1
+  },
+  {
+    "id": "wertschaetzung-schicken",
+    "beduerfnis": "naehe",
+    "label": "Jemandem schreiben, was du an ihm magst",
+    "dauer_min": 5
+  },
+  {
+    "id": "treffen-vorschlagen",
+    "beduerfnis": "naehe",
+    "label": "Ein Treffen für diese Woche vorschlagen",
+    "dauer_min": 3
+  },
+  {
+    "id": "anderer-weg",
+    "beduerfnis": "reiz",
+    "label": "Einen anderen Weg gehen als sonst",
+    "dauer_min": 10
+  },
+  {
+    "id": "unbekannte-musik",
+    "beduerfnis": "reiz",
+    "label": "Musik hören, die du noch nicht kennst",
+    "dauer_min": 10
+  },
+  {
+    "id": "kurz-kalt-duschen",
+    "beduerfnis": "reiz",
+    "label": "Kurz kalt duschen",
+    "dauer_min": 3
+  },
+  {
+    "id": "drei-ideen",
+    "beduerfnis": "reiz",
+    "label": "Drei Ideen für etwas Neues notieren",
+    "dauer_min": 5
+  },
+  {
+    "id": "kritzeln",
+    "beduerfnis": "reiz",
+    "label": "Fünf Minuten zeichnen oder kritzeln",
+    "dauer_min": 5
+  },
+  {
+    "id": "richtige-mahlzeit",
+    "beduerfnis": "hunger",
+    "label": "Eine richtige Mahlzeit statt Nebenbei-Essen",
+    "dauer_min": 15
+  },
+  {
+    "id": "erst-obst",
+    "beduerfnis": "hunger",
+    "label": "Erst ein Stück Obst, dann neu entscheiden",
+    "dauer_min": 3
+  },
+  {
+    "id": "grosses-glas-wasser",
+    "beduerfnis": "hunger",
+    "label": "Ein großes Glas Wasser, dann nachspüren",
+    "dauer_min": 2
+  },
+  {
+    "id": "butterbrot-in-ruhe",
+    "beduerfnis": "hunger",
+    "label": "Ein Butterbrot, in Ruhe gegessen",
+    "dauer_min": 5
+  },
+  {
+    "id": "klein-und-aufmerksam",
+    "beduerfnis": "genuss",
+    "label": "Das Gewünschte in klein, mit voller Aufmerksamkeit",
+    "dauer_min": 10
+  },
+  {
+    "id": "kaffee-zelebrieren",
+    "beduerfnis": "genuss",
+    "label": "Einen guten Kaffee oder Tee zelebrieren",
+    "dauer_min": 10
+  },
+  {
+    "id": "gesicht-in-die-sonne",
+    "beduerfnis": "genuss",
+    "label": "Fünf Minuten Gesicht in die Sonne",
+    "dauer_min": 5
+  },
+  {
+    "id": "musik-mit-augen-zu",
+    "beduerfnis": "genuss",
+    "label": "Ein Musikstück mit geschlossenen Augen",
+    "dauer_min": 5
+  },
+  {
+    "id": "langsam-schmecken",
+    "beduerfnis": "genuss",
+    "label": "Einen Bissen ganz langsam essen und schmecken",
+    "dauer_min": 3
+  }
+]

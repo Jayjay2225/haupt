@@ -1,0 +1,53 @@
+{
+  "bereich": "psyche",
+  "name": "Psychische Gesundheit",
+  "unterpunkte": [
+    {"id": "stimmung", "label": "Stimmung"},
+    {"id": "gelassenheit", "label": "Gelassenheit"},
+    {"id": "gruebeln", "label": "Grübeln"},
+    {"id": "grenzen", "label": "Grenzen"},
+    {"id": "selbstwert", "label": "Selbstwert"}
+  ],
+  "wunschbild": [
+    {"id": "gelassen-bleiben", "label": "Gelassen bleiben, auch wenn es turbulent wird", "gruppe": "gelassenheit"},
+    {"id": "stimmung-stabil", "label": "Eine stabilere Stimmung", "gruppe": "gelassenheit"},
+    {"id": "stress-frueh-erkennen", "label": "Stress früh erkennen und gegensteuern", "gruppe": "gelassenheit"},
+    {"id": "mit-druck-umgehen", "label": "Gut mit Druck umgehen", "gruppe": "gelassenheit"},
+    {"id": "innere-ruhe", "label": "Mehr innere Ruhe", "gruppe": "gelassenheit"},
+    {"id": "weniger-gruebeln", "label": "Weniger grübeln", "gruppe": "gedanken"},
+    {"id": "gedankenkarussell-anhalten", "label": "Das Gedankenkarussell anhalten können", "gruppe": "gedanken"},
+    {"id": "sorgen-einordnen", "label": "Sorgen einordnen können", "gruppe": "gedanken"},
+    {"id": "im-moment-sein", "label": "Öfter im Moment sein", "gruppe": "gedanken"},
+    {"id": "leichter-entscheiden", "label": "Leichter Entscheidungen treffen", "gruppe": "gedanken"},
+    {"id": "klar-nein-sagen", "label": "Klar Nein sagen", "gruppe": "grenzen"},
+    {"id": "andere-nicht-retten", "label": "Andere nicht retten müssen", "gruppe": "grenzen"},
+    {"id": "beduerfnisse-ernst-nehmen", "label": "Meine Bedürfnisse ernst nehmen", "gruppe": "grenzen"},
+    {"id": "konflikte-ansprechen", "label": "Konflikte ruhig ansprechen", "gruppe": "grenzen"},
+    {"id": "um-hilfe-bitten", "label": "Um Hilfe bitten können", "gruppe": "grenzen"},
+    {"id": "selbstwert-staerken", "label": "Meinen Selbstwert stärken", "gruppe": "selbstfuersorge"},
+    {"id": "freundlich-mit-mir", "label": "Freundlich mit mir selbst sprechen", "gruppe": "selbstfuersorge"},
+    {"id": "fehler-zugestehen", "label": "Mir Fehler zugestehen", "gruppe": "selbstfuersorge"},
+    {"id": "therapie-coaching", "label": "Therapie oder Coaching nutzen", "gruppe": "selbstfuersorge"},
+    {"id": "meditation", "label": "Regelmäßig meditieren", "gruppe": "selbstfuersorge"},
+    {"id": "gefuehle-benennen", "label": "Gefühle wahrnehmen und benennen", "gruppe": "selbstfuersorge"},
+    {"id": "pausen-erlauben", "label": "Mir Pausen erlauben", "gruppe": "selbstfuersorge"},
+    {"id": "weiss-noch-nicht", "label": "Weiß ich noch nicht", "gruppe": "offen"}
+  ],
+  "ziel_vorlagen": [
+    {"id": "meditation-pro-woche", "label": "{x}-mal pro Woche meditieren", "messbar": true, "einheit": "mal/Woche"},
+    {"id": "journaling-minuten", "label": "Abends {x} Minuten Gedanken notieren", "messbar": true, "einheit": "Minuten/Tag"},
+    {"id": "therapie-rhythmus", "label": "Alle {x} Wochen ein Therapie- oder Coaching-Termin", "messbar": true, "einheit": "Wochen"},
+    {"id": "atemuebung-taeglich", "label": "Täglich {x} Minuten Atemübung", "messbar": true, "einheit": "Minuten/Tag"},
+    {"id": "feierabend-grenze", "label": "Ab {x} Uhr keine Arbeit und keine News mehr", "messbar": true, "einheit": "Uhrzeit"},
+    {"id": "nein-sagen-ueben", "label": "{x}-mal pro Woche bewusst Nein sagen, wo es mir dient", "messbar": true, "einheit": "mal/Woche"},
+    {"id": "gelassenheit-situation", "label": "Im Umgang mit {x} gelassener werden", "messbar": false, "einheit": ""}
+  ],
+  "radar_impulse": [
+    "scrollen",
+    "doomscrolling",
+    "arbeiten-statt-pause",
+    "nachricht-impulsiv",
+    "serien",
+    "alkohol"
+  ]
+}

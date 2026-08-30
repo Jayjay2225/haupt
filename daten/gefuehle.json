@@ -1,0 +1,47 @@
+[
+  {
+    "id": "muede",
+    "label": "müde",
+    "beduerfnis_hinweise": ["energie", "pause"]
+  },
+  {
+    "id": "gestresst",
+    "label": "gestresst",
+    "beduerfnis_hinweise": ["pause", "trost", "ablenkung"]
+  },
+  {
+    "id": "gelangweilt",
+    "label": "gelangweilt",
+    "beduerfnis_hinweise": ["reiz", "ablenkung"]
+  },
+  {
+    "id": "einsam",
+    "label": "einsam",
+    "beduerfnis_hinweise": ["naehe", "trost"]
+  },
+  {
+    "id": "unruhig",
+    "label": "unruhig",
+    "beduerfnis_hinweise": ["pause", "ablenkung", "trost"]
+  },
+  {
+    "id": "traurig",
+    "label": "traurig",
+    "beduerfnis_hinweise": ["trost", "naehe"]
+  },
+  {
+    "id": "genervt",
+    "label": "genervt",
+    "beduerfnis_hinweise": ["pause", "ablenkung", "belohnung"]
+  },
+  {
+    "id": "gut",
+    "label": "eigentlich gut",
+    "beduerfnis_hinweise": ["genuss", "belohnung", "reiz"]
+  },
+  {
+    "id": "weiss-nicht",
+    "label": "weiß nicht",
+    "beduerfnis_hinweise": []
+  }
+]

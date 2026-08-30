@@ -1,0 +1,41 @@
+{
+  "bereich": "genuss",
+  "name": "Erholung, Genuss & Freizeit",
+  "unterpunkte": [],
+  "wunschbild": [
+    { "id": "echte-pausen", "label": "Echte Pausen im Alltag", "gruppe": "erholung" },
+    { "id": "feierabend-ritual", "label": "Ein Feierabend-Ritual, das den Tag beendet", "gruppe": "erholung" },
+    { "id": "freie-wochenenden", "label": "Wochenenden, die sich frei anfühlen", "gruppe": "erholung" },
+    { "id": "ausschlafen", "label": "Regelmäßig ausschlafen können", "gruppe": "erholung" },
+    { "id": "nichtstun-koennen", "label": "Nichtstun aushalten und genießen", "gruppe": "erholung" },
+    { "id": "offline-zeiten", "label": "Bewusste Offline-Zeiten", "gruppe": "erholung" },
+    { "id": "essen-in-ruhe", "label": "Gutes Essen in Ruhe genießen", "gruppe": "bewusster-genuss" },
+    { "id": "genuss-ohne-nebenbei", "label": "Genuss ohne Nebenbei — eine Sache, volle Aufmerksamkeit", "gruppe": "bewusster-genuss" },
+    { "id": "genussrituale", "label": "Kleine Genussrituale pflegen — Kaffee, Bad, Musik", "gruppe": "bewusster-genuss" },
+    { "id": "qualitaet-statt-menge", "label": "Qualität statt Menge", "gruppe": "bewusster-genuss" },
+    { "id": "bewusst-ja-koennen", "label": "Bewusst Ja sagen können, ohne Rechtfertigung", "gruppe": "bewusster-genuss" },
+    { "id": "hobby-pflegen", "label": "Ein Hobby regelmäßig pflegen", "gruppe": "freizeit" },
+    { "id": "neues-ausprobieren", "label": "Etwas Neues ausprobieren", "gruppe": "freizeit" },
+    { "id": "zeit-in-natur", "label": "Zeit draußen in der Natur", "gruppe": "freizeit" },
+    { "id": "bewegung-als-freude", "label": "Bewegung als Freude, nicht als Pflicht", "gruppe": "freizeit" },
+    { "id": "kultur-erleben", "label": "Konzerte, Kino, Ausstellungen — Kultur erleben", "gruppe": "freizeit" },
+    { "id": "lesen-zum-vergnuegen", "label": "Lesen einfach zum Vergnügen", "gruppe": "freizeit" },
+    { "id": "freizeit-mit-menschen", "label": "Freizeit mit Menschen, die guttun", "gruppe": "freizeit" },
+    { "id": "regelmaessig-urlaub", "label": "Regelmäßig richtig Urlaub machen", "gruppe": "auszeiten" },
+    { "id": "mikroabenteuer", "label": "Kleine Auszeiten und Mikroabenteuer im Alltag", "gruppe": "auszeiten" },
+    { "id": "neue-orte", "label": "Neue Orte entdecken", "gruppe": "auszeiten" },
+    { "id": "urlaub-ohne-arbeit", "label": "Urlaub ohne Arbeit im Gepäck", "gruppe": "auszeiten" },
+    { "id": "tag-fuer-mich", "label": "Regelmäßig einen Tag nur für mich", "gruppe": "auszeiten" },
+    { "id": "weiss-noch-nicht", "label": "Weiß ich noch nicht", "gruppe": "offen" }
+  ],
+  "ziel_vorlagen": [
+    { "id": "freie-abende", "label": "{x} Abende pro Woche ohne Verpflichtungen", "messbar": true, "einheit": "abende/woche" },
+    { "id": "naturzeit", "label": "{x} Stunden pro Woche draußen", "messbar": true, "einheit": "stunden/woche" },
+    { "id": "hobbyzeit", "label": "{x} Stunden pro Woche für mein Hobby", "messbar": true, "einheit": "stunden/woche" },
+    { "id": "handyfreie-abende", "label": "{x} handyfreie Abende pro Woche", "messbar": true, "einheit": "abende/woche" },
+    { "id": "genussmomente", "label": "Ein bewusster Genussmoment an {x} Tagen pro Woche", "messbar": true, "einheit": "tage/woche" },
+    { "id": "mikroabenteuer-monat", "label": "{x} Mikroabenteuer pro Monat", "messbar": true, "einheit": "abenteuer/monat" },
+    { "id": "urlaub-planen", "label": "Bis {x} den nächsten Urlaub planen", "messbar": false }
+  ],
+  "radar_impulse": ["serien", "scrollen", "zocken", "snacks", "alkohol", "essen-bestellen"]
+}

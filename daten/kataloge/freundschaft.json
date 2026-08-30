@@ -1,0 +1,46 @@
+{
+  "bereich": "freundschaft",
+  "name": "Freundschaft",
+  "unterpunkte": [],
+  "wunschbild": [
+    {"id": "regelmaessig-melden", "label": "Mich regelmäßig melden", "gruppe": "kontakt-pflegen"},
+    {"id": "alte-freunde-kontakt", "label": "Mit alten Freunden in Kontakt bleiben", "gruppe": "kontakt-pflegen"},
+    {"id": "alte-kontakte-aufleben", "label": "Alte Kontakte wieder aufleben lassen", "gruppe": "kontakt-pflegen"},
+    {"id": "wichtige-momente", "label": "An Geburtstage und wichtige Momente denken", "gruppe": "kontakt-pflegen"},
+    {"id": "verlaesslich-sein", "label": "Verlässlich da sein, wenn es darauf ankommt", "gruppe": "kontakt-pflegen"},
+    {"id": "besuche-planen", "label": "Besuche bei Freunden planen, die weiter weg wohnen", "gruppe": "kontakt-pflegen"},
+    {"id": "tiefe-gespraeche", "label": "Tiefe Gespräche statt Smalltalk", "gruppe": "tiefe"},
+    {"id": "enger-kreis", "label": "Einen engen Kreis pflegen", "gruppe": "tiefe"},
+    {"id": "mich-zeigen", "label": "Mich zeigen, wie es mir wirklich geht", "gruppe": "tiefe"},
+    {"id": "wirklich-zuhoeren", "label": "Wirklich zuhören", "gruppe": "tiefe"},
+    {"id": "unstimmigkeiten-klaeren", "label": "Unstimmigkeiten ansprechen und klären", "gruppe": "tiefe"},
+    {"id": "um-unterstuetzung-bitten", "label": "Freunde um Unterstützung bitten können", "gruppe": "tiefe"},
+    {"id": "neue-menschen", "label": "Neue Menschen kennenlernen", "gruppe": "neue-freundschaften"},
+    {"id": "offen-zugehen", "label": "Offen auf andere zugehen", "gruppe": "neue-freundschaften"},
+    {"id": "gruppe-verein", "label": "Einer Gruppe oder einem Verein beitreten", "gruppe": "neue-freundschaften"},
+    {"id": "bekanntschaften-vertiefen", "label": "Bekanntschaften zu Freundschaften vertiefen", "gruppe": "neue-freundschaften"},
+    {"id": "feste-treffen", "label": "Feste Treffen im Kalender, etwa Stammtisch oder Spieleabend", "gruppe": "gemeinsame-zeit"},
+    {"id": "gemeinsame-aktivitaeten", "label": "Gemeinsame Aktivitäten wie Sport, Projekte oder Ausflüge", "gruppe": "gemeinsame-zeit"},
+    {"id": "raum-fuer-spontanes", "label": "Raum für Spontanes lassen", "gruppe": "gemeinsame-zeit"},
+    {"id": "gemeinsam-reisen", "label": "Gemeinsam reisen", "gruppe": "gemeinsame-zeit"},
+    {"id": "rituale-mit-freunden", "label": "Rituale mit Freunden, etwa ein jährliches Wochenende", "gruppe": "gemeinsame-zeit"},
+    {"id": "qualitaet-vor-quantitaet", "label": "Weniger, dafür intensivere Treffen", "gruppe": "gemeinsame-zeit"},
+    {"id": "weiss-noch-nicht", "label": "Weiß ich noch nicht", "gruppe": "offen"}
+  ],
+  "ziel_vorlagen": [
+    {"id": "treffen-pro-monat", "label": "{x} Treffen mit Freunden pro Monat", "messbar": true, "einheit": "Treffen/Monat"},
+    {"id": "anrufe-pro-woche", "label": "{x} Anrufe oder Sprachnachrichten pro Woche", "messbar": true, "einheit": "pro Woche"},
+    {"id": "neue-kontakte", "label": "Pro Monat {x} Menschen neu kennenlernen", "messbar": true, "einheit": "pro Monat"},
+    {"id": "freundes-wochenenden", "label": "{x} Wochenenden pro Jahr mit Freunden", "messbar": true, "einheit": "pro Jahr"},
+    {"id": "fester-abend", "label": "Alle {x} Wochen ein fester Abend mit Freunden", "messbar": true, "einheit": "Wochen"},
+    {"id": "melden-pro-woche", "label": "Mich pro Woche bei {x} Freunden melden", "messbar": true, "einheit": "Freunde/Woche"},
+    {"id": "wieder-in-kontakt", "label": "Mit {x} wieder in echten Kontakt kommen", "messbar": false, "einheit": ""}
+  ],
+  "radar_impulse": [
+    "scrollen",
+    "serien",
+    "zocken",
+    "nachricht-impulsiv",
+    "arbeiten-statt-pause"
+  ]
+}

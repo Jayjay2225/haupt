@@ -1,0 +1,50 @@
+{
+  "bereich": "finanzen",
+  "name": "Finanzen",
+  "unterpunkte": [
+    { "id": "sicherheit", "label": "Sicherheit" },
+    { "id": "uebersicht", "label": "Übersicht" },
+    { "id": "freiheit", "label": "Freiheit" },
+    { "id": "ruhestand", "label": "Ruhestand" }
+  ],
+  "wunschbild": [
+    { "id": "notgroschen", "label": "Einen Notgroschen für mehrere Monate aufbauen", "gruppe": "sicherheit" },
+    { "id": "schuldenfrei", "label": "Schuldenfrei sein", "gruppe": "sicherheit" },
+    { "id": "kredite-abbauen", "label": "Kredite planvoll abbauen", "gruppe": "sicherheit" },
+    { "id": "risiken-abgesichert", "label": "Die wichtigen Risiken abgesichert haben", "gruppe": "sicherheit" },
+    { "id": "ruhig-schlafen", "label": "Ruhig schlafen, was Geld angeht", "gruppe": "sicherheit" },
+    { "id": "familie-absichern", "label": "Meine Familie absichern", "gruppe": "sicherheit" },
+    { "id": "ueberblick", "label": "Jederzeit Überblick über Einnahmen und Ausgaben", "gruppe": "uebersicht" },
+    { "id": "einfaches-budget", "label": "Mit einem einfachen Budget leben", "gruppe": "uebersicht" },
+    { "id": "schlanke-fixkosten", "label": "Fixkosten schlank halten", "gruppe": "uebersicht" },
+    { "id": "abos-im-blick", "label": "Abos und Verträge regelmäßig prüfen", "gruppe": "uebersicht" },
+    { "id": "bewusst-ausgeben", "label": "Bewusst ausgeben statt nebenbei", "gruppe": "uebersicht" },
+    { "id": "klare-absprachen", "label": "Klare Geld-Absprachen in Partnerschaft oder Familie", "gruppe": "uebersicht" },
+    { "id": "finanzielle-unabhaengigkeit", "label": "Finanzielle Unabhängigkeit bis zu einem Wunschalter", "gruppe": "freiheit" },
+    { "id": "vermoegen-aufbauen", "label": "Langfristig Vermögen aufbauen", "gruppe": "freiheit" },
+    { "id": "zweites-standbein", "label": "Einkommensquellen neben dem Beruf", "gruppe": "freiheit" },
+    { "id": "investieren-verstehen", "label": "Investieren verstehen und ruhig umsetzen", "gruppe": "freiheit" },
+    { "id": "wohneigentum", "label": "Wohneigentum", "gruppe": "freiheit" },
+    { "id": "geben-koennen", "label": "Genug haben, um großzügig geben zu können", "gruppe": "freiheit" },
+    { "id": "arbeiten-aus-freiheit", "label": "Arbeiten, weil ich will — nicht, weil ich muss", "gruppe": "freiheit" },
+    { "id": "frueh-aufhoeren", "label": "Früh aufhören können", "gruppe": "ruhestand" },
+    { "id": "nie-ganz-aufhoeren", "label": "Nie ganz aufhören wollen", "gruppe": "ruhestand" },
+    { "id": "teilzeit-ab-alter", "label": "Ab einem bestimmten Alter in Teilzeit wechseln", "gruppe": "ruhestand" },
+    { "id": "ruhestand-im-ausland", "label": "Im Ruhestand auswandern oder länger im Ausland leben", "gruppe": "ruhestand" },
+    { "id": "vorsorge-geregelt", "label": "Altersvorsorge geregelt wissen", "gruppe": "ruhestand" },
+    { "id": "ruhestandsbild", "label": "Eine konkrete Vorstellung vom Ruhestand entwickeln", "gruppe": "ruhestand" },
+    { "id": "weiss-noch-nicht", "label": "Weiß ich noch nicht", "gruppe": "offen" }
+  ],
+  "ziel_vorlagen": [
+    { "id": "notgroschen-monate", "label": "Notgroschen für {x} Monate aufbauen", "messbar": true, "einheit": "monate" },
+    { "id": "schuldenfrei-bis", "label": "Schuldenfrei bis {x}", "messbar": true, "einheit": "datum" },
+    { "id": "sparquote", "label": "{x} Prozent vom Einkommen sparen", "messbar": true, "einheit": "prozent" },
+    { "id": "unabhaengig-bis-alter", "label": "Finanziell unabhängig bis Alter {x}", "messbar": true, "einheit": "alter" },
+    { "id": "monatliche-investition", "label": "{x} Euro pro Monat investieren", "messbar": true, "einheit": "euro/monat" },
+    { "id": "fixkosten-senken", "label": "Fixkosten um {x} Euro pro Monat senken", "messbar": true, "einheit": "euro/monat" },
+    { "id": "finanz-check", "label": "{x}-mal pro Monat Finanzen durchsehen", "messbar": true, "einheit": "termine/monat" },
+    { "id": "teilzeit-ab", "label": "Ab Alter {x} auf Teilzeit wechseln", "messbar": true, "einheit": "alter" },
+    { "id": "ruhestandsbild-bis", "label": "Bis {x} mein Ruhestandsbild in drei Sätzen festhalten", "messbar": false }
+  ],
+  "radar_impulse": ["shopping", "essen-bestellen", "scrollen", "zocken", "alkohol"]
+}

@@ -1,0 +1,114 @@
+[
+  {
+    "id": "suesses",
+    "label": "Süßes",
+    "icon": "candy",
+    "bereiche": ["koerper", "psyche"],
+    "beduerfnisse": ["energie", "trost", "belohnung"],
+    "keywords": ["schoko", "schokolade", "eis", "suess", "zucker", "riegel", "kuchen", "keks", "gummibaer", "naschen", "nutella", "bonbon", "dessert", "croissant"]
+  },
+  {
+    "id": "snacks",
+    "label": "Snacken",
+    "icon": "popcorn",
+    "bereiche": ["koerper"],
+    "beduerfnisse": ["hunger", "ablenkung", "pause", "belohnung"],
+    "keywords": ["chips", "snack", "snacken", "knabbern", "salzig", "nuesse", "popcorn", "cracker", "kaese", "brot", "kuehlschrank", "zwischendurch", "erdnuesse"]
+  },
+  {
+    "id": "alkohol",
+    "label": "Alkohol",
+    "icon": "wine",
+    "bereiche": ["koerper", "psyche"],
+    "beduerfnisse": ["trost", "pause", "belohnung", "genuss"],
+    "keywords": ["bier", "wein", "alkohol", "drink", "cocktail", "schnaps", "gin", "whisky", "aperol", "feierabendbier", "sekt", "trinken", "glas"]
+  },
+  {
+    "id": "nikotin",
+    "label": "Nikotin",
+    "icon": "cigarette",
+    "bereiche": ["koerper"],
+    "beduerfnisse": ["pause", "ablenkung", "reiz"],
+    "keywords": ["zigarette", "kippe", "rauchen", "vape", "dampfen", "nikotin", "tabak", "snus", "iqos", "drehen"]
+  },
+  {
+    "id": "koffein",
+    "label": "Koffein",
+    "icon": "coffee",
+    "bereiche": ["koerper"],
+    "beduerfnisse": ["energie", "pause", "reiz"],
+    "keywords": ["kaffee", "espresso", "cappuccino", "latte", "koffein", "energy", "energydrink", "cola", "mate", "redbull", "wachmacher"]
+  },
+  {
+    "id": "scrollen",
+    "label": "Scrollen",
+    "icon": "smartphone",
+    "bereiche": ["psyche", "genuss"],
+    "beduerfnisse": ["ablenkung", "reiz", "pause"],
+    "keywords": ["insta", "instagram", "tiktok", "reels", "shorts", "scrollen", "handy", "feed", "youtube", "social", "reddit", "timeline", "stories"]
+  },
+  {
+    "id": "serien",
+    "label": "Noch eine Folge",
+    "icon": "tv",
+    "bereiche": ["koerper", "genuss"],
+    "beduerfnisse": ["ablenkung", "pause", "belohnung", "reiz"],
+    "keywords": ["netflix", "serie", "folge", "staffel", "streamen", "binge", "prime", "disney", "weiterschauen", "glotzen", "fernsehen", "episode"]
+  },
+  {
+    "id": "zocken",
+    "label": "Zocken",
+    "icon": "gamepad-2",
+    "bereiche": ["genuss", "psyche"],
+    "beduerfnisse": ["reiz", "ablenkung", "belohnung"],
+    "keywords": ["zocken", "gaming", "game", "playstation", "xbox", "switch", "steam", "runde", "fortnite", "daddeln", "controller", "fifa", "lol"]
+  },
+  {
+    "id": "shopping",
+    "label": "Shopping",
+    "icon": "shopping-bag",
+    "bereiche": ["finanzen", "psyche"],
+    "beduerfnisse": ["belohnung", "reiz", "ablenkung", "trost"],
+    "keywords": ["amazon", "bestellen", "shoppen", "kaufen", "warenkorb", "sale", "rabatt", "zalando", "ebay", "shopping", "deal", "klarna", "guenstig"]
+  },
+  {
+    "id": "essen-bestellen",
+    "label": "Essen bestellen",
+    "icon": "pizza",
+    "bereiche": ["koerper", "finanzen"],
+    "beduerfnisse": ["hunger", "belohnung", "genuss", "pause"],
+    "keywords": ["lieferando", "bestellen", "pizza", "burger", "sushi", "doener", "lieferdienst", "fastfood", "pommes", "wolt", "mcdonalds", "liefern"]
+  },
+  {
+    "id": "dating-apps",
+    "label": "Dating-App öffnen",
+    "icon": "heart",
+    "bereiche": ["beziehung", "psyche"],
+    "beduerfnisse": ["naehe", "reiz", "ablenkung", "belohnung"],
+    "keywords": ["tinder", "bumble", "hinge", "swipen", "match", "matchen", "dating", "flirten", "okcupid", "daten", "profil", "likes"]
+  },
+  {
+    "id": "arbeiten-statt-pause",
+    "label": "Arbeiten statt Pause",
+    "icon": "briefcase",
+    "bereiche": ["verwirklichung", "koerper", "psyche"],
+    "beduerfnisse": ["ablenkung", "belohnung", "pause"],
+    "keywords": ["mail", "mails", "arbeiten", "weiterarbeiten", "durchziehen", "deadline", "projekt", "todo", "slack", "laptop", "checken"]
+  },
+  {
+    "id": "nachricht-impulsiv",
+    "label": "Nachricht an die falsche Person",
+    "icon": "send",
+    "bereiche": ["beziehung", "psyche"],
+    "beduerfnisse": ["naehe", "trost", "reiz"],
+    "keywords": ["schreiben", "nachricht", "whatsapp", "ex", "melden", "anrufen", "texten", "antworten", "chat", "sms", "tippen", "blockiert"]
+  },
+  {
+    "id": "doomscrolling",
+    "label": "News-Doomscrolling",
+    "icon": "newspaper",
+    "bereiche": ["psyche"],
+    "beduerfnisse": ["ablenkung", "reiz"],
+    "keywords": ["news", "nachrichten", "schlagzeilen", "ticker", "liveticker", "eilmeldung", "krise", "krieg", "spiegel", "tagesschau", "doomscrollen", "push"]
+  }
+]
