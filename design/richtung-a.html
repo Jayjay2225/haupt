@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jetztgut — Richtung A: Morgenlicht</title>
+<!--
+  WCAG-AA-Kontrast, nachgerechnet (relative Luminanz nach WCAG 2.1, gerundet):
+  1) Tinte #2B2A25 auf Papier #E9E6DF        = 11,5 : 1   (Fließtext — AA und AAA)
+  2) Papierhell #F3F1EA auf Tanne #22453A    =  9,4 : 1   (Text auf Kompass-Spiegel und Auswahl — AA und AAA)
+  3) Nebel #5E5B52 auf Karte #F3F1EA         =  6,0 : 1   (Nebentext — AA; auf Papier #E9E6DF: 5,4 : 1)
+  Ergänzend: Tanne #22453A auf Papier #E9E6DF = 8,5 : 1 · Ocker-Text #7A5717 auf Papier = 5,3 : 1.
+  Ockerlicht #C08E3B ist rein dekorativ (Ring des Atemkreises) und trägt keine Information allein.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&amp;family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Morgenlicht — helle Basis */
+    --papier:      #E9E6DF;  /* Grundfläche: helles, warmes Graphit-Papier */
+    --papier-hell: #F3F1EA;  /* Karten, helle Flächen */
+    --linie:       #D9D4C8;  /* Trenner, Ränder */
+    --tinte:       #2B2A25;  /* Fließtext, warmes Graphit */
+    --tinte-soft:  #45433C;  /* Sekundärer Lesetext */
+    --nebel:       #5E5B52;  /* Nebentext, stille Aktionen */
+    --tanne:       #22453A;  /* tragende Farbe: Titel, Auswahl, Kompass */
+    --tanne-tief:  #18332B;  /* gedrückte Zustände, Dark-Mode-Grund */
+    --tanne-hell:  #C9D4CC;  /* Nebentext auf Tannengrün */
+    --ocker:       #C08E3B;  /* Ockerlicht, nur Akzent: Atemkreis, Marker */
+    --ocker-text:  #7A5717;  /* Ocker als Schriftfarbe, AA-fest */
+    /* Präsentations-Matte (nur Rahmen dieser Seite, nicht Teil der App) */
+    --matte:       #38362F;
+    --matte-karte: #403E36;
+    --matte-linie: #4C4941;
+    --matte-text:  #E5E1D6;
+    --matte-nebel: #B7B2A4;
+
+    --schrift-display: "Bricolage Grotesque","Instrument Sans","IBM Plex Sans",system-ui,"Segoe UI",sans-serif;
+    --schrift-text: "Source Sans 3","Source Sans Pro","Atkinson Hyperlegible","IBM Plex Sans",system-ui,"Segoe UI",sans-serif;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ background:var(--matte); }
+  body{
+    font-family:var(--schrift-text);
+    color:var(--matte-text);
+    padding:8px 0 60px;
+  }
+  .rahmen{ width:1310px; margin:0 auto; }
+
+  .seitenkopf{
+    display:flex; align-items:baseline; gap:14px;
+    margin:0 4px 16px;
+  }
+  .seitenkopf h1{
+    font-family:var(--schrift-display);
+    font-size:22px; font-weight:600; letter-spacing:.01em;
+    color:var(--matte-text);
+  }
+  .seitenkopf span{ font-size:14px; color:var(--matte-nebel); }
+
+  /* ============ Screens-Zeile ============ */
+  #screens{ display:flex; justify-content:space-between; align-items:flex-start; }
+  .spalte{ width:410px; }
+  .frame-label{
+    font-family:var(--schrift-text);
+    font-size:12.5px; line-height:1; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--matte-nebel); margin:0 0 6px 12px;
+  }
+  .phone{
+    width:410px; height:820px;
+    border:10px solid #211F1B; border-radius:44px;
+    background:var(--papier);
+    overflow:hidden;
+    box-shadow:0 22px 44px rgba(12,11,9,.42), inset 0 0 0 1px rgba(255,255,255,.05);
+  }
+  .screen{
+    width:390px; height:800px;
+    padding:10px 20px 16px;
+    display:flex; flex-direction:column;
+    font-size:17px; line-height:1.5; color:var(--tinte);
+    background:var(--papier);
+  }
+
+  /* Icons */
+  .ico{ flex:none; display:inline-block; vertical-align:-4px; }
+
+  /* ============ Screen A: Der Moment ============ */
+  .moment{
+    background:
+      radial-gradient(120% 52% at 50% -6%, rgba(192,142,59,.16), rgba(192,142,59,0) 62%),
+      var(--papier);
+  }
+  .statusrow{
+    display:flex; align-items:center; justify-content:space-between;
+    min-height:40px;
+  }
+  .uhr{ font-size:15px; color:var(--nebel); font-variant-numeric:tabular-nums; }
+  .xbtn{
+    width:44px; height:44px; margin-right:-10px;
+    display:flex; align-items:center; justify-content:center;
+    background:none; border:none; border-radius:50%;
+    color:var(--nebel); cursor:pointer;
+  }
+
+  .atem-wrap{ text-align:center; padding-top:2px; }
+  .atemkreis{
+    width:72px; height:72px; margin:0 auto;
+    border-radius:50%;
+    border:2px solid var(--ocker);
+    background:radial-gradient(circle, rgba(192,142,59,.14), rgba(192,142,59,0) 68%);
+    box-shadow:
+      0 0 0 7px rgba(192,142,59,.10),
+      0 0 30px rgba(192,142,59,.38),
+      inset 0 0 16px rgba(192,142,59,.22);
+    animation:atmen 6s ease-in-out infinite;
+  }
+  @keyframes atmen{
+    0%,100%{ transform:scale(.94); }
+    50%    { transform:scale(1.06); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .atemkreis{ animation:none; }
+  }
+  .spiegel{
+    font-family:var(--schrift-display);
+    font-size:21px; font-weight:600; line-height:1.32;
+    color:var(--tinte);
+    margin:12px auto 8px; max-width:320px;
+  }
+  .chips{ display:flex; justify-content:center; gap:8px; }
+  .chip{
+    font-size:14px; color:var(--nebel);
+    border:1px solid var(--linie); border-radius:999px;
+    padding:4px 12px; background:rgba(243,241,234,.6);
+  }
+
+  .kompass-spiegel{
+    margin-top:12px;
+    background:var(--tanne); border-radius:18px;
+    padding:14px 16px;
+    display:flex; gap:12px; align-items:flex-start;
+    color:var(--papier-hell);
+  }
+  .kompass-spiegel .ico{ color:var(--ocker); margin-top:2px; }
+  .ks-ziel{ font-size:17px; line-height:1.42; color:var(--tanne-hell); }
+  .ks-frage{
+    font-family:var(--schrift-display);
+    font-size:19px; font-weight:600; line-height:1.3;
+    color:var(--papier-hell); margin-top:3px;
+  }
+
+  .optionen{ margin-top:12px; display:flex; flex-direction:column; gap:10px; }
+  /* Drei exakt gleichwertige Karten: identische Klasse, Größe, Farbe, Gewichtung */
+  .option{
+    display:flex; gap:14px; align-items:flex-start;
+    min-height:100px;
+    background:var(--papier-hell);
+    border:1px solid var(--linie); border-radius:18px;
+    padding:14px 16px;
+    box-shadow:0 1px 2px rgba(43,42,37,.06);
+  }
+  .option .o-ico{
+    flex:none; width:40px; height:40px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(34,69,58,.08); color:var(--tanne);
+  }
+  .option h3{
+    font-family:var(--schrift-display);
+    font-size:18px; font-weight:600; line-height:1.25;
+    color:var(--tinte);
+  }
+  .option p{ font-size:17px; line-height:1.45; color:var(--tinte-soft); margin-top:4px; }
+  .alt-zeile{ display:block; }
+  .alt-zeile::before{ content:"— "; color:var(--ocker-text); }
+
+  .skip{
+    margin-top:auto;
+    min-height:46px; display:flex; align-items:center; justify-content:center;
+    font-size:17px; color:var(--nebel);
+  }
+
+  /* ============ Screen B: Kompass ============ */
+  .scr-head{ padding-top:4px; margin-bottom:8px; }
+  .scr-head h2{
+    font-family:var(--schrift-display);
+    font-size:24px; font-weight:600; color:var(--tanne); line-height:1.2;
+  }
+  .scr-head .sub{ font-size:15px; color:var(--nebel); margin-top:3px; }
+
+  .bereiche{ list-style:none; }
+  .bereiche li{
+    padding:5px 0 7px;
+    border-bottom:1px solid var(--linie);
+  }
+  .bereiche li:last-child{ border-bottom:none; }
+  .b-row{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .b-name{ font-size:17px; color:var(--tinte); }
+  .b-wert{
+    font-size:16px; font-weight:700; color:var(--tanne);
+    font-variant-numeric:tabular-nums;
+  }
+  .dots{ display:flex; gap:5px; margin-top:5px; }
+  .dot{
+    width:9px; height:9px; border-radius:50%;
+    background:#CFCABE;
+  }
+  .dot.voll{ background:var(--tanne); }
+  .b-notiz{
+    display:flex; gap:8px; align-items:flex-start;
+    margin-top:6px; font-size:16px; line-height:1.4; color:var(--nebel);
+  }
+  .b-notiz .ico{ color:var(--ocker-text); margin-top:3px; }
+  .quiet-link{
+    margin-top:auto;
+    min-height:38px; display:flex; align-items:center; justify-content:center;
+    font-size:16px; color:var(--nebel);
+  }
+
+  /* ============ Screen C: Wochenreflexion ============ */
+  .wochenkarte{
+    background:var(--tanne); border-radius:18px;
+    padding:14px 16px;
+    color:var(--papier-hell);
+  }
+  .wk-satz{
+    font-family:var(--schrift-display);
+    font-size:20px; font-weight:600; line-height:1.35;
+  }
+  .wk-sub{ font-size:15px; color:var(--tanne-hell); margin-top:6px; }
+
+  .reflex-block{
+    margin-top:10px;
+    background:var(--papier-hell);
+    border:1px solid var(--linie); border-radius:18px;
+    padding:12px 14px;
+  }
+  .r-name{ font-size:17px; font-weight:600; color:var(--tinte); }
+  .skala{ display:flex; gap:4px; margin-top:8px; }
+  .pill{
+    flex:1; height:32px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:var(--nebel);
+    border:1px solid #C9C4B8; background:transparent;
+    font-variant-numeric:tabular-nums;
+  }
+  .pill.aktiv{
+    background:var(--tanne); border-color:var(--tanne);
+    color:var(--papier-hell); font-weight:700;
+  }
+  .trend{
+    display:flex; gap:7px; align-items:center;
+    margin-top:8px; font-size:15px; color:var(--nebel);
+  }
+  .trend .ico{ color:var(--ocker-text); }
+  .feld{
+    margin-top:8px;
+    background:#E7E4DB; border:1px solid #D5D0C4; border-radius:12px;
+    padding:9px 12px;
+    font-size:17px; line-height:1.4; color:var(--nebel);
+  }
+  .feld-karte{ margin-top:12px; }
+  .feld-karte h3{
+    font-family:var(--schrift-display);
+    font-size:17px; font-weight:600; color:var(--tinte);
+  }
+
+  /* ============ Spezifikation unterhalb der Screens ============ */
+  #spez{ margin-top:44px; }
+  #spez h2{
+    font-family:var(--schrift-display);
+    font-size:22px; font-weight:600; color:var(--matte-text);
+    margin:0 4px 16px;
+  }
+  .spez-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .panel{
+    background:var(--matte-karte);
+    border:1px solid var(--matte-linie); border-radius:18px;
+    padding:22px;
+  }
+  .panel h3{
+    font-family:var(--schrift-display);
+    font-size:17px; font-weight:600; color:var(--matte-text);
+    margin-bottom:14px;
+  }
+  .swatches{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .swatch .farbe{
+    height:56px; border-radius:10px;
+    border:1px solid rgba(0,0,0,.18);
+  }
+  .swatch .hex{
+    font-size:14px; font-weight:600; color:var(--matte-text);
+    margin-top:7px; font-variant-numeric:tabular-nums;
+  }
+  .swatch .rolle{ font-size:13.5px; color:var(--matte-nebel); line-height:1.35; }
+
+  .spezimen-display{
+    font-family:var(--schrift-display);
+    font-size:33px; font-weight:600; line-height:1.2;
+    color:var(--matte-text);
+  }
+  .spezimen-name{ font-size:14px; color:var(--matte-nebel); margin:4px 0 18px; }
+  .spezimen-text{ font-size:17px; line-height:1.55; color:var(--matte-text); }
+  .stack{ font-size:13.5px; color:var(--matte-nebel); margin-top:6px; line-height:1.4; }
+
+  .begruendung p{
+    font-size:16.5px; line-height:1.55; color:var(--matte-text);
+    margin-bottom:12px; padding-left:18px; position:relative;
+  }
+  .begruendung p::before{
+    content:""; position:absolute; left:0; top:9px;
+    width:8px; height:8px; border-radius:50%; background:var(--ocker);
+  }
+  .dm-swatches{ display:flex; gap:10px; margin-top:14px; }
+  .dm-swatches .chip-farbe{
+    flex:1; height:44px; border-radius:10px;
+    border:1px solid rgba(255,255,255,.12);
+    display:flex; align-items:flex-end; justify-content:center;
+    font-size:12.5px; padding-bottom:5px;
+    font-variant-numeric:tabular-nums;
+  }
+  .dm-text{ font-size:16px; line-height:1.55; color:var(--matte-text); }
+</style>
+</head>
+<body>
+<div class="rahmen">
+
+  <!-- ==================== DREI KEY-SCREENS ==================== -->
+  <section id="screens">
+
+    <!-- (a) Der Moment -->
+    <div class="spalte">
+      <p class="frame-label">Der Moment</p>
+      <article class="phone" aria-label="Screen: Der Moment">
+        <div class="screen moment">
+          <header class="statusrow">
+            <span class="uhr">16:12</span>
+            <button class="xbtn" aria-label="Moment schließen">
+              <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </header>
+
+          <div class="atem-wrap">
+            <div class="atemkreis" aria-hidden="true"></div>
+            <p class="spiegel">Ein Eis. Okay — lass uns kurz hinschauen.</p>
+            <div class="chips">
+              <span class="chip">Gefühl: unruhig</span>
+              <span class="chip">Bedürfnis: Energie</span>
+            </div>
+          </div>
+
+          <section class="kompass-spiegel">
+            <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            <div>
+              <p class="ks-ziel">Dein Kompass: 10&nbsp;% Körperfett bis Dezember.</p>
+              <p class="ks-frage">Was ist jetzt gut für dich?</p>
+            </div>
+          </section>
+
+          <section class="optionen" aria-label="Drei gleichwertige Optionen">
+            <div class="option">
+              <span class="o-ico">
+                <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+              </span>
+              <div>
+                <h3>Alternative wählen</h3>
+                <p><span class="alt-zeile">Ein Apfel und ein Glas Wasser</span><span class="alt-zeile">5 Minuten vor die Tür</span></p>
+              </div>
+            </div>
+            <div class="option">
+              <span class="o-ico">
+                <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </span>
+              <div>
+                <h3>10 Minuten warten</h3>
+                <p>Der Impuls darf bleiben. Danach schaust du noch einmal hin.</p>
+              </div>
+            </div>
+            <div class="option">
+              <span class="o-ico">
+                <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              </span>
+              <div>
+                <h3>Bewusst ja</h3>
+                <p>Dann genieß es ganz. Ohne Nebengeräusche.</p>
+              </div>
+            </div>
+          </section>
+
+          <p class="skip">Überspringen</p>
+        </div>
+      </article>
+    </div>
+
+    <!-- (b) Kompass -->
+    <div class="spalte">
+      <p class="frame-label">Kompass</p>
+      <article class="phone" aria-label="Screen: Kompass">
+        <div class="screen">
+          <header class="scr-head">
+            <h2>Dein Kompass</h2>
+            <p class="sub">Ist-Zustand 0 bis 10 — Stand dieser Woche</p>
+          </header>
+
+          <ul class="bereiche">
+            <li>
+              <div class="b-row"><span class="b-name">Körperliche Gesundheit</span><span class="b-wert">6</span></div>
+              <div class="dots"><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+              <p class="b-notiz">
+                <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                <span>Woran ich gerade arbeite: Schlaf vor Mitternacht, Abendessen früher.</span>
+              </p>
+            </li>
+            <li>
+              <div class="b-row"><span class="b-name">Psychische Gesundheit</span><span class="b-wert">5</span></div>
+              <div class="dots"><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            </li>
+            <li>
+              <div class="b-row"><span class="b-name">Spiritualität</span><span class="b-wert">4</span></div>
+              <div class="dots"><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            </li>
+            <li>
+              <div class="b-row"><span class="b-name">Beziehung &amp; Partnerschaft</span><span class="b-wert">7</span></div>
+              <div class="dots"><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            </li>
+            <li>
+              <div class="b-row"><span class="b-name">Freundschaft</span><span class="b-wert">6</span></div>
+              <div class="dots"><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            </li>
+            <li>
+              <div class="b-row"><span class="b-name">Familie &amp; Verwandtschaft</span><span class="b-wert">7</span></div>
+              <div class="dots"><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            </li>
+            <li>
+              <div class="b-row"><span class="b-name">Verwirklichung</span><span class="b-wert">8</span></div>
+              <div class="dots"><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot"></span><span class="dot"></span></div>
+              <p class="b-notiz">
+                <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                <span>Woran ich gerade arbeite: Vormittage für das eigene Projekt freihalten.</span>
+              </p>
+            </li>
+            <li>
+              <div class="b-row"><span class="b-name">Hilfe für andere</span><span class="b-wert">5</span></div>
+              <div class="dots"><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            </li>
+            <li>
+              <div class="b-row"><span class="b-name">Finanzen</span><span class="b-wert">6</span></div>
+              <div class="dots"><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            </li>
+            <li>
+              <div class="b-row"><span class="b-name">Erholung, Genuss &amp; Freizeit</span><span class="b-wert">4</span></div>
+              <div class="dots"><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            </li>
+          </ul>
+
+          <p class="quiet-link">Kompass vervollständigen</p>
+        </div>
+      </article>
+    </div>
+
+    <!-- (c) Wochenreflexion -->
+    <div class="spalte">
+      <p class="frame-label">Wochenreflexion</p>
+      <article class="phone" aria-label="Screen: Wochenreflexion">
+        <div class="screen">
+          <header class="scr-head">
+            <h2>Wochenreflexion</h2>
+            <p class="sub">Sonntag, 30. August</p>
+          </header>
+
+          <section class="wochenkarte">
+            <p class="wk-satz">11 Momente, 7 davon in deine Richtung, 3 bewusste Ja.</p>
+            <p class="wk-sub">Vierte Woche in Folge reflektiert.</p>
+          </section>
+
+          <section class="reflex-block">
+            <p class="r-name">Körperliche Gesundheit</p>
+            <div class="skala" aria-label="Einschätzung 0 bis 10">
+              <span class="pill">0</span><span class="pill">1</span><span class="pill">2</span><span class="pill">3</span><span class="pill">4</span><span class="pill">5</span><span class="pill aktiv">6</span><span class="pill">7</span><span class="pill">8</span><span class="pill">9</span><span class="pill">10</span>
+            </div>
+            <p class="trend">
+              <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+              Etwas höher als in den letzten Wochen
+            </p>
+            <div class="feld">Was hat die Woche geprägt?</div>
+          </section>
+
+          <section class="reflex-block">
+            <p class="r-name">Psychische Gesundheit</p>
+            <div class="skala" aria-label="Einschätzung 0 bis 10">
+              <span class="pill">0</span><span class="pill">1</span><span class="pill">2</span><span class="pill">3</span><span class="pill">4</span><span class="pill">5</span><span class="pill">6</span><span class="pill aktiv">7</span><span class="pill">8</span><span class="pill">9</span><span class="pill">10</span>
+            </div>
+            <p class="trend">
+              <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+              Auf dem Stand der Vorwoche
+            </p>
+          </section>
+
+          <section class="reflex-block">
+            <p class="r-name">Verwirklichung</p>
+            <div class="skala" aria-label="Einschätzung 0 bis 10">
+              <span class="pill">0</span><span class="pill">1</span><span class="pill">2</span><span class="pill">3</span><span class="pill">4</span><span class="pill">5</span><span class="pill">6</span><span class="pill">7</span><span class="pill aktiv">8</span><span class="pill">9</span><span class="pill">10</span>
+            </div>
+            <p class="trend">
+              <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+              Fällt zusammen mit ruhigeren Vormittagen
+            </p>
+          </section>
+
+          <section class="reflex-block feld-karte">
+            <h3>Woran ich nächste Woche arbeite</h3>
+            <div class="feld">Drei Abende ohne Bildschirm wären ein Anfang.</div>
+          </section>
+        </div>
+      </article>
+    </div>
+
+  </section>
+
+  <!-- ==================== SPEZIFIKATION ==================== -->
+  <section id="spez">
+    <header class="seitenkopf">
+      <h1>Jetztgut — Richtung A: Morgenlicht</h1>
+      <span>Berghütte am Morgen · warmes Graphit-Papier · Tannengrün · Ockerlicht</span>
+    </header>
+    <div class="spez-grid">
+
+      <div class="panel">
+        <h3>Farbpalette</h3>
+        <div class="swatches">
+          <div class="swatch">
+            <div class="farbe" style="background:#E9E6DF"></div>
+            <p class="hex">#E9E6DF</p>
+            <p class="rolle">Papier — Grundfläche, helles warmes Graphit-Papier</p>
+          </div>
+          <div class="swatch">
+            <div class="farbe" style="background:#F3F1EA"></div>
+            <p class="hex">#F3F1EA</p>
+            <p class="rolle">Karte — Optionen, Flächen, Text auf Tanne</p>
+          </div>
+          <div class="swatch">
+            <div class="farbe" style="background:#D9D4C8"></div>
+            <p class="hex">#D9D4C8</p>
+            <p class="rolle">Linie — Trenner und Ränder</p>
+          </div>
+          <div class="swatch">
+            <div class="farbe" style="background:#2B2A25"></div>
+            <p class="hex">#2B2A25</p>
+            <p class="rolle">Tinte — Fließtext, warmes Graphit</p>
+          </div>
+          <div class="swatch">
+            <div class="farbe" style="background:#5E5B52"></div>
+            <p class="hex">#5E5B52</p>
+            <p class="rolle">Nebel — Nebentext, stille Aktionen</p>
+          </div>
+          <div class="swatch">
+            <div class="farbe" style="background:#22453A"></div>
+            <p class="hex">#22453A</p>
+            <p class="rolle">Tanne — tragende Farbe: Titel, Auswahl, Kompass</p>
+          </div>
+          <div class="swatch">
+            <div class="farbe" style="background:#18332B"></div>
+            <p class="hex">#18332B</p>
+            <p class="rolle">Tanne tief — gedrückte Zustände, Dark-Mode-Grund</p>
+          </div>
+          <div class="swatch">
+            <div class="farbe" style="background:#C08E3B"></div>
+            <p class="hex">#C08E3B</p>
+            <p class="rolle">Ockerlicht — Akzent nur für Atemkreis und Marker</p>
+          </div>
+          <div class="swatch">
+            <div class="farbe" style="background:#7A5717"></div>
+            <p class="hex">#7A5717</p>
+            <p class="rolle">Ocker-Text — Akzent als Schrift, AA-fest</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Schriftpaar</h3>
+        <p class="spezimen-display">Was ist jetzt gut für dich?</p>
+        <p class="spezimen-name">Bricolage Grotesque — Display, 500 bis 700</p>
+        <p class="stack">Stack: "Bricolage Grotesque", "Instrument Sans", "IBM Plex Sans", system-ui, "Segoe UI", sans-serif</p>
+        <p class="spezimen-text" style="margin-top:18px">Der Impuls ist nicht der Feind — er ist Information. Jetztgut hilft dir, kurz innezuhalten, das Bedürfnis dahinter zu verstehen und dann bewusst zu entscheiden. Fließtext 17 px, Zeilenhöhe 1,5.</p>
+        <p class="spezimen-name">Source Sans 3 — Text, 400 und 600</p>
+        <p class="stack">Stack: "Source Sans 3", "Source Sans Pro", "Atkinson Hyperlegible", "IBM Plex Sans", system-ui, "Segoe UI", sans-serif</p>
+      </div>
+
+      <div class="panel begruendung">
+        <h3>Begründung der Richtung</h3>
+        <p>Morgenlicht übersetzt die Berghütte am Morgen in ein Interface: helles, warmes Graphit-Papier statt klinischem Weiß, damit die App nach Werkbank und Frühlicht wirkt, nicht nach Spa oder Klinik.</p>
+        <p>Tiefes Tannengrün trägt als einzige Vollfarbe Orientierung und Ruhe — es hält Kompass-Spiegel, Auswahl und Wochenzusammenfassung zusammen, ohne je zu alarmieren.</p>
+        <p>Das Ockerlicht bleibt dem einen Signatur-Moment vorbehalten: dem Atemkreis als Ring aus Morgenlicht, der das Innehalten sichtbar macht, statt es zu inszenieren.</p>
+      </div>
+
+      <div class="panel">
+        <h3>Warmer Dark Mode</h3>
+        <p class="dm-text">Abends kehrt sich das Licht um, die Wärme bleibt: Der Grund wechselt auf tiefes warmes Graphit, Karten auf einen Ton darüber, die Tinte wird zu Papier. Tannengrün hellt zu einem gedeckten Salbeiton auf, das Ockerlicht bleibt allein dem Atemkreis vorbehalten. Kein kaltes Schwarz, keine reinen Weißflächen.</p>
+        <div class="dm-swatches">
+          <div class="chip-farbe" style="background:#23221C; color:#B7B2A4">#23221C</div>
+          <div class="chip-farbe" style="background:#2C2B24; color:#B7B2A4">#2C2B24</div>
+          <div class="chip-farbe" style="background:#E9E6DF; color:#45433C">#E9E6DF</div>
+          <div class="chip-farbe" style="background:#7FA894; color:#18332B">#7FA894</div>
+          <div class="chip-farbe" style="background:#C99A45; color:#2B2A25">#C99A45</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
