@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "hinweis": "Regelbasierte Krisen-Erkennung (Phase 2). Eingaben werden wie beim Keyword-Mapping normalisiert (Kleinschreibung, Wortstamm-Vergleich). Bei einem Treffer endet der Moment-Flow ohne Scoring, es erscheint der ruhige Hilfe-Screen; die Eingabe wird nicht gespeichert. Diese Liste wird versioniert gepflegt (siehe Konzept, Kapitel 11) — Balance zwischen Sensitivität und Fehlalarmen.",
+  "kategorien": [
+    {
+      "id": "suizidalitaet",
+      "label": "Direkte Suizidalität",
+      "muster": ["nicht mehr leben", "umbring", "suizid", "selbstmord", "mein leben beenden"]
+    },
+    {
+      "id": "hoffnungslosigkeit",
+      "label": "Hoffnungslosigkeit und Endgültigkeit",
+      "muster": ["keinen sinn mehr", "hat alles keinen sinn", "allen waere besser ohne mich", "nicht mehr aufwachen", "nicht mehr da sein"]
+    },
+    {
+      "id": "selbstverletzung",
+      "label": "Selbstverletzung",
+      "muster": ["ritz", "mir selbst wehtun", "mir wehtun", "mir was antun", "mir etwas antun"]
+    },
+    {
+      "id": "abschied",
+      "label": "Abschiedsformulierungen",
+      "muster": ["zum letzten mal", "wenn ich nicht mehr da bin", "abschiedsbrief"]
+    },
+    {
+      "id": "gefaehrdung",
+      "label": "Gefährdung anderer",
+      "muster": ["ihm etwas antun", "ihr etwas antun", "jemandem wehtun"]
+    }
+  ],
+  "hilfe": {
+    "telefonseelsorge": ["0800 111 0 111", "116 123"],
+    "akute_gefahr": "112"
+  }
+}

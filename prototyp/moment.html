@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Jetztgut — Moment-Prototyp</title>
+<!--
+  Mini-Prototyp des Moment-Flows, Richtung A "Morgenlicht".
+  WCAG-AA-Kontrast, nachgerechnet (relative Luminanz nach WCAG 2.1, gerundet):
+  1) Tinte #2B2A25 auf Papier #E9E6DF        = 11,5 : 1  (Fließtext — AA und AAA)
+  2) Tinte #2B2A25 auf Karte #F3F1EA         = 12,7 : 1  (Text auf Kacheln und Karten)
+  3) Tinte-soft #45433C auf Papier #E9E6DF   =  7,9 : 1  (Sekundärtext; auf Karte 8,8 : 1)
+  4) Nebel #5E5B52 auf Papier #E9E6DF        =  5,4 : 1  (Nebentext; auf Karte #F3F1EA 6,0 : 1)
+  5) Papierhell #F3F1EA auf Tanne #22453A    =  9,4 : 1  (Primärbuttons, Kompass-Spiegel, Tel-Links)
+  6) Tanne-hell #C9D4CC auf Tanne #22453A    =  7,0 : 1  (Nebentext auf Tannengrün)
+  7) Tanne #22453A auf Papier #E9E6DF        =  8,5 : 1  (Überschriften, Fokus-Ring: > 3:1 auch als Nicht-Text)
+  8) Ocker-Text #7A5717 auf Papier #E9E6DF   =  5,3 : 1  (Akzent-Schrift; auf Karte #F3F1EA 5,8 : 1)
+  Ockerlicht #C08E3B ist rein dekorativ (Ring des Atemkreises) und trägt keine Information allein.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&amp;family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Morgenlicht — Design-Tokens (einzige Farbquelle) */
+    --papier:      #E9E6DF;
+    --papier-hell: #F3F1EA;
+    --linie:       #D9D4C8;
+    --tinte:       #2B2A25;
+    --tinte-soft:  #45433C;
+    --nebel:       #5E5B52;
+    --tanne:       #22453A;
+    --tanne-tief:  #18332B;
+    --tanne-hell:  #C9D4CC;
+    --ocker:       #C08E3B;
+    --ocker-text:  #7A5717;
+    /* Präsentations-Matte (nur Desktop-Rahmen, nicht Teil der App) */
+    --matte:       #38362F;
+    --matte-nebel: #B7B2A4;
+    --geraet-rand: #211F1B;
+    --schatten:    rgba(12,11,9,.42);
+    --karten-schatten: rgba(43,42,37,.06);
+    --tanne-hauch: rgba(34,69,58,.08);
+    --tanne-hauch2:rgba(34,69,58,.06);
+    --ocker-glow-a:rgba(192,142,59,.14);
+    --ocker-glow-0:rgba(192,142,59,0);
+    --ocker-glow-b:rgba(192,142,59,.10);
+    --ocker-glow-c:rgba(192,142,59,.35);
+    --ocker-glow-d:rgba(192,142,59,.20);
+    --glanz:       rgba(255,255,255,.05);
+
+    --schrift-display: "Bricolage Grotesque","Instrument Sans","IBM Plex Sans",system-ui,"Segoe UI",sans-serif;
+    --schrift-text: "Source Sans 3","Source Sans Pro","Atkinson Hyperlegible","IBM Plex Sans",system-ui,"Segoe UI",sans-serif;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{
+    font-family:var(--schrift-text);
+    font-size:17px; line-height:1.5;
+    color:var(--tinte);
+    background:var(--papier);
+    overscroll-behavior:none;
+    -webkit-font-smoothing:antialiased;
+  }
+  [hidden]{ display:none !important; }
+  button{ font:inherit; color:inherit; background:none; border:none; cursor:pointer; }
+  a{ color:inherit; }
+  button:focus-visible, a:focus-visible, input:focus-visible{
+    outline:3px solid var(--tanne); outline-offset:2px;
+  }
+  .screen:focus{ outline:none; }
+
+  /* ============ Bühne: mobil Vollbild, ab 520px Telefon-Rahmen ============ */
+  .buehne{ min-height:100vh; min-height:100dvh; }
+  .app{
+    position:relative;
+    width:100%;
+    height:100vh; height:100dvh;
+    background:var(--papier);
+    overflow:hidden;
+  }
+  .b-hinweis{ display:none; }
+  @media (min-width:520px){
+    body{ background:var(--matte); }
+    .buehne{
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:14px; padding:24px 0;
+    }
+    .app{
+      width:410px;
+      height:min(820px, calc(100dvh - 88px));
+      min-height:560px;
+      border:10px solid var(--geraet-rand); border-radius:44px;
+      box-shadow:0 22px 44px var(--schatten), inset 0 0 0 1px var(--glanz);
+    }
+    .b-hinweis{
+      display:block;
+      font-size:13px; letter-spacing:.14em; text-transform:uppercase;
+      color:var(--matte-nebel);
+    }
+  }
+
+  /* ============ Screens & Übergänge ============ */
+  .screen{
+    position:absolute; inset:0;
+    padding:12px 20px 18px;
+    display:flex; flex-direction:column;
+    overflow-y:auto;
+    background:var(--papier);
+    opacity:0; visibility:hidden; transform:translateY(10px);
+  }
+  html.bereit .screen{
+    transition:opacity .25s ease, transform .25s ease, visibility 0s linear .25s;
+  }
+  .screen.aktiv{
+    opacity:1; visibility:visible; transform:none;
+  }
+  html.bereit .screen.aktiv{
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .screen.warm{
+    background:
+      radial-gradient(120% 52% at 50% -6%, var(--ocker-glow-a), var(--ocker-glow-0) 62%),
+      var(--papier);
+  }
+
+  /* ============ Kopfzeile: Fortschritts-Punkte + Schließen ============ */
+  .kopf{
+    display:flex; align-items:center; justify-content:space-between;
+    min-height:48px; flex:none;
+  }
+  .kopf-platz{ width:48px; }
+  .punkte{ display:flex; gap:7px; }
+  .punkte i{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--linie);
+  }
+  .punkte i.an{ background:var(--tanne); }
+  .xbtn{
+    width:48px; height:48px; margin-right:-10px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%; color:var(--nebel);
+  }
+  .xbtn:hover{ color:var(--tinte); }
+  .ico{ flex:none; display:block; }
+
+  /* ============ Einstieg ============ */
+  .start-kopf{ text-align:center; padding-top:26px; }
+  .wortmarke{
+    font-family:var(--schrift-display);
+    font-size:30px; font-weight:700; letter-spacing:.01em;
+    color:var(--tanne);
+  }
+  .claim{ font-size:17px; color:var(--tinte-soft); margin-top:2px; }
+  .innehalten{
+    margin-top:22px;
+    min-height:76px; width:100%;
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    background:var(--tanne); color:var(--papier-hell);
+    border-radius:20px;
+    font-family:var(--schrift-display); font-size:21px; font-weight:600;
+    box-shadow:0 2px 6px var(--karten-schatten);
+  }
+  .innehalten:hover{ background:var(--tanne-tief); }
+  .innehalten .ico{ color:var(--ocker); }
+  .quiet-label{
+    margin-top:20px;
+    font-size:15px; color:var(--nebel);
+  }
+  .impuls-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .i-chip{
+    min-height:48px; padding:8px 16px;
+    background:var(--papier-hell);
+    border:1px solid var(--linie); border-radius:999px;
+    font-size:16px; color:var(--tinte-soft);
+    box-shadow:0 1px 2px var(--karten-schatten);
+    transition:border-color .15s ease;
+  }
+  .i-chip:hover{ border-color:var(--tanne); color:var(--tinte); }
+  .eingabe-zeile{ display:flex; gap:8px; margin-top:14px; }
+  .eingabe-zeile input{
+    flex:1; min-width:0; min-height:52px;
+    padding:8px 14px;
+    font-family:var(--schrift-text); font-size:17px; color:var(--tinte);
+    background:var(--papier-hell);
+    border:1px solid var(--linie); border-radius:14px;
+  }
+  .eingabe-zeile input::placeholder{ color:var(--nebel); opacity:1; }
+  .eingabe-zeile input:focus{ border-color:var(--tanne); }
+  .mic-btn{
+    flex:none; width:52px; min-height:52px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--papier-hell);
+    border:1px solid var(--linie); border-radius:14px;
+    color:var(--nebel);
+  }
+  .demo-zeile{
+    margin-top:auto; padding-top:18px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .demo-label{
+    font-size:13px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--nebel);
+  }
+  .schalter{
+    display:flex; gap:4px;
+    background:var(--papier-hell);
+    border:1px solid var(--linie); border-radius:999px;
+    padding:3px;
+  }
+  .schalter button{
+    min-height:42px; padding:4px 14px;
+    border-radius:999px;
+    font-size:15px; color:var(--nebel);
+  }
+  .schalter button[aria-pressed="true"]{
+    background:var(--tanne); color:var(--papier-hell);
+  }
+  .neu-start{
+    margin-left:auto;
+    min-height:48px; padding:0 6px;
+    font-size:15px; color:var(--nebel);
+    text-decoration:underline; text-underline-offset:3px;
+  }
+  .neu-start:hover{ color:var(--tinte); }
+
+  /* ============ Ankommen ============ */
+  .spiegel{
+    font-family:var(--schrift-display);
+    font-size:24px; font-weight:600; line-height:1.3;
+    color:var(--tinte); text-align:center;
+    margin:22px auto 0; max-width:320px;
+  }
+  .atemkreis{
+    width:190px; height:190px;
+    margin:34px auto 0;
+    border-radius:50%;
+    border:9px solid transparent;
+    background:
+      radial-gradient(circle at 50% 34%, #FBF7EC, #F5EFE0 60%, #F0E8D5 100%) content-box,
+      conic-gradient(from 210deg, #A87A2C, #E7C377 38%, #C08E3B 62%, #8F6B2C 82%, #A87A2C) border-box;
+    box-shadow:
+      0 0 0 10px var(--ocker-glow-b),
+      0 0 44px var(--ocker-glow-c);
+    display:flex; align-items:center; justify-content:center;
+    animation:atmen 6s ease-in-out infinite;
+  }
+  @keyframes atmen{
+    0%,100%{ transform:scale(1); }
+    50%    { transform:scale(1.12); }
+  }
+  .atem-label{
+    font-family:var(--schrift-display);
+    font-size:19px; font-weight:500; color:var(--tinte-soft);
+    transition:opacity .55s ease;
+  }
+  .weiter-btn{
+    margin-top:auto;
+    min-height:56px; width:100%;
+    border:1px solid var(--linie); border-radius:16px;
+    background:var(--papier-hell);
+    font-family:var(--schrift-display); font-size:18px; font-weight:600;
+    color:var(--tanne);
+  }
+  .weiter-btn:hover{ border-color:var(--tanne); }
+
+  /* ============ Fragen (Gefühl / Bedürfnis) ============ */
+  .frage{
+    font-family:var(--schrift-display);
+    font-size:25px; font-weight:600; line-height:1.25;
+    color:var(--tanne);
+    margin-top:8px;
+  }
+  .frage-sub{ font-size:15px; color:var(--nebel); margin-top:4px; }
+  .kacheln{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+    margin-top:16px;
+  }
+  .kachel{
+    min-height:72px;
+    padding:10px 6px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    background:var(--papier-hell);
+    border:1px solid var(--linie); border-radius:14px;
+    box-shadow:0 1px 2px var(--karten-schatten);
+    font-size:17px; line-height:1.25; color:var(--tinte);
+    text-align:center;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .kachel:hover{ border-color:var(--tanne); }
+  .kachel.gewaehlt{
+    background:var(--tanne); border-color:var(--tanne); color:var(--papier-hell);
+  }
+  .k-tipp{ font-size:13px; color:var(--ocker-text); visibility:hidden; }
+  .k-tipp.zeigen{ visibility:visible; }
+  .kachel.gewaehlt .k-tipp{ color:var(--tanne-hell); }
+  .intensitaet{ margin-top:18px; text-align:center; }
+  .int-label{ font-size:14px; color:var(--nebel); }
+  .int-reihe{ display:flex; gap:10px; justify-content:center; margin-top:8px; }
+  .chip-btn{
+    min-height:48px; padding:8px 20px;
+    background:var(--papier-hell);
+    border:1px solid var(--linie); border-radius:999px;
+    font-size:16px; color:var(--tinte-soft);
+  }
+  .chip-btn:hover{ border-color:var(--tanne); }
+  .skip{
+    margin-top:auto;
+    min-height:48px; width:100%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; color:var(--nebel);
+  }
+  .skip:hover{ color:var(--tinte); }
+
+  /* ============ Entscheidung ============ */
+  .kompass-spiegel{
+    margin-top:6px; flex:none;
+    background:var(--tanne); border-radius:18px;
+    padding:14px 16px;
+    display:flex; gap:12px; align-items:flex-start;
+    color:var(--papier-hell);
+  }
+  .kompass-spiegel .ico{ color:var(--ocker); margin-top:2px; }
+  .ks-ziel{ font-size:17px; line-height:1.4; color:var(--tanne-hell); }
+  .ks-frage{
+    font-family:var(--schrift-display);
+    font-size:19px; font-weight:600; line-height:1.3;
+    color:var(--papier-hell); margin-top:3px;
+  }
+  .gefuehl-zeile{
+    margin-top:10px;
+    font-size:16px; color:var(--nebel);
+  }
+  .optionen{
+    margin-top:10px;
+    display:grid; gap:10px; grid-auto-rows:1fr;
+  }
+  .option{
+    display:flex; flex-direction:column; align-items:stretch; gap:6px;
+    background:var(--papier-hell);
+    border:1px solid var(--linie); border-radius:18px;
+    padding:14px 16px;
+    box-shadow:0 1px 2px var(--karten-schatten);
+    text-align:left;
+    transition:border-color .15s ease;
+  }
+  button.option:hover{ border-color:var(--tanne); }
+  .option-kopf{ display:flex; gap:12px; align-items:center; }
+  .o-ico{
+    flex:none; width:40px; height:40px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--tanne-hauch); color:var(--tanne);
+  }
+  .o-titel{
+    font-family:var(--schrift-display);
+    font-size:18px; font-weight:600; line-height:1.25;
+    color:var(--tinte);
+  }
+  .o-text{
+    font-size:17px; line-height:1.42; color:var(--tinte-soft);
+    padding-left:52px;
+  }
+  .alt-liste{ display:flex; flex-direction:column; padding-left:40px; }
+  .alt-btn{
+    min-height:48px;
+    display:flex; align-items:center; gap:8px;
+    padding:4px 10px; border-radius:10px;
+    font-size:17px; line-height:1.3; color:var(--tinte-soft);
+    text-align:left;
+  }
+  .alt-btn::before{ content:"—"; color:var(--ocker-text); flex:none; }
+  .alt-btn:hover{ background:var(--tanne-hauch2); color:var(--tinte); }
+
+  /* ============ Timer ============ */
+  .ring-wrap{ position:relative; width:220px; margin:26px auto 0; }
+  .ring{ width:220px; height:220px; display:block; }
+  .ring-track{ fill:none; stroke:var(--linie); stroke-width:6; }
+  .ring-lauf{
+    fill:none; stroke:var(--tanne); stroke-width:6; stroke-linecap:round;
+    transform:rotate(-90deg); transform-origin:center;
+  }
+  .ring-zeit{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--schrift-display);
+    font-size:40px; font-weight:600; color:var(--tanne);
+    font-variant-numeric:tabular-nums;
+  }
+  .timer-satz{
+    margin-top:20px; text-align:center;
+    font-size:17px; color:var(--tinte-soft);
+  }
+  .demo-chip{
+    display:block;
+    margin:16px auto 0;
+    min-height:48px; padding:6px 16px;
+    border:1px solid var(--linie); border-radius:999px;
+    font-size:14px; color:var(--nebel);
+  }
+  .demo-chip[aria-pressed="true"]{ border-color:var(--tanne); color:var(--tanne); }
+  .nochda{ text-align:center; margin-top:36px; }
+  .nochda:focus{ outline:none; }
+  .nochda .frage{ margin-top:0; }
+  .antworten{ display:grid; gap:10px; grid-auto-rows:1fr; margin-top:22px; }
+  .antwort-btn{
+    min-height:64px;
+    background:var(--papier-hell);
+    border:1px solid var(--linie); border-radius:16px;
+    box-shadow:0 1px 2px var(--karten-schatten);
+    font-family:var(--schrift-display); font-size:18px; font-weight:600;
+    color:var(--tinte);
+    transition:border-color .15s ease;
+  }
+  .antwort-btn:hover{ border-color:var(--tanne); }
+
+  /* ============ Abschluss ============ */
+  .abschluss-mitte{ text-align:center; margin-top:30px; }
+  .abschluss-ring{
+    width:64px; height:64px; margin:0 auto;
+    border-radius:50%;
+    border:2px solid var(--ocker);
+    background:radial-gradient(circle, var(--ocker-glow-a), var(--ocker-glow-0) 68%);
+    box-shadow:0 0 0 6px var(--ocker-glow-b), 0 0 22px var(--ocker-glow-c);
+  }
+  .gross{
+    font-family:var(--schrift-display);
+    font-size:27px; font-weight:600; line-height:1.25;
+    color:var(--tanne);
+    margin:22px auto 0; max-width:320px;
+  }
+  .ausgang-zeile{
+    font-size:18px; line-height:1.45; color:var(--tinte-soft);
+    margin:14px auto 0; max-width:320px;
+  }
+  .punkte-karte{
+    margin-top:22px;
+    background:var(--papier-hell);
+    border:1px solid var(--linie); border-radius:16px;
+    padding:14px 16px;
+  }
+  .punkt-zeile{
+    display:flex; gap:10px; align-items:center;
+    min-height:30px;
+    font-size:16px; color:var(--tinte-soft);
+  }
+  .punkt-zeile .ico{ color:var(--ocker-text); }
+  .bereich-zeile{
+    margin-top:10px;
+    font-size:15px; color:var(--nebel);
+  }
+  .fertig-btn{
+    margin-top:auto;
+    min-height:60px; width:100%;
+    background:var(--tanne); color:var(--papier-hell);
+    border-radius:16px;
+    font-family:var(--schrift-display); font-size:19px; font-weight:600;
+  }
+  .fertig-btn:hover{ background:var(--tanne-tief); }
+
+  /* ============ Krise ============ */
+  .krise-inhalt{ margin-top:44px; }
+  .krise-inhalt h2{
+    font-family:var(--schrift-display);
+    font-size:24px; font-weight:600; line-height:1.3;
+    color:var(--tanne);
+  }
+  .krise-inhalt p{ margin-top:12px; color:var(--tinte-soft); }
+  .tel-btn{
+    margin-top:12px;
+    min-height:68px; width:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+    background:var(--tanne); color:var(--papier-hell);
+    border-radius:16px; text-decoration:none;
+    padding:10px 14px;
+  }
+  .tel-btn:hover{ background:var(--tanne-tief); }
+  .t-name{ font-size:15px; color:var(--tanne-hell); }
+  .t-nr{
+    font-family:var(--schrift-display);
+    font-size:22px; font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .krise-hinweis{ font-size:16px; color:var(--nebel); margin-top:14px; }
+  .zurueck-btn{
+    margin-top:auto;
+    min-height:56px; width:100%;
+    border:1px solid var(--linie); border-radius:14px;
+    background:var(--papier-hell);
+    font-family:var(--schrift-display); font-size:18px; font-weight:600;
+    color:var(--tinte);
+  }
+  .zurueck-btn:hover{ border-color:var(--tanne); }
+
+  /* ============ Reduced Motion ============ */
+  @media (prefers-reduced-motion: reduce){
+    .atemkreis{ animation:none; }
+    html.bereit .screen, html.bereit .screen.aktiv{ transition:none; }
+    .screen{ transform:none; }
+    .atem-label{ transition:opacity 1.1s ease; }
+    .kachel, .option, .i-chip, .antwort-btn{ transition:none; }
+  }
+</style>
+</head>
+<body>
+<div class="buehne">
+  <div class="app" id="app">
+
+    <!-- 0 · Einstieg -->
+    <section class="screen" id="scr-start" tabindex="-1" aria-label="Einstieg">
+      <header class="start-kopf">
+        <p class="wortmarke">Jetztgut</p>
+        <p class="claim">Was ist jetzt gut für dich?</p>
+      </header>
+      <button class="innehalten" id="btn-innehalten">
+        <svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><circle cx="12" cy="12" r="9"/></svg>
+        <span>Innehalten</span>
+      </button>
+      <p class="quiet-label">Oder sag, was gerade ruft</p>
+      <div class="impuls-chips">
+        <button class="i-chip" data-imp="suesses">Süßes</button>
+        <button class="i-chip" data-imp="alkohol">Alkohol</button>
+        <button class="i-chip" data-imp="scrollen">Scrollen</button>
+        <button class="i-chip" data-imp="shopping">Shopping</button>
+        <button class="i-chip" data-imp="serien">Noch eine Folge</button>
+        <button class="i-chip" data-imp="arbeiten-statt-pause">Arbeiten statt Pause</button>
+        <button class="i-chip" data-imp="nachricht-impulsiv">Nachricht</button>
+      </div>
+      <div class="eingabe-zeile">
+        <input id="eingabe" type="text" placeholder="Sag es in einem Satz" aria-label="Sag es in einem Satz" autocomplete="off" enterkeyhint="go">
+        <button class="mic-btn" id="btn-mic" title="Spracheingabe kommt in Phase 2" aria-label="Spracheingabe kommt in Phase 2">
+          <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+        </button>
+      </div>
+      <div class="demo-zeile">
+        <span class="demo-label" id="demo-label">Demo</span>
+        <div class="schalter" role="group" aria-labelledby="demo-label">
+          <button id="ziel-mit" aria-pressed="true">Mit Ziel</button>
+          <button id="ziel-ohne" aria-pressed="false">Ohne Ziel</button>
+        </div>
+        <button class="neu-start" id="btn-neustart">Neu starten</button>
+      </div>
+    </section>
+
+    <!-- 1 · Ankommen -->
+    <section class="screen warm" id="scr-ankommen" tabindex="-1" aria-label="Ankommen">
+      <header class="kopf">
+        <span class="kopf-platz" aria-hidden="true"></span>
+        <span class="punkte" aria-hidden="true"><i class="an"></i><i></i><i></i><i></i><i></i></span>
+        <button class="xbtn" aria-label="Schließen und zurück zum Anfang">
+          <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </header>
+      <p class="spiegel" id="spiegel-satz">Ein Eis. Okay — lass uns 30 Sekunden hinschauen.</p>
+      <div class="atemkreis" aria-hidden="true">
+        <span class="atem-label" id="atem-label">Einatmen</span>
+      </div>
+      <button class="weiter-btn" id="btn-weiter">Weiter</button>
+    </section>
+
+    <!-- 2 · Gefühl -->
+    <section class="screen" id="scr-gefuehl" tabindex="-1" aria-label="Gefühl">
+      <header class="kopf">
+        <span class="kopf-platz" aria-hidden="true"></span>
+        <span class="punkte" aria-hidden="true"><i></i><i class="an"></i><i></i><i></i><i></i></span>
+        <button class="xbtn" aria-label="Schließen und zurück zum Anfang">
+          <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </header>
+      <h2 class="frage">Was ist gerade da?</h2>
+      <p class="frage-sub">Ein Tap genügt.</p>
+      <div class="kacheln" id="gefuehl-kacheln"></div>
+      <div class="intensitaet" id="intensitaet" hidden>
+        <p class="int-label">Intensität — optional</p>
+        <div class="int-reihe">
+          <button class="chip-btn" data-int="leicht">leicht</button>
+          <button class="chip-btn" data-int="mittel">mittel</button>
+          <button class="chip-btn" data-int="stark">stark</button>
+        </div>
+      </div>
+      <button class="skip" id="skip-gefuehl">Überspringen</button>
+    </section>
+
+    <!-- 3 · Bedürfnis -->
+    <section class="screen" id="scr-beduerfnis" tabindex="-1" aria-label="Bedürfnis">
+      <header class="kopf">
+        <span class="kopf-platz" aria-hidden="true"></span>
+        <span class="punkte" aria-hidden="true"><i></i><i></i><i class="an"></i><i></i><i></i></span>
+        <button class="xbtn" aria-label="Schließen und zurück zum Anfang">
+          <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </header>
+      <h2 class="frage" id="beduerfnis-frage">Wonach ruft das Eis eigentlich?</h2>
+      <div class="kacheln" id="beduerfnis-kacheln"></div>
+      <button class="skip" id="skip-beduerfnis">Überspringen</button>
+    </section>
+
+    <!-- 4 · Entscheidung -->
+    <section class="screen" id="scr-entscheidung" tabindex="-1" aria-label="Entscheidung">
+      <header class="kopf">
+        <span class="kopf-platz" aria-hidden="true"></span>
+        <span class="punkte" aria-hidden="true"><i></i><i></i><i></i><i class="an"></i><i></i></span>
+        <button class="xbtn" aria-label="Schließen und zurück zum Anfang">
+          <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </header>
+      <section class="kompass-spiegel">
+        <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        <div>
+          <p class="ks-ziel" id="ks-ziel">Dein Kompass: 10 % Körperfett bis Dezember.</p>
+          <p class="ks-frage">Was ist jetzt gut für dich?</p>
+        </div>
+      </section>
+      <p class="gefuehl-zeile" id="gefuehl-zeile" hidden></p>
+      <div class="optionen" aria-label="Drei gleichwertige Optionen">
+        <div class="option">
+          <span class="option-kopf">
+            <span class="o-ico">
+              <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+            </span>
+            <span class="o-titel">Alternative wählen</span>
+          </span>
+          <div class="alt-liste" id="alt-liste"></div>
+        </div>
+        <button class="option" id="opt-warten">
+          <span class="option-kopf">
+            <span class="o-ico">
+              <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <span class="o-titel">10 Minuten warten</span>
+          </span>
+          <span class="o-text">Der Impuls darf bleiben. Danach schaust du noch einmal hin.</span>
+        </button>
+        <button class="option" id="opt-ja">
+          <span class="option-kopf">
+            <span class="o-ico">
+              <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            </span>
+            <span class="o-titel">Bewusst ja</span>
+          </span>
+          <span class="o-text">Dann genieß es ganz. Ohne Nebengeräusche.</span>
+        </button>
+      </div>
+      <button class="skip" id="skip-entscheidung">Überspringen</button>
+    </section>
+
+    <!-- 4b · Timer -->
+    <section class="screen" id="scr-timer" tabindex="-1" aria-label="Zehn Minuten warten">
+      <header class="kopf">
+        <span class="kopf-platz" aria-hidden="true"></span>
+        <span class="punkte" aria-hidden="true"><i></i><i></i><i></i><i class="an"></i><i></i></span>
+        <button class="xbtn" aria-label="Schließen und zurück zum Anfang">
+          <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </header>
+      <div id="timer-lauf-block">
+        <h2 class="frage" style="text-align:center">10 Minuten warten</h2>
+        <div class="ring-wrap">
+          <svg class="ring" viewBox="0 0 220 220" aria-hidden="true">
+            <circle class="ring-track" cx="110" cy="110" r="98"/>
+            <circle class="ring-lauf" id="ring-lauf" cx="110" cy="110" r="98"/>
+          </svg>
+          <div class="ring-zeit" id="ring-zeit">10:00</div>
+        </div>
+        <p class="timer-satz">Der Impuls darf da sein. Du musst gerade nichts tun.</p>
+        <button class="demo-chip" id="timer-demo" aria-pressed="false">Demo: ×60 · Prototyp-Hilfe</button>
+      </div>
+      <div class="nochda" id="timer-nochda" tabindex="-1" hidden>
+        <h2 class="frage">Noch da?</h2>
+        <div class="antworten">
+          <button class="antwort-btn" id="btn-gelegt">Hat sich gelegt</button>
+          <button class="antwort-btn" id="btn-nochmal">Ich will es noch</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 · Abschluss -->
+    <section class="screen warm" id="scr-abschluss" tabindex="-1" aria-label="Abschluss">
+      <header class="kopf">
+        <span class="kopf-platz" aria-hidden="true"></span>
+        <span class="punkte" aria-hidden="true"><i></i><i></i><i></i><i></i><i class="an"></i></span>
+        <button class="xbtn" aria-label="Schließen und zurück zum Anfang">
+          <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </header>
+      <div class="abschluss-mitte">
+        <div class="abschluss-ring" aria-hidden="true"></div>
+        <h2 class="gross">Innegehalten. Das war der eigentliche Erfolg.</h2>
+        <p class="ausgang-zeile" id="ausgang-zeile"></p>
+      </div>
+      <div class="punkte-karte">
+        <p class="punkt-zeile">
+          <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><circle cx="12" cy="16" r=".5"/></svg>
+          <span>+1 Achtsamkeit</span>
+        </p>
+        <p class="punkt-zeile" id="kompass-punkt" hidden>
+          <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+          <span id="kompass-punkt-text">+1 Kompass · Körperliche Gesundheit</span>
+        </p>
+        <p class="bereich-zeile" id="bereich-zeile">Zählt für: Körperliche Gesundheit, Psychische Gesundheit</p>
+      </div>
+      <button class="fertig-btn" id="btn-fertig">Fertig</button>
+    </section>
+
+    <!-- Sonderpfad · Krise -->
+    <section class="screen" id="scr-krise" tabindex="-1" aria-label="Hilfe">
+      <div class="krise-inhalt">
+        <h2>Da ist gerade mehr, als ein Moment tragen kann.</h2>
+        <p>Das klingt nach echter Not. Du musst da nicht allein durch — es gibt Menschen, die jetzt zuhören. Rund um die Uhr, kostenfrei und anonym.</p>
+        <a class="tel-btn" href="tel:08001110111">
+          <span class="t-name">Telefonseelsorge</span>
+          <span class="t-nr">0800 111 0 111</span>
+        </a>
+        <a class="tel-btn" href="tel:116123">
+          <span class="t-name">Telefonseelsorge</span>
+          <span class="t-nr">116 123</span>
+        </a>
+        <p class="krise-hinweis">Bei akuter Gefahr wähle bitte die 112.</p>
+      </div>
+      <button class="zurueck-btn" id="btn-krise-zurueck">Zurück</button>
+    </section>
+
+  </div>
+  <p class="b-hinweis">Jetztgut · Mini-Prototyp · Moment-Flow</p>
+</div>
+<script>
+(function(){
+'use strict';
+
+/* ============ Daten (kanonische ids aus dem Styleguide) ============ */
+var IMPULSE = {
+  'eis':                  { spiegel:'Ein Eis',              ruf:'das Eis',           bereiche:['Körperliche Gesundheit','Psychische Gesundheit'] },
+  'suesses':              { spiegel:'Süßes',                ruf:'das Süße',          bereiche:['Körperliche Gesundheit','Psychische Gesundheit'] },
+  'alkohol':              { spiegel:'Alkohol',              ruf:'der Alkohol',       bereiche:['Körperliche Gesundheit','Psychische Gesundheit'] },
+  'nikotin':              { spiegel:'Eine Zigarette',       ruf:'das Rauchen',       bereiche:['Körperliche Gesundheit','Psychische Gesundheit'] },
+  'koffein':              { spiegel:'Noch ein Kaffee',      ruf:'der Kaffee',        bereiche:['Körperliche Gesundheit'] },
+  'scrollen':             { spiegel:'Scrollen',             ruf:'das Scrollen',      bereiche:['Psychische Gesundheit','Erholung, Genuss & Freizeit'] },
+  'serien':               { spiegel:'Noch eine Folge',      ruf:'die nächste Folge', bereiche:['Körperliche Gesundheit','Psychische Gesundheit'] },
+  'zocken':               { spiegel:'Zocken',               ruf:'das Zocken',        bereiche:['Psychische Gesundheit','Erholung, Genuss & Freizeit'] },
+  'shopping':             { spiegel:'Shopping',             ruf:'das Shopping',      bereiche:['Finanzen','Psychische Gesundheit'] },
+  'essen-bestellen':      { spiegel:'Essen bestellen',      ruf:'das Bestellen',     bereiche:['Körperliche Gesundheit','Finanzen'] },
+  'dating-apps':          { spiegel:'Die Dating-App',       ruf:'die Dating-App',    bereiche:['Beziehung & Partnerschaft','Psychische Gesundheit'] },
+  'arbeiten-statt-pause': { spiegel:'Arbeiten statt Pause', ruf:'das Weiterarbeiten',bereiche:['Psychische Gesundheit','Erholung, Genuss & Freizeit'] },
+  'nachricht-impulsiv':   { spiegel:'Die Nachricht',        ruf:'diese Nachricht',   bereiche:['Beziehung & Partnerschaft','Psychische Gesundheit'] },
+  'doomscrolling':        { spiegel:'Der Newsfeed',         ruf:'der Newsfeed',      bereiche:['Psychische Gesundheit'] },
+  'frei':                 { spiegel:null,                   ruf:'dieser Impuls',     bereiche:['Psychische Gesundheit'] }
+};
+
+/* Regelbasierte Keyword-Erkennung (Phase-2-Vorschau) */
+var KEYWORDS = [
+  { re:/\beis\b|eiscreme|eisdiele/,                                    id:'eis' },
+  { re:/schoko|suess|süß|kuchen|keks|riegel|gummib|zucker|snack|chips|naschen/, id:'suesses' },
+  { re:/wein|bier|alkohol|schnaps|drink|aperol|prosecco|sekt/,         id:'alkohol' },
+  { re:/zigarette|rauchen|vape|nikotin|kippe/,                         id:'nikotin' },
+  { re:/kaffee|espresso|koffein|energy/,                               id:'koffein' },
+  { re:/doomscroll|\bnews\b|nachrichtenlage/,                          id:'doomscrolling' },
+  { re:/insta|tiktok|handy|scroll|reels|feed|youtube|social/,          id:'scrollen' },
+  { re:/folge|serie|netflix|staffel|weiterschauen/,                    id:'serien' },
+  { re:/zocken|gaming|daddeln|\bgame\b/,                               id:'zocken' },
+  { re:/pizza|lieferando|sushi|burger|d(ö|oe)ner/,                     id:'essen-bestellen' },
+  { re:/bestell|amazon|shop|kaufen|zalando|warenkorb/,                 id:'shopping' },
+  { re:/tinder|bumble|dating/,                                         id:'dating-apps' },
+  { re:/arbeiten|mails|durcharbeiten|weiterarbeiten|fertig machen/,    id:'arbeiten-statt-pause' },
+  { re:/schreiben|nachricht|anrufen|melden|simsen|\bex\b/,             id:'nachricht-impulsiv' }
+];
+
+/* Sicherheitsnetz — beendet den Scoring-Flow */
+var KRISE_RE = /nicht mehr leben|umbring|keinen sinn mehr|suizid|selbstmord|nicht mehr da sein|nicht mehr aufwachen|mir (et)?was antun|\britz(e|en|t)\b/;
+
+var GEFUEHLE = [
+  { id:'muede', label:'müde' }, { id:'gestresst', label:'gestresst' },
+  { id:'gelangweilt', label:'gelangweilt' }, { id:'einsam', label:'einsam' },
+  { id:'unruhig', label:'unruhig' }, { id:'traurig', label:'traurig' },
+  { id:'genervt', label:'genervt' }, { id:'gut', label:'eigentlich gut' },
+  { id:'weiss-nicht', label:'weiß nicht' }
+];
+var NEGATIV = { muede:1, gestresst:1, gelangweilt:1, einsam:1, unruhig:1, traurig:1, genervt:1 };
+
+var BEDUERFNISSE = [
+  { id:'energie', label:'Energie' }, { id:'pause', label:'Pause' },
+  { id:'trost', label:'Trost' }, { id:'belohnung', label:'Belohnung' },
+  { id:'ablenkung', label:'Ablenkung' }, { id:'naehe', label:'Nähe' },
+  { id:'reiz', label:'Reiz/Abwechslung' }, { id:'hunger', label:'echter Hunger' },
+  { id:'genuss', label:'Lust auf Genuss' }
+];
+
+/* Sanfte Vorschläge je Gefühl (keine Vorauswahl) */
+var VORSCHLAG = {
+  'muede':['energie','pause'], 'gestresst':['pause','trost','ablenkung'],
+  'gelangweilt':['reiz','ablenkung'], 'einsam':['naehe','trost'],
+  'unruhig':['pause','ablenkung'], 'traurig':['trost','naehe'],
+  'genervt':['pause','ablenkung'], 'gut':['genuss','hunger'],
+  'weiss-nicht':['pause','ablenkung']
+};
+
+/* Kleine Alternativen-Map je Bedürfnis */
+var ALTERNATIVEN = {
+  'energie':  ['Ein Apfel und ein Glas Wasser','5 Minuten vor die Tür'],
+  'pause':    ['3 Minuten atmen, sonst nichts','Ein kurzer Spaziergang'],
+  'trost':    ['Jemanden anrufen, der dir guttut','Deine Lieblingsmusik, laut oder leise'],
+  'belohnung':['Ein guter Kaffee, in Ruhe','Ein Kapitel in deinem Buch'],
+  'ablenkung':['Kurz raus, einmal um den Block','Eine Sache aufräumen, nur eine'],
+  'naehe':    ['Eine Nachricht an einen Freund','Jemanden anrufen, einfach so'],
+  'reiz':     ['Etwas mit den Händen tun','Kaltes Wasser ins Gesicht, kurz raus'],
+  'hunger':   ['Eine echte Mahlzeit, in Ruhe','Eine Handvoll Nüsse und ein Glas Wasser'],
+  'genuss':   ['Ein guter Tee auf dem Sofa','10 Minuten Musik, nur Musik']
+};
+var ALT_ALLGEMEIN = ['3 Minuten atmen, sonst nichts','Ein Glas Wasser','Kurz vor die Tür'];
+
+/* ============ Zustand ============ */
+var state = {
+  started:false, mitZiel:true,
+  impulsId:null, freiText:null,
+  gefuehl:null, intensitaet:null,
+  beduerfnis:null, ausgang:null, altWahl:null
+};
+function resetFlow(){
+  state.started=false; state.impulsId=null; state.freiText=null;
+  state.gefuehl=null; state.intensitaet=null; state.beduerfnis=null;
+  state.ausgang=null; state.altWahl=null;
+}
+
+var timers = [];
+function merkTimeout(fn, ms){ var id=setTimeout(fn, ms); timers.push(function(){ clearTimeout(id); }); }
+function merkInterval(fn, ms){ var id=setInterval(fn, ms); timers.push(function(){ clearInterval(id); }); return id; }
+function clearTimers(){ timers.forEach(function(f){ f(); }); timers=[]; }
+
+function $(id){ return document.getElementById(id); }
+function go(hash){ if(location.hash!==hash){ location.hash=hash; } }
+
+/* ============ Routing ============ */
+var SCREENS = {
+  start:'scr-start', ankommen:'scr-ankommen', gefuehl:'scr-gefuehl',
+  beduerfnis:'scr-beduerfnis', entscheidung:'scr-entscheidung',
+  timer:'scr-timer', abschluss:'scr-abschluss', krise:'scr-krise'
+};
+
+function fillDefaults(name){
+  if(name==='start' || name==='krise' || state.started){ return; }
+  state.started=true;
+  if(!state.impulsId){ state.impulsId='eis'; }
+  var nachGefuehl = (name==='beduerfnis'||name==='entscheidung'||name==='timer'||name==='abschluss');
+  var nachBeduerfnis = (name==='entscheidung'||name==='timer'||name==='abschluss');
+  if(nachGefuehl && !state.gefuehl){ state.gefuehl='gestresst'; }
+  if(nachBeduerfnis && !state.beduerfnis){ state.beduerfnis='trost'; }
+  if(name==='abschluss' && !state.ausgang){
+    state.ausgang='alternative';
+    state.altWahl=ALTERNATIVEN['trost'][0];
+  }
+}
+
+function aktiviere(name){
+  Object.keys(SCREENS).forEach(function(n){
+    var el=$(SCREENS[n]);
+    el.classList.toggle('aktiv', n===name);
+  });
+  var el=$(SCREENS[name]);
+  try{ el.focus({ preventScroll:true }); }catch(e){ el.focus(); }
+  el.scrollTop=0;
+}
+
+function route(){
+  var name=(location.hash||'#start').replace('#','');
+  if(!SCREENS[name]){ name='start'; }
+  clearTimers();
+  fillDefaults(name);
+  if(name==='ankommen'){ enterAnkommen(); }
+  if(name==='gefuehl'){ enterGefuehl(); }
+  if(name==='beduerfnis'){ enterBeduerfnis(); }
+  if(name==='entscheidung'){ enterEntscheidung(); }
+  if(name==='timer'){ enterTimer(); }
+  if(name==='abschluss'){ enterAbschluss(); }
+  aktiviere(name);
+}
+window.addEventListener('hashchange', route);
+
+function schliessen(){
+  var name=(location.hash||'#start').replace('#','');
+  if(name==='start'){ return; }
+  resetFlow();
+  go('#start');
+}
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape'){ schliessen(); }
+});
+Array.prototype.forEach.call(document.querySelectorAll('.xbtn'), function(b){
+  b.addEventListener('click', schliessen);
+});
+
+/* ============ Einstieg ============ */
+function bereinige(t){
+  var s=t.trim().replace(/[.!?…\s]+$/,'');
+  s=s.replace(/^ich\s+(will|moechte|möchte|brauche|koennte|könnte)(\s+(jetzt|gerade|unbedingt|gern|gerne|so gerne|mal|echt|total))*\s*/i,'');
+  if(!s){ s=t.trim(); }
+  s=s.charAt(0).toUpperCase()+s.slice(1);
+  if(s.length>42){ s=s.slice(0,41).replace(/\s+$/,'')+'…'; }
+  return s;
+}
+function erkenneImpuls(lower){
+  for(var i=0;i<KEYWORDS.length;i++){ if(KEYWORDS[i].re.test(lower)){ return KEYWORDS[i].id; } }
+  return null;
+}
+function starteMitImpuls(id){
+  resetFlow();
+  state.started=true; state.impulsId=id;
+  go('#ankommen');
+}
+function starteMitText(){
+  var roh=$('eingabe').value, t=roh.trim();
+  if(!t){ starteMitImpuls('frei'); return; }
+  var lower=t.toLowerCase();
+  if(KRISE_RE.test(lower)){ resetFlow(); go('#krise'); return; }
+  var id=erkenneImpuls(lower);
+  resetFlow();
+  state.started=true;
+  if(id){ state.impulsId=id; }
+  else { state.impulsId='frei'; state.freiText=bereinige(t); }
+  go('#ankommen');
+}
+$('btn-innehalten').addEventListener('click', starteMitText);
+$('eingabe').addEventListener('keydown', function(e){
+  if(e.key==='Enter'){ e.preventDefault(); starteMitText(); }
+});
+$('btn-mic').addEventListener('click', function(){ /* stiller Platzhalter — Phase 2 */ });
+Array.prototype.forEach.call(document.querySelectorAll('.i-chip'), function(b){
+  b.addEventListener('click', function(){ starteMitImpuls(b.getAttribute('data-imp')); });
+});
+function zeichneZiel(){
+  $('ziel-mit').setAttribute('aria-pressed', state.mitZiel?'true':'false');
+  $('ziel-ohne').setAttribute('aria-pressed', state.mitZiel?'false':'true');
+}
+$('ziel-mit').addEventListener('click', function(){ state.mitZiel=true; zeichneZiel(); });
+$('ziel-ohne').addEventListener('click', function(){ state.mitZiel=false; zeichneZiel(); });
+$('btn-neustart').addEventListener('click', function(){
+  resetFlow(); state.mitZiel=true; zeichneZiel();
+  $('eingabe').value='';
+  go('#start');
+});
+
+/* ============ Ankommen ============ */
+function spiegelSatz(){
+  var imp=IMPULSE[state.impulsId||'eis'];
+  if(state.impulsId==='frei'){
+    return state.freiText
+      ? state.freiText+'. Okay — lass uns 30 Sekunden hinschauen.'
+      : 'Einen Moment nur für dich. Lass uns 30 Sekunden hinschauen.';
+  }
+  return imp.spiegel+'. Okay — lass uns 30 Sekunden hinschauen.';
+}
+function enterAnkommen(){
+  $('spiegel-satz').textContent=spiegelSatz();
+  var label=$('atem-label');
+  label.textContent='Einatmen'; label.style.opacity='1';
+  var ein=true;
+  merkInterval(function(){
+    ein=!ein;
+    label.style.opacity='0';
+    merkTimeout(function(){
+      label.textContent=ein?'Einatmen':'Ausatmen';
+      label.style.opacity='1';
+    }, 550);
+  }, 3000);
+  merkTimeout(function(){ go('#gefuehl'); }, 7000);
+}
+$('btn-weiter').addEventListener('click', function(){ go('#gefuehl'); });
+
+/* ============ Gefühl ============ */
+function baueGefuehlKacheln(){
+  var wrap=$('gefuehl-kacheln');
+  GEFUEHLE.forEach(function(g){
+    var b=document.createElement('button');
+    b.className='kachel'; b.setAttribute('data-gefuehl', g.id);
+    var s=document.createElement('span'); s.className='k-label'; s.textContent=g.label;
+    b.appendChild(s);
+    b.addEventListener('click', function(){ waehleGefuehl(g.id, b); });
+    wrap.appendChild(b);
+  });
+}
+function waehleGefuehl(id, btn){
+  var schonGewaehlt = (state.gefuehl===id && !$('intensitaet').hidden);
+  if(schonGewaehlt){ go('#beduerfnis'); return; }
+  state.gefuehl=id; state.intensitaet=null;
+  Array.prototype.forEach.call($('gefuehl-kacheln').children, function(k){
+    k.classList.toggle('gewaehlt', k===btn);
+  });
+  $('intensitaet').hidden=false;
+  clearTimers();
+  merkTimeout(function(){ go('#beduerfnis'); }, 1500);
+}
+Array.prototype.forEach.call(document.querySelectorAll('#intensitaet .chip-btn'), function(b){
+  b.addEventListener('click', function(){
+    state.intensitaet=b.getAttribute('data-int');
+    go('#beduerfnis');
+  });
+});
+function enterGefuehl(){
+  state.gefuehl=null; state.intensitaet=null;
+  Array.prototype.forEach.call($('gefuehl-kacheln').children, function(k){
+    k.classList.remove('gewaehlt');
+  });
+  $('intensitaet').hidden=true;
+}
+$('skip-gefuehl').addEventListener('click', function(){
+  state.gefuehl=null; state.intensitaet=null;
+  go('#beduerfnis');
+});
+
+/* ============ Bedürfnis ============ */
+function baueBeduerfnisKacheln(){
+  var wrap=$('beduerfnis-kacheln');
+  BEDUERFNISSE.forEach(function(b){
+    var k=document.createElement('button');
+    k.className='kachel'; k.setAttribute('data-beduerfnis', b.id);
+    var s=document.createElement('span'); s.className='k-label'; s.textContent=b.label;
+    var t=document.createElement('span'); t.className='k-tipp'; t.textContent='vielleicht das?';
+    k.appendChild(s); k.appendChild(t);
+    k.addEventListener('click', function(){
+      state.beduerfnis=b.id;
+      go('#entscheidung');
+    });
+    wrap.appendChild(k);
+  });
+}
+function enterBeduerfnis(){
+  var imp=IMPULSE[state.impulsId||'eis'];
+  $('beduerfnis-frage').textContent='Wonach ruft '+imp.ruf+' eigentlich?';
+  var tipps=(state.gefuehl && VORSCHLAG[state.gefuehl]) ? VORSCHLAG[state.gefuehl] : [];
+  Array.prototype.forEach.call($('beduerfnis-kacheln').children, function(k){
+    k.classList.remove('gewaehlt');
+    var id=k.getAttribute('data-beduerfnis');
+    k.querySelector('.k-tipp').classList.toggle('zeigen', tipps.indexOf(id)>=0);
+  });
+}
+$('skip-beduerfnis').addEventListener('click', function(){
+  state.beduerfnis=null;
+  go('#entscheidung');
+});
+
+/* ============ Entscheidung ============ */
+function gefuehlLabel(id){
+  for(var i=0;i<GEFUEHLE.length;i++){ if(GEFUEHLE[i].id===id){ return GEFUEHLE[i].label; } }
+  return null;
+}
+function enterEntscheidung(){
+  $('ks-ziel').textContent = state.mitZiel
+    ? 'Dein Kompass: 10 % Körperfett bis Dezember.'
+    : 'Dein Wunschbild: Du willst dich energiegeladen und beweglich fühlen.';
+  var zeile=$('gefuehl-zeile');
+  if(state.gefuehl && NEGATIV[state.gefuehl]){
+    zeile.textContent='Gerade ist da auch: '+gefuehlLabel(state.gefuehl)+'. Das darf mitentscheiden.';
+    zeile.hidden=false;
+  } else {
+    zeile.hidden=true;
+  }
+  var liste=$('alt-liste');
+  liste.innerHTML='';
+  var alts=(state.beduerfnis && ALTERNATIVEN[state.beduerfnis]) ? ALTERNATIVEN[state.beduerfnis] : ALT_ALLGEMEIN.slice(0,2);
+  alts.forEach(function(text){
+    var b=document.createElement('button');
+    b.className='alt-btn'; b.textContent=text;
+    b.addEventListener('click', function(){
+      state.ausgang='alternative'; state.altWahl=text;
+      go('#abschluss');
+    });
+    liste.appendChild(b);
+  });
+}
+$('opt-warten').addEventListener('click', function(){ go('#timer'); });
+$('opt-ja').addEventListener('click', function(){
+  state.ausgang='bewusst-ja'; state.altWahl=null;
+  go('#abschluss');
+});
+$('skip-entscheidung').addEventListener('click', function(){
+  state.ausgang='offen'; state.altWahl=null;
+  go('#abschluss');
+});
+
+/* ============ Timer ============ */
+var RING_C = 2*Math.PI*98;
+$('ring-lauf').style.strokeDasharray=String(RING_C);
+var tmRest=600, tmSpeed=1, tmLast=0;
+function timerRender(){
+  var s=Math.max(0, Math.ceil(tmRest));
+  var mm=Math.floor(s/60), ss=s%60;
+  $('ring-zeit').textContent=mm+':'+(ss<10?'0':'')+ss;
+  $('ring-lauf').style.strokeDashoffset=String(RING_C*(1-tmRest/600));
+}
+function enterTimer(){
+  tmRest=600; tmSpeed=1; tmLast=performance.now();
+  $('timer-demo').setAttribute('aria-pressed','false');
+  $('timer-lauf-block').hidden=false;
+  $('timer-nochda').hidden=true;
+  timerRender();
+  merkInterval(function(){
+    var jetzt=performance.now();
+    tmRest -= (jetzt-tmLast)/1000*tmSpeed;
+    tmLast=jetzt;
+    if(tmRest<=0){
+      tmRest=0; timerRender();
+      clearTimers();
+      $('timer-lauf-block').hidden=true;
+      $('timer-nochda').hidden=false;
+      try{ $('timer-nochda').focus({ preventScroll:true }); }catch(e){}
+      return;
+    }
+    timerRender();
+  }, 200);
+}
+$('timer-demo').addEventListener('click', function(){
+  tmSpeed=(tmSpeed===1)?60:1;
+  this.setAttribute('aria-pressed', tmSpeed===60?'true':'false');
+});
+$('btn-gelegt').addEventListener('click', function(){
+  state.ausgang='warten-gelegt'; state.altWahl=null;
+  go('#abschluss');
+});
+$('btn-nochmal').addEventListener('click', function(){ go('#entscheidung'); });
+
+/* ============ Abschluss ============ */
+function enterAbschluss(){
+  var imp=IMPULSE[state.impulsId||'eis'];
+  var zeile;
+  if(state.ausgang==='alternative'){
+    zeile='Deine Wahl: '+(state.altWahl||'eine gute Alternative')+'. Du hast hingehört.';
+  } else if(state.ausgang==='warten-gelegt'){
+    zeile='Der Impuls durfte da sein — und ist weitergezogen.';
+  } else if(state.ausgang==='bewusst-ja'){
+    zeile='Und dein bewusstes Ja gehört dazu. Genieß es ganz — ohne Nebengeräusche.';
+  } else {
+    zeile='Mehr braucht es gerade nicht.';
+  }
+  $('ausgang-zeile').textContent=zeile;
+  var kompass=(state.ausgang==='alternative'||state.ausgang==='warten-gelegt');
+  $('kompass-punkt').hidden=!kompass;
+  if(kompass){
+    $('kompass-punkt-text').textContent='+1 Kompass · '+imp.bereiche[0];
+  }
+  $('bereich-zeile').textContent='Zählt für: '+imp.bereiche.join(', ');
+}
+$('btn-fertig').addEventListener('click', function(){
+  resetFlow();
+  go('#start');
+});
+$('btn-krise-zurueck').addEventListener('click', function(){
+  resetFlow();
+  go('#start');
+});
+
+/* ============ Start ============ */
+baueGefuehlKacheln();
+baueBeduerfnisKacheln();
+zeichneZiel();
+route();
+requestAnimationFrame(function(){
+  requestAnimationFrame(function(){
+    document.documentElement.classList.add('bereit');
+  });
+});
+})();
+</script>
+</body>
+</html>

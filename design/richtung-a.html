@@ -106,14 +106,15 @@
 
   .atem-wrap{ text-align:center; padding-top:2px; }
   .atemkreis{
-    width:72px; height:72px; margin:0 auto;
+    width:76px; height:76px; margin:0 auto;
     border-radius:50%;
-    border:2px solid var(--ocker);
-    background:radial-gradient(circle, rgba(192,142,59,.14), rgba(192,142,59,0) 68%);
+    border:7px solid transparent;
+    background:
+      radial-gradient(circle at 50% 34%, #FDF9EF, #F5EFE0 62%, #F0E9D7 100%) content-box,
+      conic-gradient(from 210deg, #A87A2C, #E7C377 38%, #C08E3B 62%, #8F6B2C 82%, #A87A2C) border-box;
     box-shadow:
       0 0 0 7px rgba(192,142,59,.10),
-      0 0 30px rgba(192,142,59,.38),
-      inset 0 0 16px rgba(192,142,59,.22);
+      0 0 32px rgba(192,142,59,.40);
     animation:atmen 6s ease-in-out infinite;
   }
   @keyframes atmen{
@@ -239,7 +240,7 @@
   .r-name{ font-size:17px; font-weight:600; color:var(--tinte); }
   .skala{ display:flex; gap:4px; margin-top:8px; }
   .pill{
-    flex:1; height:32px; border-radius:10px;
+    flex:1; height:38px; border-radius:11px;
     display:flex; align-items:center; justify-content:center;
     font-size:14px; color:var(--nebel);
     border:1px solid #C9C4B8; background:transparent;
@@ -343,7 +344,7 @@
 
           <div class="atem-wrap">
             <div class="atemkreis" aria-hidden="true"></div>
-            <p class="spiegel">Ein Eis. Okay — lass uns kurz hinschauen.</p>
+            <p class="spiegel">Ein Eis. Okay — lass uns 30 Sekunden hinschauen.</p>
             <div class="chips">
               <span class="chip">Gefühl: unruhig</span>
               <span class="chip">Bedürfnis: Energie</span>
@@ -361,7 +362,7 @@
           <section class="optionen" aria-label="Drei gleichwertige Optionen">
             <div class="option">
               <span class="o-ico">
-                <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+                <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
               </span>
               <div>
                 <h3>Alternative wählen</h3>

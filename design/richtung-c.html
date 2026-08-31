@@ -1,517 +1,586 @@
-<!--
-  Jetztgut — Design-Richtung C „Glut"
-  Abend und Glut: dark-first, tiefes Nachtblau / warmes Anthrazit als Grund (kein kaltes Schwarz),
-  Glut-Akzente in Kupfer und Bernstein. Literata (Display) + Atkinson Hyperlegible (Text).
-
-  WCAG-AA-Kontrastnachweis (berechnet nach WCAG 2.1, relative Luminanz):
-    1. Primärtext  #EFE7D9 auf Screen-Grund #1B212B  = 13,17:1  (AAA, weit über AA 4,5:1)
-    2. Nebentext   #B0A695 auf Karte       #232A35  =  6,01:1  (AA erfüllt, ungünstigster Fall;
-       auf Screen-Grund #1B212B: 6,72:1)
-    3. Glut-Akzent #E8A24C auf Screen-Grund #1B212B  =  7,47:1  (AA erfüllt; auf Karte #232A35: 6,67:1)
--->
+<!DOCTYPE html>
+<html lang="de">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Jetztgut — Richtung C „Glut"</title>
+<title>Jetztgut — Design-Richtung C: Glut</title>
+<!--
+  KONTRAST-NACHWEIS (WCAG 2.1, berechnet):
+  1. Text #F0EAE0 auf Nachtgrund #161A22  = 14.57:1  (AA und AAA, Fliesstext)
+  2. Nebentext #A8A296 auf Karte #1F2430  =  6.11:1  (AA, Fliesstext)
+  3. Bernstein #E9B366 auf Nachtgrund #161A22 = 9.22:1 (AA und AAA, Akzent-Text)
+  Zusatz: Glut-Kupfer #D08048 auf Karte #1F2430 = 5.07:1 (AA fuer Text ab 17 px, Icons, Linien)
+-->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   :root{
-    --nacht:      #10141B;  /* Seitengrund */
-    --grund:      #1B212B;  /* Screen-Grund, Nachtblau-Anthrazit */
-    --flaeche:    #232A35;  /* Karten, Eingabefelder */
-    --flaeche-2:  #1F2530;  /* leichte Zwischenebene */
-    --linie:      #39414F;  /* Hairlines, Ränder */
-    --text:       #EFE7D9;  /* Primärtext, warmes Papierweiß */
-    --text-2:     #B0A695;  /* Nebentext, warmes Aschgrau */
-    --glut:       #E8A24C;  /* Bernstein — Akzent, Atemkreis */
-    --kupfer:     #C0703C;  /* Kupfer — Füllungen, Skalen */
-    --kupfer-tief:#8F4F28;  /* Kupfer gedimmt — Flächenfüllung */
-    --font-display: 'Literata', 'Newsreader', Georgia, 'Times New Roman', serif;
-    --font-text: 'Atkinson Hyperlegible', 'Source Sans 3', 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+    --nacht-tief:#101319;   /* Umfeld hinter den Screens */
+    --nacht:#161A22;        /* Grund der App: tiefes Nachtblau, warm abgemischt */
+    --karte:#1F2430;        /* Kartenflaeche */
+    --karte-innen:#242A37;  /* eingelassene Felder */
+    --linie:#333A47;        /* Raender, Trenner */
+    --linie-hell:#3E4655;   /* Chips, aktive Raender */
+    --glut:#D08048;         /* Kupfer: Aktionen, Linienakzente */
+    --bernstein:#E9B366;    /* Glutkern: Hervorhebung, Werte */
+    --text:#F0EAE0;         /* warmes Weiss */
+    --neben:#A8A296;        /* Nebentext */
+    --schrift-display:'Literata', Literata, 'Newsreader', Georgia, 'Times New Roman', serif;
+    --schrift-text:'Atkinson Hyperlegible', 'Source Sans 3', 'IBM Plex Sans', 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
   }
-  *{ box-sizing:border-box; margin:0; padding:0; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{color-scheme:dark;}
   body{
-    background:var(--nacht);
+    background:
+      radial-gradient(1100px 520px at 50% -8%, rgba(208,128,72,.055), transparent 62%),
+      var(--nacht-tief);
     color:var(--text);
-    font-family:var(--font-text);
+    font-family:var(--schrift-text);
     font-size:17px;
-    line-height:1.5;
+    line-height:1.55;
   }
-  button{ font:inherit; color:inherit; background:none; border:none; text-align:left; cursor:pointer; }
 
-  /* ============ Screens-Zeile ============ */
+  /* ============ SCREENS-ZEILE ============ */
   #screens{
     max-width:1330px;
-    padding:16px 14px 8px;
+    margin:0 auto;
+    padding:16px 12px 10px;
     display:flex;
-    gap:32px;
-    justify-content:flex-start;
+    gap:26px;
+    justify-content:center;
+    align-items:flex-start;
   }
-  .device{ width:412px; flex:0 0 auto; }
-  .device-label{
-    font-family:var(--font-text);
+  .phone-col{display:flex; flex-direction:column; align-items:center;}
+  .frame-label{
     font-size:13px;
     letter-spacing:.14em;
     text-transform:uppercase;
-    color:var(--text-2);
-    margin:0 0 8px 14px;
+    color:var(--neben);
+    margin-bottom:9px;
   }
   .phone{
-    width:390px; height:806px;
-    box-sizing:content-box;
-    border:11px solid #262C37;
-    border-radius:46px;
-    background:var(--grund);
+    width:410px;
+    border:10px solid #272C37;
+    border-radius:42px;
+    background:var(--nacht);
+    box-shadow:
+      0 24px 60px rgba(0,0,0,.45),
+      0 0 0 1px rgba(233,179,102,.06),
+      0 2px 30px rgba(208,128,72,.07);
     overflow:hidden;
-    box-shadow:0 18px 50px rgba(0,0,0,.45), inset 0 0 0 1px rgba(239,231,217,.04);
-    position:relative;
-    display:flex; flex-direction:column;
   }
-  .screen{ padding:14px 24px 20px; display:flex; flex-direction:column; height:100%; }
-  .statusrow{
-    display:flex; align-items:center; justify-content:space-between;
-    font-size:13px; color:var(--text-2);
-    min-height:24px;
+  .screen{
+    width:390px;
+    height:808px;
+    background:var(--nacht);
+    display:flex;
+    flex-direction:column;
+    padding:14px 22px 18px;
+    overflow:hidden;
   }
-  .icon{ width:22px; height:22px; stroke:currentColor; stroke-width:1.75;
-         fill:none; stroke-linecap:round; stroke-linejoin:round; flex:0 0 auto; }
-  .icon-sm{ width:18px; height:18px; }
 
-  /* ---------- Screen A: Der Moment ---------- */
-  .close-btn{
-    width:44px; height:44px; margin:-8px -12px 0 0;
-    display:flex; align-items:center; justify-content:center;
-    color:var(--text-2); border-radius:22px;
+  /* ---- gemeinsame Screen-Bausteine ---- */
+  .topzeile{
+    display:flex; justify-content:space-between; align-items:center;
+    min-height:40px;
   }
-  .ringwrap{ display:flex; justify-content:center; padding:20px 0 24px; }
-  .ring{
-    width:112px; height:112px; border-radius:50%;
-    border:2px solid var(--glut);
-    background:radial-gradient(circle at 50% 55%, rgba(232,162,76,.16) 0%, rgba(232,162,76,.05) 55%, transparent 72%);
-    box-shadow:0 0 34px rgba(232,162,76,.28), inset 0 0 22px rgba(232,162,76,.14);
+  .uhr{font-size:15px; color:var(--neben); letter-spacing:.04em;}
+  .x-knopf{
+    width:44px; height:44px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%;
+    color:var(--neben);
+    border:1px solid transparent;
+  }
+  .icon{flex:none;}
+  h2.screen-titel{
+    font-family:var(--schrift-display);
+    font-weight:500;
+    font-size:25px;
+    line-height:1.25;
+    letter-spacing:.005em;
+  }
+  .untertitel{font-size:17px; color:var(--neben); margin-top:2px;}
+
+  /* ---- Atemkreis: glimmender Ring ---- */
+  .atem-zone{display:flex; justify-content:center; padding:6px 0 14px;}
+  .atemkreis{
+    width:76px; height:76px; border-radius:50%;
+    border:2px solid rgba(233,179,102,.9);
+    background:radial-gradient(circle at 50% 58%, rgba(208,128,72,.22), rgba(22,26,34,0) 68%);
+    box-shadow:
+      0 0 22px rgba(208,128,72,.38),
+      0 0 64px rgba(208,128,72,.16),
+      inset 0 0 24px rgba(208,128,72,.28);
     animation:atmen 6s ease-in-out infinite;
   }
   @keyframes atmen{
-    0%,100%{ transform:scale(1);    box-shadow:0 0 22px rgba(232,162,76,.18), inset 0 0 16px rgba(232,162,76,.10); }
-    50%    { transform:scale(1.06); box-shadow:0 0 44px rgba(232,162,76,.34), inset 0 0 26px rgba(232,162,76,.18); }
+    0%,100%{transform:scale(1);
+      box-shadow:0 0 16px rgba(208,128,72,.28), 0 0 46px rgba(208,128,72,.10), inset 0 0 18px rgba(208,128,72,.20);}
+    50%{transform:scale(1.07);
+      box-shadow:0 0 30px rgba(208,128,72,.48), 0 0 80px rgba(208,128,72,.22), inset 0 0 30px rgba(208,128,72,.34);}
   }
   @media (prefers-reduced-motion: reduce){
-    .ring{ animation:none; }
+    .atemkreis{animation:gluehen 6s ease-in-out infinite;}
+    @keyframes gluehen{0%,100%{opacity:.78;}50%{opacity:1;}}
   }
-  .mirror{
-    font-family:var(--font-display);
-    font-size:22px; font-weight:500; line-height:1.4;
+
+  /* ---- Screen A: Der Moment ---- */
+  .spiegel{
+    font-family:var(--schrift-display);
+    font-size:21px;
+    font-weight:400;
+    line-height:1.4;
     text-align:center;
     padding:0 6px;
   }
-  .kompass-line{
-    margin:22px 0 24px;
-    padding:14px 16px;
-    border-left:2px solid var(--kupfer);
-    background:var(--flaeche-2);
-    border-radius:0 12px 12px 0;
-    display:flex; gap:12px; align-items:flex-start;
-    font-size:17px; line-height:1.45;
-    color:var(--text-2);
-  }
-  .kompass-line .icon{ color:var(--glut); margin-top:2px; }
-  .kompass-line strong{ color:var(--text); font-weight:400; display:block; margin-top:4px; }
-  .optionen{ display:flex; flex-direction:column; gap:12px; }
-  .option{
-    display:flex; gap:14px; align-items:flex-start;
-    width:100%; min-height:106px;
-    padding:16px 18px;
-    background:var(--flaeche);
-    border:1px solid var(--linie);
-    border-radius:16px;
-  }
-  .option .icon{ color:var(--glut); margin-top:3px; }
-  .option h3{
-    font-family:var(--font-display);
-    font-size:19px; font-weight:600; line-height:1.3;
-    margin-bottom:5px;
-  }
-  .option p{ font-size:17px; line-height:1.42; color:var(--text-2); }
-  .skip{
-    margin-top:auto;
-    min-height:48px;
-    display:flex; align-items:center; justify-content:center;
-    width:100%;
-    font-size:17px; color:var(--text-2);
+  .kompass-spiegel{
+    margin-top:12px;
+    padding:10px 12px;
+    border-top:1px solid var(--linie);
+    border-bottom:1px solid var(--linie);
     text-align:center;
   }
+  .kompass-etikett{
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    font-size:12.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--glut);
+    margin-bottom:6px;
+  }
+  .kompass-ziel{font-size:17px; color:var(--text);}
+  .kompass-frage{
+    font-family:var(--schrift-display);
+    font-style:italic;
+    font-size:19px;
+    color:var(--bernstein);
+    margin-top:5px;
+  }
+  .optionen{
+    display:flex; flex-direction:column; gap:10px;
+    margin-top:12px;
+    flex:1;
+    min-height:0;
+  }
+  .option{
+    background:var(--karte);
+    border:1px solid var(--linie);
+    border-radius:18px;
+    padding:12px 14px;
+    flex:1 1 0;
+    min-height:0;
+    display:flex; flex-direction:column; gap:7px;
+    justify-content:center;
+  }
+  .option-kopf{display:flex; align-items:center; gap:10px;}
+  .option-kopf .icon{color:var(--glut);}
+  .option-titel{font-size:18px; font-weight:700; letter-spacing:.005em;}
+  .option-text{font-size:17px; color:var(--neben); line-height:1.45;}
+  .vorschlaege{display:flex; flex-direction:column; gap:8px;}
+  .vorschlag{
+    border:1px solid var(--linie-hell);
+    background:var(--karte-innen);
+    border-radius:12px;
+    padding:8px 13px;
+    font-size:17px;
+    color:var(--text);
+  }
+  .ueberspringen{
+    text-align:center;
+    color:var(--neben);
+    font-size:17px;
+    padding:10px 0 0;
+    letter-spacing:.02em;
+  }
 
-  /* ---------- Screen B: Kompass ---------- */
-  .screen h1{
-    font-family:var(--font-display);
-    font-size:27px; font-weight:600; line-height:1.25;
-    margin-top:8px;
+  /* ---- Screen B: Kompass ---- */
+  .bereiche{display:flex; flex-direction:column; margin-top:8px; flex:1;}
+  .bereich{
+    padding:8px 2px 9px;
+    border-bottom:1px solid rgba(51,58,71,.55);
   }
-  .sub{ font-size:15px; color:var(--text-2); margin:4px 0 12px; }
-  .bereiche{ list-style:none; display:flex; flex-direction:column; }
-  .bereich{ padding:8px 0 9px; border-bottom:1px solid rgba(57,65,79,.55); }
-  .bereich:last-child{ border-bottom:none; }
-  .bereich-kopf{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
-  .bereich-kopf span{ font-size:17px; line-height:1.35; }
-  .wert{
-    font-family:var(--font-display);
-    font-size:17px; font-weight:500; color:var(--glut);
-    flex:0 0 auto;
-  }
-  .balken{
-    margin-top:6px; height:3px; border-radius:2px;
-    background:var(--flaeche);
-    overflow:hidden; position:relative;
-  }
-  .balken i{
-    display:block; height:100%;
-    background:linear-gradient(90deg, var(--kupfer-tief), var(--kupfer) 70%, var(--glut));
-    border-radius:2px;
-  }
-  .dran{
+  .bereich:last-child{border-bottom:none;}
+  .bereich-zeile{display:flex; justify-content:space-between; align-items:baseline; gap:10px;}
+  .bereich-name{font-size:17px;}
+  .bereich-wert{font-size:15px; color:var(--bernstein); font-weight:700; letter-spacing:.03em;}
+  .skala{
     margin-top:7px;
-    padding-left:12px;
-    border-left:2px solid var(--kupfer);
+    height:4px; border-radius:2px;
+    background:#2A303C;
+    overflow:hidden;
   }
-  .dran b{
-    display:block;
-    font-weight:400; color:var(--glut);
-    font-size:12px; letter-spacing:.1em; text-transform:uppercase;
-    margin-bottom:1px;
+  .skala-fuellung{
+    height:100%; border-radius:2px;
+    background:linear-gradient(90deg, #A65C2E, var(--glut) 55%, var(--bernstein));
+    box-shadow:0 0 8px rgba(208,128,72,.45);
   }
-  .dran span{ font-size:17px; line-height:1.35; color:var(--text-2); }
+  .arbeit{
+    margin-top:7px;
+    padding:7px 12px 8px;
+    background:var(--karte);
+    border:1px solid var(--linie);
+    border-left:2px solid var(--glut);
+    border-radius:10px;
+  }
+  .arbeit-etikett{
+    font-size:12px; letter-spacing:.13em; text-transform:uppercase;
+    color:var(--glut); margin-bottom:2px;
+  }
+  .arbeit-text{font-size:17px; line-height:1.4;}
 
-  /* ---------- Screen C: Wochenreflexion ---------- */
-  .summary{
-    background:var(--flaeche);
+  /* ---- Screen C: Wochenreflexion ---- */
+  .wochenkarte{
+    margin-top:10px;
+    background:var(--karte);
     border:1px solid var(--linie);
-    border-radius:16px;
-    padding:15px 18px;
-    margin-bottom:12px;
+    border-radius:18px;
+    padding:13px 16px;
   }
-  .summary p.satz{
-    font-family:var(--font-display);
-    font-size:20px; font-weight:500; line-height:1.45;
+  .karten-etikett{
+    font-size:12.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--glut); margin-bottom:6px;
   }
-  .summary p.neben{ font-size:15px; color:var(--text-2); margin-top:9px; padding-top:9px;
-                    border-top:1px solid rgba(57,65,79,.55); }
-  .refblock{
-    background:var(--flaeche-2);
-    border:1px solid rgba(57,65,79,.55);
-    border-radius:16px;
-    padding:13px 16px 14px;
-    margin-bottom:10px;
+  .wochensatz{
+    font-family:var(--schrift-display);
+    font-size:20px;
+    line-height:1.42;
   }
-  .refkopf{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
-  .refkopf h2{ font-family:var(--font-display); font-size:19px; font-weight:600; line-height:1.3; }
-  .dots{ display:flex; gap:8px; margin:10px 0 8px; }
-  .dot{
-    width:18px; height:18px; border-radius:50%;
+  .reflex-block{
+    margin-top:10px;
+    background:var(--karte);
     border:1px solid var(--linie);
-    background:transparent;
+    border-radius:18px;
+    padding:12px 14px;
   }
-  .dot.voll{ background:var(--kupfer-tief); border-color:transparent; }
-  .dot.aktiv{
-    background:var(--glut); border-color:var(--glut);
-    box-shadow:0 0 10px rgba(232,162,76,.45);
+  .reflex-kopf{display:flex; justify-content:space-between; align-items:baseline;}
+  .reflex-name{font-size:17px; font-weight:700;}
+  .reflex-wert{font-size:15px; color:var(--bernstein); font-weight:700;}
+  .punkte{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:8px; padding:0 1px;
+  }
+  .punkt{
+    width:9px; height:9px; border-radius:50%;
+    background:#39404E;
+  }
+  .punkt.voll{background:#8A6238;}
+  .punkt.aktiv{
+    width:14px; height:14px;
+    background:var(--bernstein);
+    box-shadow:0 0 10px rgba(233,179,102,.55);
+  }
+  .frei-text{
+    margin-top:9px;
+    background:var(--karte-innen);
+    border:1px solid var(--linie-hell);
+    border-radius:12px;
+    padding:8px 12px;
+    min-height:44px;
+    font-size:17px;
+    line-height:1.45;
+  }
+  .frei-text.leer{color:var(--neben); font-style:italic;}
+  .vorbefuellt{
+    margin-top:7px;
+    font-size:15px;
+    color:var(--neben);
+    line-height:1.4;
   }
   .trend{
-    display:flex; align-items:center; gap:10px;
-    font-size:15px; color:var(--text-2);
-    margin-bottom:10px;
-  }
-  .trend svg{ flex:0 0 auto; }
-  .feld{
-    background:var(--flaeche);
+    margin-top:10px;
+    background:var(--karte);
     border:1px solid var(--linie);
-    border-radius:12px;
-    padding:11px 14px;
-    font-size:17px; line-height:1.42;
-    min-height:48px;
+    border-radius:18px;
+    padding:12px 14px 10px;
   }
-  .feld.leer{ color:var(--text-2); font-style:italic; }
-  .weiter{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    width:100%; min-height:56px;
-    padding:0 18px;
-    background:var(--flaeche-2);
-    border:1px solid rgba(57,65,79,.55);
-    border-radius:16px;
-    font-size:17px;
-  }
-  .weiter .neben{ font-size:15px; color:var(--text-2); }
-  .fuss{ margin-top:auto; text-align:center; font-size:14px; color:var(--text-2); padding-top:12px; }
+  .trend-text{font-size:15px; color:var(--neben); line-height:1.45; margin-top:4px;}
 
-  /* ============ Spezifikation unterhalb ============ */
+  /* ============ SPEZIFIKATION UNTERHALB ============ */
   #spez{
-    max-width:1330px;
-    padding:44px 24px 60px;
+    max-width:1282px;
+    margin:0 auto;
+    padding:56px 24px 80px;
   }
   #spez h2{
-    font-family:var(--font-display);
-    font-size:24px; font-weight:600;
-    margin-bottom:16px;
+    font-family:var(--schrift-display);
+    font-weight:500;
+    font-size:30px;
+    margin-bottom:6px;
   }
-  #spez section{ margin-bottom:44px; }
-  .swatches{ display:flex; flex-wrap:wrap; gap:14px; }
-  .swatch{ width:150px; }
-  .swatch .farbe{
-    height:74px; border-radius:12px;
-    border:1px solid rgba(239,231,217,.14);
-    margin-bottom:8px;
+  #spez .anriss{color:var(--neben); max-width:70ch; margin-bottom:36px;}
+  #spez h3{
+    font-size:13px; letter-spacing:.15em; text-transform:uppercase;
+    color:var(--glut);
+    margin:36px 0 14px;
   }
-  .swatch code{ font-size:14px; color:var(--text); font-family:ui-monospace, 'IBM Plex Mono', monospace; }
-  .swatch p{ font-size:14px; color:var(--text-2); line-height:1.4; margin-top:2px; }
-  .spezimen{ display:flex; flex-direction:column; gap:18px; max-width:760px; }
-  .spezimen .display{
-    font-family:var(--font-display);
-    font-size:30px; font-weight:500; line-height:1.35;
+  .swatches{display:flex; flex-wrap:wrap; gap:14px;}
+  .swatch{
+    width:150px;
+    background:var(--karte);
+    border:1px solid var(--linie);
+    border-radius:12px;
+    overflow:hidden;
   }
-  .spezimen .meta{ font-size:14px; color:var(--text-2); }
-  .spezimen .body{ font-size:17px; line-height:1.55; max-width:620px; }
-  .begruendung{ max-width:760px; font-size:17px; line-height:1.6; }
-  .begruendung p{ margin-bottom:12px; }
+  .swatch .farbe{height:64px;}
+  .swatch .info{padding:10px 12px 12px;}
+  .swatch .hex{font-size:14px; letter-spacing:.05em; color:var(--text);}
+  .swatch .rolle{font-size:14px; color:var(--neben); line-height:1.35; margin-top:2px;}
+  .spezimen{
+    display:flex; flex-wrap:wrap; gap:20px;
+  }
+  .spezimen-karte{
+    flex:1 1 380px;
+    background:var(--karte);
+    border:1px solid var(--linie);
+    border-radius:14px;
+    padding:22px 24px;
+  }
+  .spezimen-karte .rolle{font-size:13px; letter-spacing:.13em; text-transform:uppercase; color:var(--neben); margin-bottom:10px;}
+  .probe-display{
+    font-family:var(--schrift-display);
+    font-size:29px; font-weight:500; line-height:1.3;
+  }
+  .probe-display em{color:var(--bernstein); font-style:italic; font-weight:400;}
+  .probe-text{font-size:17px; line-height:1.6; margin-top:4px;}
+  .stack{font-size:14px; color:var(--neben); margin-top:12px; line-height:1.5;}
+  .begruendung{max-width:76ch;}
+  .begruendung p{margin-bottom:12px;}
   .hinweis{
-    max-width:760px;
+    max-width:76ch;
+    background:var(--karte);
+    border:1px solid var(--linie);
+    border-left:2px solid var(--glut);
+    border-radius:12px;
     padding:16px 20px;
-    border-left:2px solid var(--kupfer);
-    background:var(--flaeche-2);
-    border-radius:0 12px 12px 0;
-    font-size:16px; line-height:1.55; color:var(--text-2);
+    color:var(--text);
   }
-  .hinweis b{ color:var(--text); font-weight:700; }
+  .hinweis .etikett{font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--glut); margin-bottom:6px;}
 </style>
+</head>
+<body>
 
-<!-- ================================================================ -->
-<!-- 1. DIE DREI KEY-SCREENS -->
-<!-- ================================================================ -->
-<div id="screens">
+<!-- ============================== 1. DIE DREI KEY-SCREENS ============================== -->
+<section id="screens">
 
-  <!-- (a) Der Moment -->
-  <div class="device">
-    <p class="device-label">Der Moment</p>
+  <!-- (a) DER MOMENT -->
+  <div class="phone-col">
+    <div class="frame-label">Der Moment</div>
     <div class="phone">
       <div class="screen">
-        <div class="statusrow">
-          <span>21:04</span>
-          <button class="close-btn" aria-label="Moment beenden">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
-          </button>
+        <div class="topzeile">
+          <span class="uhr">21:37</span>
+          <span class="x-knopf" role="button" aria-label="Schließen">
+            <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </span>
         </div>
 
-        <div class="ringwrap"><div class="ring" aria-hidden="true"></div></div>
+        <div class="atem-zone"><div class="atemkreis" aria-hidden="true"></div></div>
 
-        <p class="mirror">Ein Eis. Okay — lass uns 30&nbsp;Sekunden hinschauen.</p>
+        <p class="spiegel">Ein Eis. Okay — lass uns 30&nbsp;Sekunden hinschauen.</p>
 
-        <div class="kompass-line">
-          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.1 5-4.9 2 2.1-5z"/></svg>
-          <div>
-            Dein Kompass: 10&nbsp;% Körperfett bis Dezember.
-            <strong>Was ist jetzt gut für dich?</strong>
+        <div class="kompass-spiegel">
+          <div class="kompass-etikett">
+            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88"/></svg>
+            Dein Kompass
           </div>
+          <p class="kompass-ziel">10&nbsp;% Körperfett bis Dezember.</p>
+          <p class="kompass-frage">Was ist jetzt gut für dich?</p>
         </div>
 
         <div class="optionen">
-          <button class="option">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M4 18v-6a3 3 0 0 1 3-3h11"/><path d="m14 5 4 4-4 4"/></svg>
-            <div>
-              <h3>Alternative wählen</h3>
-              <p>Ein Apfel und ein Glas Wasser&ensp;·&ensp;5&nbsp;Minuten vor die Tür</p>
+          <div class="option" role="button">
+            <div class="option-kopf">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+              <span class="option-titel">Alternative wählen</span>
             </div>
-          </button>
-          <button class="option">
-            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-            <div>
-              <h3>10 Minuten warten</h3>
-              <p>Der Timer läuft leise mit. Danach fragen wir kurz: Noch da?</p>
+            <div class="vorschlaege">
+              <div class="vorschlag">Ein Apfel und ein Glas Wasser</div>
+              <div class="vorschlag">5 Minuten vor die Tür</div>
             </div>
-          </button>
-          <button class="option">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M12 21c4-2.5 6-5.5 6-8.5 0-2.5-1.5-4-3-5.5C13.5 5.5 12.7 4 12.5 3c-.4 1.6-1.2 2.8-2.5 4C8.4 8.6 6 10 6 12.5c0 3 2 6 6 8.5Z"/><path d="M12 21c1.6-1.2 2.5-2.6 2.5-4 0-1.3-.9-2.2-1.7-3.1-.4-.5-.7-.9-.8-1.4-.3.8-.8 1.4-1.4 2-.7.8-1.6 1.5-1.6 2.7 0 1.3.9 2.6 3 3.8Z"/></svg>
-            <div>
-              <h3>Bewusst ja</h3>
-              <p>Dann genieß es ganz. Ohne Nebengeräusche.</p>
+          </div>
+
+          <div class="option" role="button">
+            <div class="option-kopf">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span class="option-titel">10 Minuten warten</span>
             </div>
-          </button>
+            <p class="option-text">Der Impuls darf da sein. Danach schauen wir noch mal.</p>
+          </div>
+
+          <div class="option" role="button">
+            <div class="option-kopf">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span class="option-titel">Bewusst ja</span>
+            </div>
+            <p class="option-text">Dann genieß es ganz. Ohne Nebengeräusche.</p>
+          </div>
         </div>
 
-        <button class="skip">Überspringen</button>
+        <p class="ueberspringen" role="button">Überspringen</p>
       </div>
     </div>
   </div>
 
-  <!-- (b) Kompass -->
-  <div class="device">
-    <p class="device-label">Kompass</p>
+  <!-- (b) KOMPASS -->
+  <div class="phone-col">
+    <div class="frame-label">Kompass</div>
     <div class="phone">
       <div class="screen">
-        <div class="statusrow"><span>18:36</span></div>
-        <h1>Dein Kompass</h1>
-        <p class="sub">Zehn Bereiche. Ist-Zustand dieser Woche, 0–10.</p>
+        <h2 class="screen-titel">Dein Kompass</h2>
+        <p class="untertitel">Zehn Bereiche, Stand: diese Woche.</p>
 
-        <ul class="bereiche">
-          <li class="bereich">
-            <div class="bereich-kopf"><span>Körperliche Gesundheit</span><span class="wert">5</span></div>
-            <div class="balken"><i style="width:50%"></i></div>
-            <p class="dran"><b>Woran ich gerade arbeite:</b> Abends nach 20&nbsp;Uhr nichts Süßes mehr.</p>
-          </li>
-          <li class="bereich">
-            <div class="bereich-kopf"><span>Psychische Gesundheit</span><span class="wert">6</span></div>
-            <div class="balken"><i style="width:60%"></i></div>
-          </li>
-          <li class="bereich">
-            <div class="bereich-kopf"><span>Spiritualität</span><span class="wert">4</span></div>
-            <div class="balken"><i style="width:40%"></i></div>
-          </li>
-          <li class="bereich">
-            <div class="bereich-kopf"><span>Beziehung &amp; Partnerschaft</span><span class="wert">7</span></div>
-            <div class="balken"><i style="width:70%"></i></div>
-          </li>
-          <li class="bereich">
-            <div class="bereich-kopf"><span>Freundschaft</span><span class="wert">6</span></div>
-            <div class="balken"><i style="width:60%"></i></div>
-          </li>
-          <li class="bereich">
-            <div class="bereich-kopf"><span>Familie &amp; Verwandtschaft</span><span class="wert">8</span></div>
-            <div class="balken"><i style="width:80%"></i></div>
-          </li>
-          <li class="bereich">
-            <div class="bereich-kopf"><span>Verwirklichung</span><span class="wert">7</span></div>
-            <div class="balken"><i style="width:70%"></i></div>
-            <p class="dran"><b>Woran ich gerade arbeite:</b> Ein Abend pro Woche für das Buchprojekt.</p>
-          </li>
-          <li class="bereich">
-            <div class="bereich-kopf"><span>Hilfe für andere</span><span class="wert">5</span></div>
-            <div class="balken"><i style="width:50%"></i></div>
-          </li>
-          <li class="bereich">
-            <div class="bereich-kopf"><span>Finanzen</span><span class="wert">6</span></div>
-            <div class="balken"><i style="width:60%"></i></div>
-          </li>
-          <li class="bereich">
-            <div class="bereich-kopf"><span>Erholung, Genuss &amp; Freizeit</span><span class="wert">4</span></div>
-            <div class="balken"><i style="width:40%"></i></div>
-          </li>
-        </ul>
+        <div class="bereiche">
+          <div class="bereich">
+            <div class="bereich-zeile"><span class="bereich-name">Körperliche Gesundheit</span><span class="bereich-wert">5</span></div>
+            <div class="skala"><div class="skala-fuellung" style="width:50%"></div></div>
+            <div class="arbeit">
+              <div class="arbeit-etikett">Woran ich gerade arbeite</div>
+              <p class="arbeit-text">Abends nach 20 Uhr nichts Süßes mehr.</p>
+            </div>
+          </div>
+          <div class="bereich">
+            <div class="bereich-zeile"><span class="bereich-name">Psychische Gesundheit</span><span class="bereich-wert">6</span></div>
+            <div class="skala"><div class="skala-fuellung" style="width:60%"></div></div>
+          </div>
+          <div class="bereich">
+            <div class="bereich-zeile"><span class="bereich-name">Spiritualität</span><span class="bereich-wert">4</span></div>
+            <div class="skala"><div class="skala-fuellung" style="width:40%"></div></div>
+          </div>
+          <div class="bereich">
+            <div class="bereich-zeile"><span class="bereich-name">Beziehung &amp; Partnerschaft</span><span class="bereich-wert">3</span></div>
+            <div class="skala"><div class="skala-fuellung" style="width:30%"></div></div>
+            <div class="arbeit">
+              <div class="arbeit-etikett">Woran ich gerade arbeite</div>
+              <p class="arbeit-text">Beim Dating ehrlich sagen, was ich suche.</p>
+            </div>
+          </div>
+          <div class="bereich">
+            <div class="bereich-zeile"><span class="bereich-name">Freundschaft</span><span class="bereich-wert">7</span></div>
+            <div class="skala"><div class="skala-fuellung" style="width:70%"></div></div>
+          </div>
+          <div class="bereich">
+            <div class="bereich-zeile"><span class="bereich-name">Familie &amp; Verwandtschaft</span><span class="bereich-wert">6</span></div>
+            <div class="skala"><div class="skala-fuellung" style="width:60%"></div></div>
+          </div>
+          <div class="bereich">
+            <div class="bereich-zeile"><span class="bereich-name">Verwirklichung</span><span class="bereich-wert">8</span></div>
+            <div class="skala"><div class="skala-fuellung" style="width:80%"></div></div>
+          </div>
+          <div class="bereich">
+            <div class="bereich-zeile"><span class="bereich-name">Hilfe für andere</span><span class="bereich-wert">5</span></div>
+            <div class="skala"><div class="skala-fuellung" style="width:50%"></div></div>
+          </div>
+          <div class="bereich">
+            <div class="bereich-zeile"><span class="bereich-name">Finanzen</span><span class="bereich-wert">7</span></div>
+            <div class="skala"><div class="skala-fuellung" style="width:70%"></div></div>
+          </div>
+          <div class="bereich">
+            <div class="bereich-zeile"><span class="bereich-name">Erholung, Genuss &amp; Freizeit</span><span class="bereich-wert">4</span></div>
+            <div class="skala"><div class="skala-fuellung" style="width:40%"></div></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- (c) Wochenreflexion -->
-  <div class="device">
-    <p class="device-label">Wochenreflexion</p>
+  <!-- (c) WOCHENREFLEXION -->
+  <div class="phone-col">
+    <div class="frame-label">Wochenreflexion</div>
     <div class="phone">
       <div class="screen">
-        <div class="statusrow"><span>Sonntag, 30. August</span><span>19:20</span></div>
-        <h1>Wochenreflexion</h1>
-        <p class="sub">Dein Rückblick, in unter fünf Minuten.</p>
+        <h2 class="screen-titel">Wochenreflexion</h2>
+        <p class="untertitel">Sonntag, 30. August</p>
 
-        <div class="summary">
-          <p class="satz">11 Momente, 7 davon in deine Richtung, 3 bewusste Ja.</p>
-          <p class="neben">Vierte Woche in Folge reflektiert.</p>
+        <div class="wochenkarte">
+          <div class="karten-etikett">Deine Woche</div>
+          <p class="wochensatz">11 Momente, 7 davon in deine Richtung, 3 bewusste Ja.</p>
         </div>
 
-        <div class="refblock">
-          <div class="refkopf"><h2>Körperliche Gesundheit</h2><span class="wert">6</span></div>
-          <div class="dots" aria-label="Einschätzung 6 von 10">
-            <span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span>
-            <span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span>
-            <span class="dot aktiv"></span><span class="dot"></span><span class="dot"></span>
-            <span class="dot"></span><span class="dot"></span>
+        <div class="reflex-block">
+          <div class="reflex-kopf"><span class="reflex-name">Körperliche Gesundheit</span><span class="reflex-wert">6</span></div>
+          <div class="punkte" aria-hidden="true">
+            <span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt aktiv"></span><span class="punkt"></span><span class="punkt"></span><span class="punkt"></span><span class="punkt"></span>
           </div>
-          <div class="trend">
-            <svg width="64" height="18" viewBox="0 0 64 18" aria-hidden="true">
-              <polyline points="2,13 18,14 34,10 50,9 60,6" fill="none" stroke="#C0703C" stroke-width="1.75" stroke-linecap="round"/>
-              <circle cx="60" cy="6" r="2.4" fill="#E8A24C"/>
-            </svg>
-            <span>Zeigt seit drei Wochen sanft nach oben.</span>
-          </div>
-          <p class="feld">Dreimal draußen gewesen. Der Abendspaziergang trägt mehr, als ich dachte.</p>
+          <p class="vorbefuellt">Aus deinen Momenten: 5 rund um Süßes, 4 davon in deine Richtung.</p>
+          <div class="frei-text">Drei Abende ohne Süßes. Der Sonntag war zäh, und das ist okay.</div>
         </div>
 
-        <div class="refblock">
-          <div class="refkopf"><h2>Psychische Gesundheit</h2><span class="wert">7</span></div>
-          <div class="dots" aria-label="Einschätzung 7 von 10">
-            <span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span>
-            <span class="dot voll"></span><span class="dot voll"></span><span class="dot voll"></span>
-            <span class="dot voll"></span><span class="dot aktiv"></span><span class="dot"></span>
-            <span class="dot"></span><span class="dot"></span>
+        <div class="reflex-block">
+          <div class="reflex-kopf"><span class="reflex-name">Psychische Gesundheit</span><span class="reflex-wert">7</span></div>
+          <div class="punkte" aria-hidden="true">
+            <span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt aktiv"></span><span class="punkt"></span><span class="punkt"></span><span class="punkt"></span>
           </div>
-          <div class="trend">
-            <svg width="64" height="18" viewBox="0 0 64 18" aria-hidden="true">
-              <polyline points="2,9 18,8 34,10 50,8 60,8" fill="none" stroke="#C0703C" stroke-width="1.75" stroke-linecap="round"/>
-              <circle cx="60" cy="8" r="2.4" fill="#E8A24C"/>
-            </svg>
-            <span>Hält sich ruhig auf einer Höhe.</span>
-          </div>
-          <p class="feld leer">Deine Gedanken zu dieser Woche …</p>
+          <div class="frei-text leer">Was war diese Woche da?</div>
         </div>
 
-        <button class="weiter">
-          <span>Verwirklichung</span>
-          <span class="neben">als Nächstes</span>
-          <svg class="icon icon-sm" viewBox="0 0 24 24" style="color:#B0A695"><path d="m9 6 6 6-6 6"/></svg>
-        </button>
+        <div class="reflex-block">
+          <div class="reflex-kopf"><span class="reflex-name">Verwirklichung</span><span class="reflex-wert">8</span></div>
+          <div class="punkte" aria-hidden="true">
+            <span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt voll"></span><span class="punkt aktiv"></span><span class="punkt"></span><span class="punkt"></span>
+          </div>
+        </div>
 
-        <p class="fuss">Du bestimmst, wie viele Bereiche du heute anschaust.</p>
+        <div class="trend">
+          <div class="karten-etikett">Körperliche Gesundheit · 4 Wochen</div>
+          <svg width="100%" height="34" viewBox="0 0 330 40" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M8,31 C60,28 95,30 140,24 S250,15 322,10" fill="none" stroke="#D08048" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="8" cy="31" r="3" fill="#8A6238"/>
+            <circle cx="112" cy="27" r="3" fill="#8A6238"/>
+            <circle cx="217" cy="18" r="3" fill="#8A6238"/>
+            <circle cx="322" cy="10" r="3.5" fill="#E9B366"/>
+          </svg>
+          <p class="trend-text">Die Linie steigt sanft — das fällt zusammen mit ruhigeren Abenden.</p>
+        </div>
       </div>
     </div>
   </div>
 
-</div>
+</section>
 
-<!-- ================================================================ -->
-<!-- 2. PALETTE, TYPOGRAFIE, BEGRÜNDUNG -->
-<!-- ================================================================ -->
-<div id="spez">
+<!-- ============================== 2. PALETTE, SCHRIFT, BEGRUENDUNG ============================== -->
+<section id="spez">
+  <h2>Richtung C — Glut</h2>
+  <p class="anriss">Abend und Glut: dark-first als bewusster, ruhiger Gegenpol mit warmem Kern. Der dunkle Modus ist hier der Hauptmodus — die meisten Momente passieren abends.</p>
 
-  <section>
-    <h2>Farbpalette</h2>
-    <div class="swatches">
-      <div class="swatch"><div class="farbe" style="background:#10141B"></div><code>#10141B</code><p>Nacht — Seitengrund</p></div>
-      <div class="swatch"><div class="farbe" style="background:#1B212B"></div><code>#1B212B</code><p>Nachtblau-Anthrazit — Screen-Grund</p></div>
-      <div class="swatch"><div class="farbe" style="background:#232A35"></div><code>#232A35</code><p>Warme Fläche — Karten, Felder</p></div>
-      <div class="swatch"><div class="farbe" style="background:#39414F"></div><code>#39414F</code><p>Hairline — Ränder, Trenner</p></div>
-      <div class="swatch"><div class="farbe" style="background:#EFE7D9"></div><code>#EFE7D9</code><p>Papierweiß warm — Primärtext</p></div>
-      <div class="swatch"><div class="farbe" style="background:#B0A695"></div><code>#B0A695</code><p>Aschgrau warm — Nebentext</p></div>
-      <div class="swatch"><div class="farbe" style="background:#E8A24C"></div><code>#E8A24C</code><p>Bernstein — Glut-Akzent, Atemkreis</p></div>
-      <div class="swatch"><div class="farbe" style="background:#C0703C"></div><code>#C0703C</code><p>Kupfer — Skalen, Linienakzente</p></div>
+  <h3>Farbpalette</h3>
+  <div class="swatches">
+    <div class="swatch"><div class="farbe" style="background:#101319"></div><div class="info"><div class="hex">#101319</div><div class="rolle">Nacht tief — Umfeld, Verläufe</div></div></div>
+    <div class="swatch"><div class="farbe" style="background:#161A22"></div><div class="info"><div class="hex">#161A22</div><div class="rolle">Nachtgrund — Screen-Fläche, warmes Nachtblau</div></div></div>
+    <div class="swatch"><div class="farbe" style="background:#1F2430"></div><div class="info"><div class="hex">#1F2430</div><div class="rolle">Karte — Flächen, Optionen</div></div></div>
+    <div class="swatch"><div class="farbe" style="background:#333A47"></div><div class="info"><div class="hex">#333A47</div><div class="rolle">Linie — Ränder, Trenner</div></div></div>
+    <div class="swatch"><div class="farbe" style="background:#D08048"></div><div class="info"><div class="hex">#D08048</div><div class="rolle">Glut-Kupfer — Akzent, Icons, Etiketten</div></div></div>
+    <div class="swatch"><div class="farbe" style="background:#E9B366"></div><div class="info"><div class="hex">#E9B366</div><div class="rolle">Bernstein — Glutkern, Werte, Ring</div></div></div>
+    <div class="swatch"><div class="farbe" style="background:#F0EAE0"></div><div class="info"><div class="hex">#F0EAE0</div><div class="rolle">Text — warmes Weiß</div></div></div>
+    <div class="swatch"><div class="farbe" style="background:#A8A296"></div><div class="info"><div class="hex">#A8A296</div><div class="rolle">Nebentext — ruhige Zweitstimme</div></div></div>
+  </div>
+
+  <h3>Schriftpaar</h3>
+  <div class="spezimen">
+    <div class="spezimen-karte">
+      <div class="rolle">Display — Literata (warme Serife)</div>
+      <p class="probe-display">Innegehalten. <em>Das war der eigentliche Erfolg.</em></p>
+      <p class="stack">Stack: 'Literata', 'Newsreader', Georgia, 'Times New Roman', serif — Gewichte 400, 500, 600, Kursive für die Kompass-Frage.</p>
     </div>
-  </section>
-
-  <section>
-    <h2>Schriftpaar</h2>
-    <div class="spezimen">
-      <div>
-        <p class="display">Innegehalten. Das war der eigentliche Erfolg.</p>
-        <p class="meta">Literata Medium, 22–30&nbsp;px — Display-Serife für die wenigen großen Sätze</p>
-      </div>
-      <div>
-        <p class="body">Der Impuls ist nicht der Feind — er ist Information. Jetztgut hilft dir, kurz innezuhalten, das Bedürfnis dahinter zu verstehen und dann bewusst zu entscheiden. Auch ein bewusstes Ja zählt ganz.</p>
-        <p class="meta">Atkinson Hyperlegible Regular, 17&nbsp;px, Zeilenhöhe 1,5 — Fließtext und Bedienung</p>
-      </div>
+    <div class="spezimen-karte">
+      <div class="rolle">Text — Atkinson Hyperlegible</div>
+      <p class="probe-text">Der Impuls ist nicht der Feind — er ist Information. Jetztgut spiegelt, was da ist, und stellt eine Frage: Was ist jetzt gut für dich? Fließtext ab 17 px, großzügige Zeilenhöhe, auch bei wenig Licht mühelos lesbar.</p>
+      <p class="stack">Stack: 'Atkinson Hyperlegible', 'Source Sans 3', 'IBM Plex Sans', 'Instrument Sans', 'Segoe UI', system-ui, sans-serif — Gewichte 400 und 700.</p>
     </div>
-  </section>
+  </div>
 
-  <section>
-    <h2>Begründung der Richtung</h2>
-    <div class="begruendung">
-      <p>Glut denkt die App vom Abend her — der Tageszeit, in der die meisten Impulse rufen: ein dunkler, ruhiger Raum, in dem ein einziger warmer Lichtpunkt genügt und nichts um Aufmerksamkeit konkurriert.</p>
-      <p>Das tiefe Nachtblau ist bewusst kein Schwarz, sondern warm grundiert; Kupfer und Bernstein liegen darauf wie Glut im Ofen — sparsam gesetzt, damit der Atemkreis das einzige Leuchten bleibt und die drei Entscheidungen gleichwertig nebeneinander stehen.</p>
-      <p>Literata gibt den wenigen großen Sätzen Gewicht und Wärme, Atkinson Hyperlegible hält alles darunter auch mit müden Augen mühelos lesbar — genau dann, wenn die App am meisten gebraucht wird.</p>
-    </div>
-  </section>
+  <h3>Begründung der Richtung</h3>
+  <div class="begruendung">
+    <p>Glut denkt die App vom Abend her: Die meisten Impulse kommen nach 16 Uhr, und ein dunkler, warm temperierter Grund nimmt dem Moment die Grelle, statt sie zu verstärken.</p>
+    <p>Das tiefe Nachtblau bleibt bewusst warm abgemischt, und Kupfer und Bernstein glimmen darauf wie ein Feuer, das heruntergebrannt ist — Ruhe mit einem lebendigen Kern, kein kaltes Schwarz.</p>
+    <p>Literata gibt den wenigen großen Sätzen Gewicht und Wärme, Atkinson Hyperlegible hält alles Übrige auch bei wenig Licht mühelos lesbar — der Atemkreis wird zum glimmenden Ring in der Dunkelheit.</p>
+  </div>
 
-  <section>
-    <h2>Dark-first und die helle Variante</h2>
-    <p class="hinweis">
-      <b>Glut ist dark-first:</b> Der warme Dunkelmodus ist der Hauptmodus und oben abgebildet.
-      Die helle Variante wird aus denselben Tokens gespiegelt — warmes Papier <b>#F2EBDF</b> als Grund,
-      Tinte <b>#262B34</b> als Text, Kupfer <b>#A85F30</b> bleibt einziger Akzent (auf hellem Grund
-      nachgedunkelt, damit AA hält). Aus der Glut am Abend wird Morgenlicht; Aufbau, Abstände und
-      Gleichwertigkeit der Optionen bleiben identisch.
-    </p>
-  </section>
+  <h3>Heller Modus (Skizze)</h3>
+  <div class="hinweis">
+    <div class="etikett">Dark-first — die helle Variante in Kürze</div>
+    <p>Der warme Dark Mode ist der Hauptmodus dieser Richtung. Die helle Variante kehrt die Werte um: warmes Papierweiß (#F2EDE3) als Grund, das Nachtblau (#161A22) wird Textfarbe, Karten in #FBF8F2 mit Linien in #D8D2C6. Kupfer bleibt der einzige Akzent, wird für AA auf hellem Grund aber abgedunkelt (#A85F28); der Atemkreis glimmt dann nicht, sondern zeichnet sich als ruhige Kupferlinie auf Papier. Gedacht für den Morgen — der Abend bleibt das Zuhause dieser Richtung.</p>
+  </div>
+</section>
 
-</div>
+</body>
+</html>
