@@ -5,12 +5,14 @@ Impulses kurz innezuhalten, das Bedürfnis dahinter zu verstehen und dann bewuss
 entscheiden. Leitsatz: *Quit short dopamine, invest in serotonin* — „Weniger Kick, mehr Kompass.“
 
 Dieses Repository enthält die **Phase-1-Lieferung** (Konzept, Design-Richtungen,
-Mini-Prototyp). Die eigentliche App wird nach Freigabe in Phase 2 gebaut.
+Mini-Prototyp) und den **Phase-2-Prototyp**: die lauffähige App in der
+freigegebenen Richtung A „Morgenlicht“.
 
 ## Inhalt
 
 | Pfad | Was es ist |
 |---|---|
+| `app/` | **Die App (Phase 2)** — React + TypeScript + Vite, local-first (IndexedDB), PWA. Start: `cd app && npm install && npm run dev`. Demo-Daten: `/?demo=1`. Details in `app/README.md` |
 | `Konzept_Jetztgut.pdf` | Das vollständige Konzept: Vision, Personas, psychologisches Fundament, Bereiche-Modell, Kernflows, Scoring, Dialog-Design, Wireframes, Designsystem, Architektur, Datenschutz, Roadmap, Annahmen — plus Anhang A mit allen Optionskatalogen |
 | `design/richtung-a.html` | Design-Richtung **A „Morgenlicht“** — Tannengrün, warmes Graphit-Papier, Ockerlicht (Bricolage Grotesque + Source Sans 3) |
 | `design/richtung-b.html` | Design-Richtung **B „Werkbank“** — Graphit, Cognac-Leder, Kupfer (Instrument Sans + IBM Plex Sans) |
@@ -46,11 +48,14 @@ und C (warmer Dark Mode als Maßstab). Details in Kapitel 9 des Konzepts.
 - Der gesamte Flow bleibt unter 90 Sekunden; „Bewusst ja“ erhält dasselbe warme
   Feedback wie jede andere Entscheidung.
 
-## Nächster Schritt
+## Stand
 
-Feedback zu Konzept und Design-Richtung geben, dann Phase 2 freigeben — zum Beispiel:
-**„Phase 2 starten, Richtung A.“** Offene Fragen und Standard-Annahmen stehen in
-Kapitel 13 des Konzepts.
+Phase 1 abgenommen, **Richtung A freigegeben**, Phase 2 geliefert: Onboarding/Kompass,
+Moment-Flow (Kacheln + Text + Sprache, regelbasierte Interpretation, Krisen-Check),
+Scoring Variante A, Wochenreflexion, Dashboard mit Trends, Einsichten, Einstellungen
+mit Export und vollständigem Löschen — Design-Tokens als einzige Farbquelle.
+**Phase 3 (später):** KI-Dialog über die Claude API hinter einem Proxy, Whisper-Option,
+Sync, Notifications. Offene Fragen: Konzept, Kapitel 13.
 
 *Hinweis: Jetztgut ist ein Selbsthilfe-Werkzeug und ersetzt keine Therapie.
 In Krisen: Telefonseelsorge 0800 111 0 111 oder 116 123, bei akuter Gefahr 112.*

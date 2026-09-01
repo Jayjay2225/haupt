@@ -1,0 +1,114 @@
+/* ============================================================
+   Jetztgut — Design-Tokens, Richtung A „Morgenlicht“
+   Die EINZIGE Quelle für Farben, Schrift, Abstände und Radien.
+   (Konzept Kapitel 9; Dark Mode warm, kein kaltes Schwarz.)
+   ============================================================ */
+
+:root {
+  /* Farben — Light */
+  --farbe-grund: #E9E6DF;
+  --farbe-karte: #F3F1EA;
+  --farbe-linie: #D9D4C8;
+  --farbe-tinte: #2B2A25;
+  --farbe-tinte-soft: #45433C;
+  --farbe-nebel: #5E5B52;
+  --farbe-tanne: #22453A;
+  --farbe-tanne-flaeche: #22453A;
+  --farbe-tanne-flaeche-aktiv: #18332B;
+  --farbe-auf-tanne: #F3F1EA;
+  --farbe-auf-tanne-soft: #C9D4CC;
+  --farbe-tanne-tint: rgba(34, 69, 58, 0.08);
+  --farbe-ocker: #C08E3B;
+  --farbe-ocker-text: #7A5717;
+  --farbe-eingabe: #E7E4DB;
+  --farbe-eingabe-rand: #D5D0C4;
+  --farbe-schleier: rgba(43, 42, 37, 0.42);
+  --ocker-glow-a: rgba(192, 142, 59, 0.14);
+  --ocker-glow-b: rgba(192, 142, 59, 0.10);
+  --ocker-glow-c: rgba(192, 142, 59, 0.38);
+
+  /* Typografie */
+  --schrift-display: 'Bricolage Grotesque', 'Source Sans 3', system-ui, sans-serif;
+  --schrift-text: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+  --groesse-display: 24px;
+  --groesse-h1: 21px;
+  --groesse-h2: 18px;
+  --groesse-body: 17px;
+  --groesse-sekundaer: 15px;
+  --groesse-caption: 13px;
+  --zeile-display: 1.2;
+  --zeile-h1: 1.32;
+  --zeile-body: 1.5;
+
+  /* Abstände (4er-Raster) und Radien */
+  --raum-1: 4px;
+  --raum-2: 8px;
+  --raum-3: 12px;
+  --raum-4: 16px;
+  --raum-5: 20px;
+  --raum-6: 24px;
+  --raum-7: 32px;
+  --radius-pill: 11px;
+  --radius-feld: 12px;
+  --radius-karte: 18px;
+  --radius-rund: 999px;
+
+  /* Bewegung */
+  --dauer-kurz: 200ms;
+  --dauer-mittel: 240ms;
+  --kurve: cubic-bezier(0.2, 0, 0.2, 1);
+
+  color-scheme: light;
+}
+
+/* System-Einstellung dunkel — solange kein explizites helles Theme gewählt ist */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='hell']) {
+    --farbe-grund: #23221C;
+    --farbe-karte: #2C2B24;
+    --farbe-linie: #3C3A32;
+    --farbe-tinte: #E9E6DF;
+    --farbe-tinte-soft: #CFCBC0;
+    --farbe-nebel: #B7B2A4;
+    --farbe-tanne: #7FA894;
+    --farbe-tanne-flaeche: #18332B;
+    --farbe-tanne-flaeche-aktiv: #122A22;
+    --farbe-auf-tanne: #E9E6DF;
+    --farbe-auf-tanne-soft: #C9D4CC;
+    --farbe-tanne-tint: rgba(127, 168, 148, 0.12);
+    --farbe-ocker: #C99A45;
+    --farbe-ocker-text: #C99A45;
+    --farbe-eingabe: #2C2B24;
+    --farbe-eingabe-rand: #3C3A32;
+    --farbe-schleier: rgba(16, 15, 12, 0.55);
+    --ocker-glow-a: rgba(201, 154, 69, 0.20);
+    --ocker-glow-b: rgba(201, 154, 69, 0.14);
+    --ocker-glow-c: rgba(201, 154, 69, 0.50);
+    color-scheme: dark;
+  }
+}
+
+/* Explizite Wahl „dunkel“ gewinnt in beide Richtungen */
+:root[data-theme='dunkel'] {
+  --farbe-grund: #23221C;
+  --farbe-karte: #2C2B24;
+  --farbe-linie: #3C3A32;
+  --farbe-tinte: #E9E6DF;
+  --farbe-tinte-soft: #CFCBC0;
+  --farbe-nebel: #B7B2A4;
+  --farbe-tanne: #7FA894;
+  --farbe-tanne-flaeche: #18332B;
+  --farbe-tanne-flaeche-aktiv: #122A22;
+  --farbe-auf-tanne: #E9E6DF;
+  --farbe-auf-tanne-soft: #C9D4CC;
+  --farbe-tanne-tint: rgba(127, 168, 148, 0.12);
+  --farbe-ocker: #C99A45;
+  --farbe-ocker-text: #C99A45;
+  --farbe-eingabe: #2C2B24;
+  --farbe-eingabe-rand: #3C3A32;
+  --farbe-schleier: rgba(16, 15, 12, 0.55);
+  --ocker-glow-a: rgba(201, 154, 69, 0.20);
+  --ocker-glow-b: rgba(201, 154, 69, 0.14);
+  --ocker-glow-c: rgba(201, 154, 69, 0.50);
+  color-scheme: dark;
+}
