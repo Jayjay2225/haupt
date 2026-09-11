@@ -1,0 +1,23 @@
+# Abhängigkeiten
+node_modules/
+
+# Build-Ausgaben
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Tests & Coverage
+coverage/
+test-results/
+playwright-report/
+
+# Umgebungsvariablen
+.env
+.env.*
+!.env.example
+
+# Logs & Betriebssystem
+*.log
+.DS_Store
