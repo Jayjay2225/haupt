@@ -10,8 +10,25 @@ Grundlage ist das Prompt-Set in `docs/PROMPTS.md` (Stand 11.09.2026). Nach jedem
 | 3 | Rechenkern | `packages/calc`, `docs/CALC-SPEC.md`, `data/risk-defaults.json` | ⬜ offen (Paket-Gerüst vorhanden) |
 | 4 | Eignungs- und Belehrungs-Check | `packages/eligibility` | ⬜ offen (Paket-Gerüst vorhanden) |
 | 5 | PDF-Kurzprüfung | `apps/report`, Beispielberichte in `examples/` | ⬜ offen (benötigt `brand/`) |
-| 6 | Website und Funnel | `apps/web`, `config/business.ts` | ⬜ offen (benötigt Entscheidungen, s. u.) |
+| 6 | Website und Funnel | `apps/web`, `apps/web/config/business.ts` | 🟡 teilweise (18.09.2026, s. u.) |
 | 7 | Compliance- und Plausibilitäts-Review | `docs/REVIEW.md` | ⬜ offen |
+
+## Stand Prompt 6 (Website) – auf Nutzerwunsch vorgezogen
+
+Am 18.09.2026 wurde das Website-Grundgerüst `apps/web` auf ausdrücklichen Wunsch vor den Prompts 1–5 gebaut. Umgesetzt ist alles, was ohne die fehlenden Artefakte ehrlich möglich ist – **ohne erfundene Zahlen** (Prinzip 1):
+
+**Fertig:**
+- Startseite (Nutzenversprechen ohne Zahlenversprechen, Ablauf, Methodik, Abgrenzung, Kosten/Modell aus Konfiguration, FAQ)
+- Mehrstufiger Rechner (Kontakt → Vertrag → Beiträge → Werte → Eignungs-Check-Fragen → Zusammenfassung mit Einwilligungen), mobil-first, Validierung je Schritt, Zwischenspeicherung im Browser (localStorage), DM/EUR-Eingabe, Versicherer-Autocomplete aus Starter-Namensliste
+- Ergebnis-Seite: bestätigt die Erfassung und erklärt, warum noch kein Wert angezeigt wird – bewusst keine Platzhalter-Zahlen
+- Rechtsseiten Impressum/Datenschutz/AGB/Widerrufsbelehrung als klar gekennzeichnete Entwürfe (Anbieterdaten offen)
+- Geschäftsmodell-Schalter `apps/web/config/business.ts` (A/B/C angelegt, B vorläufig aktiv), Marken-Platzhalter `config/brand.ts`, `robots: noindex` für die Vorabversion
+
+**Offen (Rest von Prompt 6):**
+- Versicherer-Seiten `/lebensversicherung/[versicherer]` – brauchen `data/insurers.json` (Prompt 2)
+- Anbindung von Eignungs-Check und Rechenkern an die Ergebnis-Seite (Prompte 3–4)
+- Persistenz (Postgres/Prisma), E-Mails mit Double-Opt-in, Upload/OCR, Admin-Bereich, Zahlung (Modell A), B2B-Login (Modell C)
+- Rate-Limiting, Consent-Management, Auftragsverarbeiter-Liste (mit Hosting-Entscheidung)
 
 ## Vor Prompt 6 zu entscheiden (aus `docs/PROMPTS.md`)
 

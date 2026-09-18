@@ -16,7 +16,10 @@ data/                   fachliche Datensätze (legal-rules, insurers, …) – e
 packages/
   calc/                 Rechenkern (reine Funktionen, keine I/O) – Implementierung mit Prompt 3
   eligibility/          Eignungs- und Belehrungs-Check – Implementierung mit Prompt 4
-apps/                   report (Prompt 5) und web (Prompt 6) – werden mit ihren Prompts angelegt
+apps/
+  web/                  Next.js-Website: Startseite, Rechner-Funnel, Rechtsseiten-Entwürfe
+                        (Grundgerüst; Auswertung folgt mit Prompts 1–4)
+  (report/)             PDF-Berichtsgenerator – entsteht mit Prompt 5
 scripts/                Datenpflege-Skripte (Prompt 2)
 brand/                  Logo, Farben, Typografie (vor Prompt 5 zu befüllen)
 ```
@@ -29,6 +32,8 @@ Voraussetzungen: Node ≥ 20, pnpm 10.
 pnpm install
 pnpm test        # Vitest über alle Pakete
 pnpm typecheck   # tsc --noEmit je Paket
+pnpm dev         # Website lokal starten (http://localhost:3000)
+pnpm build       # Produktions-Build der Website
 ```
 
 ## Vorgehen
