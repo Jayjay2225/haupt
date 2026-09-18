@@ -60,3 +60,29 @@ export function branchenNettoReihe(): { jahr: number; wert: number }[] {
     .map(([jahr, kz]) => ({ jahr: Number(jahr), wert: kz.wert }))
     .sort((a, b) => a.jahr - b.jahr);
 }
+
+/** Unternehmensreihe der Nettoverzinsung (nur Jahre mit eigenem Wert), sortiert. */
+export function unternehmensNettoReihe(id: string): { jahr: number; wert: number }[] {
+  const v = versichererNachId(id);
+  if (v === undefined) {
+    return [];
+  }
+  return Object.entries(v.kennzahlen)
+    .flatMap(([jahr, kz]) => (kz.nettoverzinsung ? [{ jahr: Number(jahr), wert: kz.nettoverzinsung.wert }] : []))
+    .sort((a, b) => a.jahr - b.jahr);
+}
+
+/** Quellen (Titel) der Unternehmens-Nettoverzinsung, dedupliziert – für die Bildunterschrift. */
+export function quellenDerUnternehmensreihe(id: string): string[] {
+  const v = versichererNachId(id);
+  if (v === undefined) {
+    return [];
+  }
+  const titel = new Set<string>();
+  for (const kz of Object.values(v.kennzahlen)) {
+    if (kz.nettoverzinsung) {
+      titel.add(kz.nettoverzinsung.quelle.titel);
+    }
+  }
+  return [...titel];
+}

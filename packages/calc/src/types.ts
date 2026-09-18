@@ -71,9 +71,12 @@ export interface Kennzahl {
 export interface JahresKennzahlen {
   nettoverzinsung?: Kennzahl;
   laufendeDurchschnittsverzinsung?: Kennzahl;
+  /** Zillmer-nahe Quote in % der Beitragssumme (Deckel für die Abschlusskosten). */
   abschlusskostenquote?: Kennzahl;
   verwaltungskostenquote?: Kennzahl;
   deklarationGesamtverzinsung?: Kennzahl;
+  /** Nachrichtlich (BaFin Tabelle 160): Abschlussaufwendungen in % der verdienten Bruttobeiträge. */
+  abschlussaufwendungenProzentBeitraege?: Kennzahl;
 }
 
 export interface ZinsEintrag {
@@ -101,7 +104,11 @@ export interface VersichererDaten {
 
 export interface InsurersDaten {
   data: { version: string; stand: string };
-  branchendurchschnitt: { nettoverzinsung: Record<string, Kennzahl> };
+  branchendurchschnitt: {
+    nettoverzinsung: Record<string, Kennzahl>;
+    /** Branchen-„lfd. Verzinsung“ (BaFin) für das Min-Szenario, wenn Unternehmenswerte fehlen. */
+    laufendeDurchschnittsverzinsung?: Record<string, Kennzahl>;
+  };
   referenzzinsen: {
     basiszinsBGB247: { werte: ZinsEintrag[] };
     einlagenzins: { werte: ZinsEintrag[] };
@@ -158,6 +165,10 @@ export interface SzenarioErgebnis {
   mehrwertGegenKuendigung?: number;
   wirtschaftlichKeinVorteil?: boolean;
   nutzungenProzentDerBeitraege: number;
+  /** Aufteilung der Nutzungen nach Herkunft des Zinssatzes je Jahr. */
+  nutzungenNachHerkunft: Record<Zinsherkunft, number>;
+  /** Anteil der Nutzungen, der auf Unternehmenswerten beruht (Prozent, eine Nachkommastelle). */
+  anteilUnternehmenswerteProzent: number;
   zinsreihe: JahresZins[];
 }
 

@@ -444,6 +444,15 @@ export function renderBerichtHtml(b: BerichtInput): string {
     Nutzungen im Basis-Szenario entsprechen ${formatProzent(basis.nutzungenProzentDerBeitraege)} der eingezahlten
     Beiträge – diese Kennzahl ist nur zusammen mit der daneben ausgewiesenen Zinsreihe aussagekräftig.
   </p>
+  <p>
+    <strong>Datenbasis der Nutzungen:</strong> ${formatProzent(basis.anteilUnternehmenswerteProzent)} der Nutzungen
+    beruhen auf Kennzahlen des Versicherers (${formatEuro(basis.nutzungenNachHerkunft.insurer)}),
+    ${formatProzent(basis.nutzungen > 0 ? Math.round((basis.nutzungenNachHerkunft.branche / basis.nutzungen) * 1000) / 10 : 0)}
+    auf Branchendurchschnitten (${formatEuro(basis.nutzungenNachHerkunft.branche)}) und
+    ${formatProzent(basis.nutzungen > 0 ? Math.round((basis.nutzungenNachHerkunft.fallback / basis.nutzungen) * 1000) / 10 : 0)}
+    auf Näherungen für Jahre ohne Daten (${formatEuro(basis.nutzungenNachHerkunft.fallback)}).
+    Je höher der Unternehmensanteil, desto belastbarer ist die Schätzung gegenüber dem Versicherer.
+  </p>
   ${zinsreihenTabelle(b.calc)}
   <div class="hinweisbox">
     <strong>Gegenposition des Versicherers (typische Einwände):</strong> Nutzungen seien nur aus den konkreten

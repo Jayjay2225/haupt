@@ -104,10 +104,10 @@ describe('Golden-Vertrag (a): private Rentenversicherung 12/2004', () => {
         },
         "min": {
           "erstattung": 25088,
-          "mehrwertGegenKuendigung": -3561.75,
-          "nutzungen": 11207.25,
-          "nutzungenProzent": 43.8,
-          "rueckabwicklungswert": 36295.25,
+          "mehrwertGegenKuendigung": -5535.21,
+          "nutzungen": 9233.79,
+          "nutzungenProzent": 36.1,
+          "rueckabwicklungswert": 34321.79,
         },
       }
     `);
@@ -135,24 +135,24 @@ describe('Golden-Vertrag (b): Kapitallebensversicherung 10/1995 mit Dynamik', ()
       {
         "basis": {
           "erstattung": 413087.7,
-          "mehrwertGegenKuendigung": 313490.3,
-          "nutzungen": 211060.6,
-          "nutzungenProzent": 48,
-          "rueckabwicklungswert": 624148.3,
+          "mehrwertGegenKuendigung": 348892.36,
+          "nutzungen": 246462.66,
+          "nutzungenProzent": 56.1,
+          "rueckabwicklungswert": 659550.36,
         },
         "max": {
           "erstattung": 426271.35,
-          "mehrwertGegenKuendigung": 341953.42,
-          "nutzungen": 226340.07,
-          "nutzungenProzent": 51.5,
-          "rueckabwicklungswert": 652611.42,
+          "mehrwertGegenKuendigung": 377898.02,
+          "nutzungen": 262284.67,
+          "nutzungenProzent": 59.7,
+          "rueckabwicklungswert": 688556.02,
         },
         "min": {
           "erstattung": 395509.5,
-          "mehrwertGegenKuendigung": 282589.53,
-          "nutzungen": 197738.03,
-          "nutzungenProzent": 45,
-          "rueckabwicklungswert": 593247.53,
+          "mehrwertGegenKuendigung": 304392.24,
+          "nutzungen": 219540.74,
+          "nutzungenProzent": 50,
+          "rueckabwicklungswert": 615050.24,
         },
       }
     `);

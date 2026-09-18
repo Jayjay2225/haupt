@@ -104,9 +104,16 @@ export function loeseZinsreihe(
 
     const branche = daten.branchendurchschnitt.nettoverzinsung[String(jahr)];
     if (branche !== undefined) {
-      jahre.push({ jahr, satzProzent: branche.wert, herkunft: 'branche', quelle: branche.quelle });
+      let satz = branche.wert;
+      let quelle = branche.quelle;
+      const brancheLaufend = daten.branchendurchschnitt.laufendeDurchschnittsverzinsung?.[String(jahr)];
+      if (szenario === 'min' && brancheLaufend !== undefined && brancheLaufend.wert < satz) {
+        satz = brancheLaufend.wert;
+        quelle = brancheLaufend.quelle;
+      }
+      jahre.push({ jahr, satzProzent: satz, herkunft: 'branche', quelle });
       brancheJahreGenutzt += 1;
-      letzterBranchenwert = { jahr, wert: branche.wert };
+      letzterBranchenwert = { jahr, wert: satz };
       continue;
     }
 

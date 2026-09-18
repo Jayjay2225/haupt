@@ -52,6 +52,7 @@ export interface JahresKennzahlen {
   abschlusskostenquote?: Kennzahl;
   verwaltungskostenquote?: Kennzahl;
   deklarationGesamtverzinsung?: Kennzahl;
+  abschlussaufwendungenProzentBeitraege?: Kennzahl;
 }
 
 export interface Rechtsnachfolge {
@@ -88,6 +89,7 @@ export interface InsurersDaten {
   branchendurchschnitt: {
     beschreibung: string;
     nettoverzinsung: Record<string, Kennzahl>;
+    laufendeDurchschnittsverzinsung?: Record<string, Kennzahl>;
   };
   referenzzinsen: {
     basiszinsBGB247: { beschreibung: string; werte: ZinsEintrag[] };
@@ -152,6 +154,9 @@ export function pruefe(): Pruefergebnis {
 
   for (const [jahr, kz] of Object.entries(daten.branchendurchschnitt.nettoverzinsung)) {
     pruefeKennzahl(`branchendurchschnitt.nettoverzinsung.${jahr}`, kz, fehler, warnungen);
+  }
+  for (const [jahr, kz] of Object.entries(daten.branchendurchschnitt.laufendeDurchschnittsverzinsung ?? {})) {
+    pruefeKennzahl(`branchendurchschnitt.laufendeDurchschnittsverzinsung.${jahr}`, kz, fehler, warnungen);
   }
   for (const eintrag of daten.referenzzinsen.basiszinsBGB247.werte) {
     pruefeQuelle(`referenzzinsen.basiszinsBGB247 (${eintrag.gueltigAb})`, eintrag.quelle, fehler);
@@ -240,6 +245,19 @@ export function schreibeCoverage(daten: InsurersDaten): string {
           ? `${fehlend.length} Jahre (u. a. ${fehlend.slice(0, 5).join(', ')} …)`
           : fehlend.join(', ');
     zeilen.push(`| ${v.kanonischerName} | ${jahreText} | ${fehlendText} |`);
+  }
+  zeilen.push('');
+
+  zeilen.push('## Matrix 1990–2003 (Altjahre, Prompt 9)');
+  zeilen.push('');
+  zeilen.push('✓ = Nettoverzinsung belegt · · = fehlt. Beschaffungswege: Geschäftsberichte/Mehrjahresübersichten (Wayback), BAV-Geschäftsbericht Teil B (Bibliotheks-Scan, `docs/SCAN-ANLEITUNG.md`).');
+  zeilen.push('');
+  const altjahre = Array.from({ length: 14 }, (_, i) => 1990 + i);
+  zeilen.push(`| Gesellschaft | ${altjahre.map((j) => String(j).slice(2)).join(' | ')} |`);
+  zeilen.push(`|---|${altjahre.map(() => ':-:').join('|')}|`);
+  for (const v of daten.insurers) {
+    const marken = altjahre.map((j) => (v.kennzahlen[String(j)]?.nettoverzinsung !== undefined ? '✓' : '·'));
+    zeilen.push(`| ${v.kanonischerName} | ${marken.join(' | ')} |`);
   }
   zeilen.push('');
 

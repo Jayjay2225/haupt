@@ -12,7 +12,9 @@
     "build": "pnpm --filter @rueckab/web build",
     "test": "vitest run",
     "typecheck": "pnpm -r typecheck",
-    "data:check": "node --experimental-strip-types scripts/update-insurers.ts check"
+    "data:check": "node --experimental-strip-types scripts/update-insurers.ts check",
+    "data:scans": "node --experimental-strip-types scripts/data-scans.ts check",
+    "data:bafin": "node --experimental-strip-types scripts/import-bafin.ts import"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

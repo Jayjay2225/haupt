@@ -22,6 +22,7 @@ import type {
   SzenarioErgebnis,
   SzenarioName,
   Warnung,
+  Zinsherkunft,
 } from './types';
 
 const GRENZE_ALT_BEGINN = monatsIndex('1994-07'); // Juli 1994: Tag entscheidet (29.07.1994)
@@ -216,6 +217,15 @@ export function berechneRueckabwicklung(
       });
     }
 
+    const nachHerkunft: Record<Zinsherkunft, number> = { insurer: 0, branche: 0, fallback: 0, override: 0 };
+    const herkunftProJahr = new Map(zinsen.jahre.map((j) => [j.jahr, j.herkunft]));
+    for (const [jahr, zins] of aufgezinst.nutzungenProJahr) {
+      const herkunft = herkunftProJahr.get(jahr) ?? 'fallback';
+      nachHerkunft[herkunft] += zins;
+    }
+    const anteilUnternehmen =
+      aufgezinst.nutzungen > 0 ? Math.round((nachHerkunft.insurer / aufgezinst.nutzungen) * 1000) / 10 : 0;
+
     const ergebnis: SzenarioErgebnis = {
       name,
       summeBeitraege: rund(summeBeitraege),
@@ -230,6 +240,13 @@ export function berechneRueckabwicklung(
       erhalteneLeistungenAufgezinst: rund(leistungenAufgezinst),
       nettoanspruch: rund(nettoanspruch),
       nutzungenProzentDerBeitraege: Math.round(nutzungenProzent * 10) / 10,
+      nutzungenNachHerkunft: {
+        insurer: rund(nachHerkunft.insurer),
+        branche: rund(nachHerkunft.branche),
+        fallback: rund(nachHerkunft.fallback),
+        override: rund(nachHerkunft.override),
+      },
+      anteilUnternehmenswerteProzent: anteilUnternehmen,
       zinsreihe: zinsen.jahre,
     };
     if (

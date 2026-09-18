@@ -116,26 +116,26 @@ Rundung: intern volle Gleitkommagenauigkeit, Ausgabefelder auf Cent gerundet; di
 
 Fixture-Daten sind ausdrücklich Testdaten (synthetische, als solche gekennzeichnete Reihen) – sie sind **nicht** Teil von `data/insurers.json` und erscheinen in keinem Bericht. Die Golden-Tests laufen dagegen gegen die echte `data/insurers.json` und frieren deren Stand ein (Snapshot bricht bei Datenänderung bewusst).
 
-## 10. Golden-Ergebnisse (Stand data.version 0.1.0, calc.version 0.2.0, Stichtag 09/2026)
+## 10. Golden-Ergebnisse (Stand data.version 0.2.0, calc.version 0.2.0, Stichtag 09/2026)
 
-Beide Verträge rechnen mangels Unternehmenskennzahlen mit dem **Branchendurchschnitt** (als Schätzung markiert); fehlende Jahre 1996–1998 und 2025–2026 werden per Fallback überbrückt (Warnung `ZINSREIHE_LUECKE`).
+Vertrag (a) rechnet mangels Unternehmenskennzahlen (`versichererId: unbekannt`) mit dem **Branchendurchschnitt** (als Schätzung markiert). Vertrag (b) nutzt ab 2011 die aus der BaFin-Tabelle 160 importierten Kennzahlen der Allianz Lebensversicherungs-AG (Nettoverzinsung Basis/Max, laufende Durchschnittsverzinsung Min), davor den Branchendurchschnitt. Fehlende Jahre 1996–1998 und 2025–2026 werden per Fallback überbrückt (Warnung `ZINSREIHE_LUECKE`). Im Min-Szenario gilt für Branchenjahre ab 2011 der kleinere Wert aus Branchen-Nettoverzinsung und Branchen-laufender Verzinsung.
 
 **Vertrag (a) – private RV, Beginn 12/2004, 1.200 € jährlich, 25.600 € eingezahlt, Rückkaufswert 39.857 €:**
 
 | Szenario | erstattungsfähige Beiträge | Nutzungen | Rückabwicklungswert | Mehrwert ggü. Kündigung |
 |---|---|---|---|---|
-| Min | 25.088,00 € | 11.207,25 € | 36.295,25 € | −3.561,75 € |
+| Min | 25.088,00 € | 9.233,79 € | 34.321,79 € | −5.535,21 € |
 | Basis | 25.344,00 € | 11.474,21 € | 36.818,21 € | **−3.038,79 €** |
 | Max | 25.600,00 € | 12.008,14 € | 37.608,14 € | −2.248,86 € |
 
-Bewertung: In allen drei Szenarien liegt der Rückabwicklungswert **unter** dem Rückkaufswert → das Tool setzt `wirtschaftlichKeinVorteil` und muss „wirtschaftlich kein Vorteil erkennbar" ausgeben (Erwartung aus `docs/PROMPTS.md` erfüllt). Plausibel: Der Rückkaufswert einer bis 2026 laufenden RV enthält Überschussbeteiligung; die bereicherungsrechtliche Schätzung auf Branchenniveau bleibt darunter.
+Bewertung: In allen drei Szenarien liegt der Rückabwicklungswert **unter** dem Rückkaufswert → das Tool setzt `wirtschaftlichKeinVorteil` und muss „wirtschaftlich kein Vorteil erkennbar" ausgeben (Erwartung aus `docs/PROMPTS.md` erfüllt). Plausibel: Der Rückkaufswert einer bis 2026 laufenden RV enthält Überschussbeteiligung; die bereicherungsrechtliche Schätzung auf Branchenniveau bleibt darunter. Gegenüber data.version 0.1.0 ist nur das Min-Szenario gesunken (laufende Branchenverzinsung ab 2011 als Untergrenze).
 
-**Vertrag (b) – Kapital-LV, Beginn 10/1995, Dynamik 5 %, 439.455 € eingezahlt, Rückkaufswert 310.658 €:**
+**Vertrag (b) – Kapital-LV (Allianz), Beginn 10/1995, Dynamik 5 %, 439.455 € eingezahlt, Rückkaufswert 310.658 €:**
 
 | Szenario | erstattungsfähige Beiträge | Nutzungen | Rückabwicklungswert | Mehrwert ggü. Kündigung |
 |---|---|---|---|---|
-| Min | 395.509,50 € | 197.738,03 € | 593.247,53 € | +282.589,53 € |
-| Basis | 413.087,70 € | 211.060,60 € | 624.148,30 € | **+313.490,30 €** |
-| Max | 426.271,35 € | 226.340,07 € | 652.611,42 € | +341.953,42 € |
+| Min | 395.509,50 € | 219.540,74 € | 615.050,24 € | +304.392,24 € |
+| Basis | 413.087,70 € | 246.462,66 € | 659.550,36 € | **+348.892,36 €** |
+| Max | 426.271,35 € | 262.284,67 € | 688.556,02 € | +377.898,02 € |
 
-Bewertung: Deutlicher rechnerischer Mehrwert in allen Szenarien (Nutzungen 45–51,5 % der Beiträge – getragen von den hohen Nettoverzinsungen der 1990er/2000er). Im Bericht zwingend mit Annahmenliste (pauschaler Risikoanteil, Branchendurchschnitt statt Unternehmenswert, Zins-Lücken) und ohne Anspruchszusage auszuweisen.
+Bewertung: Deutlicher rechnerischer Mehrwert in allen Szenarien (Nutzungen 55,5–61,5 % der Beiträge – getragen von den hohen Nettoverzinsungen der 1990er/2000er und den über dem Branchendurchschnitt liegenden Allianz-Werten ab 2011). Gegenüber data.version 0.1.0 (nur Branchendurchschnitt) sind die Nutzungen im Basis-Szenario um rund 35.000 € gestiegen; der Bericht weist den Anteil der Nutzungen aus Unternehmens-, Branchen- und Näherungswerten aus („Datenbasis der Nutzungen“). Im Bericht zwingend mit Annahmenliste (pauschaler Risikoanteil, Branchendurchschnitt vor 2011, Zins-Lücken) und ohne Anspruchszusage auszuweisen.
