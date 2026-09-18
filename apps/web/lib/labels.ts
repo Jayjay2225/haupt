@@ -71,3 +71,21 @@ export function labelOderLeer<T extends string>(
 ): string {
   return wert === '' ? '–' : labels[wert];
 }
+
+/** Unterlagen-Checkliste (Verbraucherprodukt, Schritt 5). */
+export type UnterlageFeld =
+  | 'unterlagePolice'
+  | 'unterlageBegleitschreiben'
+  | 'unterlageBedingungen'
+  | 'unterlageStandmitteilung'
+  | 'unterlageAbrechnung';
+
+export const UNTERLAGEN_LABEL: Record<UnterlageFeld, string> = {
+  unterlagePolice: 'Police (Versicherungsschein)',
+  unterlageBegleitschreiben: 'Begleitschreiben, das mit der Police kam',
+  unterlageBedingungen: 'Versicherungsbedingungen und Verbraucherinformation',
+  unterlageStandmitteilung: 'Letzte Standmitteilung',
+  unterlageAbrechnung: 'Kündigungs- oder Auszahlungsabrechnung (falls vorhanden)',
+};
+
+export const UNTERLAGEN_FELDER = Object.keys(UNTERLAGEN_LABEL) as UnterlageFeld[];

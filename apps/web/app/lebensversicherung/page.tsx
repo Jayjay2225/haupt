@@ -12,10 +12,9 @@ export default function VersichererIndex() {
     <div className="container abschnitt">
       <h1>Lebensversicherer im Überblick</h1>
       <p className="schmal">
-        Für die Rückabwicklung zählt das tatsächliche Kapitalanlageergebnis der Gesellschaft,
-        bei der Ihr Vertrag geführt wird – auch wenn auf der Police noch ein früherer Name
-        steht. Hier entsteht je Gesellschaft eine Übersicht mit Namenshistorie und den
-        Kennzahlen, die unsere Berechnung verwendet.
+        Auf alten Policen steht oft ein Name, den es so nicht mehr gibt. Wir ordnen ihn der
+        Gesellschaft zu, die heute die Zahlen liefert – denn gerechnet wird mit dem, was der
+        Versicherer wirklich verdient hat. Die Zahlen bleiben streng: jede mit Quelle.
       </p>
       <ul className="kartenreihe">
         {versicherer.map((v) => (

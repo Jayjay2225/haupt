@@ -1,49 +1,54 @@
 /**
- * Geschäftsmodell-Schalter laut Prompt 6 (docs/PROMPTS.md): alle drei Modelle
- * sind angelegt und werden per Konfiguration aktiviert. Die Entscheidung für
- * A, B oder C ist offen (docs/STATUS.md); bis dahin ist B vorläufig aktiv,
- * weil es ohne Zahlungsintegration lauffähig ist – Begründung in
- * docs/ASSUMPTIONS.md.
+ * Geschäftsmodell (Prompt 8, Entscheidung 3): Hybrid.
+ *
+ * - Kostenlose wirtschaftliche Ampel ohne Euro-Beträge.
+ * - Kostenpflichtiger Bericht (Startpreis 89 € brutto, hier konfiguriert).
+ * - Modell C (Kanzlei-Lizenz) bleibt im Code und wird über
+ *   NEXT_PUBLIC_PRODUKT_VARIANTE=kanzlei aktiviert (siehe variante.ts).
+ *
+ * Die früheren Modelle A/B/C bleiben nachrichtlich dokumentiert.
  */
-export type BusinessModelId = 'A' | 'B' | 'C';
+import { PRODUKT_VARIANTE } from './variante';
+
+/** Bruttopreis des schriftlichen Berichts in Euro (Startpreis). */
+export const BERICHT_PREIS_BRUTTO_EUR = 89;
+
+/** Enthaltene Umsatzsteuer, nur für die Preisangabe („inkl. MwSt.“). */
+export const BERICHT_PREIS_HINWEIS = 'inkl. gesetzlicher Umsatzsteuer';
+
+/** Ist „Später am Rechner fortsetzen“ (Link per E-Mail) aktiv? Erst mit Persistenz. */
+export const FORTSETZEN_AKTIV = false;
+
+/** Ist die Bestellung des Berichts technisch freigeschaltet (Zahlungsanbieter)? */
+export const BESTELLUNG_AKTIV = false;
+
+export type BusinessModelId = 'hybrid' | 'kanzlei';
 
 export interface BusinessModel {
   id: BusinessModelId;
   name: string;
-  /** Kurzbeschreibung für interne Zwecke und den Preis-/Modell-Abschnitt. */
   beschreibung: string;
-  /** Text für den Abschnitt „Preis bzw. Modell“ auf der Startseite. */
+  /** Text für den Abschnitt „Was kostet es“. */
   preisHinweis: string;
 }
 
 export const BUSINESS_MODELS: Record<BusinessModelId, BusinessModel> = {
-  A: {
-    id: 'A',
-    name: 'Kurzprüfung gegen Festpreis',
+  hybrid: {
+    id: 'hybrid',
+    name: 'Hybrid: kostenlose Ampel, kostenpflichtiger Bericht',
     beschreibung:
-      'Schriftliche Kurzprüfung als PDF gegen Festpreis; Zahlung vor Erstellung, Rechnung per E-Mail.',
-    preisHinweis:
-      'Die schriftliche Kurzprüfung wird zum Festpreis erstellt. Der Preis wird vor der Beauftragung klar angezeigt; bezahlt wird vor Erstellung, die Rechnung kommt per E-Mail.',
+      'Die Ampel und die Einordnung in Worten sind kostenlos. Wer die Zahlen will – Spanne, Jahrestabelle, Quellen –, bestellt den schriftlichen Bericht zum Festpreis.',
+    preisHinweis: `Die Ampel kostet nichts. Der schriftliche Bericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}. Kein Abo, keine Folgekosten.`,
   },
-  B: {
-    id: 'B',
-    name: 'Kostenlose Vorschau',
+  kanzlei: {
+    id: 'kanzlei',
+    name: 'Kanzlei-Lizenz (Modell C)',
     beschreibung:
-      'Kostenlose Ersteinschätzung (Ampel und Spanne); Weitergabe an eine Partnerkanzlei nur mit ausdrücklicher Einwilligung.',
-    preisHinweis:
-      'Die Ersteinschätzung (Ampel und Wertspanne) ist kostenlos. Eine Weitergabe Ihrer Daten an eine Partnerkanzlei erfolgt ausschließlich mit Ihrer ausdrücklichen Einwilligung – niemals automatisch.',
-  },
-  C: {
-    id: 'C',
-    name: 'B2B-Zugang für Kanzleien und Versicherungsberater',
-    beschreibung:
-      'Eigener Login, Mandantenverwaltung und White-Label-Bericht für Kanzleien und Versicherungsberater.',
-    preisHinweis:
-      'Zugang für Kanzleien und Versicherungsberater mit eigenem Login, Mandantenverwaltung und White-Label-Bericht. Konditionen auf Anfrage.',
+      'Eigener Zugang für Kanzleien und Versicherungsberater: Belehrungs-Check, Beträge, Bericht als White-Label. Markenneutral.',
+    preisHinweis: 'Lizenzkonditionen nach Vereinbarung.',
   },
 };
 
-/** Vorläufig aktives Modell – Entscheidung offen, siehe docs/ASSUMPTIONS.md. */
-export const ACTIVE_MODEL: BusinessModelId = 'B';
+export const ACTIVE_MODEL: BusinessModelId = PRODUKT_VARIANTE === 'kanzlei' ? 'kanzlei' : 'hybrid';
 
 export const activeModel: BusinessModel = BUSINESS_MODELS[ACTIVE_MODEL];

@@ -1,20 +1,35 @@
-/* Eigenständiges Design für [MARKE] (CLAUDE.md, Prinzip 5).
-   Systemschriften statt externer Fonts (Datenminimierung, EU-Hosting). */
+/* Renten-Rettung – Gestaltung nach docs/DESIGN.md.
+   Marineblau als Vertrauensanker, Weiß, helles Blaugrau; Rettungsorange nur
+   für Hauptknopf und Überschriften-Hervorhebung; Ampelfarben ausschließlich in
+   der Ampel. Schriften werden von Next beim Build geladen und selbst gehostet
+   (CSS-Variablen --schrift-titel / --schrift-text aus app/layout.tsx). */
 
 :root {
-  --farbe-tinte: #16232e;
-  --farbe-tinte-sanft: #4a5a66;
-  --farbe-primaer: #0e4f6e;
-  --farbe-primaer-dunkel: #0a3b53;
-  --farbe-akzent: #b7791f;
-  --farbe-flaeche: #ffffff;
-  --farbe-flaeche-sanft: #f3f6f8;
-  --farbe-linie: #d7dfe4;
-  --farbe-fehler: #a4262c;
-  --farbe-hinweis-grund: #fdf6ec;
-  --farbe-hinweis-linie: #e5cfa3;
+  --marine: #0a1f33;
+  --weiss: #ffffff;
+  --blaugrau: #f1f4f8;
+  --orange: #f2541b;
+  --orange-dunkel: #b34011;
+  --sekundaer: #4a5a66;
+  --linie: #d7dfe4;
+  --fehler: #a4262c;
+  --ampel-gruen: #1e8e4e;
+  --ampel-gelb: #f2b705;
+  --ampel-rot: #c62828;
+  --ampel-aus: #c9d1d9;
   --radius: 10px;
-  --schrift: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --schrift-titel-stack: var(--schrift-titel, 'Archivo'), 'Arial Black', Arial, sans-serif;
+  --schrift-text-stack: var(--schrift-text, 'Source Sans 3'), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --akzent: var(--orange);
+  --akzent-text: var(--marine);
+}
+
+/* Modell C: markenneutral – kein Orange, ruhige Akzente. */
+:root[data-optik='neutral'] {
+  --orange: #1f4e79;
+  --orange-dunkel: #163a5c;
+  --akzent: #1f4e79;
+  --akzent-text: #ffffff;
 }
 
 * {
@@ -27,33 +42,38 @@ html {
 
 body {
   margin: 0;
-  font-family: var(--schrift);
-  font-size: 1rem;
-  line-height: 1.6;
-  color: var(--farbe-tinte);
-  background: var(--farbe-flaeche);
+  font-family: var(--schrift-text-stack);
+  font-size: 1.125rem; /* 18 px */
+  line-height: 1.55;
+  color: var(--marine);
+  background: var(--weiss);
 }
 
 h1,
 h2,
 h3 {
-  line-height: 1.25;
-  color: var(--farbe-tinte);
-}
-
-h1 {
-  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-family: var(--schrift-titel-stack);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--marine);
+  letter-spacing: -0.01em;
   margin: 0 0 0.75rem;
 }
 
+h1 {
+  font-size: clamp(2.125rem, 6vw, 3rem);
+}
+
 h2 {
-  font-size: clamp(1.3rem, 3vw, 1.7rem);
-  margin: 0 0 1rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
 }
 
 h3 {
-  font-size: 1.1rem;
-  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.hervor {
+  color: var(--orange);
 }
 
 p {
@@ -61,15 +81,26 @@ p {
 }
 
 a {
-  color: var(--farbe-primaer);
+  color: var(--marine);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
-  outline: 3px solid var(--farbe-akzent);
-  outline-offset: 2px;
+select:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--orange-dunkel);
+  outline-offset: 3px;
+}
+
+.zahl,
+.tabellenziffern,
+td,
+.wert-zahl,
+.betrag {
+  font-variant-numeric: tabular-nums;
 }
 
 .container {
@@ -82,59 +113,65 @@ select:focus-visible {
   max-width: 46rem;
 }
 
-/* Vorabversions-Banner */
+/* Beta-Streifen */
 .vorab-banner {
-  background: var(--farbe-hinweis-grund);
-  border-bottom: 1px solid var(--farbe-hinweis-linie);
-  font-size: 0.9rem;
+  background: var(--blaugrau);
+  border-bottom: 1px solid var(--linie);
+  font-size: 0.95rem;
   padding-block: 0.4rem;
   text-align: center;
-  color: var(--farbe-tinte-sanft);
+  color: var(--sekundaer);
+  margin: 0;
 }
 
 /* Kopf- und Fußzeile */
 .kopf {
-  border-bottom: 1px solid var(--farbe-linie);
-  background: var(--farbe-flaeche);
+  background: var(--marine);
+  color: var(--weiss);
+}
+
+.kopf a {
+  color: var(--weiss);
+  text-decoration: none;
+}
+
+.kopf a:focus-visible {
+  outline-color: var(--weiss);
 }
 
 .kopf-innen {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem 1.5rem;
+  gap: 0.5rem 1.5rem;
   padding-block: 0.9rem;
 }
 
 .marke {
-  font-weight: 700;
-  font-size: 1.15rem;
-  color: var(--farbe-primaer-dunkel);
-  text-decoration: none;
+  font-family: var(--schrift-titel-stack);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.01em;
 }
 
 .kopf-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.75rem 1.25rem;
   margin-left: auto;
-}
-
-.kopf-nav a {
-  text-decoration: none;
-  color: var(--farbe-tinte-sanft);
+  font-size: 1rem;
 }
 
 .kopf-nav a:hover {
-  color: var(--farbe-primaer);
+  text-decoration: underline;
 }
 
 .fuss {
-  border-top: 1px solid var(--farbe-linie);
-  background: var(--farbe-flaeche-sanft);
+  border-top: 1px solid var(--linie);
+  background: var(--blaugrau);
   margin-top: 4rem;
-  font-size: 0.9rem;
-  color: var(--farbe-tinte-sanft);
+  font-size: 1rem;
+  color: var(--sekundaer);
 }
 
 .fuss-innen {
@@ -150,19 +187,31 @@ select:focus-visible {
 }
 
 .fuss-nav a {
-  color: var(--farbe-tinte-sanft);
+  color: var(--marine);
 }
 
 /* Startseite */
 .hero {
-  background: linear-gradient(180deg, var(--farbe-flaeche-sanft), var(--farbe-flaeche));
-  padding-block: 3.5rem 3rem;
+  padding-block: 3rem 2.5rem;
 }
 
-.hero p.untertitel {
-  font-size: 1.15rem;
-  color: var(--farbe-tinte-sanft);
-  max-width: 44rem;
+.hero .untertitel {
+  font-size: 1.35rem;
+  max-width: 34rem;
+  margin-bottom: 1.5rem;
+}
+
+.hero-raster {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 52rem) {
+  .hero-raster {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 3rem;
+  }
 }
 
 .abschnitt {
@@ -170,39 +219,42 @@ select:focus-visible {
 }
 
 .abschnitt.getoent {
-  background: var(--farbe-flaeche-sanft);
+  background: var(--blaugrau);
 }
 
-.kartenreihe {
+.schrittliste {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  margin: 0;
-  padding: 0;
-  list-style: none;
   counter-reset: schritt;
 }
 
-.karte {
-  background: var(--farbe-flaeche);
-  border: 1px solid var(--farbe-linie);
-  border-radius: var(--radius);
-  padding: 1.25rem;
+@media (min-width: 40rem) {
+  .schrittliste {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-.karte.nummeriert::before {
+.schrittliste li {
   counter-increment: schritt;
+  padding-top: 0.25rem;
+}
+
+.schrittliste li::before {
   content: counter(schritt);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 50%;
-  background: var(--farbe-primaer);
-  color: #fff;
-  font-weight: 700;
-  margin-bottom: 0.75rem;
+  background: var(--marine);
+  color: var(--weiss);
+  font-family: var(--schrift-titel-stack);
+  font-weight: 800;
+  margin-bottom: 0.6rem;
 }
 
 .punkteliste {
@@ -215,62 +267,222 @@ select:focus-visible {
 }
 
 .faq details {
-  border: 1px solid var(--farbe-linie);
-  border-radius: var(--radius);
-  padding: 0.9rem 1.1rem;
-  margin-bottom: 0.75rem;
-  background: var(--farbe-flaeche);
+  border-bottom: 1px solid var(--linie);
+  padding: 0.9rem 0;
 }
 
 .faq summary {
   font-weight: 600;
   cursor: pointer;
+  font-size: 1.15rem;
 }
 
 .faq details[open] summary {
   margin-bottom: 0.5rem;
 }
 
-/* Buttons */
+/* Knöpfe */
 .knopf {
   display: inline-block;
   border: none;
   border-radius: var(--radius);
-  background: var(--farbe-primaer);
-  color: #fff;
+  background: var(--marine);
+  color: var(--weiss);
   font: inherit;
   font-weight: 600;
-  padding: 0.75rem 1.5rem;
+  min-height: 3.5rem;
+  padding: 0.85rem 1.5rem;
   text-decoration: none;
   cursor: pointer;
+  text-align: center;
 }
 
 .knopf:hover {
-  background: var(--farbe-primaer-dunkel);
+  filter: brightness(1.1);
+}
+
+.knopf.haupt {
+  background: var(--akzent);
+  color: var(--akzent-text);
+  font-family: var(--schrift-titel-stack);
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
 }
 
 .knopf.zweitrangig {
   background: transparent;
-  color: var(--farbe-primaer);
-  border: 1px solid var(--farbe-primaer);
+  color: var(--marine);
+  border: 2px solid var(--marine);
 }
 
 .knopf.zweitrangig:hover {
-  background: var(--farbe-flaeche-sanft);
+  background: var(--blaugrau);
+  filter: none;
+}
+
+/* Hauptknopf mobil unten fixiert */
+.fix-unten {
+  position: sticky;
+  bottom: 0.75rem;
+  z-index: 5;
+}
+
+@media (min-width: 52rem) {
+  .fix-unten {
+    position: static;
+  }
 }
 
 /* Hinweiskästen */
 .hinweis {
-  background: var(--farbe-hinweis-grund);
-  border: 1px solid var(--farbe-hinweis-linie);
-  border-radius: var(--radius);
+  background: var(--blaugrau);
+  border-left: 5px solid var(--marine);
+  border-radius: 0 var(--radius) var(--radius) 0;
   padding: 1rem 1.25rem;
   margin-block: 1rem;
 }
 
 .hinweis.neutral {
-  background: var(--farbe-flaeche-sanft);
-  border-color: var(--farbe-linie);
+  border-left-color: var(--linie);
+}
+
+.transparenz {
+  border: 2px solid var(--marine);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-block: 1.5rem;
+}
+
+.transparenz h2,
+.transparenz h3 {
+  margin-bottom: 0.5rem;
+}
+
+.transparenz ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+/* Ampel */
+.ampel {
+  display: inline-grid;
+  grid-auto-flow: row;
+  gap: 0.55rem;
+  padding: 0.7rem;
+  background: var(--marine);
+  border-radius: 1.2rem;
+}
+
+.ampel--gross {
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border-radius: 1.6rem;
+}
+
+.ampel .licht {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: var(--ampel-aus);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ampel--gross .licht {
+  width: 3.4rem;
+  height: 3.4rem;
+}
+
+.ampel[data-zustand='rot'] .licht--rot {
+  background: var(--ampel-rot);
+  box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.25);
+}
+
+.ampel[data-zustand='gelb'] .licht--gelb {
+  background: var(--ampel-gelb);
+  box-shadow: 0 0 0 4px rgba(242, 183, 5, 0.3);
+}
+
+.ampel[data-zustand='gruen'] .licht--gruen {
+  background: var(--ampel-gruen);
+  box-shadow: 0 0 0 4px rgba(30, 142, 78, 0.25);
+}
+
+/* Schnellcheck: Gehäuse-Segmente springen mit jedem Feld an. */
+.ampel[data-fortschritt='1'] .licht--rot,
+.ampel[data-fortschritt='2'] .licht--rot,
+.ampel[data-fortschritt='2'] .licht--gelb,
+.ampel[data-fortschritt='3'] .licht--rot,
+.ampel[data-fortschritt='3'] .licht--gelb,
+.ampel[data-fortschritt='3'] .licht--gruen {
+  background: #eef2f6;
+}
+
+.ampel[data-zustand='bereit'] .licht {
+  background: #eef2f6;
+}
+
+.ampel[data-zustand='bereit'] .licht--gruen {
+  animation: bereit 1.4s ease-in-out 2;
+}
+
+@keyframes bereit {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ampel .licht {
+    transition: none;
+  }
+
+  .ampel[data-zustand='bereit'] .licht--gruen {
+    animation: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.ampel-zeile {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ampel-text {
+  max-width: 34rem;
+}
+
+.ampel-text h2,
+.ampel-text h3 {
+  margin-bottom: 0.4rem;
+}
+
+/* Schnellcheck */
+.schnellcheck {
+  background: var(--blaugrau);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.schnellcheck-raster {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+}
+
+.schnellcheck .felder {
+  display: grid;
+  gap: 0.75rem;
 }
 
 /* Formular */
@@ -281,27 +493,27 @@ select:focus-visible {
   padding: 0;
   margin: 0 0 1.5rem;
   list-style: none;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .formular-schritte li {
-  padding: 0.3rem 0.7rem;
+  padding: 0.3rem 0.75rem;
   border-radius: 999px;
-  border: 1px solid var(--farbe-linie);
-  color: var(--farbe-tinte-sanft);
-  background: var(--farbe-flaeche);
+  border: 1px solid var(--linie);
+  color: var(--sekundaer);
+  background: var(--weiss);
 }
 
 .formular-schritte li[aria-current='step'] {
-  background: var(--farbe-primaer);
-  border-color: var(--farbe-primaer);
-  color: #fff;
+  background: var(--marine);
+  border-color: var(--marine);
+  color: var(--weiss);
   font-weight: 600;
 }
 
 .formular-schritte li.erledigt {
-  background: var(--farbe-flaeche-sanft);
-  color: var(--farbe-primaer-dunkel);
+  background: var(--blaugrau);
+  color: var(--marine);
 }
 
 .feld {
@@ -315,9 +527,10 @@ select:focus-visible {
   margin-bottom: 0.3rem;
 }
 
-.feld .erklaerung {
-  font-size: 0.9rem;
-  color: var(--farbe-tinte-sanft);
+.feld .erklaerung,
+.erklaerung {
+  font-size: 1rem;
+  color: var(--sekundaer);
   margin: 0 0 0.4rem;
 }
 
@@ -329,28 +542,29 @@ select:focus-visible {
   width: 100%;
   max-width: 26rem;
   font: inherit;
-  padding: 0.55rem 0.7rem;
-  border: 1px solid var(--farbe-linie);
+  min-height: 3rem;
+  padding: 0.55rem 0.8rem;
+  border: 2px solid var(--linie);
   border-radius: 8px;
-  background: var(--farbe-flaeche);
+  background: var(--weiss);
   color: inherit;
 }
 
 .feld.hat-fehler input,
 .feld.hat-fehler select,
 .feld.hat-fehler .optionen {
-  border-color: var(--farbe-fehler);
+  border-color: var(--fehler);
 }
 
 .feld-fehler {
-  color: var(--farbe-fehler);
-  font-size: 0.9rem;
+  color: var(--fehler);
+  font-size: 1rem;
   margin-top: 0.3rem;
 }
 
 .feld-echo {
-  font-size: 0.9rem;
-  color: var(--farbe-tinte-sanft);
+  font-size: 1rem;
+  color: var(--sekundaer);
   margin-top: 0.3rem;
 }
 
@@ -368,16 +582,24 @@ fieldset.feld legend {
 
 .optionen {
   display: grid;
-  gap: 0.4rem;
-  border: 1px solid transparent;
+  gap: 0.5rem;
+  border: 2px solid transparent;
   border-radius: 8px;
 }
 
 .optionen label {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.6rem;
   align-items: baseline;
   font-weight: 400;
+}
+
+.optionen input[type='radio'],
+.optionen input[type='checkbox'] {
+  width: 1.3rem;
+  height: 1.3rem;
+  accent-color: var(--marine);
+  flex-shrink: 0;
 }
 
 .optionen.nebeneinander {
@@ -393,7 +615,7 @@ fieldset.feld legend {
   margin-top: 2rem;
 }
 
-/* Zusammenfassung */
+/* Zusammenfassung / Tabellen */
 .zusammenfassung {
   width: 100%;
   border-collapse: collapse;
@@ -410,15 +632,82 @@ fieldset.feld legend {
 .zusammenfassung td {
   text-align: left;
   vertical-align: top;
-  border-bottom: 1px solid var(--farbe-linie);
+  border-bottom: 1px solid var(--linie);
   padding: 0.5rem 0.75rem 0.5rem 0;
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .zusammenfassung th {
   width: 40%;
-  color: var(--farbe-tinte-sanft);
+  color: var(--sekundaer);
   font-weight: 600;
+}
+
+/* Ergebnis-Vorschau */
+.wert-karte {
+  background: var(--blaugrau);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin: 1rem 0;
+}
+
+.wert-zahl {
+  font-family: var(--schrift-titel-stack);
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0.25rem 0;
+}
+
+.checkliste {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.checkliste li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--linie);
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.checkliste .status {
+  font-weight: 700;
+  min-width: 5.5rem;
+}
+
+/* Wege nebeneinander (/verkaufen) */
+.wege {
+  width: 100%;
+  border-collapse: collapse;
+  margin-block: 1rem;
+  font-size: 1rem;
+}
+
+.wege th,
+.wege td {
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--linie);
+  padding: 0.6rem 0.75rem 0.6rem 0;
+}
+
+.wege thead th {
+  border-bottom: 2px solid var(--marine);
+}
+
+.tabellen-scroll {
+  overflow-x: auto;
+}
+
+/* Rechtsseiten */
+.entwurf-kennung {
+  border: 2px dashed var(--orange-dunkel);
+  border-radius: var(--radius);
+  background: var(--blaugrau);
+  padding: 1rem 1.25rem;
+  margin-block: 1.5rem;
 }
 
 /* Nur für Screenreader sichtbar */
@@ -434,52 +723,6 @@ fieldset.feld legend {
   border: 0;
 }
 
-/* Ergebnis-Vorschau */
-.ampel-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  border-radius: 999px;
-  padding: 0.4rem 1rem;
-  border: 1px solid var(--farbe-linie);
-}
-
-.ampel-chip::before {
-  content: '';
-  display: inline-block;
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 50%;
-  background: var(--ampel-farbe, var(--farbe-tinte-sanft));
-}
-
-.ampel-gruen { --ampel-farbe: #008300; background: #eef6ee; border-color: #b5d4b5; }
-.ampel-gelb { --ampel-farbe: #b97b00; background: #fdf6ec; border-color: #e5cfa3; }
-.ampel-rot { --ampel-farbe: #c22827; background: #faeeee; border-color: #e3b8b8; }
-
-.wert-karte {
-  background: var(--farbe-flaeche-sanft);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-  margin: 1rem 0;
-}
-
-.wert-zahl {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0.25rem 0;
-}
-
-/* Rechtsseiten */
-.entwurf-kennung {
-  border: 2px dashed var(--farbe-akzent);
-  border-radius: var(--radius);
-  background: var(--farbe-hinweis-grund);
-  padding: 1rem 1.25rem;
-  margin-block: 1.5rem;
-}
-
 @media (max-width: 40rem) {
   .kopf-nav {
     margin-left: 0;
@@ -487,6 +730,14 @@ fieldset.feld legend {
 
   .formular-aktionen .knopf {
     width: 100%;
-    text-align: center;
+  }
+
+  .schnellcheck-raster {
+    grid-template-columns: 1fr;
+  }
+
+  .schnellcheck .ampel {
+    justify-self: center;
+    grid-auto-flow: column;
   }
 }

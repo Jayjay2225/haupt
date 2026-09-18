@@ -90,10 +90,10 @@ describe('validiereSchritt', () => {
 
   it('fragt Belehrungsdetails nur ab, wenn eine Belehrung gefunden wurde', () => {
     const ohneBelehrung: CaseDraft = { ...gueltigerDraft(), belehrungVorhanden: 'nein' };
-    expect(validiereSchritt('eignung', ohneBelehrung)).toEqual({});
+    expect(validiereSchritt('eignung', ohneBelehrung, true)).toEqual({});
 
     const mitBelehrung: CaseDraft = { ...gueltigerDraft(), belehrungVorhanden: 'ja' };
-    const fehler = validiereSchritt('eignung', mitBelehrung);
+    const fehler = validiereSchritt('eignung', mitBelehrung, true);
     expect(fehler['belehrungFrist']).toBeDefined();
     expect(fehler['belehrungForm']).toBeDefined();
     expect(fehler['hervorhebung']).toBeDefined();

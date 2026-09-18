@@ -1,17 +1,18 @@
 /**
  * Datenmodell und Validierung des mehrstufigen Rechner-Formulars.
  *
- * `CaseDraft` ist bewusst ein reines UI-Modell (alle Felder als Strings mit
- * Leerwert-Default): Es sammelt die Angaben, die der Rechenkern (Prompt 3,
- * `ContractInput`) und der Eignungs-Check (Prompt 4) später auswerten.
- * Die Abbildung auf `ContractInput` entsteht mit Prompt 3 – hier wird nichts
- * berechnet und nichts bewertet.
+ * `CaseDraft` ist ein reines UI-Modell (alle Felder mit Leerwert-Default): Es
+ * sammelt die Angaben, die Rechenkern (`ContractInput`) und Eignungs-Check
+ * (`EligibilityInput`) auswerten; die Abbildung steht in lib/berechnung.ts.
  *
- * Zwischenspeicherung: localStorage im Browser des Nutzers (Prompt 6
- * „Zwischenspeicherung“); es werden keine Daten an einen Server gesendet,
- * solange Persistenz/Backend nicht umgesetzt sind (offener Punkt in
- * docs/STATUS.md).
+ * Produktvarianten (config/variante.ts): Im Verbraucherprodukt ist die
+ * Belehrungsbewertung abgeschaltet – Schritt 5 ist dann eine neutrale
+ * Unterlagen-Checkliste; in der Kanzlei-Variante bleibt der Eignungs-Check.
+ *
+ * Zwischenspeicherung: localStorage im Browser; an den Server geht nur die
+ * zustandslose Vorschau-Anfrage (nichts wird gespeichert).
  */
+import { VARIANTE } from '@/config/variante';
 import { parseDecimalDe } from './format';
 
 export const DRAFT_STORAGE_KEY = 'rueckab.rechner.entwurf.v1';
@@ -73,16 +74,24 @@ export interface CaseDraft {
   auszahlungenSumme: string;
   policendarlehen: JaNeinUnbekannt;
   buzEnthalten: JaNeinUnbekannt;
-  // Schritt 5 – Eignungs-Check (Antworten werden erst mit Prompt 4 bewertet)
+  // Schritt 5a – Eignungs-Check (nur Kanzlei-Variante)
   zustandekommen: Zustandekommen;
   belehrungVorhanden: JaNeinUnbekannt;
   belehrungFrist: BelehrungFrist;
   belehrungForm: BelehrungForm;
   hervorhebung: JaNeinUnbekannt;
   abgetretenOderBeliehen: JaNeinUnbekannt;
+  // Schritt 5b – Unterlagen-Checkliste (Verbraucherprodukt)
+  unterlagePolice: boolean;
+  unterlageBegleitschreiben: boolean;
+  unterlageBedingungen: boolean;
+  unterlageStandmitteilung: boolean;
+  unterlageAbrechnung: boolean;
   // Schritt 6 – Zusammenfassung & Einwilligungen
   einwilligungDatenschutz: boolean;
   einwilligungKontakt: boolean;
+  /** Eigener, nie vorangekreuzter Block auf der Ergebnis-Seite (Ankauf). */
+  einwilligungAnkaufKontakt: boolean;
   /** ISO-Zeitpunkt des Absendens; leer = noch nicht abgesendet. */
   eingereichtAm: string;
 }
@@ -117,8 +126,14 @@ export function leererDraft(): CaseDraft {
     belehrungForm: '',
     hervorhebung: '',
     abgetretenOderBeliehen: '',
+    unterlagePolice: false,
+    unterlageBegleitschreiben: false,
+    unterlageBedingungen: false,
+    unterlageStandmitteilung: false,
+    unterlageAbrechnung: false,
     einwilligungDatenschutz: false,
     einwilligungKontakt: false,
+    einwilligungAnkaufKontakt: false,
     eingereichtAm: '',
   };
 }
@@ -136,11 +151,11 @@ export type Schritt = (typeof SCHRITTE)[number];
 
 export const SCHRITT_TITEL: Record<Schritt, string> = {
   kontakt: 'Kontakt',
-  vertrag: 'Vertrag',
+  vertrag: 'Police',
   beitraege: 'Beiträge',
   werte: 'Werte',
-  eignung: 'Eignungs-Check',
-  zusammenfassung: 'Zusammenfassung',
+  eignung: VARIANTE.belehrungsCheck ? 'Eignungs-Check' : 'Unterlagen',
+  zusammenfassung: 'Prüfen',
 };
 
 export type Fehlerliste = Partial<Record<string, string>>;
@@ -163,26 +178,31 @@ function pruefeBetragsfeld(
   }
   const betrag = parseDecimalDe(wert);
   if (betrag === null) {
-    fehler[feld] = 'Bitte einen Betrag im Format 1.234,56 angeben.';
+    fehler[feld] = 'Bitte als Betrag schreiben, zum Beispiel 1.234,56.';
   } else if (betrag < 0) {
-    fehler[feld] = 'Der Betrag kann nicht negativ sein.';
+    fehler[feld] = 'Ein Betrag kann nicht negativ sein.';
   }
 }
 
 /**
  * Validiert einen einzelnen Schritt und liefert Fehlermeldungen je Feld.
- * Reine Funktion, damit sie ohne Browser testbar ist.
+ * `belehrungsCheck` steuert, ob Schritt 5 die Eignungs-Fragen (Kanzlei) oder
+ * die Unterlagen-Checkliste (Verbraucher, keine Pflichtfelder) enthält.
  */
-export function validiereSchritt(schritt: Schritt, draft: CaseDraft): Fehlerliste {
+export function validiereSchritt(
+  schritt: Schritt,
+  draft: CaseDraft,
+  belehrungsCheck: boolean = VARIANTE.belehrungsCheck,
+): Fehlerliste {
   const fehler: Fehlerliste = {};
 
   switch (schritt) {
     case 'kontakt': {
       if (draft.name.trim() === '') {
-        fehler['name'] = 'Bitte geben Sie Ihren Namen an.';
+        fehler['name'] = 'Bitte Ihren Namen eintragen.';
       }
       if (draft.email.trim() === '') {
-        fehler['email'] = 'Bitte geben Sie Ihre E-Mail-Adresse an.';
+        fehler['email'] = 'Bitte Ihre E-Mail-Adresse eintragen.';
       } else if (!EMAIL_MUSTER.test(draft.email.trim())) {
         fehler['email'] = 'Diese E-Mail-Adresse sieht nicht vollständig aus.';
       }
@@ -190,19 +210,19 @@ export function validiereSchritt(schritt: Schritt, draft: CaseDraft): Fehlerlist
     }
     case 'vertrag': {
       if (draft.versicherer.trim() === '') {
-        fehler['versicherer'] = 'Bitte den Versicherer angeben – der Name auf der Police genügt.';
+        fehler['versicherer'] = 'Bitte den Versicherer eintragen – der Name auf der Police reicht.';
       }
       if (draft.vertragsart === '') {
         fehler['vertragsart'] = 'Bitte die Vertragsart auswählen.';
       }
       if (!MONAT_MUSTER.test(draft.beginn)) {
-        fehler['beginn'] = 'Bitte Monat und Jahr des Vertragsbeginns angeben.';
+        fehler['beginn'] = 'Bitte Monat und Jahr des Beginns angeben.';
       }
       if (draft.ende !== '' && !MONAT_MUSTER.test(draft.ende)) {
         fehler['ende'] = 'Bitte Monat und Jahr angeben oder das Feld leer lassen.';
       }
       if (draft.status === '') {
-        fehler['status'] = 'Bitte den aktuellen Stand des Vertrags auswählen.';
+        fehler['status'] = 'Bitte auswählen, wie es um den Vertrag steht.';
       } else if (draft.status !== 'laufend' && !MONAT_MUSTER.test(draft.statusDatum)) {
         fehler['statusDatum'] = 'Bitte angeben, seit wann bzw. zu wann das gilt (Monat und Jahr).';
       }
@@ -218,11 +238,11 @@ export function validiereSchritt(schritt: Schritt, draft: CaseDraft): Fehlerlist
         'erstbeitrag',
         draft.erstbeitrag,
         erstbeitragPflicht,
-        'Bitte Erstbeitrag oder aktuellen Beitrag angeben – eines von beiden genügt.',
+        'Bitte den ersten oder den heutigen Beitrag eintragen – einer reicht.',
       );
       pruefeBetragsfeld(fehler, 'aktuellerBeitrag', draft.aktuellerBeitrag, false, '');
       if (draft.dynamik === '') {
-        fehler['dynamik'] = 'Bitte angeben, ob der Vertrag eine Beitragsdynamik hat.';
+        fehler['dynamik'] = 'Bitte angeben, ob der Beitrag jedes Jahr steigt.';
       }
       pruefeBetragsfeld(fehler, 'gesamtsummeLautMitteilung', draft.gesamtsummeLautMitteilung, false, '');
       if (draft.beitragszahlungBis !== '' && !MONAT_MUSTER.test(draft.beitragszahlungBis)) {
@@ -233,30 +253,33 @@ export function validiereSchritt(schritt: Schritt, draft: CaseDraft): Fehlerlist
     case 'werte': {
       pruefeBetragsfeld(fehler, 'rueckkaufswert', draft.rueckkaufswert, false, '');
       if (draft.auszahlungenErhalten === '') {
-        fehler['auszahlungenErhalten'] = 'Bitte auswählen, ob Sie bereits Auszahlungen erhalten haben.';
+        fehler['auszahlungenErhalten'] = 'Bitte auswählen, ob Sie schon Geld ausgezahlt bekommen haben.';
       } else if (draft.auszahlungenErhalten === 'ja') {
         pruefeBetragsfeld(
           fehler,
           'auszahlungenSumme',
           draft.auszahlungenSumme,
           true,
-          'Bitte die Summe der erhaltenen Auszahlungen angeben – eine Schätzung genügt.',
+          'Bitte die Summe der Auszahlungen eintragen – geschätzt reicht.',
         );
       }
       if (draft.policendarlehen === '') {
         fehler['policendarlehen'] = 'Bitte auswählen, ob ein Policendarlehen besteht oder bestand.';
       }
       if (draft.buzEnthalten === '') {
-        fehler['buzEnthalten'] = 'Bitte auswählen, ob eine Berufsunfähigkeits-Zusatzversicherung enthalten ist.';
+        fehler['buzEnthalten'] = 'Bitte auswählen, ob ein Berufsunfähigkeitsschutz enthalten ist.';
       }
       break;
     }
     case 'eignung': {
+      if (!belehrungsCheck) {
+        break; // Unterlagen-Checkliste: keine Pflichtfelder.
+      }
       if (draft.zustandekommen === '') {
-        fehler['zustandekommen'] = 'Bitte auswählen – „unbekannt“ ist eine gültige Antwort.';
+        fehler['zustandekommen'] = 'Bitte auswählen – „weiß ich nicht“ ist eine gültige Antwort.';
       }
       if (draft.belehrungVorhanden === '') {
-        fehler['belehrungVorhanden'] = 'Bitte auswählen – „unbekannt“ ist eine gültige Antwort.';
+        fehler['belehrungVorhanden'] = 'Bitte auswählen – „weiß ich nicht“ ist eine gültige Antwort.';
       }
       if (draft.belehrungVorhanden === 'ja') {
         if (draft.belehrungFrist === '') {
@@ -266,18 +289,17 @@ export function validiereSchritt(schritt: Schritt, draft: CaseDraft): Fehlerlist
           fehler['belehrungForm'] = 'Bitte die Form laut Belehrung auswählen.';
         }
         if (draft.hervorhebung === '') {
-          fehler['hervorhebung'] = 'Bitte auswählen – „unbekannt“ ist eine gültige Antwort.';
+          fehler['hervorhebung'] = 'Bitte auswählen – „weiß ich nicht“ ist eine gültige Antwort.';
         }
       }
       if (draft.abgetretenOderBeliehen === '') {
-        fehler['abgetretenOderBeliehen'] = 'Bitte auswählen – „unbekannt“ ist eine gültige Antwort.';
+        fehler['abgetretenOderBeliehen'] = 'Bitte auswählen – „weiß ich nicht“ ist eine gültige Antwort.';
       }
       break;
     }
     case 'zusammenfassung': {
       if (!draft.einwilligungDatenschutz) {
-        fehler['einwilligungDatenschutz'] =
-          'Ohne diese Einwilligung können wir Ihre Angaben nicht verarbeiten.';
+        fehler['einwilligungDatenschutz'] = 'Ohne dieses Ja dürfen wir nicht rechnen.';
       }
       break;
     }
@@ -287,10 +309,14 @@ export function validiereSchritt(schritt: Schritt, draft: CaseDraft): Fehlerlist
 }
 
 /** Prüft alle Schritte bis einschließlich `bisSchritt`. */
-export function validiereBis(bisSchritt: Schritt, draft: CaseDraft): Fehlerliste {
+export function validiereBis(
+  bisSchritt: Schritt,
+  draft: CaseDraft,
+  belehrungsCheck: boolean = VARIANTE.belehrungsCheck,
+): Fehlerliste {
   const fehler: Fehlerliste = {};
   for (const schritt of SCHRITTE) {
-    Object.assign(fehler, validiereSchritt(schritt, draft));
+    Object.assign(fehler, validiereSchritt(schritt, draft, belehrungsCheck));
     if (schritt === bisSchritt) {
       break;
     }
@@ -312,20 +338,23 @@ export function ladeDraft(): CaseDraft {
     if (typeof geparst !== 'object' || geparst === null) {
       return leererDraft();
     }
-    // Nur bekannte Felder übernehmen, damit alte/fremde Einträge nicht stören.
-    const basis = leererDraft();
-    const quelle = geparst as Record<string, unknown>;
-    for (const schluessel of Object.keys(basis) as (keyof CaseDraft)[]) {
-      const wert = quelle[schluessel];
-      if (typeof wert === typeof basis[schluessel]) {
-        (basis as unknown as Record<string, unknown>)[schluessel] = wert;
-      }
-    }
-    basis.version = 1;
-    return basis;
+    return uebernehmeBekannteFelder(geparst as Record<string, unknown>);
   } catch {
     return leererDraft();
   }
+}
+
+/** Nur bekannte Felder mit passendem Typ übernehmen (localStorage, API). */
+export function uebernehmeBekannteFelder(quelle: Record<string, unknown>): CaseDraft {
+  const basis = leererDraft();
+  for (const schluessel of Object.keys(basis) as (keyof CaseDraft)[]) {
+    const wert = quelle[schluessel];
+    if (typeof wert === typeof basis[schluessel]) {
+      (basis as unknown as Record<string, unknown>)[schluessel] = wert;
+    }
+  }
+  basis.version = 1;
+  return basis;
 }
 
 export function speichereDraft(draft: CaseDraft): void {

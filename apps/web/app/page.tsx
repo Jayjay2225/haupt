@@ -1,205 +1,186 @@
 import Link from 'next/link';
 import { BRAND } from '@/config/brand';
-import { activeModel } from '@/config/business';
+import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS } from '@/config/business';
+import { VARIANTE } from '@/config/variante';
+import { Ampel } from '@/components/Ampel';
+import { Schnellcheck } from '@/components/Schnellcheck';
+import { TransparenzKasten } from '@/components/TransparenzKasten';
+import { alleVersichererNamen } from '@/lib/insurers-data';
+import { musterfaelle } from '@/lib/musterfall';
+
+const euroGerundet = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 
 export default function Startseite() {
+  const namen = alleVersichererNamen();
+  const faelle = musterfaelle();
+
   return (
     <>
       <section className="hero">
-        <div className="container">
-          <h1>
-            Lohnt sich die Rückabwicklung Ihrer Lebens- oder Rentenversicherung?
-          </h1>
-          <p className="untertitel">
-            {BRAND.name} erstellt eine strukturierte Kurzprüfung: Wie hoch wäre der
-            Rückabwicklungswert nach einem wirksamen Widerspruch, Rücktritt oder Widerruf –
-            geschätzt in drei Szenarien und immer verglichen mit Ihrem aktuellen
-            Rückkaufswert. Ergebnis ist eine Entscheidungsgrundlage für Sie und Ihren
-            Rechtsanwalt, keine Rechtsberatung.
-          </p>
-          <p>
-            <Link href="/rechner" className="knopf">
-              Angaben erfassen
-            </Link>
-          </p>
+        <div className="container hero-raster">
+          <div>
+            <h1>
+              Alte Lebensversicherung? <span className="hervor">Erst rechnen.</span> Dann kündigen.
+            </h1>
+            <p className="untertitel">
+              Kündigen bringt den Rückkaufswert. Ein Widerspruch kann mehr bringen. Wir rechnen es
+              aus – kostenlos, mit klarer Ampel.
+            </p>
+            <p>
+              <strong>Vertrag zwischen 1994 und 2007?</strong> Dann lohnt der Blick. Rot heißt: Finger
+              weg. Das sagen wir Ihnen auch.
+            </p>
+          </div>
+          <Schnellcheck versichererNamen={namen} />
         </div>
       </section>
 
-      <section className="abschnitt" aria-labelledby="ablauf-titel">
+      <section className="abschnitt getoent" aria-labelledby="ablauf-titel">
         <div className="container">
-          <h2 id="ablauf-titel">So funktioniert es</h2>
-          <ol className="kartenreihe">
-            <li className="karte nummeriert">
-              <h3>Angaben erfassen</h3>
+          <h2 id="ablauf-titel">So läuft es</h2>
+          <ol className="schrittliste">
+            <li>
+              <h3>Police eingeben</h3>
+              <p>Versicherer, Beginn, Beitrag, Rückkaufswert. Die Standmitteilung hilft. Fünf Minuten.</p>
+            </li>
+            <li>
+              <h3>Ampel lesen</h3>
               <p>
-                Sie beantworten Schritt für Schritt Fragen zu Vertrag, Beiträgen und Werten.
-                Eine aktuelle Standmitteilung hilft, ist aber nicht Voraussetzung – Ihre
-                Eingaben werden zwischengespeichert.
+                Grün, Gelb oder Rot – mit Erklärung in Worten. Der Rückkaufswert ist immer der
+                Vergleich. Kostenlos.
               </p>
             </li>
-            <li className="karte nummeriert">
-              <h3>Prüfung und Berechnung</h3>
+            <li>
+              <h3>Bericht holen. Oder lassen.</h3>
               <p>
-                Ein Eignungs-Check ordnet ein, ob Ihr Vertrag überhaupt infrage kommt. Die
-                Berechnung schätzt den Rückabwicklungswert in drei Szenarien (Min / Basis /
-                Max) – jede verwendete Kennzahl mit Quelle.
-              </p>
-            </li>
-            <li className="karte nummeriert">
-              <h3>Schriftliche Kurzprüfung</h3>
-              <p>
-                Sie erhalten das Ergebnis als nachvollziehbaren Bericht mit Jahrestabelle,
-                Annahmen und dem Vergleich zum Rückkaufswert – geeignet als Grundlage für
-                eine anwaltliche Prüfung.
+                Wer die Zahlen will, bestellt den Bericht: Spanne, Jahrestabelle, Quellen. Für die
+                Kanzlei – oder für die Schublade.
               </p>
             </li>
           </ol>
         </div>
       </section>
 
-      <section className="abschnitt getoent" id="methodik" aria-labelledby="methodik-titel">
+      <section className="abschnitt" aria-labelledby="musterfall-titel">
         <div className="container">
-          <h2 id="methodik-titel">Unsere Methodik: vorsichtig statt vollmundig</h2>
-          <p>
-            Viele Hochrechnungen zinsen einfach den vollen Beitrag mit hohen Renditen auf.
-            Wir rechnen bewusst anders – orientiert an der Rechtsprechung des
-            Bundesgerichtshofs zur Rückabwicklung von Versicherungsverträgen:
+          <h2 id="musterfall-titel">Zwei Musterfälle. Einmal Grün, einmal Rot.</h2>
+          <p className="schmal">
+            Beide aus unserem Rechenkern mit den Branchenwerten des Gesamtverbands der
+            Versicherer. Werte gerundet. Ein Musterfall ist keine Vorhersage für Ihren Vertrag.
           </p>
-          <ul className="punkteliste">
-            <li>
-              <strong>Nutzungen nur auf den Sparanteil:</strong> Vom Beitrag werden Risiko-,
-              Abschluss- und Verwaltungskostenanteile abgezogen; nur der verbleibende
-              Sparanteil wird verzinst.
-            </li>
-            <li>
-              <strong>Maßstab ist die Nettoverzinsung Ihres Versicherers:</strong> also das
-              tatsächliche Kapitalanlageergebnis der jeweiligen Gesellschaft im jeweiligen
-              Jahr – nicht eine pauschale Wunschrendite.
-            </li>
-            <li>
-              <strong>Drei Szenarien statt einer Schlagzeile:</strong> Min, Basis und Max
-              zeigen die Bandbreite; jede Kennzahl trägt ihre Quelle mit Abrufdatum.
-            </li>
-            <li>
-              <strong>Ehrlicher Vergleich:</strong> Erhaltene Leistungen und der aktuelle
-              Rückkaufswert werden gegengerechnet. Bringt die Rückabwicklung wirtschaftlich
-              voraussichtlich nichts, sagen wir das klar.
-            </li>
-          </ul>
-          <p>
-            Alle Werte sind Schätzungen unter offengelegten Annahmen. Die genauen
-            Fundstellen der Rechtsprechung und die verwendeten Datenreihen werden im Bericht
-            ausgewiesen.
-          </p>
-        </div>
-      </section>
-
-      <section className="abschnitt" aria-labelledby="einordnung-titel">
-        <div className="container">
-          <h2 id="einordnung-titel">Was {BRAND.name} ist – und was nicht</h2>
-          <div className="kartenreihe" role="list">
-            <div className="karte" role="listitem">
-              <h3>Das leistet die Kurzprüfung</h3>
-              <ul className="punkteliste">
-                <li>Strukturierte Erfassung Ihrer Vertragsdaten</li>
-                <li>Eignungs-Check mit Ampel und Begründung als Hinweis</li>
-                <li>Geschätzter Rückabwicklungswert in drei Szenarien</li>
-                <li>Vergleich mit Rückkaufswert und erhaltenen Leistungen</li>
-              </ul>
-            </div>
-            <div className="karte" role="listitem">
-              <h3>Das leistet sie nicht</h3>
-              <ul className="punkteliste">
-                <li>Keine Rechtsberatung im Einzelfall und keine Vertretung</li>
-                <li>Keine Erfolgs- oder Auszahlungsversprechen</li>
-                <li>Keine Empfehlung, den Vertrag zu kündigen oder zu behalten</li>
-                <li>Keine steuerliche Beratung</li>
-              </ul>
-            </div>
+          <div className="hero-raster">
+            {faelle.map((fall) => (
+              <article key={fall.id} className="wert-karte">
+                <Ampel zustand={fall.ampel.ampel} beschriftung={fall.ampel.titel} />
+                <h3 style={{ marginTop: '1rem' }}>{fall.titel}</h3>
+                <p className="erklaerung">{fall.beschreibung}</p>
+                <p style={{ margin: '0.25rem 0' }}>
+                  Rückkaufswert: <strong className="betrag">rund {euroGerundet.format(fall.rueckkaufswert)}</strong>
+                </p>
+                <p style={{ margin: '0.25rem 0' }}>
+                  Widerspruch, mittleres Szenario:{' '}
+                  <strong className="betrag">rund {euroGerundet.format(fall.basis)}</strong>
+                  <br />
+                  <span className="erklaerung">
+                    Musterfall, Schätzung mit Bandbreite: {euroGerundet.format(fall.min)} bis{' '}
+                    {euroGerundet.format(fall.max)}
+                  </span>
+                </p>
+                <p style={{ marginBottom: 0 }}>{fall.ampel.text}</p>
+              </article>
+            ))}
           </div>
-          <p className="hinweis neutral">
-            Ob ein Widerspruch, Rücktritt oder Widerruf im Einzelfall wirksam ist, kann nur
-            ein Rechtsanwalt beurteilen. Unsere Kurzprüfung bereitet diese Prüfung
-            strukturiert vor.
-          </p>
         </div>
       </section>
 
-      <section className="abschnitt getoent" aria-labelledby="modell-titel">
+      <section className="abschnitt getoent" aria-labelledby="kosten-titel">
         <div className="container schmal">
-          <h2 id="modell-titel">Kosten und Ablauf</h2>
-          <p>{activeModel.preisHinweis}</p>
+          <h2 id="kosten-titel">Was kostet es?</h2>
           <p>
-            Details regeln die <Link href="/agb">AGB</Link>; der Umgang mit Ihren Daten ist
-            in der <Link href="/datenschutz">Datenschutzerklärung</Link> beschrieben.
+            <strong>Die Ampel: nichts.</strong> Sie sehen Grün, Gelb oder Rot und eine Einordnung in
+            Worten. Ohne Konto, ohne Kleingedrucktes.
+          </p>
+          {VARIANTE.berichtKostenpflichtig && (
+            <p>
+              <strong>
+                Der Bericht: {BERICHT_PREIS_BRUTTO_EUR} € {BERICHT_PREIS_HINWEIS}.
+              </strong>{' '}
+              Darin: die Spanne in Euro, die Rechnung Jahr für Jahr, jede Zahl mit Quelle, die
+              Gegenposition des Versicherers. Kein Abo. <Link href="/bericht">Was im Bericht steht</Link>
+            </p>
+          )}
+          <p className="erklaerung">
+            Ob Sie danach eine Kanzlei beauftragen, entscheiden Sie. Wir verdienen daran nichts.
           </p>
         </div>
       </section>
 
-      <section className="abschnitt faq" id="faq" aria-labelledby="faq-titel">
+      <section className="abschnitt" aria-labelledby="transparenz-titel">
         <div className="container schmal">
-          <h2 id="faq-titel">Häufige Fragen</h2>
+          <TransparenzKasten />
+        </div>
+      </section>
+
+      <section className="abschnitt getoent faq" id="fragen" aria-labelledby="fragen-titel">
+        <div className="container schmal">
+          <h2 id="fragen-titel">Fragen</h2>
           <details>
-            <summary>Für welche Verträge kommt eine Rückabwicklung in Betracht?</summary>
+            <summary>Was ist ein Widerspruch – und warum bringt er oft mehr?</summary>
             <p>
-              Im Schwerpunkt für Kapitallebens- und private Rentenversicherungen (auch
-              fondsgebunden), die zwischen dem 29.07.1994 und dem 31.12.2007 im sogenannten
-              Policenmodell geschlossen wurden und deren Widerspruchsbelehrung fehlerhaft
-              war. Für Verträge ab 2008 gilt ein anderes Widerrufsrecht mit in der Regel
-              deutlich geringeren Folgen; Verträge vor dem 29.07.1994 und reine
-              Risikolebensversicherungen sind kein Fall. Der Eignungs-Check ordnet Ihren
-              Vertrag ein – vereinfacht und ohne rechtliche Bewertung des Einzelfalls.
+              Viele Verträge von 1994 bis 2007 wurden ohne richtige Belehrung über das
+              Widerspruchsrecht geschlossen. Dann kann der Vertrag Jahre später noch rückabgewickelt
+              werden: Beiträge zurück, abzüglich des Schutzes, den Sie hatten, plus die Zinsen, die
+              der Versicherer mit Ihrem Geld verdient hat. Das ist oft mehr als der Rückkaufswert –
+              aber nicht immer. Deshalb rechnen wir erst.
+            </p>
+          </details>
+          <details>
+            <summary>Woher kommen Ihre Zahlen?</summary>
+            <p>
+              Aus Geschäftsberichten der Versicherer und den Statistiken von Aufsicht und Verband.
+              Jede Zahl im Bericht trägt ihre Quelle mit Datum. Fehlt ein Wert, nehmen wir den
+              Branchendurchschnitt und schreiben das dazu. Wir erfinden keine Zahlen.
+            </p>
+          </details>
+          <details>
+            <summary>Ist die Ampel eine Rechtsberatung?</summary>
+            <p>
+              Nein. Wir rechnen und ordnen ein. Ob ein Widerspruch in Ihrem Fall wirksam ist,
+              prüft eine Kanzlei. Unser Ergebnis begründet keinen Anspruch in bestimmter Höhe – es
+              ist eine Schätzung mit Bandbreite.
+            </p>
+          </details>
+          <details>
+            <summary>Was, wenn die Ampel Rot zeigt?</summary>
+            <p>
+              Dann sagen wir es klar: Kündigen bringt hier voraussichtlich nicht weniger als der
+              Widerspruch. Sie sparen sich Anwaltskosten und Ärger. Rot ist ein Ergebnis, kein
+              Misserfolg.
             </p>
           </details>
           <details>
             <summary>Welche Unterlagen brauche ich?</summary>
             <p>
-              Hilfreich sind Police samt Verbraucherinformationen (wegen der Belehrung), die
-              letzte Standmitteilung und Angaben zu Beiträgen und Rückkaufswert. Sie können
-              die Erfassung auch mit Näherungswerten beginnen und Unterlagen später
-              nachreichen – fehlende Werte werden im Ergebnis als Schätzung markiert.
-            </p>
-          </details>
-          <details>
-            <summary>Woher kommen die Zahlen in der Berechnung?</summary>
-            <p>
-              Aus öffentlich verfügbaren Quellen wie Geschäftsberichten der Versicherer und
-              Aufsichts- bzw. Verbandsstatistiken. Jede Kennzahl wird mit Quelle und
-              Abrufdatum ausgewiesen; fehlt ein Wert, verwenden wir den Branchendurchschnitt
-              und kennzeichnen ihn als Schätzung. Werte werden nie erfunden.
-            </p>
-          </details>
-          <details>
-            <summary>Ist das Ergebnis verbindlich?</summary>
-            <p>
-              Nein. Das Ergebnis ist eine Schätzung mit Bandbreite unter offengelegten
-              Annahmen. Es ersetzt weder die anwaltliche Prüfung noch die Auskunft des
-              Versicherers und begründet keinen Anspruch in bestimmter Höhe.
-            </p>
-          </details>
-          <details>
-            <summary>Verliere ich durch die Kurzprüfung meinen Versicherungsschutz?</summary>
-            <p>
-              Nein. Die Kurzprüfung ist eine reine Auswertung Ihrer Angaben und verändert
-              Ihren Vertrag nicht. Ob Sie anschließend etwas unternehmen – und was –,
-              entscheiden Sie, sinnvollerweise gemeinsam mit einem Rechtsanwalt. Der Bericht
-              weist auch darauf hin, was bei einer Rückabwicklung aufgegeben würde, etwa
-              Garantiezins und Versicherungsschutz.
+              Für die Ampel: die letzte Standmitteilung. Für die Kanzlei später: Police,
+              Begleitschreiben und Versicherungsbedingungen. Fehlt etwas, muss der Versicherer
+              Zweitschriften liefern. Wie Sie die anfordern, steht im Ergebnis.
             </p>
           </details>
           <details>
             <summary>Was passiert mit meinen Daten?</summary>
             <p>
-              Ihre Eingaben werden zunächst nur in Ihrem Browser zwischengespeichert. Eine
-              Weitergabe an Dritte erfolgt ausschließlich mit Ihrer ausdrücklichen
-              Einwilligung. Einzelheiten regelt die{' '}
-              <Link href="/datenschutz">Datenschutzerklärung</Link>.
+              Ihre Angaben bleiben auf Ihrem Gerät, bis Sie die Ampel anfordern. Dann rechnen wir
+              einmal durch und speichern nichts. Weitergegeben wird nur, wenn Sie das ausdrücklich
+              wollen. Alles dazu in der <Link href="/datenschutz">Datenschutzerklärung</Link>.
             </p>
           </details>
-          <p>
-            <Link href="/rechner" className="knopf">
-              Jetzt Angaben erfassen
+          <p style={{ marginTop: '1.5rem' }}>
+            <Link href="/rechner" className="knopf haupt">
+              Jetzt rechnen – kostenlos
             </Link>
+          </p>
+          <p className="erklaerung">
+            {BRAND.name} · Anbieter: {BRAND.anbieter}
           </p>
         </div>
       </section>

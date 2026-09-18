@@ -1,5 +1,6 @@
 'use client';
 
+import { VARIANTE } from '@/config/variante';
 import type { CaseDraft } from '@/lib/draft';
 import { formatEuro, formatMonatDe, parseDecimalDe } from '@/lib/format';
 import {
@@ -7,21 +8,20 @@ import {
   BELEHRUNG_FRIST_LABEL,
   JNU_LABEL,
   STATUS_LABEL,
+  UNTERLAGEN_FELDER,
+  UNTERLAGEN_LABEL,
   VERTRAGSART_LABEL,
   ZAHLWEISE_LABEL,
   ZUSTANDEKOMMEN_LABEL,
   labelOderLeer,
 } from '@/lib/labels';
 
-function betragAnzeige(eingabe: string, zusatz = ''): string {
+function betragAnzeige(eingabe: string): string {
   if (eingabe.trim() === '') {
     return '–';
   }
   const wert = parseDecimalDe(eingabe);
-  if (wert === null) {
-    return eingabe;
-  }
-  return zusatz === '' ? formatEuro(wert) : `${formatEuro(wert)} ${zusatz}`;
+  return wert === null ? eingabe : formatEuro(wert);
 }
 
 function monatAnzeige(isoMonat: string): string {
@@ -53,66 +53,50 @@ export function ZusammenfassungAnsicht({ draft }: { draft: CaseDraft }) {
   const kontakt: Zeile[] = [
     { begriff: 'Name', wert: draft.name || '–' },
     { begriff: 'E-Mail', wert: draft.email || '–' },
-    { begriff: 'Telefon (optional)', wert: draft.telefon || '–' },
+    { begriff: 'Telefon (freiwillig)', wert: draft.telefon || '–' },
   ];
 
   const vertrag: Zeile[] = [
     { begriff: 'Versicherer (laut Police)', wert: draft.versicherer || '–' },
     { begriff: 'Vertragsart', wert: labelOderLeer(draft.vertragsart, VERTRAGSART_LABEL) },
-    { begriff: 'Vertragsbeginn', wert: monatAnzeige(draft.beginn) },
-    { begriff: 'Vertragsende (geplant)', wert: monatAnzeige(draft.ende) },
-    { begriff: 'Stand des Vertrags', wert: labelOderLeer(draft.status, STATUS_LABEL) },
+    { begriff: 'Beginn', wert: monatAnzeige(draft.beginn) },
+    { begriff: 'Geplantes Ende', wert: monatAnzeige(draft.ende) },
+    { begriff: 'Stand heute', wert: labelOderLeer(draft.status, STATUS_LABEL) },
   ];
   if (draft.status !== '' && draft.status !== 'laufend') {
     vertrag.push({ begriff: 'Seit / zum', wert: monatAnzeige(draft.statusDatum) });
   }
 
-  const dmZusatz = draft.erstbeitragWaehrung === 'DM' ? '(Angabe in DM)' : '';
   const beitraege: Zeile[] = [
     { begriff: 'Zahlweise', wert: labelOderLeer(draft.zahlweise, ZAHLWEISE_LABEL) },
     {
-      begriff: 'Erstbeitrag',
+      begriff: 'Erster Beitrag',
       wert:
         draft.erstbeitragWaehrung === 'DM' && draft.erstbeitrag.trim() !== ''
-          ? `${draft.erstbeitrag} DM ${dmZusatz}`
+          ? `${draft.erstbeitrag} DM (wird umgerechnet)`
           : betragAnzeige(draft.erstbeitrag),
     },
-    { begriff: 'Aktueller Beitrag', wert: betragAnzeige(draft.aktuellerBeitrag) },
-    { begriff: 'Beitragsdynamik', wert: labelOderLeer(draft.dynamik, JNU_LABEL) },
-    {
-      begriff: 'Gesamtsumme laut Standmitteilung',
-      wert: betragAnzeige(draft.gesamtsummeLautMitteilung),
-    },
-    { begriff: 'Beitragszahlung bis', wert: monatAnzeige(draft.beitragszahlungBis) },
+    { begriff: 'Heutiger Beitrag', wert: betragAnzeige(draft.aktuellerBeitrag) },
+    { begriff: 'Beitrag steigt jährlich', wert: labelOderLeer(draft.dynamik, JNU_LABEL) },
+    { begriff: 'Eingezahlt laut Standmitteilung', wert: betragAnzeige(draft.gesamtsummeLautMitteilung) },
+    { begriff: 'Beiträge gezahlt bis', wert: monatAnzeige(draft.beitragszahlungBis) },
   ];
 
   const werte: Zeile[] = [
-    { begriff: 'Aktueller Rückkaufswert', wert: betragAnzeige(draft.rueckkaufswert) },
-    {
-      begriff: 'Bereits Auszahlungen erhalten',
-      wert: labelOderLeer(draft.auszahlungenErhalten, JNU_LABEL),
-    },
+    { begriff: 'Rückkaufswert heute', wert: betragAnzeige(draft.rueckkaufswert) },
+    { begriff: 'Schon Geld bekommen', wert: labelOderLeer(draft.auszahlungenErhalten, JNU_LABEL) },
   ];
   if (draft.auszahlungenErhalten === 'ja') {
     werte.push({ begriff: 'Summe der Auszahlungen', wert: betragAnzeige(draft.auszahlungenSumme) });
   }
   werte.push(
     { begriff: 'Policendarlehen', wert: labelOderLeer(draft.policendarlehen, JNU_LABEL) },
-    {
-      begriff: 'Berufsunfähigkeits-Zusatzversicherung',
-      wert: labelOderLeer(draft.buzEnthalten, JNU_LABEL),
-    },
+    { begriff: 'Berufsunfähigkeitsschutz dabei', wert: labelOderLeer(draft.buzEnthalten, JNU_LABEL) },
   );
 
   const eignung: Zeile[] = [
-    {
-      begriff: 'Zustandekommen des Vertrags',
-      wert: labelOderLeer(draft.zustandekommen, ZUSTANDEKOMMEN_LABEL),
-    },
-    {
-      begriff: 'Belehrung in den Unterlagen gefunden',
-      wert: labelOderLeer(draft.belehrungVorhanden, JNU_LABEL),
-    },
+    { begriff: 'Zustandekommen des Vertrags', wert: labelOderLeer(draft.zustandekommen, ZUSTANDEKOMMEN_LABEL) },
+    { begriff: 'Belehrung gefunden', wert: labelOderLeer(draft.belehrungVorhanden, JNU_LABEL) },
   ];
   if (draft.belehrungVorhanden === 'ja') {
     eignung.push(
@@ -121,18 +105,24 @@ export function ZusammenfassungAnsicht({ draft }: { draft: CaseDraft }) {
       { begriff: 'Drucktechnisch hervorgehoben', wert: labelOderLeer(draft.hervorhebung, JNU_LABEL) },
     );
   }
-  eignung.push({
-    begriff: 'Vertrag abgetreten oder beliehen',
-    wert: labelOderLeer(draft.abgetretenOderBeliehen, JNU_LABEL),
-  });
+  eignung.push({ begriff: 'Abgetreten oder beliehen', wert: labelOderLeer(draft.abgetretenOderBeliehen, JNU_LABEL) });
+
+  const unterlagen: Zeile[] = UNTERLAGEN_FELDER.map((feld) => ({
+    begriff: UNTERLAGEN_LABEL[feld],
+    wert: draft[feld] ? 'vorhanden' : 'fehlt noch',
+  }));
 
   return (
     <div>
       <Tabelle titel="Kontakt" zeilen={kontakt} />
-      <Tabelle titel="Vertrag" zeilen={vertrag} />
+      <Tabelle titel="Police" zeilen={vertrag} />
       <Tabelle titel="Beiträge" zeilen={beitraege} />
-      <Tabelle titel="Werte und Leistungen" zeilen={werte} />
-      <Tabelle titel="Eignungs-Check" zeilen={eignung} />
+      <Tabelle titel="Werte" zeilen={werte} />
+      {VARIANTE.belehrungsCheck ? (
+        <Tabelle titel="Eignungs-Check" zeilen={eignung} />
+      ) : (
+        <Tabelle titel="Unterlagen" zeilen={unterlagen} />
+      )}
     </div>
   );
 }

@@ -104,7 +104,7 @@ for (const beispiel of beispiele) {
   }
   const eligibility = pruefeEignung(beispiel.eligibility, regelwerk);
   const bericht: BerichtInput = {
-    marke: '[MARKE]',
+    marke: 'Renten-Rettung',
     aktenzeichen: beispiel.aktenzeichen,
     kundenname: beispiel.kundenname,
     erstelltAm: HEUTE,
@@ -117,7 +117,7 @@ for (const beispiel of beispiele) {
   const basisname = `Kurzpruefung_${beispiel.aktenzeichen}_${HEUTE}`;
   writeFileSync(resolve(ausgabe, `${basisname}.html`), html);
   await htmlZuPdf(html, resolve(ausgabe, `${basisname}.pdf`), {
-    marke: '[MARKE]',
+    marke: 'Renten-Rettung',
     aktenzeichen: beispiel.aktenzeichen,
     kundenname: beispiel.kundenname,
     datum: formatDatum(HEUTE),

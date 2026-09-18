@@ -1,13 +1,16 @@
 'use client';
 
 /**
- * Mehrstufiges Rechner-Formular (Prompt 6): mobil-first, Zwischenspeicherung
- * im Browser (localStorage), Validierung je Schritt. Abgesendet wird in der
- * Vorabversion nur lokal – Persistenz, E-Mail-Versand und Auswertung folgen
- * (siehe docs/STATUS.md).
+ * Mehrstufiges Rechner-Formular: mobil zuerst, Hauptknopf unten fixiert,
+ * Zwischenspeicherung im Browser, Validierung je Schritt. Abgesendet wird
+ * zustandslos an /api/vorschau (Ergebnis-Seite).
+ *
+ * „Später am Rechner fortsetzen“ (Link per E-Mail) ist vorbereitet, aber
+ * abgeschaltet, bis Persistenz existiert (config/business.ts FORTSETZEN_AKTIV).
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { FORTSETZEN_AKTIV } from '@/config/business';
 import {
   SCHRITTE,
   SCHRITT_TITEL,
@@ -19,6 +22,7 @@ import {
   type Fehlerliste,
   type Schritt,
 } from '@/lib/draft';
+import { erzeugeFortsetzenAnfrage } from '@/lib/fortsetzen';
 import {
   SchrittBeitraege,
   SchrittEignung,
@@ -44,6 +48,7 @@ export function RechnerFunnel({ versichererNamen }: { versichererNamen: string[]
   const [schrittIndex, setSchrittIndex] = useState(0);
   const [fehler, setFehler] = useState<Fehlerliste>({});
   const [geladen, setGeladen] = useState(false);
+  const [fortsetzenHinweis, setFortsetzenHinweis] = useState<string | null>(null);
 
   useEffect(() => {
     setDraft(ladeDraft());
@@ -72,23 +77,17 @@ export function RechnerFunnel({ versichererNamen }: { versichererNamen: string[]
   );
 
   if (!geladen) {
-    return <p>Das Formular wird geladen …</p>;
+    return <p>Das Formular lädt …</p>;
   }
 
   const schritt = SCHRITTE[schrittIndex] ?? 'kontakt';
   const istLetzter = schrittIndex === SCHRITTE.length - 1;
   const AktuellerSchritt = SCHRITT_KOMPONENTEN[schritt];
 
-  function zeigeFehler(neueFehler: Fehlerliste): boolean {
-    setFehler(neueFehler);
-    if (Object.keys(neueFehler).length === 0) {
-      return false;
-    }
-    return true;
-  }
-
   function weiter() {
-    if (zeigeFehler(validiereSchritt(schritt, draft))) {
+    const neueFehler = validiereSchritt(schritt, draft);
+    setFehler(neueFehler);
+    if (Object.keys(neueFehler).length > 0) {
       return;
     }
     setSchrittIndex((index) => Math.min(index + 1, SCHRITTE.length - 1));
@@ -102,7 +101,6 @@ export function RechnerFunnel({ versichererNamen }: { versichererNamen: string[]
   }
 
   function absenden() {
-    // Alle Schritte prüfen; bei Fehlern zum ersten betroffenen Schritt springen.
     for (let index = 0; index < SCHRITTE.length; index += 1) {
       const zuPruefen = SCHRITTE[index] as Schritt;
       const schrittFehler = validiereSchritt(zuPruefen, draft);
@@ -117,6 +115,11 @@ export function RechnerFunnel({ versichererNamen }: { versichererNamen: string[]
     setDraft(abgesendet);
     speichereDraft(abgesendet);
     router.push('/rechner/ergebnis');
+  }
+
+  function spaeterFortsetzen() {
+    const anfrage = erzeugeFortsetzenAnfrage(draft);
+    setFortsetzenHinweis(anfrage.hinweis);
   }
 
   const hatFehler = Object.keys(fehler).length > 0;
@@ -149,7 +152,7 @@ export function RechnerFunnel({ versichererNamen }: { versichererNamen: string[]
         <h2>{SCHRITT_TITEL[schritt]}</h2>
         {hatFehler && (
           <p className="feld-fehler" role="alert">
-            Bitte prüfen Sie die markierten Felder.
+            Bitte die markierten Felder prüfen.
           </p>
         )}
         <AktuellerSchritt draft={draft} fehler={fehler} aendere={aendere} versichererNamen={versichererNamen} />
@@ -159,15 +162,21 @@ export function RechnerFunnel({ versichererNamen }: { versichererNamen: string[]
               Zurück
             </button>
           )}
-          <button type="submit" className="knopf">
-            {istLetzter ? 'Angaben absenden' : 'Weiter'}
+          <button type="submit" className="knopf haupt fix-unten">
+            {istLetzter ? 'Ampel anzeigen' : 'Weiter'}
           </button>
+          {FORTSETZEN_AKTIV && (
+            <button type="button" className="knopf zweitrangig" onClick={spaeterFortsetzen}>
+              Später weitermachen
+            </button>
+          )}
         </div>
+        {fortsetzenHinweis !== null && <p className="erklaerung">{fortsetzenHinweis}</p>}
       </form>
 
       <p className="erklaerung" style={{ marginTop: '1.5rem' }}>
-        Ihre Eingaben werden automatisch in Ihrem Browser zwischengespeichert. Sie können
-        die Seite schließen und später fortfahren.
+        Ihre Eingaben bleiben auf diesem Gerät gespeichert. Sie können die Seite schließen und
+        später hier weitermachen.
       </p>
     </div>
   );

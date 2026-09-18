@@ -1,12 +1,11 @@
 import Link from 'next/link';
 import { BRAND } from '@/config/brand';
+import { VARIANTE } from '@/config/variante';
 
 export function SiteHeader() {
   return (
     <>
-      <p className="vorab-banner">
-        Vorabversion im Aufbau – die Berechnung ist noch nicht freigeschaltet.
-      </p>
+      <p className="vorab-banner">Beta-Version – nur mit Passwort erreichbar, noch nicht freigeschaltet.</p>
       <header className="kopf">
         <div className="container kopf-innen">
           <Link href="/" className="marke">
@@ -14,8 +13,10 @@ export function SiteHeader() {
           </Link>
           <nav className="kopf-nav" aria-label="Hauptnavigation">
             <Link href="/rechner">Rechner</Link>
-            <Link href="/#methodik">Methodik</Link>
-            <Link href="/#faq">Häufige Fragen</Link>
+            {VARIANTE.ankaufHinweis && <Link href="/verkaufen">Verkaufen</Link>}
+            {VARIANTE.transparenzKasten && <Link href="/so-verdienen-wir">So verdienen wir</Link>}
+            <Link href="/#fragen">Fragen</Link>
+            {BRAND.b2bDomain !== '' && <Link href="/unternehmer">Für Unternehmer</Link>}
           </nav>
         </div>
       </header>
