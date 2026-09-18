@@ -1,0 +1,45 @@
+# Annahmen und Festlegungen
+
+Laufende Liste gemäß Grundprinzip 8 (`CLAUDE.md`). Jede fachliche oder technische Annahme wird hier mit Datum geführt; überholte Einträge werden als „ersetzt am …“ markiert, nicht gelöscht.
+
+## 11.09.2026 – Projektaufsatz (Prompt 0)
+
+1. **Marke offen.** „[MARKE]“ bleibt Platzhalter in `CLAUDE.md` und allen Texten, bis Marke, Domain und Absender entschieden sind (laut Prompt-Set vor Prompt 6). Interner Arbeitsname des Monorepos: `lv-rueckabwicklung`; npm-Scope vorläufig `@rueckab/*` – wird bei der Branding-Entscheidung umbenannt.
+2. **Werkzeuge.** pnpm-Workspaces (pnpm 10, über `packageManager` im Root-`package.json` gepinnt), Node ≥ 20, durchgängig ESM. TypeScript strikt (`strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`) – bewusst streng, weil der Rechenkern Geldbeträge deterministisch verarbeiten muss. Tests mit Vitest über eine Root-Konfiguration (`vitest.config.ts`).
+3. **Struktur.** `packages/calc` und `packages/eligibility` sind nur als Paket-Gerüste angelegt (Versionskonstante + Smoke-Test), damit Tooling und Tests von Anfang an laufen. Die fachliche Implementierung folgt strikt Prompt 3 bzw. 4: erst Spezifikation und Testfälle, dann Implementierung. `apps/report` und `apps/web` werden erst mit Prompt 5/6 angelegt, weil dafür `brand/` bzw. die Marken- und Geschäftsmodell-Entscheidungen nötig sind.
+4. **Versionierung.** `calc.version` startet mit `0.1.0` (Konstante `CALC_VERSION` in `packages/calc`); `data.version` wird mit Prompt 2 in `data/insurers.json` eingeführt. Beide erscheinen laut Grundprinzip 7 in jedem Bericht.
+5. **Postgres/Prisma.** Datenbank und Prisma werden erst eingerichtet, wenn die erste Persistenz gebraucht wird (spätestens mit `apps/web`, Prompt 6). Der Rechenkern bleibt frei von I/O.
+
+## 18.09.2026 – Website-Grundgerüst (Prompt 6, vorgezogen)
+
+6. **Reihenfolge-Abweichung auf Nutzerwunsch.** Das Website-Grundgerüst wurde vor den Prompts 1–5 gebaut („webseite weiter bauen“). Alles, was die fehlenden Artefakte braucht, ist als offener Punkt in `docs/STATUS.md` geführt; die Ergebnis-Seite zeigt bewusst keine Zahlen und keine Ampel, bis Regelwerk, Versichererdaten und Rechenkern belastbar vorliegen (Prinzip 1: nie Werte erfinden).
+7. **Geschäftsmodell B vorläufig aktiv.** `apps/web/config/business.ts` legt alle drei Modelle an; aktiv ist vorläufig B (kostenlose Vorschau), weil es ohne Zahlungsintegration lauffähig ist. Die Entscheidung A/B/C bleibt offen und ändert nur die Konfiguration, nicht den Code.
+8. **Vorabversion nicht indexierbar.** `robots: noindex, nofollow` im Layout, dazu ein sichtbarer Vorabversions-Banner, solange Marke, Rechtstexte und Berechnung nicht stehen.
+9. **Kein externes Font-/Asset-Hosting.** Systemschriften und eigenes CSS ohne Framework – Datenminimierung, EU-Hosting-Vorgabe, keine Drittanbieter-Requests.
+10. **Versicherer-Starterliste nur Namen.** `apps/web/data/insurers-starter.ts` enthält ausschließlich Namen (inkl. gängiger Altnamen) für die Eingabehilfe, keine Kennzahlen und keine als geprüft ausgegebene Rechtsnachfolge. Wird durch `data/insurers.json` aus Prompt 2 ersetzt; Freitext bleibt möglich.
+11. **Vorabversion speichert nur lokal.** Der Rechner speichert Eingaben ausschließlich im Browser (localStorage) und überträgt nichts an einen Server; das steht sichtbar im Formular und in der Datenschutz-Entwurfsseite. Persistenz, E-Mail-Versand und Admin folgen mit der Backend-Umsetzung (Postgres/Prisma).
+## 18.09.2026 – Prompts 1–5 (Regelwerk, Daten, Rechenkern, Eignungs-Check, Bericht)
+
+13. **Zitat-Quellenlage.** Leitsätze/Tenores stammen überwiegend aus frei zugänglichen Volltext-Spiegeln (nur die BGH-PM zu IV ZR 353/21 direkt primär); der Wort-für-Wort-Primärabgleich ist Pflichtpunkt vor Go-live (docs/LEGAL-OPEN-QUESTIONS.md Nr. 1) und wird im Bericht offengelegt.
+14. **Höchstzillmersatz korrigiert.** Recherche ergab 40 ‰ bis Ende 2014 und 25 ‰ ab 01.01.2015 (LVRG; § 4 DeckRV) – abweichend vom Beispielwert „35 ‰ / ab 2008“ im Prompt-Set. Die 5-Jahres-Verteilung der Abschlusskosten gilt weiterhin für Vertragsschlüsse ab 2008 (CALC-SPEC 3).
+15. **Golden-Tests gegen echte Daten.** Die Golden-Snapshots frieren data.version 0.1.0 ein; Datenänderungen brechen die Tests bewusst. Beide Beispielverträge rechnen mangels Unternehmenskennzahlen mit dem Branchendurchschnitt (markiert).
+17. **Vorschau-Berechnung serverseitig, zustandslos.** Die Ergebnis-Seite ruft `/api/vorschau` auf; gerechnet wird pro Anfrage ohne Speicherung und ohne personenbezogene Logs. Ohne Datumsangaben zu Auszahlungen wird die Laufzeitmitte unterstellt; BUZ-Anteil und Policendarlehen ohne Betragsangabe werden nicht eingerechnet und als Annahme ausgewiesen. Die frühere Namens-Starterliste ist durch `data/insurers.json` ersetzt (ersetzt Punkt 10).
+16. **PDF-Bericht.** Kopfzeile „Seite x von y“ statt fix „von 7“ (lange Jahrestabellen können umbrechen; die sieben inhaltlichen Abschnitte bleiben). PDF/A-2b ist mit Chromium nicht erreichbar – Konvertierung (z. B. Ghostscript/veraPDF im Deploy) offen. Diagrammfarben aus der validierten dataviz-Referenzpalette, bis `brand/` entschieden ist; TS-Skripte laufen über `tsx`.
+
+12. **Rechtsseiten als gekennzeichnete Entwürfe.** Impressum, Datenschutz, AGB und Widerrufsbelehrung existieren als Platzhalter mit deutlichem Entwurfs-Hinweis und ohne erfundene Anbieterdaten; endgültige Texte entstehen anwaltlich nach der Marken-/Gesellschafts- und Modellentscheidung.
+
+## 18.09.2026 – Prompts 8–9 (Renten-Rettung Privat, Altjahres-Kennzahlen)
+
+18. **Produktvarianten.** Standard ist `privat` (Hybrid-Modell); `NEXT_PUBLIC_PRODUKT_VARIANTE=kanzlei` schaltet die Kanzlei-Lizenz (Belehrungs-Check, Eurobeträge in der Vorschau, neutrale Optik, kein Ankauf-Hinweis, kein Transparenz-Kasten). Die Flags stehen in `apps/web/config/variante.ts`; Marke und Farben in `config/brand.ts` (ersetzt Punkt 8/9 zum Platzhalter „[MARKE]“).
+19. **Preis.** 89 € brutto als Konfigurationswert (`BERICHT_PREIS_BRUTTO_EUR`), Bestellung deaktiviert (`BESTELLUNG_AKTIV = false`), bis Zahlungsanbieter und Anbieter-GmbH feststehen.
+20. **Wirtschaftliche Ampel ohne Euro.** Rot bei Risiko-LV, Regime vor 1994 oder ab 2008 sowie wenn kein Szenario den Rückkaufswert übertrifft; Gelb ohne Rückkaufswert oder wenn nur das Min-Szenario darunter liegt; Grün, wenn schon das Min-Szenario darüber liegt. Größenordnungen werden ausschließlich in Worten genannt (Stufen von „wenige hundert Euro“ bis „ein siebenstelliger Betrag“); Annahmen und Warnungen mit Eurobeträgen werden aus der Vorschau gefiltert.
+21. **Musterfälle** auf der Startseite sind die beiden Golden-Verträge, gerundet (auf 10.000 € über 100.000 €, sonst auf 1.000 €) und als „Musterfall, Schätzung mit Bandbreite“ gekennzeichnet.
+22. **Schriften** (Archivo ExtraBold, Source Sans 3) werden beim Build über `next/font/google` geladen und self-hosted ausgeliefert – kein Aufruf von Google-Servern im Browser.
+23. **Gestaltungsplan** (`docs/DESIGN.md`) gilt bis zur Freigabe als Arbeitsstand; Kontraste gemessen (Marine auf Orange 4,82:1, Orange als Schriftfarbe nur groß). Ampelfarben nur in der Ampel.
+24. **`sites/unternehmer/index.html`** ist ein neutraler Platzhalter; die echte Seite wird nicht aus dem Netz rekonstruiert, sondern von Jack geliefert.
+25. **E-Mail-Texte** liegen ohne Versand vor (`lib/emails.ts`); Mail-Dienst und Double-Opt-in folgen mit der Persistenz.
+26. **BaFin Tabelle 160.** „Reinverzinsung“ wird als Nettoverzinsung der Kapitalanlagen übernommen; Verwaltungskostenquote und Abschlussaufwendungen sind Prozent der gebuchten bzw. verdienten Bruttobeiträge; Werte auf eine Nachkommastelle wie in der Quelle; „-“ und „***“ werden ausgelassen. Die Zuordnung Kurzname → id ist jahresabhängig (`data/raw/bafin/mapping.json`, z. B. Generali Leben bis 2018 → Proxalto, ab 2020 → Generali Deutschland Leben) und registerfest zu verifizieren.
+27. **Min-Szenario ab 2011.** Für Branchenjahre gilt der kleinere Wert aus Branchen-Nettoverzinsung und laufender Branchenverzinsung (letztere liegt erst ab 2011 aus BaFin vor). Golden-Snapshots frieren jetzt data.version 0.2.0 ein (ersetzt Punkt 15).
+28. **Sensitivität.** ±1 Prozentpunkt auf alle Werte vor 2004 als Maß für den Abstand Branche/Unternehmen in den 1990er-Jahren; die tatsächliche Streuung wird nach der Beschaffung nachgemessen.
+29. **Altjahres-Recherche.** Übernommen werden nur Werte mit URL/Dokument, Fundstelle (Seite) und Abrufdatum sowie Qualitätsstufe; Wayback-CDX wird mit Pausen abgefragt; Lücken bleiben Lücken und stehen in der COVERAGE-Matrix. BaFin-PDFs 2004–2010 laufen über den Lesungspfad, weil im Container kein PDF-Text-Werkzeug verfügbar ist.
+30. **Unternehmenskurve** auf den Versichererseiten nutzt Marine/Grau als Datenfarben unabhängig von der Optik-Variante; Jahre ohne Unternehmenswert heißen „Branchenjahr“.

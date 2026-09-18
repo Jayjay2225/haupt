@@ -1,0 +1,54 @@
+/**
+ * Geschäftsmodell (Prompt 8, Entscheidung 3): Hybrid.
+ *
+ * - Kostenlose wirtschaftliche Ampel ohne Euro-Beträge.
+ * - Kostenpflichtiger Bericht (Startpreis 89 € brutto, hier konfiguriert).
+ * - Modell C (Kanzlei-Lizenz) bleibt im Code und wird über
+ *   NEXT_PUBLIC_PRODUKT_VARIANTE=kanzlei aktiviert (siehe variante.ts).
+ *
+ * Die früheren Modelle A/B/C bleiben nachrichtlich dokumentiert.
+ */
+import { PRODUKT_VARIANTE } from './variante';
+
+/** Bruttopreis des schriftlichen Berichts in Euro (Startpreis). */
+export const BERICHT_PREIS_BRUTTO_EUR = 89;
+
+/** Enthaltene Umsatzsteuer, nur für die Preisangabe („inkl. MwSt.“). */
+export const BERICHT_PREIS_HINWEIS = 'inkl. gesetzlicher Umsatzsteuer';
+
+/** Ist „Später am Rechner fortsetzen“ (Link per E-Mail) aktiv? Erst mit Persistenz. */
+export const FORTSETZEN_AKTIV = false;
+
+/** Ist die Bestellung des Berichts technisch freigeschaltet (Zahlungsanbieter)? */
+export const BESTELLUNG_AKTIV = false;
+
+export type BusinessModelId = 'hybrid' | 'kanzlei';
+
+export interface BusinessModel {
+  id: BusinessModelId;
+  name: string;
+  beschreibung: string;
+  /** Text für den Abschnitt „Was kostet es“. */
+  preisHinweis: string;
+}
+
+export const BUSINESS_MODELS: Record<BusinessModelId, BusinessModel> = {
+  hybrid: {
+    id: 'hybrid',
+    name: 'Hybrid: kostenlose Ampel, kostenpflichtiger Bericht',
+    beschreibung:
+      'Die Ampel und die Einordnung in Worten sind kostenlos. Wer die Zahlen will – Spanne, Jahrestabelle, Quellen –, bestellt den schriftlichen Bericht zum Festpreis.',
+    preisHinweis: `Die Ampel kostet nichts. Der schriftliche Bericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}. Kein Abo, keine Folgekosten.`,
+  },
+  kanzlei: {
+    id: 'kanzlei',
+    name: 'Kanzlei-Lizenz (Modell C)',
+    beschreibung:
+      'Eigener Zugang für Kanzleien und Versicherungsberater: Belehrungs-Check, Beträge, Bericht als White-Label. Markenneutral.',
+    preisHinweis: 'Lizenzkonditionen nach Vereinbarung.',
+  },
+};
+
+export const ACTIVE_MODEL: BusinessModelId = PRODUKT_VARIANTE === 'kanzlei' ? 'kanzlei' : 'hybrid';
+
+export const activeModel: BusinessModel = BUSINESS_MODELS[ACTIVE_MODEL];

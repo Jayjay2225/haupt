@@ -1,0 +1,743 @@
+/* Renten-Rettung – Gestaltung nach docs/DESIGN.md.
+   Marineblau als Vertrauensanker, Weiß, helles Blaugrau; Rettungsorange nur
+   für Hauptknopf und Überschriften-Hervorhebung; Ampelfarben ausschließlich in
+   der Ampel. Schriften werden von Next beim Build geladen und selbst gehostet
+   (CSS-Variablen --schrift-titel / --schrift-text aus app/layout.tsx). */
+
+:root {
+  --marine: #0a1f33;
+  --weiss: #ffffff;
+  --blaugrau: #f1f4f8;
+  --orange: #f2541b;
+  --orange-dunkel: #b34011;
+  --sekundaer: #4a5a66;
+  --linie: #d7dfe4;
+  --fehler: #a4262c;
+  --ampel-gruen: #1e8e4e;
+  --ampel-gelb: #f2b705;
+  --ampel-rot: #c62828;
+  --ampel-aus: #c9d1d9;
+  --radius: 10px;
+  --schrift-titel-stack: var(--schrift-titel, 'Archivo'), 'Arial Black', Arial, sans-serif;
+  --schrift-text-stack: var(--schrift-text, 'Source Sans 3'), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --akzent: var(--orange);
+  --akzent-text: var(--marine);
+}
+
+/* Modell C: markenneutral – kein Orange, ruhige Akzente. */
+:root[data-optik='neutral'] {
+  --orange: #1f4e79;
+  --orange-dunkel: #163a5c;
+  --akzent: #1f4e79;
+  --akzent-text: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--schrift-text-stack);
+  font-size: 1.125rem; /* 18 px */
+  line-height: 1.55;
+  color: var(--marine);
+  background: var(--weiss);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--schrift-titel-stack);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--marine);
+  letter-spacing: -0.01em;
+  margin: 0 0 0.75rem;
+}
+
+h1 {
+  font-size: clamp(2.125rem, 6vw, 3rem);
+}
+
+h2 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+h3 {
+  font-size: 1.25rem;
+}
+
+.hervor {
+  color: var(--orange);
+}
+
+p {
+  margin: 0 0 1rem;
+}
+
+a {
+  color: var(--marine);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--orange-dunkel);
+  outline-offset: 3px;
+}
+
+.zahl,
+.tabellenziffern,
+td,
+.wert-zahl,
+.betrag {
+  font-variant-numeric: tabular-nums;
+}
+
+.container {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding-inline: 1rem;
+}
+
+.schmal {
+  max-width: 46rem;
+}
+
+/* Beta-Streifen */
+.vorab-banner {
+  background: var(--blaugrau);
+  border-bottom: 1px solid var(--linie);
+  font-size: 0.95rem;
+  padding-block: 0.4rem;
+  text-align: center;
+  color: var(--sekundaer);
+  margin: 0;
+}
+
+/* Kopf- und Fußzeile */
+.kopf {
+  background: var(--marine);
+  color: var(--weiss);
+}
+
+.kopf a {
+  color: var(--weiss);
+  text-decoration: none;
+}
+
+.kopf a:focus-visible {
+  outline-color: var(--weiss);
+}
+
+.kopf-innen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  padding-block: 0.9rem;
+}
+
+.marke {
+  font-family: var(--schrift-titel-stack);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.01em;
+}
+
+.kopf-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin-left: auto;
+  font-size: 1rem;
+}
+
+.kopf-nav a:hover {
+  text-decoration: underline;
+}
+
+.fuss {
+  border-top: 1px solid var(--linie);
+  background: var(--blaugrau);
+  margin-top: 4rem;
+  font-size: 1rem;
+  color: var(--sekundaer);
+}
+
+.fuss-innen {
+  padding-block: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.fuss-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.fuss-nav a {
+  color: var(--marine);
+}
+
+/* Startseite */
+.hero {
+  padding-block: 3rem 2.5rem;
+}
+
+.hero .untertitel {
+  font-size: 1.35rem;
+  max-width: 34rem;
+  margin-bottom: 1.5rem;
+}
+
+.hero-raster {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 52rem) {
+  .hero-raster {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 3rem;
+  }
+}
+
+.abschnitt {
+  padding-block: 3rem;
+}
+
+.abschnitt.getoent {
+  background: var(--blaugrau);
+}
+
+.schrittliste {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+  counter-reset: schritt;
+}
+
+@media (min-width: 40rem) {
+  .schrittliste {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.schrittliste li {
+  counter-increment: schritt;
+  padding-top: 0.25rem;
+}
+
+.schrittliste li::before {
+  content: counter(schritt);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--marine);
+  color: var(--weiss);
+  font-family: var(--schrift-titel-stack);
+  font-weight: 800;
+  margin-bottom: 0.6rem;
+}
+
+.punkteliste {
+  padding-left: 1.25rem;
+  margin: 0 0 1rem;
+}
+
+.punkteliste li {
+  margin-bottom: 0.5rem;
+}
+
+.faq details {
+  border-bottom: 1px solid var(--linie);
+  padding: 0.9rem 0;
+}
+
+.faq summary {
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1.15rem;
+}
+
+.faq details[open] summary {
+  margin-bottom: 0.5rem;
+}
+
+/* Knöpfe */
+.knopf {
+  display: inline-block;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--marine);
+  color: var(--weiss);
+  font: inherit;
+  font-weight: 600;
+  min-height: 3.5rem;
+  padding: 0.85rem 1.5rem;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: center;
+}
+
+.knopf:hover {
+  filter: brightness(1.1);
+}
+
+.knopf.haupt {
+  background: var(--akzent);
+  color: var(--akzent-text);
+  font-family: var(--schrift-titel-stack);
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+}
+
+.knopf.zweitrangig {
+  background: transparent;
+  color: var(--marine);
+  border: 2px solid var(--marine);
+}
+
+.knopf.zweitrangig:hover {
+  background: var(--blaugrau);
+  filter: none;
+}
+
+/* Hauptknopf mobil unten fixiert */
+.fix-unten {
+  position: sticky;
+  bottom: 0.75rem;
+  z-index: 5;
+}
+
+@media (min-width: 52rem) {
+  .fix-unten {
+    position: static;
+  }
+}
+
+/* Hinweiskästen */
+.hinweis {
+  background: var(--blaugrau);
+  border-left: 5px solid var(--marine);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1rem 1.25rem;
+  margin-block: 1rem;
+}
+
+.hinweis.neutral {
+  border-left-color: var(--linie);
+}
+
+.transparenz {
+  border: 2px solid var(--marine);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-block: 1.5rem;
+}
+
+.transparenz h2,
+.transparenz h3 {
+  margin-bottom: 0.5rem;
+}
+
+.transparenz ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+/* Ampel */
+.ampel {
+  display: inline-grid;
+  grid-auto-flow: row;
+  gap: 0.55rem;
+  padding: 0.7rem;
+  background: var(--marine);
+  border-radius: 1.2rem;
+}
+
+.ampel--gross {
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border-radius: 1.6rem;
+}
+
+.ampel .licht {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: var(--ampel-aus);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ampel--gross .licht {
+  width: 3.4rem;
+  height: 3.4rem;
+}
+
+.ampel[data-zustand='rot'] .licht--rot {
+  background: var(--ampel-rot);
+  box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.25);
+}
+
+.ampel[data-zustand='gelb'] .licht--gelb {
+  background: var(--ampel-gelb);
+  box-shadow: 0 0 0 4px rgba(242, 183, 5, 0.3);
+}
+
+.ampel[data-zustand='gruen'] .licht--gruen {
+  background: var(--ampel-gruen);
+  box-shadow: 0 0 0 4px rgba(30, 142, 78, 0.25);
+}
+
+/* Schnellcheck: Gehäuse-Segmente springen mit jedem Feld an. */
+.ampel[data-fortschritt='1'] .licht--rot,
+.ampel[data-fortschritt='2'] .licht--rot,
+.ampel[data-fortschritt='2'] .licht--gelb,
+.ampel[data-fortschritt='3'] .licht--rot,
+.ampel[data-fortschritt='3'] .licht--gelb,
+.ampel[data-fortschritt='3'] .licht--gruen {
+  background: #eef2f6;
+}
+
+.ampel[data-zustand='bereit'] .licht {
+  background: #eef2f6;
+}
+
+.ampel[data-zustand='bereit'] .licht--gruen {
+  animation: bereit 1.4s ease-in-out 2;
+}
+
+@keyframes bereit {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ampel .licht {
+    transition: none;
+  }
+
+  .ampel[data-zustand='bereit'] .licht--gruen {
+    animation: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.ampel-zeile {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ampel-text {
+  max-width: 34rem;
+}
+
+.ampel-text h2,
+.ampel-text h3 {
+  margin-bottom: 0.4rem;
+}
+
+/* Schnellcheck */
+.schnellcheck {
+  background: var(--blaugrau);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.schnellcheck-raster {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+}
+
+.schnellcheck .felder {
+  display: grid;
+  gap: 0.75rem;
+}
+
+/* Formular */
+.formular-schritte {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  list-style: none;
+  font-size: 0.95rem;
+}
+
+.formular-schritte li {
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--linie);
+  color: var(--sekundaer);
+  background: var(--weiss);
+}
+
+.formular-schritte li[aria-current='step'] {
+  background: var(--marine);
+  border-color: var(--marine);
+  color: var(--weiss);
+  font-weight: 600;
+}
+
+.formular-schritte li.erledigt {
+  background: var(--blaugrau);
+  color: var(--marine);
+}
+
+.feld {
+  margin-bottom: 1.25rem;
+}
+
+.feld > label,
+.feld > .feld-titel {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.feld .erklaerung,
+.erklaerung {
+  font-size: 1rem;
+  color: var(--sekundaer);
+  margin: 0 0 0.4rem;
+}
+
+.feld input[type='text'],
+.feld input[type='email'],
+.feld input[type='tel'],
+.feld input[type='month'],
+.feld select {
+  width: 100%;
+  max-width: 26rem;
+  font: inherit;
+  min-height: 3rem;
+  padding: 0.55rem 0.8rem;
+  border: 2px solid var(--linie);
+  border-radius: 8px;
+  background: var(--weiss);
+  color: inherit;
+}
+
+.feld.hat-fehler input,
+.feld.hat-fehler select,
+.feld.hat-fehler .optionen {
+  border-color: var(--fehler);
+}
+
+.feld-fehler {
+  color: var(--fehler);
+  font-size: 1rem;
+  margin-top: 0.3rem;
+}
+
+.feld-echo {
+  font-size: 1rem;
+  color: var(--sekundaer);
+  margin-top: 0.3rem;
+}
+
+fieldset.feld {
+  border: none;
+  padding: 0;
+  margin-inline: 0;
+}
+
+fieldset.feld legend {
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 0.3rem;
+}
+
+.optionen {
+  display: grid;
+  gap: 0.5rem;
+  border: 2px solid transparent;
+  border-radius: 8px;
+}
+
+.optionen label {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  font-weight: 400;
+}
+
+.optionen input[type='radio'],
+.optionen input[type='checkbox'] {
+  width: 1.3rem;
+  height: 1.3rem;
+  accent-color: var(--marine);
+  flex-shrink: 0;
+}
+
+.optionen.nebeneinander {
+  grid-auto-flow: column;
+  justify-content: start;
+  gap: 1.25rem;
+}
+
+.formular-aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+/* Zusammenfassung / Tabellen */
+.zusammenfassung {
+  width: 100%;
+  border-collapse: collapse;
+  margin-block: 1rem;
+}
+
+.zusammenfassung caption {
+  text-align: left;
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+}
+
+.zusammenfassung th,
+.zusammenfassung td {
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--linie);
+  padding: 0.5rem 0.75rem 0.5rem 0;
+  font-size: 1rem;
+}
+
+.zusammenfassung th {
+  width: 40%;
+  color: var(--sekundaer);
+  font-weight: 600;
+}
+
+/* Ergebnis-Vorschau */
+.wert-karte {
+  background: var(--blaugrau);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin: 1rem 0;
+}
+
+.wert-zahl {
+  font-family: var(--schrift-titel-stack);
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0.25rem 0;
+}
+
+.checkliste {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.checkliste li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--linie);
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.checkliste .status {
+  font-weight: 700;
+  min-width: 5.5rem;
+}
+
+/* Wege nebeneinander (/verkaufen) */
+.wege {
+  width: 100%;
+  border-collapse: collapse;
+  margin-block: 1rem;
+  font-size: 1rem;
+}
+
+.wege th,
+.wege td {
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--linie);
+  padding: 0.6rem 0.75rem 0.6rem 0;
+}
+
+.wege thead th {
+  border-bottom: 2px solid var(--marine);
+}
+
+.tabellen-scroll {
+  overflow-x: auto;
+}
+
+/* Rechtsseiten */
+.entwurf-kennung {
+  border: 2px dashed var(--orange-dunkel);
+  border-radius: var(--radius);
+  background: var(--blaugrau);
+  padding: 1rem 1.25rem;
+  margin-block: 1.5rem;
+}
+
+/* Nur für Screenreader sichtbar */
+.sr-nur {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 40rem) {
+  .kopf-nav {
+    margin-left: 0;
+  }
+
+  .formular-aktionen .knopf {
+    width: 100%;
+  }
+
+  .schnellcheck-raster {
+    grid-template-columns: 1fr;
+  }
+
+  .schnellcheck .ampel {
+    justify-self: center;
+    grid-auto-flow: column;
+  }
+}
