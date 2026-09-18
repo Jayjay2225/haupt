@@ -2,6 +2,7 @@
   "name": "lv-rueckabwicklung",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=20"
@@ -10,7 +11,8 @@
     "dev": "pnpm --filter @rueckab/web dev",
     "build": "pnpm --filter @rueckab/web build",
     "test": "vitest run",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "data:check": "node --experimental-strip-types scripts/update-insurers.ts check"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
