@@ -8,8 +8,8 @@ Grundlage ist das Prompt-Set in `docs/PROMPTS.md` (Stand 11.09.2026). Nach jedem
 | 1 | Rechtsrahmen als Regelwerk | `docs/LEGAL.md`, `data/legal-rules.json` (24 Regeln), `docs/LEGAL-OPEN-QUESTIONS.md` (12 Punkte) | ✅ umgesetzt (18.09.2026); Primärquellen-Abgleich der Zitate offen (Open Question Nr. 1) |
 | 2 | Versicherer-Datenbank | `data/insurers.json`, `data/COVERAGE.md`, `scripts/update-insurers.ts` (`pnpm data:check`) | 🟡 Grundbestand (18.09.2026): Branchendurchschnitt-Nettoverzinsung 1995/1999–2024 (GDV), Basiszins § 247 BGB komplett (Bundesbank), Einlagenzins-Jahresmittel ab 2003 (Bundesbank MFI), Höchstzillmersatz 40‰/25‰, Höchstrechnungszins (DAV), 22 Gesellschaften Stammdaten. Offen: unternehmensindividuelle Kennzahlen je Jahr (Beschaffungsplan in COVERAGE.md), Nettoverzinsung 1994/1996–1998/2025 |
 | 3 | Rechenkern | `packages/calc` (calc.version 0.2.0), `docs/CALC-SPEC.md` inkl. Golden-Ergebnissen, `data/risk-defaults.json` | ✅ umgesetzt (18.09.2026): Beitragsreihe (Zahlweise/Dynamik/DM/Skalierung), Zillmer-Aufteilung, Nutzungen auf Sparanteil, 3 Szenarien, Gegenrechnung, Jahrestabelle; 36 Tests inkl. Property- und Golden-Tests gegen data/insurers.json |
-| 4 | Eignungs- und Belehrungs-Check | `packages/eligibility` | ⬜ offen (Paket-Gerüst vorhanden) |
-| 5 | PDF-Kurzprüfung | `apps/report`, Beispielberichte in `examples/` | ⬜ offen (benötigt `brand/`) |
+| 4 | Eignungs- und Belehrungs-Check | `packages/eligibility` (0.2.0) | ✅ umgesetzt (18.09.2026): Ampel aus legal-rules.json, 16 Konstellationen getestet; offen: optionaler OCR/Vision-Baustein |
+| 5 | PDF-Kurzprüfung | `apps/report`, Beispielberichte in `examples/` (`pnpm --filter @rueckab/report beispiele`) | ✅ umgesetzt (18.09.2026): 7 Abschnitte, Inline-SVG-Diagramme (validierte Palette), Kopf-/Fußzeile, de-DE, beide Golden-Beispiele erzeugt; offen: PDF/A-2b (Chromium liefert kein PDF/A), echtes Branding aus `brand/`, Regime-C-Berichtsvariante |
 | 6 | Website und Funnel | `apps/web`, `apps/web/config/business.ts` | 🟡 teilweise (18.09.2026, s. u.) |
 | 7 | Compliance- und Plausibilitäts-Review | `docs/REVIEW.md` | ⬜ offen |
 
