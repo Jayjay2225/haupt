@@ -445,6 +445,14 @@ export function renderBerichtHtml(b: BerichtInput): string {
     Beiträge – diese Kennzahl ist nur zusammen mit der daneben ausgewiesenen Zinsreihe aussagekräftig.
   </p>
   ${zinsreihenTabelle(b.calc)}
+  <div class="hinweisbox">
+    <strong>Gegenposition des Versicherers (typische Einwände):</strong> Nutzungen seien nur aus den konkreten
+    Zahlen des jeweiligen Unternehmens herzuleiten – ein Branchendurchschnitt genüge der Darlegungslast nicht;
+    die Nettoverzinsung enthalte Einmaleffekte (z. B. realisierte Bewertungsreserven ab 2012) und überzeichne
+    die laufenden Erträge; Risiko- und Kostenanteile seien höher als pauschal angesetzt. Diese Einwände
+    betreffen die Höhe, nicht das Ob der Methodik; sie sind der Grund, warum diese Kurzprüfung eine Schätzung
+    mit Bandbreite ist und die anwaltliche Prüfung mit Unternehmenszahlen der nächste Schritt bleibt.
+  </div>
 </section>
 
 <!-- Seite 7: Einordnung und nächste Schritte -->

@@ -86,8 +86,9 @@ function NettoverzinsungsChart() {
         dangerouslySetInnerHTML={{ __html: gitter + pfade + einzelpunkte + jahresmarken + endLabel }}
       />
       <figcaption className="erklaerung">
-        Nettoverzinsung der Kapitalanlagen, Branchendurchschnitt in % (Quelle: GDV, „Die deutsche
-        Lebensversicherung in Zahlen 2025“, S. 28; Lücken 1996–1998 sind nicht verbunden).
+        <strong>Branchendurchschnitt – kein Unternehmenswert:</strong> Nettoverzinsung der Kapitalanlagen aller
+        deutschen Lebensversicherer in % (Quelle: GDV, „Die deutsche Lebensversicherung in Zahlen 2025“, S. 28;
+        Lücken 1996–1998 sind nicht verbunden).
       </figcaption>
     </figure>
   );
@@ -169,7 +170,7 @@ export default async function VersichererSeite({ params }: { params: Promise<Par
       </p>
       <p>
         <Link href="/rechner" className="knopf">
-          Jetzt kostenlos prüfen
+          Jetzt unverbindlich prüfen
         </Link>
       </p>
     </div>

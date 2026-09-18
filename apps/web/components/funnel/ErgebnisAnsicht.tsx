@@ -188,6 +188,18 @@ export function ErgebnisAnsicht() {
             </details>
           )}
 
+          {vorschau.calc.regime === 'alt-policenmodell' && (
+            <div className="hinweis neutral">
+              <p>
+                <strong>Gegenposition des Versicherers (typische Einwände):</strong> Nutzungen seien nur aus
+                den konkreten Zahlen des jeweiligen Unternehmens herzuleiten – ein Branchendurchschnitt genüge
+                der Darlegungslast nicht; die Nettoverzinsung enthalte Einmaleffekte und überzeichne die
+                laufenden Erträge; Risiko- und Kostenanteile seien höher als pauschal angesetzt. Deshalb ist
+                dieses Ergebnis eine Schätzung mit Bandbreite – die anwaltliche Prüfung mit Unternehmenszahlen
+                ist der nächste Schritt.
+              </p>
+            </div>
+          )}
           <div className="hinweis">
             <p>
               <strong>Einordnung:</strong> Diese Ersteinschätzung ist eine Schätzung unter offengelegten

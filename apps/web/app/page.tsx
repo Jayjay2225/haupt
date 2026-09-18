@@ -119,8 +119,8 @@ export default function Startseite() {
           </div>
           <p className="hinweis neutral">
             Ob ein Widerspruch, Rücktritt oder Widerruf im Einzelfall wirksam ist, kann nur
-            ein Rechtsanwalt beurteilen. Unsere Kurzprüfung bereitet diese Prüfung vor und
-            macht sie effizienter.
+            ein Rechtsanwalt beurteilen. Unsere Kurzprüfung bereitet diese Prüfung
+            strukturiert vor.
           </p>
         </div>
       </section>
