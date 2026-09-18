@@ -24,11 +24,15 @@ Am 18.09.2026 wurde das Website-Grundgerüst `apps/web` auf ausdrücklichen Wuns
 - Rechtsseiten Impressum/Datenschutz/AGB/Widerrufsbelehrung als klar gekennzeichnete Entwürfe (Anbieterdaten offen)
 - Geschäftsmodell-Schalter `apps/web/config/business.ts` (A/B/C angelegt, B vorläufig aktiv), Marken-Platzhalter `config/brand.ts`, `robots: noindex` für die Vorabversion
 
-**Offen (Rest von Prompt 6):**
-- Versicherer-Seiten `/lebensversicherung/[versicherer]` – brauchen `data/insurers.json` (Prompt 2)
-- Anbindung von Eignungs-Check und Rechenkern an die Ergebnis-Seite (Prompte 3–4)
+**Nachtrag 18.09.2026 – angebunden:**
+- Ergebnis-Seite zeigt jetzt die echte kostenlose Vorschau (Modell B): Ampel mit Begründungen und Regel-IDs, Szenario-Spanne, Rückkaufswert-Vergleich inkl. „kein Vorteil erkennbar“, Annahmen/Warnungen und Versionsstände – berechnet über die zustandslose Route `/api/vorschau` (kein Speichern, keine PII-Logs)
+- Versicherer-Seiten `/lebensversicherung/[versicherer]` (22 Stück, SSG) aus `data/insurers.json`: Namenshistorie, Branchendurchschnitts-Chart mit Tabellenansicht und Quellenangabe, klarer Hinweis auf laufende Kennzahlen-Beschaffung, CTA
+- Versicherer-Autocomplete speist sich aus `data/insurers.json` (Starterliste entfernt)
+
+**Weiterhin offen (Rest von Prompt 6):**
 - Persistenz (Postgres/Prisma), E-Mails mit Double-Opt-in, Upload/OCR, Admin-Bereich, Zahlung (Modell A), B2B-Login (Modell C)
 - Rate-Limiting, Consent-Management, Auftragsverarbeiter-Liste (mit Hosting-Entscheidung)
+- PDF-Download des Berichts aus der Website (Generator existiert in `apps/report`)
 
 ## Vor Prompt 6 zu entscheiden (aus `docs/PROMPTS.md`)
 

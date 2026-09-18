@@ -82,11 +82,20 @@ export interface ZinsEintrag {
   quelle: Quelle;
 }
 
+export interface Rechtsnachfolge {
+  beschreibung: string;
+  datum?: string;
+  quelle?: Quelle;
+  confidence: 'high' | 'medium' | 'low';
+}
+
 export interface VersichererDaten {
   id: string;
   kanonischerName: string;
   altnamen: string[];
+  rechtsnachfolge?: Rechtsnachfolge[];
   kennzahlenVon?: { insurerId: string; abJahr: number; begruendung: string };
+  hinweise?: string;
   kennzahlen: Record<string, JahresKennzahlen>;
 }
 

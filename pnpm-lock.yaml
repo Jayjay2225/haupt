@@ -38,6 +38,9 @@ importers:
       '@rueckab/calc':
         specifier: workspace:*
         version: link:../../packages/calc
+      '@rueckab/eligibility':
+        specifier: workspace:*
+        version: link:../../packages/eligibility
       next:
         specifier: ^15.5.0
         version: 15.5.25(@types/node@22.20.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)

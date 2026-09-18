@@ -421,6 +421,56 @@ fieldset.feld legend {
   font-weight: 600;
 }
 
+/* Nur für Screenreader sichtbar */
+.sr-nur {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Ergebnis-Vorschau */
+.ampel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--farbe-linie);
+}
+
+.ampel-chip::before {
+  content: '';
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--ampel-farbe, var(--farbe-tinte-sanft));
+}
+
+.ampel-gruen { --ampel-farbe: #008300; background: #eef6ee; border-color: #b5d4b5; }
+.ampel-gelb { --ampel-farbe: #b97b00; background: #fdf6ec; border-color: #e5cfa3; }
+.ampel-rot { --ampel-farbe: #c22827; background: #faeeee; border-color: #e3b8b8; }
+
+.wert-karte {
+  background: var(--farbe-flaeche-sanft);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin: 1rem 0;
+}
+
+.wert-zahl {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0.25rem 0;
+}
+
 /* Rechtsseiten */
 .entwurf-kennung {
   border: 2px dashed var(--farbe-akzent);

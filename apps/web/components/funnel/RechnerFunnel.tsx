@@ -38,7 +38,7 @@ const SCHRITT_KOMPONENTEN: Record<Schritt, (props: SchrittProps) => React.JSX.El
   zusammenfassung: SchrittZusammenfassung,
 };
 
-export function RechnerFunnel() {
+export function RechnerFunnel({ versichererNamen }: { versichererNamen: string[] }) {
   const router = useRouter();
   const [draft, setDraft] = useState<CaseDraft>(leererDraft);
   const [schrittIndex, setSchrittIndex] = useState(0);
@@ -152,7 +152,7 @@ export function RechnerFunnel() {
             Bitte prüfen Sie die markierten Felder.
           </p>
         )}
-        <AktuellerSchritt draft={draft} fehler={fehler} aendere={aendere} />
+        <AktuellerSchritt draft={draft} fehler={fehler} aendere={aendere} versichererNamen={versichererNamen} />
         <div className="formular-aktionen">
           {schrittIndex > 0 && (
             <button type="button" className="knopf zweitrangig" onClick={zurueck}>

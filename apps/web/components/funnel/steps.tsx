@@ -7,7 +7,6 @@
  * Prompt 4, Berechnung mit Prompt 3).
  */
 import Link from 'next/link';
-import { alleVersichererNamen } from '@/data/insurers-starter';
 import type { CaseDraft, Fehlerliste } from '@/lib/draft';
 import { formatEuro, parseDecimalDe } from '@/lib/format';
 import {
@@ -26,6 +25,8 @@ export interface SchrittProps {
   draft: CaseDraft;
   fehler: Fehlerliste;
   aendere: <K extends keyof CaseDraft>(feld: K, wert: CaseDraft[K]) => void;
+  /** Namensliste (inkl. Altnamen) aus data/insurers.json für das Autocomplete. */
+  versichererNamen: string[];
 }
 
 function optionen<T extends string>(labels: Record<T, string>): Option[] {
@@ -91,7 +92,7 @@ export function SchrittKontakt({ draft, fehler, aendere }: SchrittProps) {
   );
 }
 
-export function SchrittVertrag({ draft, fehler, aendere }: SchrittProps) {
+export function SchrittVertrag({ draft, fehler, aendere, versichererNamen }: SchrittProps) {
   const statusDatumLabel =
     draft.status === 'gekuendigt'
       ? 'Gekündigt zum (Monat/Jahr)'
@@ -111,7 +112,7 @@ export function SchrittVertrag({ draft, fehler, aendere }: SchrittProps) {
         liste="versicherer-liste"
       />
       <datalist id="versicherer-liste">
-        {alleVersichererNamen().map((name) => (
+        {versichererNamen.map((name) => (
           <option key={name} value={name} />
         ))}
       </datalist>
