@@ -14,7 +14,8 @@
     "typecheck": "pnpm -r typecheck",
     "data:check": "node --experimental-strip-types scripts/update-insurers.ts check",
     "data:scans": "node --experimental-strip-types scripts/data-scans.ts check",
-    "data:bafin": "node --experimental-strip-types scripts/import-bafin.ts import"
+    "data:bafin": "node --experimental-strip-types scripts/import-bafin.ts import",
+    "data:altjahre": "node --experimental-strip-types scripts/import-altjahre.ts check"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

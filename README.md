@@ -20,8 +20,8 @@ apps/
   web/                  Next.js-Website „Renten-Rettung“: Startseite mit Schnellcheck, Rechner-Funnel,
                         kostenlose Ampel, Versichererseiten, Rechtsseiten-Entwürfe
   report/               PDF-Berichtsgenerator (Playwright/Chromium)
-scripts/                Datenpflege: update-insurers, import-bafin, data-scans, sensitivitaet-altjahre
-data/raw/               Rohdaten mit Provenienz: BaFin Tabelle 160 (bafin/), Bibliotheks-Scans (scans/)
+scripts/                Datenpflege: update-insurers, import-bafin, import-altjahre, data-scans, sensitivitaet-altjahre
+data/raw/               Rohdaten mit Provenienz: BaFin Tabelle 160 (bafin/), Altjahres-Belege (altjahre/), Bibliotheks-Scans (scans/)
 sites/unternehmer/      Statische B2B-Seite (Geschäftsführer-Bereich) für den Domain-Umzug
 brand/                  Logo, Farben, Typografie (Gestaltungsplan in docs/DESIGN.md)
 ```
@@ -39,6 +39,7 @@ pnpm build       # Produktions-Build der Website
 pnpm data:check  # data/insurers.json validieren, data/COVERAGE.md erzeugen
 pnpm data:bafin  # BaFin Tabelle 160 (data/raw/bafin) nach data/insurers.json importieren
 pnpm data:scans  # Zwei-Lesungen-Vergleich der Bibliotheks-Scans (data/raw/scans)
+pnpm data:altjahre # Altjahres-Werte (data/raw/altjahre) prüfen; Import: node --experimental-strip-types scripts/import-altjahre.ts import
 pnpm exec tsx scripts/sensitivitaet-altjahre.ts   # docs/SENSITIVITAET-ALTJAHRE.md erzeugen
 pnpm --filter @rueckab/report beispiele           # Beispielberichte in examples/ erzeugen
 ```
