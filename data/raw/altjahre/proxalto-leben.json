@@ -1,0 +1,97 @@
+{
+  "insurerId": "proxalto-leben",
+  "quelle": {
+    "typ": "primary",
+    "titel": "Volksfürsorge Deutsche Lebensversicherung AG, Geschäftsbericht 1999, Lagebericht Lebensversicherung",
+    "url": "https://web.archive.org/web/20031217004854id_/http://www.volksfuersorge.de:80/internet/vfu/vfu.nsf/vwFiles/Hauptversammlung/$FILE/vfu_geschaeftsbericht_1999.pdf",
+    "abrufdatum": "2026-09-18",
+    "dokument": "data/raw/altjahre/dokumente/proxalto-leben/vf-gb1999-s076.pdf"
+  },
+  "werte": [
+    {
+      "jahr": 1995,
+      "nettoverzinsung": 7.3,
+      "fundstelle": "S. 76, Grafik „Nettoverzinsung der Kapitalanlagen in Prozent“, Balken 1995",
+      "lesung2": {
+        "nettoverzinsung": 7.3
+      }
+    },
+    {
+      "jahr": 1996,
+      "nettoverzinsung": 7.3,
+      "fundstelle": "S. 76, Grafik, Balken 1996",
+      "lesung2": {
+        "nettoverzinsung": 7.3
+      }
+    },
+    {
+      "jahr": 1997,
+      "nettoverzinsung": 7.5,
+      "fundstelle": "S. 76, Grafik, Balken 1997",
+      "lesung2": {
+        "nettoverzinsung": 7.5
+      }
+    },
+    {
+      "jahr": 1998,
+      "nettoverzinsung": 7.6,
+      "fundstelle": "S. 75: „Die Nettoverzinsung betrug 7,9% (Vorjahr: 7,6%)“; S. 76 Grafik",
+      "lesung2": {
+        "nettoverzinsung": 7.6
+      }
+    },
+    {
+      "jahr": 1999,
+      "nettoverzinsung": 7.9,
+      "fundstelle": "S. 68 Kennzahlen; S. 75 Text; S. 76 Grafik; bestätigt GB 2000 S. 213 (Vorjahr 7,9)",
+      "lesung2": {
+        "nettoverzinsung": 7.9
+      }
+    },
+    {
+      "jahr": 2000,
+      "nettoverzinsung": 7.7,
+      "fundstelle": "S. 4 („Nettoverzinsung … von 7,7% in der Lebensversicherung“), S. 211, S. 213 Kennzahlen „Nettoverzinsung % 7,7 / 7,9“",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Volksfürsorge Holding AG, Geschäftsbericht 2000, Kennzahlen Lebensversicherung",
+        "url": "https://web.archive.org/web/20031130083601id_/http://www.volksfuersorge.de:80/internet/vfu/vfu.nsf/vwFiles/Hauptversammlung/$FILE/vfu_geschaeftsbericht_2000.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/proxalto-leben/vf-gb2000-s213.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.7
+      }
+    },
+    {
+      "jahr": 2001,
+      "nettoverzinsung": 6.74,
+      "fundstelle": "S. 89 („Gute Nettoverzinsung der Kapitalanlagen von 6,74%“), S. 91 Kennzahlen; bestätigt GB 2002 S. 99 (Vorjahr 6,74%)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Volksfürsorge Holding AG, Geschäftsbericht 2001 (Holding), Teil Lebensversicherung",
+        "url": "https://web.archive.org/web/20031219090512id_/http://www.volksfuersorge.de:80/internet/vfu/vfu.nsf/vwfiles/Geschaeftsbericht2001/$file/holding.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/proxalto-leben/vf-gb2001-holding-s089.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.74
+      }
+    },
+    {
+      "jahr": 2002,
+      "nettoverzinsung": 4.54,
+      "fundstelle": "S. 99 Lagebericht Leben („Nettoverzinsung in Höhe von 4,54% … (Vorjahr: 6,74%)“), S. 239 Kennzahlen Leben; S. 14 gerundet 4,5",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Volksfürsorge, Geschäftsbericht 2002 (Gruppe, Teil Lebensversicherung)",
+        "url": "https://web.archive.org/web/20031130154339id_/http://www.volksfuersorge.de:80/internet/vfu/vfu.nsf/vwFiles/Hauptversammlung/$FILE/vfu_geschaeftsbericht_2002.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/proxalto-leben/vf-gb2002-s099.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.54
+      }
+    }
+  ]
+}

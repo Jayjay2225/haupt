@@ -1,0 +1,110 @@
+{
+  "insurerId": "victoria-leben",
+  "werte": [
+    {
+      "jahr": 1999,
+      "nettoverzinsung": 7.8,
+      "fundstelle": "S. 2 Kennzahlen „Nettoverzinsung 8,1 (7,8) %“ (Vorjahr in Klammern); S. 24 „von 7,8% im Vorjahr auf 8,1% gesteigert“",
+      "quelle": {
+        "typ": "primary",
+        "titel": "VICTORIA Lebensversicherung AG, Geschäftsbericht 2000",
+        "url": "https://web.archive.org/web/20051104011933id_/http://www.victoria.de:80/daten/pdf/aktie/gb00_lv.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2000-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.8
+      }
+    },
+    {
+      "jahr": 2000,
+      "nettoverzinsung": 8.1,
+      "fundstelle": "S. 2 Kennzahlen; S. 24 „Nettoverzinsung auf 8,1% gestiegen“; bestätigt ERGO-Pressemitteilung 02.04.2002 (presseportal.de/pm/14591/336930: „6,7 (8,1) %“)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "VICTORIA Lebensversicherung AG, Geschäftsbericht 2000",
+        "url": "https://web.archive.org/web/20051104011933id_/http://www.victoria.de:80/daten/pdf/aktie/gb00_lv.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2000-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 8.1
+      }
+    },
+    {
+      "jahr": 2001,
+      "nettoverzinsung": 6.7,
+      "fundstelle": "S. 4 Zeile „Nettoverzinsung“ (2005…2001: 4,2 / 3,5 / 2,7 / 5,2 / 6,7); bestätigt Pressemitteilung 02.04.2002",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Victoria Lebensversicherung AG / Victoria Pensionskasse AG, Geschäftsbericht 2005 – 5-Jahres-Überblick",
+        "url": "https://web.archive.org/web/20070115152934id_/http://www.victoria.de:80/daten/pdf/aktie/GB_Leben_Penka_2005.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2005-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.7
+      }
+    },
+    {
+      "jahr": 2002,
+      "nettoverzinsung": 5.2,
+      "fundstelle": "S. 4 Zeile „Nettoverzinsung“; bestätigt Pressemitteilung 11.03.2004 (presseportal.de/pm/14591/536088: „2,7 (5,2) Prozent“)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Victoria Lebensversicherung AG / Victoria Pensionskasse AG, Geschäftsbericht 2005 – 5-Jahres-Überblick",
+        "url": "https://web.archive.org/web/20070115152934id_/http://www.victoria.de:80/daten/pdf/aktie/GB_Leben_Penka_2005.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2005-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.2
+      }
+    },
+    {
+      "jahr": 2003,
+      "nettoverzinsung": 2.7,
+      "fundstelle": "S. 4 Zeile „Nettoverzinsung“; bestätigt Pressemitteilung 11.03.2004",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Victoria Lebensversicherung AG / Victoria Pensionskasse AG, Geschäftsbericht 2005 – 5-Jahres-Überblick",
+        "url": "https://web.archive.org/web/20070115152934id_/http://www.victoria.de:80/daten/pdf/aktie/GB_Leben_Penka_2005.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2005-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 2.7
+      }
+    },
+    {
+      "jahr": 2004,
+      "nettoverzinsung": 3.5,
+      "fundstelle": "S. 4 Zeile „Nettoverzinsung“; S. 34 „Die Nettoverzinsung nach der Verbandsformel erhöhte sich von 3,5% auf 4,2%“",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Victoria Lebensversicherung AG / Victoria Pensionskasse AG, Geschäftsbericht 2005 – 5-Jahres-Überblick",
+        "url": "https://web.archive.org/web/20070115152934id_/http://www.victoria.de:80/daten/pdf/aktie/GB_Leben_Penka_2005.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2005-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 3.5
+      }
+    },
+    {
+      "jahr": 2005,
+      "nettoverzinsung": 4.2,
+      "fundstelle": "S. 4 Zeile „Nettoverzinsung“; S. 34; bestätigt Pressemitteilung 03.05.2007 (presseportal.de/pm/14591/979994)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Victoria Lebensversicherung AG / Victoria Pensionskasse AG, Geschäftsbericht 2005 – 5-Jahres-Überblick",
+        "url": "https://web.archive.org/web/20070115152934id_/http://www.victoria.de:80/daten/pdf/aktie/GB_Leben_Penka_2005.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2005-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.2
+      }
+    }
+  ]
+}

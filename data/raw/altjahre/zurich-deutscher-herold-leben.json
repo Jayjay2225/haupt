@@ -1,0 +1,28 @@
+{
+  "insurerId": "zurich-deutscher-herold-leben",
+  "quelle": {
+    "typ": "primary",
+    "titel": "Zürich Gruppe Deutschland, Geschäftsberichte 2003 (Sammelband), Teil „DEUTSCHER HEROLD Lebensversicherung Aktiengesellschaft“, Lagebericht Kapitalanlagen",
+    "url": "https://web.archive.org/web/20040805032328id_/http://www.zuerich.de:80/presse/geschaeftsberichte/media/pdf/geschaeftsberichte_2003.pdf",
+    "abrufdatum": "2026-09-18",
+    "dokument": "data/raw/altjahre/dokumente/zurich-deutscher-herold-leben/zuerich-gb2003-s221.pdf"
+  },
+  "werte": [
+    {
+      "jahr": 2002,
+      "nettoverzinsung": 5.6,
+      "fundstelle": "S. 221: „Die Nettoverzinsung gemäß Verbandsformel lag damit bei 4,4% nach 5,6% im Vorjahr“ (Vorjahreswert)",
+      "lesung2": {
+        "nettoverzinsung": 5.6
+      }
+    },
+    {
+      "jahr": 2003,
+      "nettoverzinsung": 4.4,
+      "fundstelle": "S. 221: „Die Nettoverzinsung gemäß Verbandsformel lag damit bei 4,4% …“; Drei-Jahres-Durchschnitt 2001–2003: 5,5%",
+      "lesung2": {
+        "nettoverzinsung": 4.4
+      }
+    }
+  ]
+}

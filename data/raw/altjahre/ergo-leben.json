@@ -1,0 +1,125 @@
+{
+  "insurerId": "ergo-leben",
+  "werte": [
+    {
+      "jahr": 2000,
+      "nettoverzinsung": 7.9,
+      "fundstelle": "Artikeltext: „Die Nettoverzinsung sank von 7,9 Prozent auf 6,7 Prozent“ (Vorjahreswert)",
+      "quelle": {
+        "typ": "secondary",
+        "titel": "Versicherungsmonitor, „Hamburg-Mannheimer setzt weiter auf die Riester-Rente“, 26.03.2002 (Quelle laut Artikel: Financial Times Deutschland)",
+        "url": "https://versicherungsmonitor.de/2002/03/26/hamburg-mannheimer-setzt-weiter-auf-die-riester-rente/",
+        "abrufdatum": "2026-09-18",
+        "hinweis": "Fachpresse; Geschäftsbericht 2001 der Hamburg-Mannheimer nicht auffindbar"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.9
+      }
+    },
+    {
+      "jahr": 2001,
+      "nettoverzinsung": 6.7,
+      "fundstelle": "Artikeltext: „Die Nettoverzinsung sank von 7,9 Prozent auf 6,7 Prozent“",
+      "quelle": {
+        "typ": "secondary",
+        "titel": "Versicherungsmonitor, „Hamburg-Mannheimer setzt weiter auf die Riester-Rente“, 26.03.2002 (Quelle laut Artikel: Financial Times Deutschland)",
+        "url": "https://versicherungsmonitor.de/2002/03/26/hamburg-mannheimer-setzt-weiter-auf-die-riester-rente/",
+        "abrufdatum": "2026-09-18",
+        "hinweis": "Fachpresse; Geschäftsbericht 2001 der Hamburg-Mannheimer nicht auffindbar"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.7
+      }
+    },
+    {
+      "jahr": 2004,
+      "nettoverzinsung": 3.1,
+      "fundstelle": "S. 4, Zeile „Nettoverzinsung“ (2008…2004: 3,8 / 4,6 / 4,7 / 5,7 / 3,1)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Hamburg-Mannheimer Versicherungs-AG / Hamburg-Mannheimer Pensionskasse AG, Geschäftsbericht 2008 – „Hamburg-Mannheimer Versicherung im 5-Jahres-Überblick“",
+        "url": "https://web.archive.org/web/20101223170941id_/http://www.ergo.de/de/Unternehmen/Unternehmen/~/media/ERGOcom/PDF/Geschaeftsberichte/Hamburg-Mannheimer/Geschaeftsbericht-2008-HM-Leben-Penka.ashx",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/ergo-leben/hm-gb2008-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 3.1
+      }
+    },
+    {
+      "jahr": 2005,
+      "nettoverzinsung": 5.7,
+      "fundstelle": "S. 4, Zeile „Nettoverzinsung“; bestätigt GB 2009 S. 4 und Versicherungsmagazin 11.04.2006 („stieg … auf 5,7 Prozent“)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Hamburg-Mannheimer Versicherungs-AG / Hamburg-Mannheimer Pensionskasse AG, Geschäftsbericht 2008 – „Hamburg-Mannheimer Versicherung im 5-Jahres-Überblick“",
+        "url": "https://web.archive.org/web/20101223170941id_/http://www.ergo.de/de/Unternehmen/Unternehmen/~/media/ERGOcom/PDF/Geschaeftsberichte/Hamburg-Mannheimer/Geschaeftsbericht-2008-HM-Leben-Penka.ashx",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/ergo-leben/hm-gb2008-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.7
+      }
+    },
+    {
+      "jahr": 2006,
+      "nettoverzinsung": 4.7,
+      "fundstelle": "S. 4, Zeile „Nettoverzinsung“; bestätigt GB 2009 S. 4",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Hamburg-Mannheimer Versicherungs-AG / Hamburg-Mannheimer Pensionskasse AG, Geschäftsbericht 2008 – „Hamburg-Mannheimer Versicherung im 5-Jahres-Überblick“",
+        "url": "https://web.archive.org/web/20101223170941id_/http://www.ergo.de/de/Unternehmen/Unternehmen/~/media/ERGOcom/PDF/Geschaeftsberichte/Hamburg-Mannheimer/Geschaeftsbericht-2008-HM-Leben-Penka.ashx",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/ergo-leben/hm-gb2008-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.7
+      }
+    },
+    {
+      "jahr": 2007,
+      "nettoverzinsung": 4.6,
+      "fundstelle": "S. 4, Zeile „Nettoverzinsung“; bestätigt GB 2009 S. 4",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Hamburg-Mannheimer Versicherungs-AG / Hamburg-Mannheimer Pensionskasse AG, Geschäftsbericht 2008 – „Hamburg-Mannheimer Versicherung im 5-Jahres-Überblick“",
+        "url": "https://web.archive.org/web/20101223170941id_/http://www.ergo.de/de/Unternehmen/Unternehmen/~/media/ERGOcom/PDF/Geschaeftsberichte/Hamburg-Mannheimer/Geschaeftsbericht-2008-HM-Leben-Penka.ashx",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/ergo-leben/hm-gb2008-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.6
+      }
+    },
+    {
+      "jahr": 2008,
+      "nettoverzinsung": 3.8,
+      "fundstelle": "S. 4, Zeile „Nettoverzinsung“; bestätigt GB 2009 S. 4",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Hamburg-Mannheimer Versicherungs-AG / Hamburg-Mannheimer Pensionskasse AG, Geschäftsbericht 2008 – „Hamburg-Mannheimer Versicherung im 5-Jahres-Überblick“",
+        "url": "https://web.archive.org/web/20101223170941id_/http://www.ergo.de/de/Unternehmen/Unternehmen/~/media/ERGOcom/PDF/Geschaeftsberichte/Hamburg-Mannheimer/Geschaeftsbericht-2008-HM-Leben-Penka.ashx",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/ergo-leben/hm-gb2008-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 3.8
+      }
+    },
+    {
+      "jahr": 2009,
+      "nettoverzinsung": 4.3,
+      "fundstelle": "S. 4, Zeile „Nettoverzinsung“ (2009…2005: 4,3 / 3,8 / 4,6 / 4,7 / 5,7)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Hamburg-Mannheimer Versicherungs-AG / Hamburg-Mannheimer Pensionskasse AG, Geschäftsbericht 2009 – 5-Jahres-Überblick",
+        "url": "https://web.archive.org/web/20101223170749id_/http://www.ergo.de/de/Unternehmen/Unternehmen/~/media/ERGOcom/PDF/Geschaeftsberichte/Hamburg-Mannheimer/Geschaeftsbericht-2009-HM-Leben-Penka.ashx",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/ergo-leben/hm-gb2009-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.3
+      }
+    }
+  ]
+}

@@ -9,8 +9,14 @@
   "ERGO LEBEN AG": "ergo-leben",
   "VICTORIA LEBEN": "victoria-leben",
   "GENERALI LEBEN AG": [
-    { "bisJahr": 2018, "id": "proxalto-leben" },
-    { "abJahr": 2020, "id": "generali-deutschland-leben" }
+    {
+      "bisJahr": 2018,
+      "id": "proxalto-leben"
+    },
+    {
+      "abJahr": 2020,
+      "id": "generali-deutschland-leben"
+    }
   ],
   "PROXALTO LEBEN AG": "proxalto-leben",
   "AACHENMüNCHENER LEB.": "generali-deutschland-leben",
@@ -29,5 +35,9 @@
   "R+V LEBENSVERS. AG": "r-v-leben",
   "SKANDIA LEBEN": "skandia-leben",
   "WÜRTT. LEBEN": "wuerttembergische-leben",
-  "ZURICH DTSCH. HEROLD": "zurich-deutscher-herold-leben"
+  "ZURICH DTSCH. HEROLD": "zurich-deutscher-herold-leben",
+  "HDI-GERLING LEBEN": "hdi-leben",
+  "HDI LEBEN AG": "hdi-leben",
+  "KARLSRUHER LV AG": "karlsruher-leben",
+  "DBV DEUTSCHE BEAMTEN": "dbv-winterthur-leben"
 }

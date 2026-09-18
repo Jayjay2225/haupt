@@ -1,6 +1,6 @@
 {
   "data": {
-    "version": "0.2.0",
+    "version": "0.4.0",
     "stand": "2026-09-18",
     "beschreibung": "Versicherer-Datenbank (Prompt 2). Regeln: Jede Zahl trägt Quelle mit URL/Dokument, Fundstelle und Abrufdatum sowie source_type (typ) und confidence. Unternehmensindividuelle Kennzahlen sind noch zu beschaffen (data/COVERAGE.md); bis dahin dient der Branchendurchschnitt als markierter Fallback. Szenario-Zuordnung je Gesellschaft: Basis = Nettoverzinsung, Min = je Jahr der niedrigere Wert aus Nettoverzinsung und laufender Durchschnittsverzinsung (solange laufende Reihe fehlt, fällt Min auf die Nettoverzinsung zurück).",
     "changelog": [
@@ -13,6 +13,16 @@
         "version": "0.2.0",
         "datum": "2026-09-18",
         "aenderung": "BaFin Tabelle 160 (2011–2024) importiert: 1344 Unternehmenswerte für 28 Kurznamen, Branchen-lfd.-Verzinsung 14 Jahre (scripts/import-bafin.ts)."
+      },
+      {
+        "version": "0.3.0",
+        "datum": "2026-09-18",
+        "aenderung": "BaFin Tabelle 160 (2011–2024) importiert: 1440 Unternehmenswerte für 32 Kurznamen, Branchen-lfd.-Verzinsung 14 Jahre (scripts/import-bafin.ts)."
+      },
+      {
+        "version": "0.4.0",
+        "datum": "2026-09-18",
+        "aenderung": "Altjahres-Kennzahlen importiert: 94 Werte für 14 Gesellschaft(en) aus data/raw/altjahre (scripts/import-altjahre.ts)."
       }
     ]
   },
@@ -1450,6 +1460,36 @@
       "rechtsnachfolge": [],
       "hinweise": "Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.",
       "kennzahlen": {
+        "1995": {
+          "nettoverzinsung": {
+            "wert": 7.49,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Allianz Lebensversicherungs-AG, Geschäftsbericht 1996 (Teil 1), Abschnitt Kapitalanlagenergebnis",
+              "url": "https://web.archive.org/web/19980505072347id_/http://www.allianz-leben.de:80/download/gb96_t1.pdf",
+              "dokument": "data/raw/altjahre/dokumente/allianz-leben/gb1996-s018.pdf",
+              "fundstelle": "S. 18: „Sie liegt mit 7,46 (7,49) Prozent auf dem hohen Niveau des Vorjahres“ – Vorjahreswert 1995 in Klammern",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "1996": {
+          "nettoverzinsung": {
+            "wert": 7.46,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Allianz Lebensversicherungs-AG, Geschäftsbericht 1996 (Teil 1), Abschnitt Kapitalanlagenergebnis",
+              "url": "https://web.archive.org/web/19980505072347id_/http://www.allianz-leben.de:80/download/gb96_t1.pdf",
+              "dokument": "data/raw/altjahre/dokumente/allianz-leben/gb1996-s018.pdf",
+              "fundstelle": "S. 18: „zur Stabilisierung der Nettoverzinsung geführt. Sie liegt mit 7,46 (7,49) Prozent …“",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
         "2011": {
           "nettoverzinsung": {
             "wert": 4.5,
@@ -2980,6 +3020,126 @@
       "rechtsnachfolge": [],
       "hinweise": "Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.",
       "kennzahlen": {
+        "1999": {
+          "nettoverzinsung": {
+            "wert": 8.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AXA Colonia Konzern AG, Geschäftsbericht 2000, Abschnitt AXA Colonia Lebensversicherung (Pflichtexemplar ULB Bonn, ePflicht)",
+              "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/120983",
+              "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-colonia-konzern-gb2000-s039.pdf",
+              "fundstelle": "S. 39 Tabelle „AXA Colonia Lebensversicherung“, Zeile „Nettoverzinsung laufendes Jahr“ 7,6 / 8,1 (Vorjahr); Fußnote: inkl. Albingia Lebensversicherung",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2000": {
+          "nettoverzinsung": {
+            "wert": 7.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AXA Colonia Konzern AG, Geschäftsbericht 2000, Abschnitt AXA Colonia Lebensversicherung (Pflichtexemplar ULB Bonn, ePflicht)",
+              "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/120983",
+              "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-colonia-konzern-gb2000-s039.pdf",
+              "fundstelle": "S. 39 Tabelle, Zeile „Nettoverzinsung laufendes Jahr“; bestätigt AXA Leben GB 2001 S. 2 („6,5 / 7,6“) und S. 12",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2001": {
+          "nettoverzinsung": {
+            "wert": 6.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AXA Lebensversicherung AG, Geschäftsbericht 2001, Kennzahlen (Pflichtexemplar ULB Bonn, ePflicht)",
+              "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/121063",
+              "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-leben-gb2001-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen „Nettoverzinsung des laufenden Geschäftsjahres 6,5 / 7,6“; S. 12 „sank von 7,6% auf 6,5%“; bestätigt GB 2002 S. 2",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2002": {
+          "nettoverzinsung": {
+            "wert": 5.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AXA Lebensversicherung AG, Geschäftsbericht 2002, Kennzahlen (Pflichtexemplar ULB Bonn, ePflicht)",
+              "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/121065",
+              "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-leben-gb2002-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen „5,1 / 6,5“; S. 8; bestätigt GB 2003 S. 2",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2003": {
+          "nettoverzinsung": {
+            "wert": 3.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AXA Lebensversicherung AG, Geschäftsbericht 2003, Kennzahlen (Pflichtexemplar ULB Bonn, ePflicht)",
+              "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/121067",
+              "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-leben-gb2003-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen „3,9 / 5,1“; S. 7; bestätigt GB 2004 S. 2",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2004": {
+          "nettoverzinsung": {
+            "wert": 3.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AXA Lebensversicherung AG, Geschäftsbericht 2004, Kennzahlen (Pflichtexemplar ULB Bonn, ePflicht)",
+              "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/121069",
+              "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-leben-gb2004-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen „3,9 / 3,9“; S. 8 „konstant bei 3,9%“; bestätigt GB 2005 S. 2",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2005": {
+          "nettoverzinsung": {
+            "wert": 4.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AXA Lebensversicherung AG, Geschäftsbericht 2005, Kennzahlen (Pflichtexemplar ULB Bonn, ePflicht)",
+              "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/121071",
+              "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-leben-gb2005-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen „4,4 / 3,9“; S. 10 „betrug 4,4 % (2004: 3,9 %)“ (GDV-Formel); bestätigt GB 2006 S. 2",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2006": {
+          "nettoverzinsung": {
+            "wert": 4.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AXA Lebensversicherung AG, Geschäftsbericht 2006, Kennzahlen (Pflichtexemplar ULB Bonn, ePflicht)",
+              "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/121073",
+              "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-leben-gb2006-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen „Nettoverzinsung des laufenden Geschäftsjahres 4,3“ (Vorjahr 4,4); S. 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
         "2011": {
           "nettoverzinsung": {
             "wert": 3.8,
@@ -6040,6 +6200,145 @@
       "rechtsnachfolge": [],
       "hinweise": "Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.",
       "kennzahlen": {
+        "2000": {
+          "nettoverzinsung": {
+            "wert": 7.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Debeka-Gruppe, „Zahlen und Fakten 2008“, S. 38 Balkendiagramm „Nettoverzinsung der Debeka Leben (in %)“ 2000–2008 (Debeka vs. Branche)",
+              "url": "https://web.archive.org/web/20090816025017id_/http://www.debeka.de:80/unternehmen/presse/zahlen_und_fakten_2008.pdf",
+              "dokument": "data/raw/altjahre/dokumente/debeka-leben/zahlen-fakten-2008-s038.pdf",
+              "fundstelle": "S. 38 Diagramm, Balken 2000 (Debeka 7,4 / Branche 7,5)",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Diagrammbeschriftung; die im Diagramm genannten Branchenwerte stimmen mit der GDV-Reihe überein kein Geschäftsbericht 2000 auffindbar; nur Diagrammwert"
+            },
+            "confidence": "high"
+          }
+        },
+        "2001": {
+          "nettoverzinsung": {
+            "wert": 6.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Debeka Lebensversicherungsverein a.G., Geschäftsbericht 2001, Lagebericht „Kapitalanlagen und -erträge“",
+              "url": "https://web.archive.org/web/20040922012651id_/http://www.debeka.de:80/cms/opencms/download/Website/gb_leben_2001.pdf",
+              "dokument": "data/raw/altjahre/dokumente/debeka-leben/gb2001-s007.pdf",
+              "fundstelle": "S. 7 „Die Nettoverzinsung betrug 6,5 %“; S. 47 (geänderter Lagebericht); bestätigt GB 2002 S. 7 („Vorjahr: 6,5 %“) und Zahlen & Fakten 2008 S. 38",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2002": {
+          "nettoverzinsung": {
+            "wert": 6.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Debeka Lebensversicherungsverein a.G., Geschäftsbericht 2002, Lagebericht",
+              "url": "https://web.archive.org/web/20040922015204id_/http://www.debeka.de:80/cms/opencms/download/Website/gbleben2002.pdf",
+              "dokument": "data/raw/altjahre/dokumente/debeka-leben/gb2002-s007.pdf",
+              "fundstelle": "S. 7 „Die Nettoverzinsung betrug 6,4 % (Vorjahr: 6,5 %)“; S. 47; bestätigt GB 2003 S. 7",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2003": {
+          "nettoverzinsung": {
+            "wert": 6.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Debeka Lebensversicherungsverein a.G., Geschäftsbericht 2003, Lagebericht",
+              "url": "https://web.archive.org/web/20040922015923id_/http://www.debeka.de:80/cms/opencms/download/Website/gb_leben_2003.pdf",
+              "dokument": "data/raw/altjahre/dokumente/debeka-leben/gb2003-s007.pdf",
+              "fundstelle": "S. 7 „Die Nettoverzinsung betrug 6,1 % (Vorjahr: 6,4 %)“; bestätigt Zahlen & Fakten 2008 S. 38",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2004": {
+          "nettoverzinsung": {
+            "wert": 6.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Debeka-Gruppe, „Zahlen und Fakten 2008“, S. 38 Balkendiagramm „Nettoverzinsung der Debeka Leben (in %)“ 2000–2008 (Debeka vs. Branche)",
+              "url": "https://web.archive.org/web/20090816025017id_/http://www.debeka.de:80/unternehmen/presse/zahlen_und_fakten_2008.pdf",
+              "dokument": "data/raw/altjahre/dokumente/debeka-leben/zahlen-fakten-2008-s038.pdf",
+              "fundstelle": "S. 38 Diagramm, Balken 2004 (Debeka 6,2 / Branche 4,9)",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Diagrammbeschriftung; die im Diagramm genannten Branchenwerte stimmen mit der GDV-Reihe überein kein Geschäftsbericht 2004/2005 auffindbar; nur Diagrammwert"
+            },
+            "confidence": "high"
+          }
+        },
+        "2005": {
+          "nettoverzinsung": {
+            "wert": 5.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Debeka Lebensversicherungsverein a.G., Geschäftsbericht 2006, Lagebericht",
+              "url": "https://web.archive.org/web/20091117070608id_/http://www.debeka.de:80/unternehmen/presse/gb_lv_2006.pdf",
+              "dokument": "data/raw/altjahre/dokumente/debeka-leben/gb2006-s007.pdf",
+              "fundstelle": "S. 7 „Die Nettoverzinsung lag mit 5,5 % (Vorjahr: 5,7 %) …“; bestätigt Zahlen & Fakten 2008 S. 38",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2006": {
+          "nettoverzinsung": {
+            "wert": 5.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Debeka Lebensversicherungsverein a.G., Geschäftsbericht 2006, Lagebericht",
+              "url": "https://web.archive.org/web/20091117070608id_/http://www.debeka.de:80/unternehmen/presse/gb_lv_2006.pdf",
+              "dokument": "data/raw/altjahre/dokumente/debeka-leben/gb2006-s007.pdf",
+              "fundstelle": "S. 7 „Die Nettoverzinsung lag mit 5,5 % …“; bestätigt Zahlen & Fakten 2008 S. 38",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2007": {
+          "nettoverzinsung": {
+            "wert": 5.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Debeka-Gruppe, „Zahlen und Fakten 2008“, S. 38 Balkendiagramm „Nettoverzinsung der Debeka Leben (in %)“ 2000–2008 (Debeka vs. Branche)",
+              "url": "https://web.archive.org/web/20090816025017id_/http://www.debeka.de:80/unternehmen/presse/zahlen_und_fakten_2008.pdf",
+              "dokument": "data/raw/altjahre/dokumente/debeka-leben/zahlen-fakten-2008-s038.pdf",
+              "fundstelle": "S. 38 Diagramm, Balken 2007 (Debeka 5,4 / Branche 4,6)",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Diagrammbeschriftung; die im Diagramm genannten Branchenwerte stimmen mit der GDV-Reihe überein"
+            },
+            "confidence": "high"
+          }
+        },
+        "2008": {
+          "nettoverzinsung": {
+            "wert": 4.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Debeka-Gruppe, „Zahlen und Fakten 2008“, S. 38 Balkendiagramm „Nettoverzinsung der Debeka Leben (in %)“ 2000–2008 (Debeka vs. Branche)",
+              "url": "https://web.archive.org/web/20090816025017id_/http://www.debeka.de:80/unternehmen/presse/zahlen_und_fakten_2008.pdf",
+              "dokument": "data/raw/altjahre/dokumente/debeka-leben/zahlen-fakten-2008-s038.pdf",
+              "fundstelle": "S. 38 Diagramm, Balken 2008 (Debeka 4,2 / Branche 3,6)",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Diagrammbeschriftung; die im Diagramm genannten Branchenwerte stimmen mit der GDV-Reihe überein"
+            },
+            "confidence": "high"
+          }
+        },
         "2011": {
           "nettoverzinsung": {
             "wert": 4.8,
@@ -6818,6 +7117,126 @@
       ],
       "hinweise": "Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.",
       "kennzahlen": {
+        "2000": {
+          "nettoverzinsung": {
+            "wert": 7.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "secondary",
+              "titel": "Versicherungsmonitor, „Hamburg-Mannheimer setzt weiter auf die Riester-Rente“, 26.03.2002 (Quelle laut Artikel: Financial Times Deutschland)",
+              "url": "https://versicherungsmonitor.de/2002/03/26/hamburg-mannheimer-setzt-weiter-auf-die-riester-rente/",
+              "fundstelle": "Artikeltext: „Die Nettoverzinsung sank von 7,9 Prozent auf 6,7 Prozent“ (Vorjahreswert)",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Fachpresse; Geschäftsbericht 2001 der Hamburg-Mannheimer nicht auffindbar"
+            },
+            "confidence": "medium"
+          }
+        },
+        "2001": {
+          "nettoverzinsung": {
+            "wert": 6.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "secondary",
+              "titel": "Versicherungsmonitor, „Hamburg-Mannheimer setzt weiter auf die Riester-Rente“, 26.03.2002 (Quelle laut Artikel: Financial Times Deutschland)",
+              "url": "https://versicherungsmonitor.de/2002/03/26/hamburg-mannheimer-setzt-weiter-auf-die-riester-rente/",
+              "fundstelle": "Artikeltext: „Die Nettoverzinsung sank von 7,9 Prozent auf 6,7 Prozent“",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Fachpresse; Geschäftsbericht 2001 der Hamburg-Mannheimer nicht auffindbar"
+            },
+            "confidence": "medium"
+          }
+        },
+        "2004": {
+          "nettoverzinsung": {
+            "wert": 3.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Hamburg-Mannheimer Versicherungs-AG / Hamburg-Mannheimer Pensionskasse AG, Geschäftsbericht 2008 – „Hamburg-Mannheimer Versicherung im 5-Jahres-Überblick“",
+              "url": "https://web.archive.org/web/20101223170941id_/http://www.ergo.de/de/Unternehmen/Unternehmen/~/media/ERGOcom/PDF/Geschaeftsberichte/Hamburg-Mannheimer/Geschaeftsbericht-2008-HM-Leben-Penka.ashx",
+              "dokument": "data/raw/altjahre/dokumente/ergo-leben/hm-gb2008-s004.pdf",
+              "fundstelle": "S. 4, Zeile „Nettoverzinsung“ (2008…2004: 3,8 / 4,6 / 4,7 / 5,7 / 3,1)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2005": {
+          "nettoverzinsung": {
+            "wert": 5.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Hamburg-Mannheimer Versicherungs-AG / Hamburg-Mannheimer Pensionskasse AG, Geschäftsbericht 2008 – „Hamburg-Mannheimer Versicherung im 5-Jahres-Überblick“",
+              "url": "https://web.archive.org/web/20101223170941id_/http://www.ergo.de/de/Unternehmen/Unternehmen/~/media/ERGOcom/PDF/Geschaeftsberichte/Hamburg-Mannheimer/Geschaeftsbericht-2008-HM-Leben-Penka.ashx",
+              "dokument": "data/raw/altjahre/dokumente/ergo-leben/hm-gb2008-s004.pdf",
+              "fundstelle": "S. 4, Zeile „Nettoverzinsung“; bestätigt GB 2009 S. 4 und Versicherungsmagazin 11.04.2006 („stieg … auf 5,7 Prozent“)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2006": {
+          "nettoverzinsung": {
+            "wert": 4.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Hamburg-Mannheimer Versicherungs-AG / Hamburg-Mannheimer Pensionskasse AG, Geschäftsbericht 2008 – „Hamburg-Mannheimer Versicherung im 5-Jahres-Überblick“",
+              "url": "https://web.archive.org/web/20101223170941id_/http://www.ergo.de/de/Unternehmen/Unternehmen/~/media/ERGOcom/PDF/Geschaeftsberichte/Hamburg-Mannheimer/Geschaeftsbericht-2008-HM-Leben-Penka.ashx",
+              "dokument": "data/raw/altjahre/dokumente/ergo-leben/hm-gb2008-s004.pdf",
+              "fundstelle": "S. 4, Zeile „Nettoverzinsung“; bestätigt GB 2009 S. 4",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2007": {
+          "nettoverzinsung": {
+            "wert": 4.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Hamburg-Mannheimer Versicherungs-AG / Hamburg-Mannheimer Pensionskasse AG, Geschäftsbericht 2008 – „Hamburg-Mannheimer Versicherung im 5-Jahres-Überblick“",
+              "url": "https://web.archive.org/web/20101223170941id_/http://www.ergo.de/de/Unternehmen/Unternehmen/~/media/ERGOcom/PDF/Geschaeftsberichte/Hamburg-Mannheimer/Geschaeftsbericht-2008-HM-Leben-Penka.ashx",
+              "dokument": "data/raw/altjahre/dokumente/ergo-leben/hm-gb2008-s004.pdf",
+              "fundstelle": "S. 4, Zeile „Nettoverzinsung“; bestätigt GB 2009 S. 4",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2008": {
+          "nettoverzinsung": {
+            "wert": 3.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Hamburg-Mannheimer Versicherungs-AG / Hamburg-Mannheimer Pensionskasse AG, Geschäftsbericht 2008 – „Hamburg-Mannheimer Versicherung im 5-Jahres-Überblick“",
+              "url": "https://web.archive.org/web/20101223170941id_/http://www.ergo.de/de/Unternehmen/Unternehmen/~/media/ERGOcom/PDF/Geschaeftsberichte/Hamburg-Mannheimer/Geschaeftsbericht-2008-HM-Leben-Penka.ashx",
+              "dokument": "data/raw/altjahre/dokumente/ergo-leben/hm-gb2008-s004.pdf",
+              "fundstelle": "S. 4, Zeile „Nettoverzinsung“; bestätigt GB 2009 S. 4",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2009": {
+          "nettoverzinsung": {
+            "wert": 4.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Hamburg-Mannheimer Versicherungs-AG / Hamburg-Mannheimer Pensionskasse AG, Geschäftsbericht 2009 – 5-Jahres-Überblick",
+              "url": "https://web.archive.org/web/20101223170749id_/http://www.ergo.de/de/Unternehmen/Unternehmen/~/media/ERGOcom/PDF/Geschaeftsberichte/Hamburg-Mannheimer/Geschaeftsbericht-2009-HM-Leben-Penka.ashx",
+              "dokument": "data/raw/altjahre/dokumente/ergo-leben/hm-gb2009-s004.pdf",
+              "fundstelle": "S. 4, Zeile „Nettoverzinsung“ (2009…2005: 4,3 / 3,8 / 4,6 / 4,7 / 5,7)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
         "2011": {
           "nettoverzinsung": {
             "wert": 4.2,
@@ -7583,6 +8002,115 @@
       "rechtsnachfolge": [],
       "hinweise": "Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.",
       "kennzahlen": {
+        "1998": {
+          "nettoverzinsung": {
+            "wert": 7.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2002, „Geschäftsergebnisse – Fünfjahresvergleich“",
+              "url": "https://web.archive.org/web/20050125155949id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/pdf/2002_konzern/Gothaer_Leben_2002.pdf",
+              "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2002-s002.pdf",
+              "fundstelle": "S. 2 Zeile „Nettoverzinsung (%)“ (2002…1998: 5,0 / 6,2 / 7,7 / 7,8 / 7,7)",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Fußnote GB 2002 S. 2: Werte 1998–2000 als Addition Gothaer Lebensversicherung a.G. und Veritas Lebensversicherung AG (vor Verschmelzung)"
+            },
+            "confidence": "high"
+          }
+        },
+        "1999": {
+          "nettoverzinsung": {
+            "wert": 7.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2002, „Geschäftsergebnisse – Fünfjahresvergleich“",
+              "url": "https://web.archive.org/web/20050125155949id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/pdf/2002_konzern/Gothaer_Leben_2002.pdf",
+              "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2002-s002.pdf",
+              "fundstelle": "S. 2 Zeile „Nettoverzinsung (%)“; bestätigt GB 2003 S. 2",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Fußnote GB 2002 S. 2: Werte 1998–2000 als Addition Gothaer Lebensversicherung a.G. und Veritas Lebensversicherung AG (vor Verschmelzung)"
+            },
+            "confidence": "high"
+          }
+        },
+        "2000": {
+          "nettoverzinsung": {
+            "wert": 7.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2002, „Geschäftsergebnisse – Fünfjahresvergleich“",
+              "url": "https://web.archive.org/web/20050125155949id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/pdf/2002_konzern/Gothaer_Leben_2002.pdf",
+              "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2002-s002.pdf",
+              "fundstelle": "S. 2 Zeile „Nettoverzinsung (%)“; bestätigt GB 2003 S. 2",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Fußnote GB 2002 S. 2: Werte 1998–2000 als Addition Gothaer Lebensversicherung a.G. und Veritas Lebensversicherung AG (vor Verschmelzung)"
+            },
+            "confidence": "high"
+          }
+        },
+        "2001": {
+          "nettoverzinsung": {
+            "wert": 6.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2002, „Geschäftsergebnisse – Fünfjahresvergleich“",
+              "url": "https://web.archive.org/web/20050125155949id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/pdf/2002_konzern/Gothaer_Leben_2002.pdf",
+              "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2002-s002.pdf",
+              "fundstelle": "S. 2; S. 13 („nach 6,2 % im Vorjahr“); bestätigt GB 2003 S. 2 und BPK-Präsentationen 2004/2005",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2002": {
+          "nettoverzinsung": {
+            "wert": 5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2002, „Geschäftsergebnisse – Fünfjahresvergleich“",
+              "url": "https://web.archive.org/web/20050125155949id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/pdf/2002_konzern/Gothaer_Leben_2002.pdf",
+              "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2002-s002.pdf",
+              "fundstelle": "S. 2; S. 13 („Nettorendite … beträgt 5,0 %“, nach Verbandsempfehlung); bestätigt GB 2003 S. 2",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2003": {
+          "nettoverzinsung": {
+            "wert": 3.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2003, Fünfjahresvergleich und Lagebericht",
+              "url": "https://web.archive.org/web/20060219134919id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/bilanzpressekonferenz_2003/40919_GB_Leben.pdf",
+              "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2003-s002.pdf",
+              "fundstelle": "S. 2 „3,5**“; S. 10 („bilanziell nur noch eine Nettoverzinsung von 3,5 % ausweisen“); bestätigt GB 2004 S. 11 und BPK 2004 S. 7/12",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "nach vollständigem Abbau stiller Lasten (§ 341b HGB)"
+            },
+            "confidence": "high"
+          }
+        },
+        "2004": {
+          "nettoverzinsung": {
+            "wert": 4.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2004",
+              "url": "https://web.archive.org/web/20060219134622id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/bilanzpressekonferenz_2004/Leben.pdf",
+              "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2004-s006.pdf",
+              "fundstelle": "S. 6 („Nettorendite von 4,3 %“); S. 11; bestätigt BPK 2005 S. 28/30",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
         "2011": {
           "nettoverzinsung": {
             "wert": 3.8,
@@ -13744,6 +14272,126 @@
       ],
       "hinweise": "Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.",
       "kennzahlen": {
+        "1995": {
+          "nettoverzinsung": {
+            "wert": 7.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Volksfürsorge Deutsche Lebensversicherung AG, Geschäftsbericht 1999, Lagebericht Lebensversicherung",
+              "url": "https://web.archive.org/web/20031217004854id_/http://www.volksfuersorge.de:80/internet/vfu/vfu.nsf/vwFiles/Hauptversammlung/$FILE/vfu_geschaeftsbericht_1999.pdf",
+              "dokument": "data/raw/altjahre/dokumente/proxalto-leben/vf-gb1999-s076.pdf",
+              "fundstelle": "S. 76, Grafik „Nettoverzinsung der Kapitalanlagen in Prozent“, Balken 1995",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "1996": {
+          "nettoverzinsung": {
+            "wert": 7.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Volksfürsorge Deutsche Lebensversicherung AG, Geschäftsbericht 1999, Lagebericht Lebensversicherung",
+              "url": "https://web.archive.org/web/20031217004854id_/http://www.volksfuersorge.de:80/internet/vfu/vfu.nsf/vwFiles/Hauptversammlung/$FILE/vfu_geschaeftsbericht_1999.pdf",
+              "dokument": "data/raw/altjahre/dokumente/proxalto-leben/vf-gb1999-s076.pdf",
+              "fundstelle": "S. 76, Grafik, Balken 1996",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "1997": {
+          "nettoverzinsung": {
+            "wert": 7.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Volksfürsorge Deutsche Lebensversicherung AG, Geschäftsbericht 1999, Lagebericht Lebensversicherung",
+              "url": "https://web.archive.org/web/20031217004854id_/http://www.volksfuersorge.de:80/internet/vfu/vfu.nsf/vwFiles/Hauptversammlung/$FILE/vfu_geschaeftsbericht_1999.pdf",
+              "dokument": "data/raw/altjahre/dokumente/proxalto-leben/vf-gb1999-s076.pdf",
+              "fundstelle": "S. 76, Grafik, Balken 1997",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "1998": {
+          "nettoverzinsung": {
+            "wert": 7.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Volksfürsorge Deutsche Lebensversicherung AG, Geschäftsbericht 1999, Lagebericht Lebensversicherung",
+              "url": "https://web.archive.org/web/20031217004854id_/http://www.volksfuersorge.de:80/internet/vfu/vfu.nsf/vwFiles/Hauptversammlung/$FILE/vfu_geschaeftsbericht_1999.pdf",
+              "dokument": "data/raw/altjahre/dokumente/proxalto-leben/vf-gb1999-s076.pdf",
+              "fundstelle": "S. 75: „Die Nettoverzinsung betrug 7,9% (Vorjahr: 7,6%)“; S. 76 Grafik",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "1999": {
+          "nettoverzinsung": {
+            "wert": 7.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Volksfürsorge Deutsche Lebensversicherung AG, Geschäftsbericht 1999, Lagebericht Lebensversicherung",
+              "url": "https://web.archive.org/web/20031217004854id_/http://www.volksfuersorge.de:80/internet/vfu/vfu.nsf/vwFiles/Hauptversammlung/$FILE/vfu_geschaeftsbericht_1999.pdf",
+              "dokument": "data/raw/altjahre/dokumente/proxalto-leben/vf-gb1999-s076.pdf",
+              "fundstelle": "S. 68 Kennzahlen; S. 75 Text; S. 76 Grafik; bestätigt GB 2000 S. 213 (Vorjahr 7,9)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2000": {
+          "nettoverzinsung": {
+            "wert": 7.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Volksfürsorge Holding AG, Geschäftsbericht 2000, Kennzahlen Lebensversicherung",
+              "url": "https://web.archive.org/web/20031130083601id_/http://www.volksfuersorge.de:80/internet/vfu/vfu.nsf/vwFiles/Hauptversammlung/$FILE/vfu_geschaeftsbericht_2000.pdf",
+              "dokument": "data/raw/altjahre/dokumente/proxalto-leben/vf-gb2000-s213.pdf",
+              "fundstelle": "S. 4 („Nettoverzinsung … von 7,7% in der Lebensversicherung“), S. 211, S. 213 Kennzahlen „Nettoverzinsung % 7,7 / 7,9“",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2001": {
+          "nettoverzinsung": {
+            "wert": 6.74,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Volksfürsorge Holding AG, Geschäftsbericht 2001 (Holding), Teil Lebensversicherung",
+              "url": "https://web.archive.org/web/20031219090512id_/http://www.volksfuersorge.de:80/internet/vfu/vfu.nsf/vwfiles/Geschaeftsbericht2001/$file/holding.pdf",
+              "dokument": "data/raw/altjahre/dokumente/proxalto-leben/vf-gb2001-holding-s089.pdf",
+              "fundstelle": "S. 89 („Gute Nettoverzinsung der Kapitalanlagen von 6,74%“), S. 91 Kennzahlen; bestätigt GB 2002 S. 99 (Vorjahr 6,74%)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2002": {
+          "nettoverzinsung": {
+            "wert": 4.54,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Volksfürsorge, Geschäftsbericht 2002 (Gruppe, Teil Lebensversicherung)",
+              "url": "https://web.archive.org/web/20031130154339id_/http://www.volksfuersorge.de:80/internet/vfu/vfu.nsf/vwFiles/Hauptversammlung/$FILE/vfu_geschaeftsbericht_2002.pdf",
+              "dokument": "data/raw/altjahre/dokumente/proxalto-leben/vf-gb2002-s099.pdf",
+              "fundstelle": "S. 99 Lagebericht Leben („Nettoverzinsung in Höhe von 4,54% … (Vorjahr: 6,74%)“), S. 239 Kennzahlen Leben; S. 14 gerundet 4,5",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
         "2011": {
           "nettoverzinsung": {
             "wert": 3.2,
@@ -14509,6 +15157,204 @@
       "rechtsnachfolge": [],
       "hinweise": "Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.",
       "kennzahlen": {
+        "2000": {
+          "nettoverzinsung": {
+            "wert": 7.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2001, Lagebericht Kapitalanlagen",
+              "url": "https://web.archive.org/web/20050505065415id_/http://www.ruv.de:80/de/download/service/pdf/rv_gb2001_leben_ag.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2001-s015.pdf",
+              "fundstelle": "S. 15: „Die Nettoverzinsung belief sich auf 6,3 % gegenüber 7,4 % im Vorjahr“; „laufende Durchschnittsverzinsung … ging … von 6,8 % auf 5,8 % zurück“ (Vorjahreswerte)",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "nur als Vorjahreswerte im GB 2001 belegt (GB 2000 der Leben AG nicht archiviert)"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 6.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2001, Lagebericht Kapitalanlagen",
+              "url": "https://web.archive.org/web/20050505065415id_/http://www.ruv.de:80/de/download/service/pdf/rv_gb2001_leben_ag.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2001-s015.pdf",
+              "fundstelle": "S. 15: „Die Nettoverzinsung belief sich auf 6,3 % gegenüber 7,4 % im Vorjahr“; „laufende Durchschnittsverzinsung … ging … von 6,8 % auf 5,8 % zurück“ (Vorjahreswerte)",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "nur als Vorjahreswerte im GB 2001 belegt (GB 2000 der Leben AG nicht archiviert)"
+            },
+            "confidence": "high"
+          }
+        },
+        "2001": {
+          "nettoverzinsung": {
+            "wert": 6.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2001, Lagebericht Kapitalanlagen",
+              "url": "https://web.archive.org/web/20050505065415id_/http://www.ruv.de:80/de/download/service/pdf/rv_gb2001_leben_ag.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2001-s015.pdf",
+              "fundstelle": "S. 7 und S. 15 (Nettoverzinsung 6,3 %); S. 15 (laufende Durchschnittsverzinsung 5,8 %); bestätigt GB 2002 S. 17 und S. 16",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 5.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2001, Lagebericht Kapitalanlagen",
+              "url": "https://web.archive.org/web/20050505065415id_/http://www.ruv.de:80/de/download/service/pdf/rv_gb2001_leben_ag.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2001-s015.pdf",
+              "fundstelle": "S. 7 und S. 15 (Nettoverzinsung 6,3 %); S. 15 (laufende Durchschnittsverzinsung 5,8 %); bestätigt GB 2002 S. 17 und S. 16",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2002": {
+          "nettoverzinsung": {
+            "wert": 4.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2002, Lagebericht Kapitalanlagen",
+              "url": "https://web.archive.org/web/20050311081546id_/http://www.ruv.de:80/de/download/service/pdf/geschftsbericht_leben_2002.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2002-s017.pdf",
+              "fundstelle": "S. 17 „belief sich auf 4,2 % nach 6,3 % im Jahr zuvor“; S. 16 „stieg leicht von 5,8 % auf 5,9 %“; Nettoverzinsung bestätigt GB 2003 S. 19",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 5.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2002, Lagebericht Kapitalanlagen",
+              "url": "https://web.archive.org/web/20050311081546id_/http://www.ruv.de:80/de/download/service/pdf/geschftsbericht_leben_2002.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2002-s017.pdf",
+              "fundstelle": "S. 17 „belief sich auf 4,2 % nach 6,3 % im Jahr zuvor“; S. 16 „stieg leicht von 5,8 % auf 5,9 %“; Nettoverzinsung bestätigt GB 2003 S. 19",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2003": {
+          "nettoverzinsung": {
+            "wert": 5.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2003",
+              "url": "https://web.archive.org/web/20050505064255id_/http://www.ruv.de:80/de/download/service/pdf/geschftsbericht_leben_2003.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2003-s009.pdf",
+              "fundstelle": "S. 9 („lag mit 5,1 % … laufende Durchschnittsverzinsung … 5,4 %“); S. 19 „5,1 % nach 4,2 %“; lfd. Verzinsung bestätigt GB 2004 S. 15",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 5.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2003",
+              "url": "https://web.archive.org/web/20050505064255id_/http://www.ruv.de:80/de/download/service/pdf/geschftsbericht_leben_2003.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2003-s009.pdf",
+              "fundstelle": "S. 9 („lag mit 5,1 % … laufende Durchschnittsverzinsung … 5,4 %“); S. 19 „5,1 % nach 4,2 %“; lfd. Verzinsung bestätigt GB 2004 S. 15",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2004": {
+          "nettoverzinsung": {
+            "wert": 5.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2004",
+              "url": "https://www.ruv.de/dam/jcr:c510a332-e7b9-4f00-b32d-1f16a3dcadc7/geschaeftsbericht_2004_leben.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2004-s009.pdf",
+              "fundstelle": "S. 9 („betrug 5,3 % … ergaben sich 5,1 %“); S. 15; bestätigt GB 2005 S. 17 (lfd. „nach 5,1 %“) und S. 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 5.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2004",
+              "url": "https://www.ruv.de/dam/jcr:c510a332-e7b9-4f00-b32d-1f16a3dcadc7/geschaeftsbericht_2004_leben.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2004-s009.pdf",
+              "fundstelle": "S. 9 („betrug 5,3 % … ergaben sich 5,1 %“); S. 15; bestätigt GB 2005 S. 17 (lfd. „nach 5,1 %“) und S. 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2005": {
+          "nettoverzinsung": {
+            "wert": 6.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2005",
+              "url": "https://www.ruv.de/dam/jcr:03f702bd-b923-4407-90de-206310856c3b/geschaeftsbericht_2005_leben.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2005-s010.pdf",
+              "fundstelle": "S. 10 („auf 6,3 % … Durchschnittsverzinsung … 4,9 %“); S. 17; Nettoverzinsung bestätigt GB 2006 S. 20",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 4.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2005",
+              "url": "https://www.ruv.de/dam/jcr:03f702bd-b923-4407-90de-206310856c3b/geschaeftsbericht_2005_leben.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2005-s010.pdf",
+              "fundstelle": "S. 10 („auf 6,3 % … Durchschnittsverzinsung … 4,9 %“); S. 17; Nettoverzinsung bestätigt GB 2006 S. 20",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2006": {
+          "nettoverzinsung": {
+            "wert": 5.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2006",
+              "url": "https://www.ruv.de/dam/jcr:45cb9a54-a1dd-4e4b-9454-cb5bf83120a1/geschaeftsbericht_2006_leben.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2006-s010.pdf",
+              "fundstelle": "S. 10 („5,2 % … laufende Durchschnittsverzinsung … blieb mit 4,8 %“); S. 20",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 4.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2006",
+              "url": "https://www.ruv.de/dam/jcr:45cb9a54-a1dd-4e4b-9454-cb5bf83120a1/geschaeftsbericht_2006_leben.pdf",
+              "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2006-s010.pdf",
+              "fundstelle": "S. 10 („5,2 % … laufende Durchschnittsverzinsung … blieb mit 4,8 %“); S. 20",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
         "2011": {
           "nettoverzinsung": {
             "wert": 3.9,
@@ -15289,6 +16135,81 @@
       ],
       "hinweise": "Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.",
       "kennzahlen": {
+        "1999": {
+          "nettoverzinsung": {
+            "wert": 7.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "IDUNA Vereinigte Lebensversicherung aG, Geschäftsbericht 2000, Kennzahlen",
+              "url": "https://web.archive.org/web/20060912212324id_/http://www.signal-iduna.de:80/content_media/gb_iduna_leben2000.pdf",
+              "dokument": "data/raw/altjahre/dokumente/signal-iduna-leben/iduna-leben-gb2000-s003.pdf",
+              "fundstelle": "S. 3 Kennzahlen „Nettoverzinsung der Kapitalanlagen in % 6,9 / 7,1“ (Vorjahr)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2000": {
+          "nettoverzinsung": {
+            "wert": 6.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "IDUNA Vereinigte Lebensversicherung aG, Geschäftsbericht 2000, Kennzahlen",
+              "url": "https://web.archive.org/web/20060912212324id_/http://www.signal-iduna.de:80/content_media/gb_iduna_leben2000.pdf",
+              "dokument": "data/raw/altjahre/dokumente/signal-iduna-leben/iduna-leben-gb2000-s003.pdf",
+              "fundstelle": "S. 3 Kennzahlen; bestätigt GB 2001 S. 2 („6,4 / 6,9“) und Pressemitteilung 22.05.2002 (presseportal.de/pm/42854/350003)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2001": {
+          "nettoverzinsung": {
+            "wert": 6.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "IDUNA Vereinigte Lebensversicherung aG, Geschäftsbericht 2001, Kennzahlen",
+              "url": "https://web.archive.org/web/20050111063901id_/http://www.signal-iduna.de:80/content_media/IDUNA_Leben.pdf",
+              "dokument": "data/raw/altjahre/dokumente/signal-iduna-leben/iduna-leben-gb2001-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen „Nettoverzinsung der Kapitalanlagen in % 6,4 / 6,9“; bestätigt Pressemitteilung 22.05.2002 („von 6,9 auf 6,4 Prozent“)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2002": {
+          "nettoverzinsung": {
+            "wert": 3.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "IDUNA Vereinigte Lebensversicherung aG, Geschäftsbericht 2003, Kennzahlen und Lagebericht",
+              "url": "https://web.archive.org/web/20040822090845id_/http://www.signal-iduna.de:80/content_media/GB_2003_Iduna_Leben.pdf",
+              "dokument": "data/raw/altjahre/dokumente/signal-iduna-leben/iduna-leben-gb2003-s003.pdf",
+              "fundstelle": "S. 3 Kennzahlen „5,5 / 3,9“ (Vorjahr); S. 13 „Nettoverzinsung von 5,5 % (Vorjahr: 3,9 %)“",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2003": {
+          "nettoverzinsung": {
+            "wert": 5.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "IDUNA Vereinigte Lebensversicherung aG, Geschäftsbericht 2003, Kennzahlen und Lagebericht",
+              "url": "https://web.archive.org/web/20040822090845id_/http://www.signal-iduna.de:80/content_media/GB_2003_Iduna_Leben.pdf",
+              "dokument": "data/raw/altjahre/dokumente/signal-iduna-leben/iduna-leben-gb2003-s003.pdf",
+              "fundstelle": "S. 3 Kennzahlen; S. 13 Lagebericht",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
         "2011": {
           "nettoverzinsung": {
             "wert": 3.9,
@@ -17608,6 +18529,36 @@
       ],
       "hinweise": "Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.",
       "kennzahlen": {
+        "2002": {
+          "nettoverzinsung": {
+            "wert": 5.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Zürich Gruppe Deutschland, Geschäftsberichte 2003 (Sammelband), Teil „DEUTSCHER HEROLD Lebensversicherung Aktiengesellschaft“, Lagebericht Kapitalanlagen",
+              "url": "https://web.archive.org/web/20040805032328id_/http://www.zuerich.de:80/presse/geschaeftsberichte/media/pdf/geschaeftsberichte_2003.pdf",
+              "dokument": "data/raw/altjahre/dokumente/zurich-deutscher-herold-leben/zuerich-gb2003-s221.pdf",
+              "fundstelle": "S. 221: „Die Nettoverzinsung gemäß Verbandsformel lag damit bei 4,4% nach 5,6% im Vorjahr“ (Vorjahreswert)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2003": {
+          "nettoverzinsung": {
+            "wert": 4.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Zürich Gruppe Deutschland, Geschäftsberichte 2003 (Sammelband), Teil „DEUTSCHER HEROLD Lebensversicherung Aktiengesellschaft“, Lagebericht Kapitalanlagen",
+              "url": "https://web.archive.org/web/20040805032328id_/http://www.zuerich.de:80/presse/geschaeftsberichte/media/pdf/geschaeftsberichte_2003.pdf",
+              "dokument": "data/raw/altjahre/dokumente/zurich-deutscher-herold-leben/zuerich-gb2003-s221.pdf",
+              "fundstelle": "S. 221: „Die Nettoverzinsung gemäß Verbandsformel lag damit bei 4,4% …“; Drei-Jahres-Durchschnitt 2001–2003: 5,5%",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
         "2011": {
           "nettoverzinsung": {
             "wert": 3.8,
@@ -18387,6 +19338,111 @@
       ],
       "hinweise": "Kennzahlen 2011–2024 aus BaFin Tabelle 160; frühere Jahre aus Geschäftsberichten zu beschaffen.",
       "kennzahlen": {
+        "1999": {
+          "nettoverzinsung": {
+            "wert": 7.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "VICTORIA Lebensversicherung AG, Geschäftsbericht 2000",
+              "url": "https://web.archive.org/web/20051104011933id_/http://www.victoria.de:80/daten/pdf/aktie/gb00_lv.pdf",
+              "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2000-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen „Nettoverzinsung 8,1 (7,8) %“ (Vorjahr in Klammern); S. 24 „von 7,8% im Vorjahr auf 8,1% gesteigert“",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2000": {
+          "nettoverzinsung": {
+            "wert": 8.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "VICTORIA Lebensversicherung AG, Geschäftsbericht 2000",
+              "url": "https://web.archive.org/web/20051104011933id_/http://www.victoria.de:80/daten/pdf/aktie/gb00_lv.pdf",
+              "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2000-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen; S. 24 „Nettoverzinsung auf 8,1% gestiegen“; bestätigt ERGO-Pressemitteilung 02.04.2002 (presseportal.de/pm/14591/336930: „6,7 (8,1) %“)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2001": {
+          "nettoverzinsung": {
+            "wert": 6.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Victoria Lebensversicherung AG / Victoria Pensionskasse AG, Geschäftsbericht 2005 – 5-Jahres-Überblick",
+              "url": "https://web.archive.org/web/20070115152934id_/http://www.victoria.de:80/daten/pdf/aktie/GB_Leben_Penka_2005.pdf",
+              "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2005-s004.pdf",
+              "fundstelle": "S. 4 Zeile „Nettoverzinsung“ (2005…2001: 4,2 / 3,5 / 2,7 / 5,2 / 6,7); bestätigt Pressemitteilung 02.04.2002",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2002": {
+          "nettoverzinsung": {
+            "wert": 5.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Victoria Lebensversicherung AG / Victoria Pensionskasse AG, Geschäftsbericht 2005 – 5-Jahres-Überblick",
+              "url": "https://web.archive.org/web/20070115152934id_/http://www.victoria.de:80/daten/pdf/aktie/GB_Leben_Penka_2005.pdf",
+              "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2005-s004.pdf",
+              "fundstelle": "S. 4 Zeile „Nettoverzinsung“; bestätigt Pressemitteilung 11.03.2004 (presseportal.de/pm/14591/536088: „2,7 (5,2) Prozent“)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2003": {
+          "nettoverzinsung": {
+            "wert": 2.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Victoria Lebensversicherung AG / Victoria Pensionskasse AG, Geschäftsbericht 2005 – 5-Jahres-Überblick",
+              "url": "https://web.archive.org/web/20070115152934id_/http://www.victoria.de:80/daten/pdf/aktie/GB_Leben_Penka_2005.pdf",
+              "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2005-s004.pdf",
+              "fundstelle": "S. 4 Zeile „Nettoverzinsung“; bestätigt Pressemitteilung 11.03.2004",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2004": {
+          "nettoverzinsung": {
+            "wert": 3.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Victoria Lebensversicherung AG / Victoria Pensionskasse AG, Geschäftsbericht 2005 – 5-Jahres-Überblick",
+              "url": "https://web.archive.org/web/20070115152934id_/http://www.victoria.de:80/daten/pdf/aktie/GB_Leben_Penka_2005.pdf",
+              "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2005-s004.pdf",
+              "fundstelle": "S. 4 Zeile „Nettoverzinsung“; S. 34 „Die Nettoverzinsung nach der Verbandsformel erhöhte sich von 3,5% auf 4,2%“",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2005": {
+          "nettoverzinsung": {
+            "wert": 4.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Victoria Lebensversicherung AG / Victoria Pensionskasse AG, Geschäftsbericht 2005 – 5-Jahres-Überblick",
+              "url": "https://web.archive.org/web/20070115152934id_/http://www.victoria.de:80/daten/pdf/aktie/GB_Leben_Penka_2005.pdf",
+              "dokument": "data/raw/altjahre/dokumente/victoria-leben/gb2005-s004.pdf",
+              "fundstelle": "S. 4 Zeile „Nettoverzinsung“; S. 34; bestätigt Pressemitteilung 03.05.2007 (presseportal.de/pm/14591/979994)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
         "2011": {
           "nettoverzinsung": {
             "wert": 3.7,
@@ -19167,6 +20223,212 @@
       ],
       "hinweise": "Kennzahlen 2011–2024 aus BaFin Tabelle 160; frühere Jahre aus Geschäftsberichten zu beschaffen.",
       "kennzahlen": {
+        "1998": {
+          "nettoverzinsung": {
+            "wert": 7.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2002, „Kennzahlen der letzten fünf Geschäftsjahre“ (Nettoverzinsung ohne Fondsgebundene Versicherungen)",
+              "url": "https://web.archive.org/web/20070810012220id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2002-s004.pdf",
+              "fundstelle": "S. 4, Zeile „Nettoverzinsung in %“ (2002…1998: 4,6 / 6,2 / 7,6 / 7,9 / 7,6), ohne Fondsgebundene Versicherungen",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "1999": {
+          "nettoverzinsung": {
+            "wert": 7.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2002, „Kennzahlen der letzten fünf Geschäftsjahre“ (Nettoverzinsung ohne Fondsgebundene Versicherungen)",
+              "url": "https://web.archive.org/web/20070810012220id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2002-s004.pdf",
+              "fundstelle": "S. 4, Zeile „Nettoverzinsung in %“",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2000": {
+          "nettoverzinsung": {
+            "wert": 7.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2002, „Kennzahlen der letzten fünf Geschäftsjahre“ (Nettoverzinsung ohne Fondsgebundene Versicherungen)",
+              "url": "https://web.archive.org/web/20070810012220id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2002-s004.pdf",
+              "fundstelle": "S. 4, Zeile „Nettoverzinsung in %“",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2001": {
+          "nettoverzinsung": {
+            "wert": 6.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2002, „Kennzahlen der letzten fünf Geschäftsjahre“ (Nettoverzinsung ohne Fondsgebundene Versicherungen)",
+              "url": "https://web.archive.org/web/20070810012220id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2002-s004.pdf",
+              "fundstelle": "Nettoverzinsung: GB 2002 S. 4 und S. 35 („Vorjahr 6,2 %“); lfd. Durchschnittsverzinsung: GB 2003 S. 3 „lfd. Durchschnittsverzinsung (in %) 5,2 / 5,4 / 6,1“",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 6.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2002, „Kennzahlen der letzten fünf Geschäftsjahre“ (Nettoverzinsung ohne Fondsgebundene Versicherungen)",
+              "url": "https://web.archive.org/web/20070810012220id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2002-s004.pdf",
+              "fundstelle": "Nettoverzinsung: GB 2002 S. 4 und S. 35 („Vorjahr 6,2 %“); lfd. Durchschnittsverzinsung: GB 2003 S. 3 „lfd. Durchschnittsverzinsung (in %) 5,2 / 5,4 / 6,1“",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2002": {
+          "nettoverzinsung": {
+            "wert": 4.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2002, „Kennzahlen der letzten fünf Geschäftsjahre“ (Nettoverzinsung ohne Fondsgebundene Versicherungen)",
+              "url": "https://web.archive.org/web/20070810012220id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2002-s004.pdf",
+              "fundstelle": "Nettoverzinsung: S. 4 und S. 35 „Nettoverzinsung von 4,6 % (Vorjahr 6,2 %)“; lfd. Durchschnittsverzinsung: GB 2003 S. 3",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "GB 2003 S. 25 nennt als Vorjahreswert 4,5 % (abweichende Basis); übernommen ist der im GB 2002 selbst ausgewiesene Wert"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 5.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2002, „Kennzahlen der letzten fünf Geschäftsjahre“ (Nettoverzinsung ohne Fondsgebundene Versicherungen)",
+              "url": "https://web.archive.org/web/20070810012220id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2002-s004.pdf",
+              "fundstelle": "Nettoverzinsung: S. 4 und S. 35 „Nettoverzinsung von 4,6 % (Vorjahr 6,2 %)“; lfd. Durchschnittsverzinsung: GB 2003 S. 3",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "GB 2003 S. 25 nennt als Vorjahreswert 4,5 % (abweichende Basis); übernommen ist der im GB 2002 selbst ausgewiesene Wert"
+            },
+            "confidence": "high"
+          }
+        },
+        "2003": {
+          "nettoverzinsung": {
+            "wert": 4.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2003",
+              "url": "https://web.archive.org/web/20040609205553id_/http://www.amv.de:80/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML2003.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2003-s003.pdf",
+              "fundstelle": "S. 25 „Nettoverzinsung ohne die Fondsgebundene Lebensversicherung von 4,8 % (Vorjahr 4,5 %)“; lfd. Durchschnittsverzinsung S. 3; Nettoverzinsung bestätigt GB 2005 S. 2",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 5.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2003",
+              "url": "https://web.archive.org/web/20040609205553id_/http://www.amv.de:80/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML2003.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2003-s003.pdf",
+              "fundstelle": "S. 25 „Nettoverzinsung ohne die Fondsgebundene Lebensversicherung von 4,8 % (Vorjahr 4,5 %)“; lfd. Durchschnittsverzinsung S. 3; Nettoverzinsung bestätigt GB 2005 S. 2",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2004": {
+          "nettoverzinsung": {
+            "wert": 4.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2005, Kennzahlen",
+              "url": "https://web.archive.org/web/20061207212728id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GB_AMLeben_2005.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2005-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen „Nettoverzinsung (in %) 4,5 / 4,1“ (Vorjahr); S. 31 „(Vorjahr: 4,1 %)“; bestätigt GB 2006 S. 2",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2005": {
+          "nettoverzinsung": {
+            "wert": 4.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2005, Kennzahlen",
+              "url": "https://web.archive.org/web/20061207212728id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GB_AMLeben_2005.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2005-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen; S. 31 „Nettoverzinsung ohne die Fondsgebundene Lebensversicherung von 4,5 %“",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2006": {
+          "nettoverzinsung": {
+            "wert": 4.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2006, Kennzahlen",
+              "url": "https://web.archive.org/web/20070709221605id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GB_AMLeben2006_endg_Stand%2002052007_mit%20Umschlag.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2006-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen „4,5 / 4,5“; S. 34",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2007": {
+          "nettoverzinsung": {
+            "wert": 4.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2008, Kennzahlen",
+              "url": "https://web.archive.org/web/20090424012334id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/AML_GB_2008_0704_eBook_endg%FCltig.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2008-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen „Nettoverzinsung (in %) 3,0 / 4,3“ (Vorjahr)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2008": {
+          "nettoverzinsung": {
+            "wert": 3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2008, Kennzahlen",
+              "url": "https://web.archive.org/web/20090424012334id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/AML_GB_2008_0704_eBook_endg%FCltig.pdf",
+              "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2008-s002.pdf",
+              "fundstelle": "S. 2 Kennzahlen",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
         "2011": {
           "nettoverzinsung": {
             "wert": 2.3,
@@ -19918,6 +21180,1529 @@
               "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_24_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
               "dokument": "data/raw/bafin/dl_st_24_erstvu_lv_va.xlsx",
               "fundstelle": "Blatt „160“, Zeile 14, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        }
+      }
+    },
+    {
+      "id": "hdi-leben",
+      "kanonischerName": "HDI Lebensversicherung AG (früher Gerling-Konzern Lebensversicherungs-AG, HDI-Gerling Lebensversicherung AG)",
+      "altnamen": [
+        "Gerling-Konzern Lebensversicherungs-AG",
+        "Gerling Leben",
+        "HDI-Gerling Lebensversicherung AG",
+        "HDI-Gerling Leben"
+      ],
+      "rechtsnachfolge": [
+        {
+          "beschreibung": "Gerling-Konzern Lebensversicherungs-AG (Köln) nach der Übernahme des Gerling-Konzerns durch Talanx (2006) in HDI-Gerling Lebensversicherung AG umfirmiert, seit 2012 HDI Lebensversicherung AG (BaFin-Kurzname 2011 „HDI-GERLING LEBEN“, ab 2012 „HDI LEBEN AG“). Daten registerfest zu klären.",
+          "quelle": {
+            "typ": "secondary",
+            "titel": "Rechtsnachfolge-Angabe aus der Altjahres-Recherche (data/raw/altjahre/RECHERCHE.md); registerfest zu verifizieren",
+            "dokument": "data/raw/altjahre/RECHERCHE.md",
+            "abrufdatum": "2026-09-18"
+          },
+          "confidence": "low"
+        }
+      ],
+      "hinweise": "Altjahre: bisher nur ein Sekundärwert (2000, Fachpresse). Geschäftsberichte 1994–2005 der Gerling-Konzern Lebensversicherungs-AG über Bundesanzeiger/Bibliothek oder Talanx IR zu beschaffen (data/raw/altjahre/RECHERCHE.md).",
+      "kennzahlen": {
+        "2000": {
+          "nettoverzinsung": {
+            "wert": 7.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "secondary",
+              "titel": "Versicherungsmonitor, „Gerling Leben setzt auf SEB und Betriebsrenten“, 23.05.2001 (Quelle laut Artikel: Financial Times Deutschland)",
+              "url": "https://versicherungsmonitor.de/2001/05/23/gerling-leben-setzt-auf-seb-und-betriebsrenten/",
+              "fundstelle": "Artikeltext: „Trotzdem konnte Gerling Leben durch Auflösung stiller Reserven die Nettoverzinsung bei 7,7 Prozent halten“",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Sekundärquelle für die Gerling-Konzern Lebensversicherungs-AG; der Gerling-Konzern-Geschäftsbericht 2001 (S. 70) nennt nur eine Segment-„Verzinsung“ der Lebensversicherungsgruppe von 6,2 % (9,1 %) mit anderer Abgrenzung – nicht verwendet"
+            },
+            "confidence": "medium"
+          }
+        },
+        "2011": {
+          "nettoverzinsung": {
+            "wert": 3.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2011, Lebensversicherer, Tabelle 160 – Zeile „HDI-GERLING LEBEN“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_11_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_11_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 20, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 4.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2011, Lebensversicherer, Tabelle 160 – Zeile „HDI-GERLING LEBEN“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_11_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_11_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 20, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2011, Lebensversicherer, Tabelle 160 – Zeile „HDI-GERLING LEBEN“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_11_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_11_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 20, logische Spalte 13",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 13,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2011, Lebensversicherer, Tabelle 160 – Zeile „HDI-GERLING LEBEN“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_11_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_11_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 20, logische Spalte 12",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2012": {
+          "nettoverzinsung": {
+            "wert": 3.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2012, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_12_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_12_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 23, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2012, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_12_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_12_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 23, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2012, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_12_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_12_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 23, logische Spalte 13",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 11.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2012, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_12_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_12_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 23, logische Spalte 12",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2013": {
+          "nettoverzinsung": {
+            "wert": 3.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2013, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_13_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_13_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 3.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2013, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_13_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_13_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 3.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2013, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_13_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_13_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 13",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 10.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2013, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_13_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_13_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 12",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2014": {
+          "nettoverzinsung": {
+            "wert": 3.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2014, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_14_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_14_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 3.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2014, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_14_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_14_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 3.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2014, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_14_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_14_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 13",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 8.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2014, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_14_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_14_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 12",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2015": {
+          "nettoverzinsung": {
+            "wert": 2.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2015, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_15_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_15_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 4.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2015, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_15_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_15_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 3.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2015, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_15_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_15_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 13",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 8.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2015, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_15_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_15_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 12",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2016": {
+          "nettoverzinsung": {
+            "wert": 3.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2016, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_16_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_16_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 25, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 2.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2016, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_16_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_16_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 25, logische Spalte 8",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 3.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2016, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_16_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_16_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 25, logische Spalte 11",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 8.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2016, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_16_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_16_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 25, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2017": {
+          "nettoverzinsung": {
+            "wert": 3.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2017, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_17_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_17_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 23, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 2.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2017, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_17_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_17_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 23, logische Spalte 8",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 3.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2017, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_17_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_17_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 23, logische Spalte 11",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 8.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2017, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_17_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_17_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 23, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2018": {
+          "nettoverzinsung": {
+            "wert": 2.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2018, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_18_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_18_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 2.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2018, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_18_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_18_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 8",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 3.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2018, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_18_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_18_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 11",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2018, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_18_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_18_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2019": {
+          "nettoverzinsung": {
+            "wert": 2.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2019, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_19_erstvu_lv_va_xls.xlsm?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_19_erstvu_lv_va_xls.xlsm",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 2.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2019, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_19_erstvu_lv_va_xls.xlsm?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_19_erstvu_lv_va_xls.xlsm",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 8",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 4.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2019, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_19_erstvu_lv_va_xls.xlsm?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_19_erstvu_lv_va_xls.xlsm",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 11",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 8.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2019, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_19_erstvu_lv_va_xls.xlsm?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_19_erstvu_lv_va_xls.xlsm",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2020": {
+          "nettoverzinsung": {
+            "wert": 2.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2020, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_20_erstvu_lv_va_xls.xlsm?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_20_erstvu_lv_va_xls.xlsm",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 2.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2020, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_20_erstvu_lv_va_xls.xlsm?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_20_erstvu_lv_va_xls.xlsm",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 8",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 4.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2020, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_20_erstvu_lv_va_xls.xlsm?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_20_erstvu_lv_va_xls.xlsm",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 11",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 8.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2020, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_20_erstvu_lv_va_xls.xlsm?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_20_erstvu_lv_va_xls.xlsm",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2021": {
+          "nettoverzinsung": {
+            "wert": 2.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2021, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_21_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_21_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 1.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2021, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_21_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_21_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 8",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 4.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2021, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_21_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_21_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 11",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 10.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2021, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_21_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_21_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 26, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2022": {
+          "nettoverzinsung": {
+            "wert": 1.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2022, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_22_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_22_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 25, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 1.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2022, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_22_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_22_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 25, logische Spalte 8",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 4.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2022, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_22_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_22_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 25, logische Spalte 11",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 13.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2022, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_22_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_22_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 25, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2023": {
+          "nettoverzinsung": {
+            "wert": 1.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2023, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_23_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_23_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 1.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2023, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_23_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_23_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 8",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 4.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2023, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_23_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_23_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 11",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 14.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2023, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_23_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_23_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2024": {
+          "nettoverzinsung": {
+            "wert": 1.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2024, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_24_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_24_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 2.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2024, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_24_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_24_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 8",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 4.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2024, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_24_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_24_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 11",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 13.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2024, Lebensversicherer, Tabelle 160 – Zeile „HDI LEBEN AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_24_erstvu_lv_va.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_24_erstvu_lv_va.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 24, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        }
+      }
+    },
+    {
+      "id": "karlsruher-leben",
+      "kanonischerName": "Karlsruher Lebensversicherung AG",
+      "altnamen": [
+        "Karlsruher Leben",
+        "Karlsruher Lebensversicherung"
+      ],
+      "rechtsnachfolge": [
+        {
+          "beschreibung": "Seit 2005 Teil der Wüstenrot & Württembergische-Gruppe; in der BaFin-Statistik letztmals 2018 gelistet – Verschmelzung auf die Württembergische Lebensversicherung AG (Datum registerfest zu klären).",
+          "quelle": {
+            "typ": "secondary",
+            "titel": "Rechtsnachfolge-Angabe aus der Altjahres-Recherche (data/raw/altjahre/RECHERCHE.md); registerfest zu verifizieren",
+            "dokument": "data/raw/altjahre/RECHERCHE.md",
+            "abrufdatum": "2026-09-18"
+          },
+          "confidence": "low"
+        }
+      ],
+      "hinweise": "Unternehmenswerte 1998–2004 aus Geschäftsberichten und „Die Karlsruher in Zahlen“ (Wayback-Kopien, data/raw/altjahre); 2005–2010 zu beschaffen.",
+      "kennzahlen": {
+        "1998": {
+          "nettoverzinsung": {
+            "wert": 7.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Karlsruher Versicherung AG / Karlsruher Rechtsschutzversicherung AG / Karlsruher Beamten-Versicherung AG, Geschäftsbericht 1999 (Aussage zur Karlsruher Lebensversicherung AG)",
+              "url": "https://web.archive.org/web/20061210093749id_/http://www.karlsruher.de:80/produkte/media/oeffentlich/karlsruher/geschaeftsberichte/1999/gbkvkrvkbv99.pdf",
+              "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/gb1999-sach-s007.pdf",
+              "fundstelle": "S. 7: Karlsruher Leben konnte „die Nettoverzinsung mit 7,5 % auf Vorjahreshöhe … halten“ – 1998 damit ebenfalls 7,5 %",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "indirekt belegt (Formulierung „auf Vorjahreshöhe“); kein eigener Zahlenwert 1998 gelesen"
+            },
+            "confidence": "high"
+          }
+        },
+        "1999": {
+          "nettoverzinsung": {
+            "wert": 7.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Karlsruher Lebensversicherung AG / Karlsruher Hinterbliebenenkasse AG, Geschäftsbericht 2000, Zahlenspiegel",
+              "url": "https://web.archive.org/web/20061210094220id_/http://www.karlsruher.de:80/produkte/media/oeffentlich/karlsruher/geschaeftsberichte/2000/gbklvkhk2000.pdf",
+              "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/gb2000-s012.pdf",
+              "fundstelle": "S. 12 Zahlenspiegel „Nettoverzinsung der Kapitalanlagen 7,6 / 7,5“ (Vorjahr); bestätigt GB 1999 der Sachgesellschaften S. 7",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2000": {
+          "nettoverzinsung": {
+            "wert": 7.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Karlsruher Lebensversicherung AG / Karlsruher Hinterbliebenenkasse AG, Geschäftsbericht 2000, Zahlenspiegel",
+              "url": "https://web.archive.org/web/20061210094220id_/http://www.karlsruher.de:80/produkte/media/oeffentlich/karlsruher/geschaeftsberichte/2000/gbklvkhk2000.pdf",
+              "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/gb2000-s012.pdf",
+              "fundstelle": "S. 4, S. 12 Zahlenspiegel, S. 19; bestätigt GB 2001 S. 12 und S. 21 („von 7,6 % im Vorjahr auf 5,6 %“)",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2001": {
+          "nettoverzinsung": {
+            "wert": 5.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Karlsruher Lebensversicherung AG / Karlsruher Hinterbliebenenkasse AG, Geschäftsbericht 2001, Zahlenspiegel",
+              "url": "https://web.archive.org/web/20061210094153id_/http://www.karlsruher.de:80/produkte/media/oeffentlich/karlsruher/geschaeftsberichte/2001/gbklvkhk01.pdf",
+              "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/gb2001-s012.pdf",
+              "fundstelle": "S. 12 Zahlenspiegel „5,6 / 7,6“; S. 21; bestätigt GB 2002 S. 6/14/24",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2002": {
+          "nettoverzinsung": {
+            "wert": 5.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Karlsruher Lebensversicherung AG / Karlsruher Hinterbliebenenkasse AG, Geschäftsbericht 2002, Zahlenspiegel",
+              "url": "https://web.archive.org/web/20040128152145id_/http://www.karlsruher.de:80/klv/gb_klv_khk_2002.pdf",
+              "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/gb2002-s014.pdf",
+              "fundstelle": "S. 14 Zahlenspiegel „Nettoverzinsung der Kapitalanlagen (in %) 5,2 / 5,6“; S. 6, S. 24 (ohne fonds-/aktienindexgebundene LV); bestätigt GB 2003 S. 6/15/26",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2003": {
+          "nettoverzinsung": {
+            "wert": 5.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "Karlsruher Lebensversicherung AG / Karlsruher Hinterbliebenenkasse AG, Geschäftsbericht 2003, Zahlenspiegel",
+              "url": "https://web.archive.org/web/20050217030922id_/http://www.karlsruher.de:80/klv/gb_klv_khk_2003.pdf",
+              "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/gb2003-s015.pdf",
+              "fundstelle": "S. 15 Zahlenspiegel „5,1 / 5,2“; S. 6, S. 26; bestätigt „Die Karlsruher in Zahlen 2004“ S. 3/5",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2004": {
+          "nettoverzinsung": {
+            "wert": 5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "„Die Karlsruher in Zahlen 2004“",
+              "url": "https://web.archive.org/web/20061210093700id_/http://www.karlsruher.de:80/produkte/media/oeffentlich/karlsruher/geschaeftsberichte/2004/karlsruherzahlen_04.pdf",
+              "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/zahlen-2004-s003.pdf",
+              "fundstelle": "S. 3 Tabelle „Nettoverzinsung 5,0 % / 5,1 %“; S. 5 „von 5,1 % auf 5,0 %“",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Geschäftsbericht 2004 nicht auffindbar; Unternehmensbroschüre"
+            },
+            "confidence": "high"
+          }
+        },
+        "2011": {
+          "nettoverzinsung": {
+            "wert": 3.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2011, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_11_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_11_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 84, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 3.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2011, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_11_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_11_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 84, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 1.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2011, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_11_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_11_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 84, logische Spalte 13",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 4.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2011, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_11_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_11_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 84, logische Spalte 12",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2012": {
+          "nettoverzinsung": {
+            "wert": 4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2012, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_12_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_12_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 86, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 3.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2012, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_12_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_12_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 86, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2012, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_12_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_12_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 86, logische Spalte 13",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 4.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2012, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_12_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_12_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 86, logische Spalte 12",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2013": {
+          "nettoverzinsung": {
+            "wert": 4.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2013, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_13_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_13_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 84, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 3.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2013, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_13_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_13_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 84, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 2.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2013, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_13_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_13_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 84, logische Spalte 13",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 2.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2013, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_13_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_13_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 84, logische Spalte 12",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2014": {
+          "nettoverzinsung": {
+            "wert": 4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2014, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_14_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_14_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 85, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 3.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2014, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_14_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_14_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 85, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2014, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_14_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_14_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 85, logische Spalte 13",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 3.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2014, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_14_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_14_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 85, logische Spalte 12",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2015": {
+          "nettoverzinsung": {
+            "wert": 3.1,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2015, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_15_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_15_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 88, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 3.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2015, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_15_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_15_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 88, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 1.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2015, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_15_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_15_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 88, logische Spalte 13",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 3.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2015, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_15_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_15_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 88, logische Spalte 12",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2016": {
+          "nettoverzinsung": {
+            "wert": 4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2016, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_16_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_16_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 85, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 3.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2016, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_16_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_16_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 85, logische Spalte 8",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2016, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_16_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_16_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 85, logische Spalte 11",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 3.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2016, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_16_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_16_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 85, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2017": {
+          "nettoverzinsung": {
+            "wert": 3.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2017, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_17_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_17_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 90, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 2.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2017, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_17_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_17_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 90, logische Spalte 8",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 2.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2017, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_17_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_17_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 90, logische Spalte 11",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 2.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2017, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_17_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_17_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 90, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2018": {
+          "nettoverzinsung": {
+            "wert": 2.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2018, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_18_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_18_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 90, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 2.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2018, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_18_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_18_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 90, logische Spalte 8",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 2.8,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2018, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_18_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_18_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 90, logische Spalte 11",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 2.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2018, Lebensversicherer, Tabelle 160 – Zeile „KARLSRUHER LV AG“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_18_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_18_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 90, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        }
+      }
+    },
+    {
+      "id": "dbv-winterthur-leben",
+      "kanonischerName": "DBV-Winterthur Lebensversicherung AG (später DBV Deutsche Beamtenversicherung Lebensversicherung AG)",
+      "altnamen": [
+        "DBV-Winterthur Leben",
+        "DBV Deutsche Beamtenversicherung Lebensversicherung AG",
+        "Deutsche Beamtenversicherung",
+        "DBV Leben"
+      ],
+      "rechtsnachfolge": [
+        {
+          "beschreibung": "Nach der Übernahme der Winterthur-Gruppe durch AXA (2006/2007) in DBV Deutsche Beamtenversicherung Lebensversicherung AG umfirmiert; in der BaFin-Statistik letztmals 2012 gelistet – Verschmelzung auf die AXA Lebensversicherung AG (Datum registerfest zu klären).",
+          "quelle": {
+            "typ": "secondary",
+            "titel": "Rechtsnachfolge-Angabe aus der Altjahres-Recherche (data/raw/altjahre/RECHERCHE.md); registerfest zu verifizieren",
+            "dokument": "data/raw/altjahre/RECHERCHE.md",
+            "abrufdatum": "2026-09-18"
+          },
+          "confidence": "low"
+        }
+      ],
+      "hinweise": "Altjahre: 2001/2002 aus der Rede zur Bilanzpressekonferenz 2003 der DBV-Winterthur Holding AG; Geschäftsberichte der Lebensversicherung AG nicht im Wayback (data/raw/altjahre/RECHERCHE.md).",
+      "kennzahlen": {
+        "2001": {
+          "nettoverzinsung": {
+            "wert": 6.52,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "DBV-Winterthur Holding AG, Rede zur Bilanzpressekonferenz 25.04.2003 („Bericht über das Geschäftsjahr 2002 und aktuelle Entwicklungen“), Abschnitt Lebensversicherung (DBV-Winterthur Lebensversicherung AG)",
+              "url": "https://web.archive.org/web/20030624061416id_/http://www.dbv-winterthur.de:80/Inhalte/06_Vorstellung/610_Unser_Unternehmen/download/Bilanz_Rede_2003.pdf",
+              "dokument": "data/raw/altjahre/dokumente/dbv-winterthur-leben/bilanzrede-2003-s003.pdf",
+              "fundstelle": "S. 3: Text „4,42 % nach 6,52 % im Vorjahr“ und Tabelle „Nettoverzinsung 6,52 % / 4,42 %“",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Unternehmensveröffentlichung (Rede des Vorstandsvorsitzenden), kein Geschäftsbericht"
+            },
+            "confidence": "high"
+          }
+        },
+        "2002": {
+          "nettoverzinsung": {
+            "wert": 4.42,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "DBV-Winterthur Holding AG, Rede zur Bilanzpressekonferenz 25.04.2003 („Bericht über das Geschäftsjahr 2002 und aktuelle Entwicklungen“), Abschnitt Lebensversicherung (DBV-Winterthur Lebensversicherung AG)",
+              "url": "https://web.archive.org/web/20030624061416id_/http://www.dbv-winterthur.de:80/Inhalte/06_Vorstellung/610_Unser_Unternehmen/download/Bilanz_Rede_2003.pdf",
+              "dokument": "data/raw/altjahre/dokumente/dbv-winterthur-leben/bilanzrede-2003-s003.pdf",
+              "fundstelle": "S. 3: Text und Tabelle (siehe 2001)",
+              "abrufdatum": "2026-09-18",
+              "hinweis": "Unternehmensveröffentlichung (Rede des Vorstandsvorsitzenden), kein Geschäftsbericht"
+            },
+            "confidence": "high"
+          }
+        },
+        "2011": {
+          "nettoverzinsung": {
+            "wert": 3.7,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2011, Lebensversicherer, Tabelle 160 – Zeile „DBV DEUTSCHE BEAMTEN“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_11_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_11_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 30, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 4.6,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2011, Lebensversicherer, Tabelle 160 – Zeile „DBV DEUTSCHE BEAMTEN“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_11_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_11_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 30, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 3.3,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2011, Lebensversicherer, Tabelle 160 – Zeile „DBV DEUTSCHE BEAMTEN“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_11_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_11_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 30, logische Spalte 13",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 7.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2011, Lebensversicherer, Tabelle 160 – Zeile „DBV DEUTSCHE BEAMTEN“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_11_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_11_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 30, logische Spalte 12",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          }
+        },
+        "2012": {
+          "nettoverzinsung": {
+            "wert": 4.4,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2012, Lebensversicherer, Tabelle 160 – Zeile „DBV DEUTSCHE BEAMTEN“, Reinverzinsung (= Nettoverzinsung der Kapitalanlagen)",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_12_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_12_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 33, logische Spalte 10",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "laufendeDurchschnittsverzinsung": {
+            "wert": 4.2,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2012, Lebensversicherer, Tabelle 160 – Zeile „DBV DEUTSCHE BEAMTEN“, lfd. Verzinsung",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_12_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_12_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 33, logische Spalte 9",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "verwaltungskostenquote": {
+            "wert": 3.9,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2012, Lebensversicherer, Tabelle 160 – Zeile „DBV DEUTSCHE BEAMTEN“, Verwaltungsaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_12_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_12_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 33, logische Spalte 13",
+              "abrufdatum": "2026-09-18"
+            },
+            "confidence": "high"
+          },
+          "abschlussaufwendungenProzentBeitraege": {
+            "wert": 7.5,
+            "einheit": "%",
+            "quelle": {
+              "typ": "primary",
+              "titel": "BaFin, Statistik der Erstversicherungsunternehmen 2012, Lebensversicherer, Tabelle 160 – Zeile „DBV DEUTSCHE BEAMTEN“, Abschlussaufwendungen in % der verdienten Brutto-Beiträge",
+              "url": "https://www.bafin.de/SharedDocs/Downloads/DE/Statistik/Erstversicherer/dl_st_12_erstvu_lv_va_xls.xlsx?__blob=publicationFile&v=1",
+              "dokument": "data/raw/bafin/dl_st_12_erstvu_lv_va_xls.xlsx",
+              "fundstelle": "Blatt „160“, Zeile 33, logische Spalte 12",
               "abrufdatum": "2026-09-18"
             },
             "confidence": "high"

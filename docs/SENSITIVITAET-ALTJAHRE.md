@@ -1,6 +1,6 @@
 # Sensitivität der Altjahre (vor 2004)
 
-Automatisch erzeugt von `scripts/sensitivitaet-altjahre.ts` am 2026-09-18 aus `data/insurers.json` (data.version 0.2.0). Frage: Wie stark ändern sich die Nutzungen des **Basis-Szenarios**, wenn alle Zinswerte der Jahre vor 2004 um ±1 Prozentpunkt verschoben werden? Das misst, wie viel an der Beschaffung unternehmensindividueller Altjahres-Werte hängt.
+Automatisch erzeugt von `scripts/sensitivitaet-altjahre.ts` am 2026-09-18 aus `data/insurers.json` (data.version 0.4.0). Frage: Wie stark ändern sich die Nutzungen des **Basis-Szenarios**, wenn alle Zinswerte der Jahre vor 2004 um ±1 Prozentpunkt verschoben werden? Das misst, wie viel an der Beschaffung unternehmensindividueller Altjahres-Werte hängt.
 
 | Vertrag | Nutzungen Basis | −1 Pp vor 2004 | +1 Pp vor 2004 | Änderung | Anteil Nutzungen aus Jahren vor 2004* |
 |---|---|---|---|---|---|

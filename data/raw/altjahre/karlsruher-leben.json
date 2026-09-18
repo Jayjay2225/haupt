@@ -1,0 +1,112 @@
+{
+  "insurerId": "karlsruher-leben",
+  "werte": [
+    {
+      "jahr": 1998,
+      "nettoverzinsung": 7.5,
+      "fundstelle": "S. 7: Karlsruher Leben konnte „die Nettoverzinsung mit 7,5 % auf Vorjahreshöhe … halten“ – 1998 damit ebenfalls 7,5 %",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Karlsruher Versicherung AG / Karlsruher Rechtsschutzversicherung AG / Karlsruher Beamten-Versicherung AG, Geschäftsbericht 1999 (Aussage zur Karlsruher Lebensversicherung AG)",
+        "url": "https://web.archive.org/web/20061210093749id_/http://www.karlsruher.de:80/produkte/media/oeffentlich/karlsruher/geschaeftsberichte/1999/gbkvkrvkbv99.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/gb1999-sach-s007.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.5
+      },
+      "hinweis": "indirekt belegt (Formulierung „auf Vorjahreshöhe“); kein eigener Zahlenwert 1998 gelesen"
+    },
+    {
+      "jahr": 1999,
+      "nettoverzinsung": 7.5,
+      "fundstelle": "S. 12 Zahlenspiegel „Nettoverzinsung der Kapitalanlagen 7,6 / 7,5“ (Vorjahr); bestätigt GB 1999 der Sachgesellschaften S. 7",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Karlsruher Lebensversicherung AG / Karlsruher Hinterbliebenenkasse AG, Geschäftsbericht 2000, Zahlenspiegel",
+        "url": "https://web.archive.org/web/20061210094220id_/http://www.karlsruher.de:80/produkte/media/oeffentlich/karlsruher/geschaeftsberichte/2000/gbklvkhk2000.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/gb2000-s012.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.5
+      }
+    },
+    {
+      "jahr": 2000,
+      "nettoverzinsung": 7.6,
+      "fundstelle": "S. 4, S. 12 Zahlenspiegel, S. 19; bestätigt GB 2001 S. 12 und S. 21 („von 7,6 % im Vorjahr auf 5,6 %“)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Karlsruher Lebensversicherung AG / Karlsruher Hinterbliebenenkasse AG, Geschäftsbericht 2000, Zahlenspiegel",
+        "url": "https://web.archive.org/web/20061210094220id_/http://www.karlsruher.de:80/produkte/media/oeffentlich/karlsruher/geschaeftsberichte/2000/gbklvkhk2000.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/gb2000-s012.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.6
+      }
+    },
+    {
+      "jahr": 2001,
+      "nettoverzinsung": 5.6,
+      "fundstelle": "S. 12 Zahlenspiegel „5,6 / 7,6“; S. 21; bestätigt GB 2002 S. 6/14/24",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Karlsruher Lebensversicherung AG / Karlsruher Hinterbliebenenkasse AG, Geschäftsbericht 2001, Zahlenspiegel",
+        "url": "https://web.archive.org/web/20061210094153id_/http://www.karlsruher.de:80/produkte/media/oeffentlich/karlsruher/geschaeftsberichte/2001/gbklvkhk01.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/gb2001-s012.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.6
+      }
+    },
+    {
+      "jahr": 2002,
+      "nettoverzinsung": 5.2,
+      "fundstelle": "S. 14 Zahlenspiegel „Nettoverzinsung der Kapitalanlagen (in %) 5,2 / 5,6“; S. 6, S. 24 (ohne fonds-/aktienindexgebundene LV); bestätigt GB 2003 S. 6/15/26",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Karlsruher Lebensversicherung AG / Karlsruher Hinterbliebenenkasse AG, Geschäftsbericht 2002, Zahlenspiegel",
+        "url": "https://web.archive.org/web/20040128152145id_/http://www.karlsruher.de:80/klv/gb_klv_khk_2002.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/gb2002-s014.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.2
+      }
+    },
+    {
+      "jahr": 2003,
+      "nettoverzinsung": 5.1,
+      "fundstelle": "S. 15 Zahlenspiegel „5,1 / 5,2“; S. 6, S. 26; bestätigt „Die Karlsruher in Zahlen 2004“ S. 3/5",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Karlsruher Lebensversicherung AG / Karlsruher Hinterbliebenenkasse AG, Geschäftsbericht 2003, Zahlenspiegel",
+        "url": "https://web.archive.org/web/20050217030922id_/http://www.karlsruher.de:80/klv/gb_klv_khk_2003.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/gb2003-s015.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.1
+      }
+    },
+    {
+      "jahr": 2004,
+      "nettoverzinsung": 5.0,
+      "fundstelle": "S. 3 Tabelle „Nettoverzinsung 5,0 % / 5,1 %“; S. 5 „von 5,1 % auf 5,0 %“",
+      "quelle": {
+        "typ": "primary",
+        "titel": "„Die Karlsruher in Zahlen 2004“",
+        "url": "https://web.archive.org/web/20061210093700id_/http://www.karlsruher.de:80/produkte/media/oeffentlich/karlsruher/geschaeftsberichte/2004/karlsruherzahlen_04.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/karlsruher-leben/zahlen-2004-s003.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.0
+      },
+      "hinweis": "Geschäftsbericht 2004 nicht auffindbar; Unternehmensbroschüre"
+    }
+  ]
+}

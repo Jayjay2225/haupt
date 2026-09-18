@@ -32,6 +32,13 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 const FARBE_UNTERNEHMEN = '#0A1F33';
 const FARBE_BRANCHE = '#6B7A86';
 
+/** „1999–2006, 2011–2024“ – zusammenhängende Jahresbereiche einer Reihe. */
+function jahresbereiche(punkte: Punkt[]): string {
+  return laeufe(punkte)
+    .map((lauf) => (lauf.length === 1 ? String(lauf[0]!.jahr) : `${lauf[0]!.jahr}–${lauf[lauf.length - 1]!.jahr}`))
+    .join(', ');
+}
+
 /** Zerlegt eine Jahresreihe in zusammenhängende Läufe (Lücken werden nicht verbunden). */
 function laeufe(punkte: Punkt[]): Punkt[][] {
   const ergebnis: Punkt[][] = [];
@@ -136,7 +143,7 @@ function NettoverzinsungsChart({
           <>
             <br />
             <span style={{ display: 'inline-block', width: '1.6rem', borderTop: `3px solid ${FARBE_UNTERNEHMEN}`, verticalAlign: 'middle', marginRight: '0.4rem' }} />
-            {name} – eigene Werte (Quelle: {quellen.join('; ')})
+            {name} – eigene Werte ({quellen.length === 1 ? 'Quelle' : `${quellen.length} Quellen`}, siehe Hinweis und Tabelle)
           </>
         )}
       </figcaption>
@@ -187,10 +194,9 @@ export default async function VersichererSeite({ params }: { params: Promise<Par
       {hatEigeneWerte ? (
         <div className="hinweis neutral">
           <p>
-            Für die Jahre <strong>{unternehmen[0]!.jahr} bis {unternehmen[unternehmen.length - 1]!.jahr}</strong> rechnen wir
-            mit den eigenen Werten dieser Gesellschaft ({quellen.join('; ')}). Für die übrigen Jahre
-            (Branchenjahre, in der Tabelle markiert) gilt der <strong>Branchendurchschnitt</strong> – das steht so auch
-            im Ergebnis.
+            Für die Jahre <strong>{jahresbereiche(unternehmen)}</strong> rechnen wir mit den eigenen Werten dieser
+            Gesellschaft (Quellen: {quellen.join('; ')}). Für die übrigen Jahre (Branchenjahre, in der Tabelle
+            markiert) gilt der <strong>Branchendurchschnitt</strong> – das steht so auch im Ergebnis.
           </p>
         </div>
       ) : (
@@ -232,8 +238,8 @@ export default async function VersichererSeite({ params }: { params: Promise<Par
         </table>
         {hatEigeneWerte && branchenjahre.length > 0 && (
           <p className="erklaerung">
-            Branchenjahre für diese Gesellschaft: {branchenjahre.length} von {alleJahre.length} Jahren. Für Jahre vor
-            2011 werden die Unternehmenswerte aus Geschäftsberichten und Aufsichtsstatistik nachgetragen (Stand in{' '}
+            Branchenjahre für diese Gesellschaft: {branchenjahre.length} von {alleJahre.length} Jahren. Fehlende
+            Unternehmenswerte werden aus Geschäftsberichten und Aufsichtsstatistik nachgetragen (Stand in{' '}
             <code>data/COVERAGE.md</code>).
           </p>
         )}

@@ -1,0 +1,29 @@
+{
+  "insurerId": "dbv-winterthur-leben",
+  "quelle": {
+    "typ": "primary",
+    "titel": "DBV-Winterthur Holding AG, Rede zur Bilanzpressekonferenz 25.04.2003 („Bericht über das Geschäftsjahr 2002 und aktuelle Entwicklungen“), Abschnitt Lebensversicherung (DBV-Winterthur Lebensversicherung AG)",
+    "url": "https://web.archive.org/web/20030624061416id_/http://www.dbv-winterthur.de:80/Inhalte/06_Vorstellung/610_Unser_Unternehmen/download/Bilanz_Rede_2003.pdf",
+    "abrufdatum": "2026-09-18",
+    "dokument": "data/raw/altjahre/dokumente/dbv-winterthur-leben/bilanzrede-2003-s003.pdf",
+    "hinweis": "Unternehmensveröffentlichung (Rede des Vorstandsvorsitzenden), kein Geschäftsbericht"
+  },
+  "werte": [
+    {
+      "jahr": 2001,
+      "nettoverzinsung": 6.52,
+      "fundstelle": "S. 3: Text „4,42 % nach 6,52 % im Vorjahr“ und Tabelle „Nettoverzinsung 6,52 % / 4,42 %“",
+      "lesung2": {
+        "nettoverzinsung": 6.52
+      }
+    },
+    {
+      "jahr": 2002,
+      "nettoverzinsung": 4.42,
+      "fundstelle": "S. 3: Text und Tabelle (siehe 2001)",
+      "lesung2": {
+        "nettoverzinsung": 4.42
+      }
+    }
+  ]
+}
