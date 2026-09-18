@@ -5,7 +5,7 @@ Grundlage ist das Prompt-Set in `docs/PROMPTS.md` (Stand 11.09.2026). Nach jedem
 | Prompt | Inhalt | Artefakte | Status |
 |---|---|---|---|
 | 0 | Projektkontext | `CLAUDE.md`, Repo-Grundgerüst | ✅ umgesetzt (11.09.2026) |
-| 1 | Rechtsrahmen als Regelwerk | `docs/LEGAL.md`, `data/legal-rules.json`, `docs/LEGAL-OPEN-QUESTIONS.md` | ⬜ offen |
+| 1 | Rechtsrahmen als Regelwerk | `docs/LEGAL.md`, `data/legal-rules.json` (24 Regeln), `docs/LEGAL-OPEN-QUESTIONS.md` (12 Punkte) | ✅ umgesetzt (18.09.2026); Primärquellen-Abgleich der Zitate offen (Open Question Nr. 1) |
 | 2 | Versicherer-Datenbank | `data/insurers.json`, `data/COVERAGE.md`, `scripts/update-insurers.ts` | ⬜ offen |
 | 3 | Rechenkern | `packages/calc`, `docs/CALC-SPEC.md`, `data/risk-defaults.json` | ⬜ offen (Paket-Gerüst vorhanden) |
 | 4 | Eignungs- und Belehrungs-Check | `packages/eligibility` | ⬜ offen (Paket-Gerüst vorhanden) |
