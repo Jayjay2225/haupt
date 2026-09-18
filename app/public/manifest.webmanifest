@@ -1,0 +1,25 @@
+{
+  "name": "Jetztgut",
+  "short_name": "Jetztgut",
+  "description": "Was ist jetzt gut für mich? Innehalten, verstehen, bewusst entscheiden.",
+  "lang": "de",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#E9E6DF",
+  "theme_color": "#22453A",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Innehalten",
+      "short_name": "Innehalten",
+      "description": "Direkt in den Moment",
+      "url": "/?moment=1",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

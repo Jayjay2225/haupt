@@ -1,0 +1,52 @@
+{
+  "bereich": "verwirklichung",
+  "name": "Verwirklichung",
+  "unterpunkte": [
+    { "id": "beruf", "label": "Beruf" },
+    { "id": "unternehmen", "label": "Unternehmen" },
+    { "id": "projekte", "label": "Projekte" },
+    { "id": "kreativitaet", "label": "Kreativität" },
+    { "id": "lernen", "label": "Lernen" },
+    { "id": "wirkung", "label": "Wirkung" }
+  ],
+  "wunschbild": [
+    { "id": "erfuellende-arbeit", "label": "Eine Arbeit, die mich erfüllt", "gruppe": "beruf" },
+    { "id": "eigenes-unternehmen", "label": "Ein eigenes Unternehmen führen", "gruppe": "beruf" },
+    { "id": "unternehmen-entwickeln", "label": "Mein Unternehmen gezielt weiterentwickeln", "gruppe": "beruf" },
+    { "id": "unternehmen-uebergeben", "label": "Mein Unternehmen eines Tages übergeben oder verkaufen", "gruppe": "beruf" },
+    { "id": "sichere-anstellung", "label": "Eine Anstellung, die mir Sicherheit gibt", "gruppe": "beruf" },
+    { "id": "beruflicher-neuanfang", "label": "Beruflich etwas Neues beginnen", "gruppe": "beruf" },
+    { "id": "fuehrungsrolle", "label": "Eine Führungsrolle übernehmen", "gruppe": "beruf" },
+    { "id": "weniger-arbeiten", "label": "Weniger arbeiten, bewusster arbeiten", "gruppe": "beruf" },
+    { "id": "zeitsouveraenitaet", "label": "Frei über meine Arbeitszeit bestimmen", "gruppe": "beruf" },
+    { "id": "fokussiert-arbeiten", "label": "Fokussiert an einer Sache arbeiten", "gruppe": "beruf" },
+    { "id": "feierabend-koennen", "label": "Feierabend machen können, ohne Rest im Kopf", "gruppe": "beruf" },
+    { "id": "echte-pausen-im-arbeitstag", "label": "Echte Pausen im Arbeitstag", "gruppe": "beruf" },
+    { "id": "herzensprojekt", "label": "Ein Herzensprojekt umsetzen", "gruppe": "projekte" },
+    { "id": "regelmaessig-kreativ", "label": "Regelmäßig kreativ sein — Schreiben, Musik, Handwerk", "gruppe": "projekte" },
+    { "id": "mit-haenden-bauen", "label": "Etwas mit den eigenen Händen bauen", "gruppe": "projekte" },
+    { "id": "etwas-veroeffentlichen", "label": "Ein Buch oder etwas Eigenes veröffentlichen", "gruppe": "projekte" },
+    { "id": "nebenprojekt", "label": "Ein Nebenprojekt neben dem Beruf pflegen", "gruppe": "projekte" },
+    { "id": "neue-faehigkeit", "label": "Eine neue Fähigkeit lernen", "gruppe": "lernen" },
+    { "id": "sprache-lernen", "label": "Eine Sprache lernen", "gruppe": "lernen" },
+    { "id": "weiterbildung", "label": "Eine Weiterbildung oder einen Abschluss machen", "gruppe": "lernen" },
+    { "id": "regelmaessig-lesen", "label": "Regelmäßig lesen und dazulernen", "gruppe": "lernen" },
+    { "id": "von-mentor-lernen", "label": "Von einem Mentor oder Vorbild lernen", "gruppe": "lernen" },
+    { "id": "etwas-das-bleibt", "label": "Etwas schaffen, das bleibt", "gruppe": "wirkung" },
+    { "id": "wissen-weitergeben", "label": "Mein Wissen weitergeben", "gruppe": "wirkung" },
+    { "id": "sichtbar-werden", "label": "Mit meiner Arbeit sichtbarer werden", "gruppe": "wirkung" },
+    { "id": "unterschied-machen", "label": "Arbeit, die für andere einen Unterschied macht", "gruppe": "wirkung" },
+    { "id": "weiss-noch-nicht", "label": "Weiß ich noch nicht", "gruppe": "offen" }
+  ],
+  "ziel_vorlagen": [
+    { "id": "projektzeit", "label": "{x} Stunden pro Woche für mein Projekt", "messbar": true, "einheit": "stunden/woche" },
+    { "id": "lernzeit", "label": "{x} Minuten Lernen pro Tag", "messbar": true, "einheit": "minuten/tag" },
+    { "id": "fokusbloecke", "label": "{x} Fokusblöcke ohne Unterbrechung pro Woche", "messbar": true, "einheit": "bloecke/woche" },
+    { "id": "puenktlich-feierabend", "label": "An {x} Tagen pro Woche pünktlich Feierabend machen", "messbar": true, "einheit": "tage/woche" },
+    { "id": "buecher-jahr", "label": "{x} Bücher in diesem Jahr lesen", "messbar": true, "einheit": "buecher/jahr" },
+    { "id": "umsatzziel", "label": "Umsatzziel {x} bis Jahresende erreichen", "messbar": true, "einheit": "euro" },
+    { "id": "meilenstein", "label": "Bis {x} einen konkreten Projekt-Meilenstein abschließen", "messbar": false },
+    { "id": "veroeffentlichen-bis", "label": "Bis {x} etwas Eigenes veröffentlichen", "messbar": false }
+  ],
+  "radar_impulse": ["arbeiten-statt-pause", "scrollen", "doomscrolling", "koffein", "serien", "zocken"]
+}

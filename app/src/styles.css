@@ -1,0 +1,417 @@
+/* Jetztgut — Komponenten-Styles. Farben ausschließlich über Tokens (tokens.css). */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: var(--schrift-text);
+  font-size: var(--groesse-body);
+  line-height: var(--zeile-body);
+  color: var(--farbe-tinte);
+  background: var(--farbe-grund);
+}
+#root { min-height: 100%; }
+button { font: inherit; color: inherit; background: none; border: none; padding: 0; cursor: pointer; }
+input, textarea, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--farbe-tanne); outline-offset: 2px; border-radius: var(--raum-1); }
+
+/* ---------- Bühne: mobil voll, am Desktop zentrierter App-Rahmen ---------- */
+.buehne { min-height: 100vh; min-height: 100dvh; display: flex; justify-content: center; background: var(--farbe-grund); }
+.app {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--farbe-grund);
+}
+@media (min-width: 560px) {
+  .buehne { padding: var(--raum-6); align-items: stretch; }
+  .app {
+    min-height: calc(100dvh - 2 * var(--raum-6));
+    border: 1px solid var(--farbe-linie);
+    border-radius: 28px;
+    overflow: hidden;
+  }
+}
+.inhalt { flex: 1; overflow-y: auto; }
+.screen-inhalt { display: flex; flex-direction: column; gap: var(--raum-5); padding: var(--raum-6) var(--raum-5) var(--raum-7); }
+.screen-kopf { display: flex; flex-direction: column; gap: var(--raum-1); }
+.screen-titel { font-family: var(--schrift-display); font-size: var(--groesse-display); line-height: var(--zeile-display); font-weight: 600; color: var(--farbe-tanne); margin: 0; }
+
+/* ---------- Typo-Rollen ---------- */
+.wortmarke { font-family: var(--schrift-display); font-weight: 600; font-size: var(--groesse-h2); color: var(--farbe-tanne); margin: 0; }
+.frage { font-family: var(--schrift-display); font-size: var(--groesse-display); line-height: var(--zeile-display); font-weight: 600; margin: 0; text-wrap: balance; }
+.momentsatz { font-family: var(--schrift-display); font-size: var(--groesse-h1); line-height: var(--zeile-h1); font-weight: 600; margin: 0; text-wrap: balance; }
+.fliess { font-size: var(--groesse-body); margin: 0; }
+.hinweis { font-size: var(--groesse-sekundaer); color: var(--farbe-nebel); margin: 0; }
+.etikett { font-size: var(--groesse-caption); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--farbe-nebel); margin: 0; }
+.mittig-text { text-align: center; }
+
+/* ---------- Knöpfe ---------- */
+.knopf {
+  min-height: 52px;
+  border-radius: var(--radius-feld);
+  background: var(--farbe-tanne-flaeche);
+  color: var(--farbe-auf-tanne);
+  font-weight: 600;
+  font-size: var(--groesse-body);
+  padding: var(--raum-3) var(--raum-5);
+  transition: background var(--dauer-kurz) var(--kurve);
+}
+.knopf:active { background: var(--farbe-tanne-flaeche-aktiv); }
+.knopf:disabled { opacity: 0.45; cursor: default; }
+.knopf-still {
+  min-height: 48px;
+  border-radius: var(--radius-feld);
+  background: var(--farbe-karte);
+  border: 1px solid var(--farbe-linie);
+  font-weight: 600;
+  padding: var(--raum-2) var(--raum-4);
+}
+.knopf-still.klein { min-height: 40px; font-size: var(--groesse-sekundaer); font-weight: 400; }
+.knopf-reihe { display: flex; flex-wrap: wrap; gap: var(--raum-2); align-items: center; }
+.skip { align-self: center; min-height: 44px; color: var(--farbe-nebel); font-size: var(--groesse-sekundaer); padding: var(--raum-2) var(--raum-4); }
+.zurueck { min-width: 44px; min-height: 44px; display: grid; place-items: center; color: var(--farbe-tinte-soft); }
+
+/* ---------- Eingaben ---------- */
+.eingabe {
+  min-height: 48px;
+  width: 100%;
+  border-radius: var(--radius-feld);
+  border: 1px solid var(--farbe-eingabe-rand);
+  background: var(--farbe-eingabe);
+  padding: var(--raum-3) var(--raum-4);
+}
+.eingabe::placeholder { color: var(--farbe-nebel); }
+.eingabe-mehrzeilig { min-height: 84px; resize: vertical; }
+.eingabe-datum, .eingabe-auswahl { width: auto; flex: 1; min-width: 130px; }
+.eingabe-pin { max-width: 160px; text-align: center; letter-spacing: 0.4em; }
+.feld { display: flex; flex-direction: column; gap: var(--raum-2); }
+.feld-stapel { display: flex; flex-direction: column; gap: var(--raum-3); }
+.feld.mittig { align-items: center; }
+
+/* ---------- Chips & Kacheln ---------- */
+.chip {
+  min-height: 40px;
+  border-radius: var(--radius-rund);
+  border: 1px solid var(--farbe-linie);
+  background: var(--farbe-karte);
+  padding: var(--raum-2) var(--raum-4);
+  font-size: var(--groesse-sekundaer);
+  transition: background var(--dauer-kurz) var(--kurve), color var(--dauer-kurz) var(--kurve);
+}
+.chip-aktiv { background: var(--farbe-tanne-flaeche); border-color: var(--farbe-tanne-flaeche); color: var(--farbe-auf-tanne); }
+.chip-demo { border-style: dashed; color: var(--farbe-nebel); align-self: center; }
+.chip-wolke { display: flex; flex-wrap: wrap; gap: var(--raum-2); }
+.chip-gruppe { margin-bottom: var(--raum-3); }
+.chip-wolke-scroll { max-height: 46vh; overflow-y: auto; padding-right: var(--raum-1); }
+
+.kachel-raster { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--raum-2); }
+.kachel {
+  min-height: 64px;
+  border-radius: var(--radius-feld);
+  background: var(--farbe-karte);
+  border: 1px solid var(--farbe-linie);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--raum-2);
+  text-align: center;
+  transition: background var(--dauer-kurz) var(--kurve), color var(--dauer-kurz) var(--kurve);
+}
+.kachel-aktiv { background: var(--farbe-tanne-flaeche); border-color: var(--farbe-tanne-flaeche); color: var(--farbe-auf-tanne); }
+.kachel-hinweis { font-size: var(--groesse-caption); color: var(--farbe-ocker-text); }
+.kachel-aktiv .kachel-hinweis { color: var(--farbe-auf-tanne-soft); }
+
+/* ---------- Home ---------- */
+.home-kopf { display: flex; flex-direction: column; gap: var(--raum-2); }
+.home-frage { font-family: var(--schrift-display); font-size: var(--groesse-display); line-height: var(--zeile-display); font-weight: 600; margin: 0; text-wrap: balance; }
+.innehalten {
+  position: relative;
+  min-height: 96px;
+  border-radius: var(--radius-karte);
+  background: var(--farbe-tanne-flaeche);
+  color: var(--farbe-auf-tanne);
+  font-family: var(--schrift-display);
+  font-size: var(--groesse-h1);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--raum-4);
+}
+.innehalten:active { background: var(--farbe-tanne-flaeche-aktiv); }
+.innehalten-ring {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 5px solid transparent;
+  background:
+    radial-gradient(circle at 50% 34%, var(--farbe-karte), var(--farbe-eingabe) 70%) content-box,
+    conic-gradient(from 210deg, var(--farbe-ocker), var(--farbe-auf-tanne-soft) 40%, var(--farbe-ocker) 100%) border-box;
+}
+.eingabe-zeile { display: flex; gap: var(--raum-2); align-items: center; }
+.mikro {
+  min-width: 48px; min-height: 48px;
+  border-radius: var(--radius-rund);
+  background: var(--farbe-tanne-flaeche);
+  color: var(--farbe-auf-tanne);
+  display: grid; place-items: center;
+}
+.mikro-aktiv { background: var(--farbe-ocker); color: var(--farbe-tinte); }
+.mikro-fallback { white-space: nowrap; }
+.impuls-block { display: flex; flex-direction: column; gap: var(--raum-2); }
+.impuls-kacheln { display: flex; flex-wrap: wrap; gap: var(--raum-2); }
+.impuls-kachel {
+  min-height: 44px;
+  border-radius: var(--radius-rund);
+  border: 1px solid var(--farbe-linie);
+  background: var(--farbe-karte);
+  padding: var(--raum-2) var(--raum-4);
+}
+.home-bilanz { font-size: var(--groesse-sekundaer); color: var(--farbe-nebel); margin: 0; }
+
+/* ---------- Tabbar ---------- */
+.tabbar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--farbe-linie);
+  background: var(--farbe-karte);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tab {
+  min-height: 56px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-size: var(--groesse-caption);
+  color: var(--farbe-nebel);
+}
+.tab-aktiv { color: var(--farbe-tanne); font-weight: 600; }
+
+/* ---------- Moment-Overlay ---------- */
+.overlay {
+  position: absolute; inset: 0; z-index: 10;
+  background: var(--farbe-grund);
+  display: flex; flex-direction: column;
+  animation: einblenden var(--dauer-mittel) var(--kurve);
+}
+@keyframes einblenden { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.overlay-kopf { display: flex; align-items: center; padding: var(--raum-4) var(--raum-4) 0; }
+.fortschritt { flex: 1; display: flex; justify-content: center; gap: var(--raum-2); }
+.fortschritt-punkt { width: 6px; height: 6px; border-radius: 50%; background: var(--farbe-linie); }
+.fortschritt-punkt.aktiv { background: var(--farbe-ocker); }
+.schliessen { min-width: 44px; min-height: 44px; display: grid; place-items: center; color: var(--farbe-tinte-soft); }
+.schrittflaeche {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column; gap: var(--raum-4);
+  padding: var(--raum-4) var(--raum-5) var(--raum-6);
+}
+.schrittflaeche.mittig { justify-content: center; align-items: center; text-align: center; gap: var(--raum-5); }
+
+.atemkreis {
+  width: 190px; height: 190px; margin: var(--raum-4) auto 0;
+  border-radius: 50%;
+  border: 9px solid transparent;
+  background:
+    radial-gradient(circle at 50% 34%, var(--farbe-karte), var(--farbe-eingabe) 60%, var(--farbe-eingabe-rand) 100%) content-box,
+    conic-gradient(from 210deg, var(--farbe-ocker), var(--farbe-auf-tanne-soft) 38%, var(--farbe-ocker) 62%, var(--farbe-ocker-text) 82%, var(--farbe-ocker)) border-box;
+  box-shadow: 0 0 0 10px var(--ocker-glow-b), 0 0 44px var(--ocker-glow-c);
+  display: flex; align-items: center; justify-content: center;
+  animation: atmen 6s var(--kurve) infinite;
+}
+@keyframes atmen { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+.atem-label { color: var(--farbe-tinte-soft); font-size: var(--groesse-sekundaer); animation: atem-text 3s var(--kurve); }
+@keyframes atem-text { from { opacity: 0.35; } to { opacity: 1; } }
+
+.intensitaet { display: flex; align-items: center; gap: var(--raum-2); flex-wrap: wrap; }
+
+.kompass-spiegel {
+  background: var(--farbe-tanne-flaeche);
+  color: var(--farbe-auf-tanne);
+  border-radius: var(--radius-karte);
+  padding: var(--raum-4) var(--raum-5);
+  display: flex; flex-direction: column; gap: var(--raum-1);
+}
+.ks-satz { margin: 0; color: var(--farbe-auf-tanne-soft); font-size: var(--groesse-sekundaer); }
+.ks-frage { margin: 0; font-family: var(--schrift-display); font-weight: 600; font-size: var(--groesse-h2); }
+.gefuehl-spiegel { margin: 0; font-size: var(--groesse-sekundaer); color: var(--farbe-nebel); }
+
+.optionen { display: flex; flex-direction: column; gap: var(--raum-3); }
+.option {
+  min-height: 100px;
+  border: 1px solid var(--farbe-linie);
+  background: var(--farbe-karte);
+  border-radius: var(--radius-karte);
+  padding: var(--raum-4) var(--raum-5);
+  display: flex; flex-direction: column; gap: var(--raum-2);
+  text-align: left;
+}
+.option h2 { margin: 0; font-family: var(--schrift-display); font-size: var(--groesse-h2); font-weight: 600; }
+.option p { margin: 0; font-size: var(--groesse-body); color: var(--farbe-tinte-soft); }
+.option-knopf { transition: background var(--dauer-kurz) var(--kurve); }
+.option-knopf:active { background: var(--farbe-eingabe); }
+.alt-liste { display: flex; flex-direction: column; }
+.alt-zeile {
+  min-height: 44px;
+  display: flex; align-items: center; gap: var(--raum-2);
+  text-align: left;
+  color: var(--farbe-ocker-text);
+  font-size: var(--groesse-body);
+}
+
+.timer-ring {
+  width: 190px; height: 190px; border-radius: 50%;
+  border: 4px solid var(--farbe-ocker);
+  display: grid; place-items: center;
+  box-shadow: 0 0 0 10px var(--ocker-glow-b);
+}
+.timer-zeit { font-family: var(--schrift-display); font-size: 44px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.punkte { display: flex; gap: var(--raum-2); flex-wrap: wrap; justify-content: center; }
+.punkt-chip {
+  background: var(--farbe-tanne-tint);
+  color: var(--farbe-tanne);
+  border-radius: var(--radius-rund);
+  padding: var(--raum-2) var(--raum-4);
+  font-weight: 600;
+  font-size: var(--groesse-sekundaer);
+}
+
+.krise-nummern { display: flex; flex-direction: column; gap: var(--raum-3); }
+.krise-nummer {
+  background: var(--farbe-tanne-flaeche);
+  color: var(--farbe-auf-tanne);
+  border-radius: var(--radius-karte);
+  padding: var(--raum-4) var(--raum-5);
+  text-decoration: none;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.krise-label { font-size: var(--groesse-caption); letter-spacing: 0.14em; text-transform: uppercase; color: var(--farbe-auf-tanne-soft); }
+.krise-zahl { font-family: var(--schrift-display); font-size: var(--groesse-h1); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ---------- Kompass ---------- */
+.bereichs-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.bereichs-zeile {
+  width: 100%;
+  display: flex; flex-direction: column; gap: var(--raum-2);
+  padding: var(--raum-4) 0;
+  border-bottom: 1px solid var(--farbe-linie);
+  text-align: left;
+}
+.bereichs-zeile-kopf { display: flex; justify-content: space-between; align-items: baseline; gap: var(--raum-3); }
+.bereichs-name { font-size: var(--groesse-body); font-weight: 600; }
+.bereichs-wert { color: var(--farbe-tanne); font-weight: 700; font-variant-numeric: tabular-nums; }
+.bereichs-woran { display: flex; align-items: center; gap: var(--raum-2); font-size: var(--groesse-sekundaer); color: var(--farbe-ocker-text); }
+
+.punktreihe { display: flex; gap: 4px; }
+.punktreihe-anzeige .punkt { width: 9px; height: 9px; border-radius: 50%; background: var(--farbe-linie); }
+.punktreihe-anzeige .punkt-voll { background: var(--farbe-tanne); }
+.pill {
+  flex: 1; height: 38px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--farbe-linie);
+  background: var(--farbe-karte);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--groesse-sekundaer);
+}
+.pill-aktiv { background: var(--farbe-tanne-flaeche); border-color: var(--farbe-tanne-flaeche); color: var(--farbe-auf-tanne); font-weight: 700; }
+
+.editor-kopf { flex-direction: row; align-items: center; gap: var(--raum-2); }
+.editor-block { display: flex; flex-direction: column; gap: var(--raum-3); }
+.editor-zeile { display: flex; justify-content: space-between; align-items: center; gap: var(--raum-3); }
+.editor-zeile-text { flex: 1; }
+.editor-neu { display: flex; flex-wrap: wrap; gap: var(--raum-2); align-items: center; }
+.editor-neu .eingabe { flex: 2; min-width: 160px; width: auto; }
+
+/* ---------- Rückblick ---------- */
+.segmente {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  background: var(--farbe-eingabe);
+  border-radius: var(--radius-feld);
+  padding: 3px; gap: 3px;
+}
+.segment { min-height: 42px; border-radius: calc(var(--radius-feld) - 3px); font-size: var(--groesse-sekundaer); color: var(--farbe-nebel); }
+.segment-aktiv { background: var(--farbe-karte); color: var(--farbe-tinte); font-weight: 600; }
+
+.wochenkarte {
+  background: var(--farbe-tanne-flaeche);
+  color: var(--farbe-auf-tanne);
+  border-radius: var(--radius-karte);
+  padding: var(--raum-5);
+  display: flex; flex-direction: column; gap: var(--raum-1);
+}
+.wochensatz { margin: 0; font-family: var(--schrift-display); font-size: var(--groesse-h1); line-height: var(--zeile-h1); font-weight: 600; }
+.wochen-unterzeile { margin: 0; color: var(--farbe-auf-tanne-soft); font-size: var(--groesse-sekundaer); }
+.reflexion-start, .reflexion-schritt { display: flex; flex-direction: column; gap: var(--raum-4); }
+.reflexion-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--raum-3); }
+.reflexion-eintrag {
+  border: 1px solid var(--farbe-linie);
+  border-radius: var(--radius-feld);
+  background: var(--farbe-karte);
+  padding: var(--raum-3) var(--raum-4);
+  display: flex; flex-direction: column; gap: var(--raum-1);
+}
+
+.trend-liste { display: flex; flex-direction: column; gap: var(--raum-4); }
+.diagramm {
+  margin: 0;
+  border: 1px solid var(--farbe-linie);
+  border-radius: var(--radius-feld);
+  background: var(--farbe-karte);
+  padding: var(--raum-3) var(--raum-4);
+  display: flex; flex-direction: column; gap: var(--raum-2);
+}
+.diagramm-titel { display: flex; justify-content: space-between; align-items: baseline; gap: var(--raum-3); font-size: var(--groesse-sekundaer); font-weight: 600; }
+.diagramm-wert { color: var(--farbe-tanne); font-variant-numeric: tabular-nums; }
+.diagramm-flaeche { width: 100%; height: auto; display: block; }
+.diagramm-raster { stroke: var(--farbe-linie); stroke-width: 1; }
+.diagramm-achse { fill: var(--farbe-nebel); font-size: 10px; font-variant-numeric: tabular-nums; }
+.diagramm-linie { fill: none; stroke: var(--farbe-tanne); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.diagramm-punkt { fill: var(--farbe-tanne); stroke: var(--farbe-karte); stroke-width: 2; }
+.diagramm-hinweis { margin: 0; font-size: var(--groesse-caption); color: var(--farbe-nebel); }
+
+.einsichten-liste { display: flex; flex-direction: column; gap: var(--raum-3); }
+.einsicht-karte {
+  border: 1px solid var(--farbe-linie);
+  border-radius: var(--radius-karte);
+  background: var(--farbe-karte);
+  padding: var(--raum-4) var(--raum-5);
+  display: flex; flex-direction: column; gap: var(--raum-3);
+}
+.einsicht-frage { border-color: var(--farbe-ocker); }
+
+/* ---------- Einstellungen / Dialoge ---------- */
+.dialog-karte {
+  border: 1px solid var(--farbe-linie);
+  border-radius: var(--radius-feld);
+  background: var(--farbe-karte);
+  padding: var(--raum-4);
+  display: flex; flex-direction: column; gap: var(--raum-3);
+}
+.schalter-zeile { display: flex; align-items: center; gap: var(--raum-3); min-height: 44px; }
+.schalter-zeile input { width: 20px; height: 20px; accent-color: var(--farbe-tanne); }
+.einordnung {
+  background: var(--farbe-karte);
+  border-left: 3px solid var(--farbe-ocker);
+  border-radius: var(--raum-1);
+  padding: var(--raum-3) var(--raum-4);
+  font-size: var(--groesse-sekundaer);
+  color: var(--farbe-tinte-soft);
+}
+.einordnung p { margin: 0; }
+details summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+
+/* ---------- Onboarding / PIN ---------- */
+.onboarding { justify-content: center; min-height: 100%; }
+.ob-schritt { display: flex; flex-direction: column; gap: var(--raum-4); }
+.ob-schritt.mittig { align-items: center; text-align: center; }
+.pin-gate { align-items: center; justify-content: center; gap: var(--raum-5); display: flex; flex-direction: column; }
+
+/* ---------- Reduced Motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .atemkreis { animation: none; }
+  .overlay { animation: none; }
+  .atem-label { animation-duration: 1.2s; }
+  .chip, .kachel, .option-knopf, .knopf { transition: none; }
+}

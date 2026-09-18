@@ -1,0 +1,43 @@
+{
+  "bereich": "hilfe",
+  "name": "Hilfe für andere",
+  "unterpunkte": [],
+  "wunschbild": [
+    { "id": "ehrenamt-regelmaessig", "label": "Ein regelmäßiges Ehrenamt", "gruppe": "engagement" },
+    { "id": "ehrenamt-projektweise", "label": "Projektweise helfen, wenn es passt", "gruppe": "engagement" },
+    { "id": "verein-aktiv", "label": "In einem Verein aktiv sein", "gruppe": "engagement" },
+    { "id": "nachbarschaftshilfe", "label": "Nachbarschaftshilfe leisten", "gruppe": "engagement" },
+    { "id": "fuer-thema-einsetzen", "label": "Mich für ein Thema einsetzen, das mir wichtig ist", "gruppe": "engagement" },
+    { "id": "engagement-finden", "label": "Ein Engagement finden, das zu mir passt", "gruppe": "engagement" },
+    { "id": "regelmaessig-spenden", "label": "Regelmäßig spenden", "gruppe": "geben" },
+    { "id": "spontan-geben", "label": "Spontan geben, wenn es mich berührt", "gruppe": "geben" },
+    { "id": "fester-anteil", "label": "Einen festen Anteil meines Einkommens geben", "gruppe": "geben" },
+    { "id": "blut-spenden", "label": "Blut oder Plasma spenden", "gruppe": "geben" },
+    { "id": "dinge-weitergeben", "label": "Dinge weitergeben statt wegwerfen", "gruppe": "geben" },
+    { "id": "zeit-statt-geld", "label": "Zeit statt Geld geben", "gruppe": "geben" },
+    { "id": "taeglich-kleine-geste", "label": "Jeden Tag eine kleine Geste", "gruppe": "alltag" },
+    { "id": "wirklich-zuhoeren", "label": "Wirklich zuhören, wenn jemand etwas braucht", "gruppe": "alltag" },
+    { "id": "hilfe-anbieten", "label": "Hilfe anbieten, bevor gefragt wird", "gruppe": "alltag" },
+    { "id": "wertschaetzung-zeigen", "label": "Öfter Danke sagen und Wertschätzung zeigen", "gruppe": "alltag" },
+    { "id": "menschen-besuchen", "label": "Menschen besuchen, die wenig Besuch bekommen", "gruppe": "alltag" },
+    { "id": "gelegenheiten-sehen", "label": "Aufmerksam durch den Tag gehen und Gelegenheiten sehen", "gruppe": "alltag" },
+    { "id": "grenzen-beim-helfen", "label": "Helfen, ohne mich dabei zu verlieren", "gruppe": "alltag" },
+    { "id": "stille-hilfe", "label": "Im Stillen helfen, ohne Bühne", "gruppe": "alltag" },
+    { "id": "mentoring", "label": "Jemanden als Mentor begleiten", "gruppe": "mentoring" },
+    { "id": "wissen-teilen", "label": "Mein Wissen kostenlos teilen", "gruppe": "mentoring" },
+    { "id": "faehigkeiten-einsetzen", "label": "Meine beruflichen Fähigkeiten für Gutes einsetzen", "gruppe": "mentoring" },
+    { "id": "junge-menschen-foerdern", "label": "Junge Menschen fördern", "gruppe": "mentoring" },
+    { "id": "umfeld-entlasten", "label": "Menschen in meinem Umfeld entlasten", "gruppe": "mentoring" },
+    { "id": "weiss-noch-nicht", "label": "Weiß ich noch nicht", "gruppe": "offen" }
+  ],
+  "ziel_vorlagen": [
+    { "id": "ehrenamt-stunden", "label": "{x} Stunden Ehrenamt pro Monat", "messbar": true, "einheit": "stunden/monat" },
+    { "id": "spendenbetrag", "label": "{x} Euro pro Monat spenden", "messbar": true, "einheit": "euro/monat" },
+    { "id": "gute-taten-woche", "label": "{x} kleine gute Taten pro Woche", "messbar": true, "einheit": "taten/woche" },
+    { "id": "blutspenden-jahr", "label": "{x}-mal im Jahr Blut spenden", "messbar": true, "einheit": "spenden/jahr" },
+    { "id": "mentoring-treffen", "label": "{x} Mentoring-Treffen pro Monat", "messbar": true, "einheit": "treffen/monat" },
+    { "id": "kisten-weitergeben", "label": "{x} Kisten aussortieren und weitergeben", "messbar": true, "einheit": "kisten" },
+    { "id": "engagement-start", "label": "Bis {x} ein passendes Engagement finden", "messbar": false }
+  ],
+  "radar_impulse": ["scrollen", "serien", "shopping", "arbeiten-statt-pause"]
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "energie",
+    "label": "Energie",
+    "frage": "Brauchst du gerade Energie?"
+  },
+  {
+    "id": "pause",
+    "label": "Pause",
+    "frage": "Brauchst du gerade eine Pause?"
+  },
+  {
+    "id": "trost",
+    "label": "Trost",
+    "frage": "Brauchst du gerade Trost?"
+  },
+  {
+    "id": "belohnung",
+    "label": "Belohnung",
+    "frage": "Wäre das gerade eine Belohnung für dich?"
+  },
+  {
+    "id": "ablenkung",
+    "label": "Ablenkung",
+    "frage": "Willst du gerade an etwas anderes denken?"
+  },
+  {
+    "id": "naehe",
+    "label": "Nähe",
+    "frage": "Fehlt dir gerade Nähe?"
+  },
+  {
+    "id": "reiz",
+    "label": "Reiz/Abwechslung",
+    "frage": "Brauchst du gerade Abwechslung?"
+  },
+  {
+    "id": "hunger",
+    "label": "echter Hunger",
+    "frage": "Hast du gerade echten Hunger?"
+  },
+  {
+    "id": "genuss",
+    "label": "Lust auf Genuss",
+    "frage": "Hast du gerade einfach Lust auf Genuss?"
+  }
+]

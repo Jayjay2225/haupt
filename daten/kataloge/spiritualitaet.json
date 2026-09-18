@@ -1,0 +1,52 @@
+{
+  "bereich": "spiritualitaet",
+  "name": "Spiritualität",
+  "unterpunkte": [
+    {"id": "praxis", "label": "Praxis"},
+    {"id": "sinn", "label": "Sinn"},
+    {"id": "stille", "label": "Stille"},
+    {"id": "natur", "label": "Natur"},
+    {"id": "glaube", "label": "Glaube"}
+  ],
+  "wunschbild": [
+    {"id": "meditation", "label": "Regelmäßig meditieren", "gruppe": "praxis"},
+    {"id": "gebet", "label": "Beten", "gruppe": "praxis"},
+    {"id": "yoga", "label": "Yoga praktizieren", "gruppe": "praxis"},
+    {"id": "achtsamkeit-im-alltag", "label": "Achtsamkeit im Alltag", "gruppe": "praxis"},
+    {"id": "feste-rituale", "label": "Feste Rituale pflegen, etwa ein Morgenritual", "gruppe": "praxis"},
+    {"id": "tagebuch-reflexion", "label": "Tagebuch oder Reflexion als Praxis", "gruppe": "praxis"},
+    {"id": "atemuebungen", "label": "Atemübungen", "gruppe": "praxis"},
+    {"id": "stille-zeiten", "label": "Regelmäßige Zeiten der Stille", "gruppe": "stille-natur"},
+    {"id": "zeit-in-natur", "label": "Zeit in der Natur verbringen", "gruppe": "stille-natur"},
+    {"id": "digitale-auszeiten", "label": "Bewusste Auszeiten von Bildschirmen", "gruppe": "stille-natur"},
+    {"id": "retreats-auszeiten", "label": "Retreats oder Auszeiten besuchen", "gruppe": "stille-natur"},
+    {"id": "wandern-pilgern", "label": "Wandern oder Pilgern", "gruppe": "stille-natur"},
+    {"id": "sinnfragen-nachgehen", "label": "Sinnfragen nachgehen", "gruppe": "sinn-glaube"},
+    {"id": "werte-klaeren", "label": "Meine Werte klären", "gruppe": "sinn-glaube"},
+    {"id": "glaube-leben", "label": "Meinen Glauben leben", "gruppe": "sinn-glaube"},
+    {"id": "dankbarkeit-ueben", "label": "Dankbarkeit üben", "gruppe": "sinn-glaube"},
+    {"id": "endlichkeit-annehmen", "label": "Mich mit Endlichkeit auseinandersetzen", "gruppe": "sinn-glaube"},
+    {"id": "texte-lesen", "label": "Spirituelle oder philosophische Texte lesen", "gruppe": "sinn-glaube"},
+    {"id": "gemeinschaft-finden", "label": "Eine Gemeinschaft mit ähnlichen Werten finden", "gruppe": "gemeinschaft"},
+    {"id": "gemeinde-gruppe", "label": "Teil einer Gemeinde oder Gruppe sein", "gruppe": "gemeinschaft"},
+    {"id": "austausch-sinnfragen", "label": "Austausch über Sinnfragen mit anderen", "gruppe": "gemeinschaft"},
+    {"id": "kein-bedarf", "label": "Bewusst kein Bedarf – dieser Bereich ist für mich gerade kein Thema", "gruppe": "offen"},
+    {"id": "weiss-noch-nicht", "label": "Weiß ich noch nicht", "gruppe": "offen"}
+  ],
+  "ziel_vorlagen": [
+    {"id": "meditation-minuten", "label": "Täglich {x} Minuten meditieren", "messbar": true, "einheit": "Minuten/Tag"},
+    {"id": "natur-pro-woche", "label": "{x}-mal pro Woche raus in die Natur", "messbar": true, "einheit": "mal/Woche"},
+    {"id": "stille-am-morgen", "label": "Jeden Morgen {x} Minuten Stille", "messbar": true, "einheit": "Minuten"},
+    {"id": "bildschirmfreie-abende", "label": "{x} bildschirmfreie Abende pro Woche", "messbar": true, "einheit": "Abende/Woche"},
+    {"id": "retreats-pro-jahr", "label": "{x} Retreats oder Auszeiten pro Jahr", "messbar": true, "einheit": "pro Jahr"},
+    {"id": "lesezeit", "label": "{x} Minuten pro Woche in Texten lesen, die mich tragen", "messbar": true, "einheit": "Minuten/Woche"},
+    {"id": "praxis-finden", "label": "Eine Praxis finden, die zu mir passt, zum Beispiel {x}", "messbar": false, "einheit": ""}
+  ],
+  "radar_impulse": [
+    "scrollen",
+    "doomscrolling",
+    "serien",
+    "arbeiten-statt-pause",
+    "zocken"
+  ]
+}

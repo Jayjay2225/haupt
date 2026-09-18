@@ -1,0 +1,47 @@
+{
+  "bereich": "familie",
+  "name": "Familie & Verwandtschaft",
+  "unterpunkte": [
+    { "id": "eltern-geschwister", "label": "Eltern & Geschwister" },
+    { "id": "kind", "label": "Kind" }
+  ],
+  "wunschbild": [
+    { "id": "keine-kinder", "label": "Bewusst keine Kinder", "gruppe": "kinder" },
+    { "id": "offen-fuer-kinder", "label": "Offen für Kinder", "gruppe": "kinder" },
+    { "id": "kinderwunsch", "label": "Aktiver Kinderwunsch", "gruppe": "kinder" },
+    { "id": "mehr-zeit-mit-kind", "label": "Habe Kinder — mehr Zeit mit ihnen", "gruppe": "kinder" },
+    { "id": "bessere-zeit-mit-kind", "label": "Habe Kinder — bessere gemeinsame Zeit", "gruppe": "kinder" },
+    { "id": "patchwork-gestalten", "label": "Patchwork-Familie gut gestalten", "gruppe": "kinder" },
+    { "id": "pflege-adoption", "label": "Offen für Pflegekind oder Adoption", "gruppe": "kinder" },
+    { "id": "praesent-sein", "label": "Präsent sein, wenn wir zusammen sind", "gruppe": "elternrolle" },
+    { "id": "geduld-im-alltag", "label": "Mehr Geduld im Alltag mit Kind", "gruppe": "elternrolle" },
+    { "id": "feste-rituale", "label": "Feste Rituale mit meinem Kind", "gruppe": "elternrolle" },
+    { "id": "vorleben-statt-erklaeren", "label": "Vorleben, was mir wichtig ist", "gruppe": "elternrolle" },
+    { "id": "erziehung-im-team", "label": "Erziehung als Team mit dem anderen Elternteil", "gruppe": "elternrolle" },
+    { "id": "altersgerecht-loslassen", "label": "Loslassen, wenn mein Kind älter wird", "gruppe": "elternrolle" },
+    { "id": "nach-trennung-eltern", "label": "Nach einer Trennung gut gemeinsam Eltern sein", "gruppe": "elternrolle" },
+    { "id": "naehe-zu-eltern", "label": "Mehr Nähe zu meinen Eltern", "gruppe": "eltern-geschwister" },
+    { "id": "naehe-zu-geschwistern", "label": "Mehr Nähe zu meinen Geschwistern", "gruppe": "eltern-geschwister" },
+    { "id": "leichter-kontakt", "label": "Regelmäßiger Kontakt, der sich leicht anfühlt", "gruppe": "eltern-geschwister" },
+    { "id": "altes-klaeren", "label": "Alte Themen ansprechen und klären", "gruppe": "eltern-geschwister" },
+    { "id": "stimmige-distanz", "label": "Eine Distanz, die für mich stimmt", "gruppe": "eltern-geschwister" },
+    { "id": "eltern-im-alter", "label": "Meine Eltern im Älterwerden begleiten", "gruppe": "eltern-geschwister" },
+    { "id": "kontakt-ueberdenken", "label": "Einen abgebrochenen Kontakt überdenken", "gruppe": "eltern-geschwister" },
+    { "id": "familienrituale", "label": "Regelmäßige Familientreffen oder Rituale", "gruppe": "miteinander" },
+    { "id": "familie-selbst-definieren", "label": "Selbst definieren, wer Familie ist", "gruppe": "miteinander" },
+    { "id": "traditionen", "label": "Traditionen weitergeben oder neu schaffen", "gruppe": "miteinander" },
+    { "id": "aufgaben-fair-verteilen", "label": "Familiäre Aufgaben fairer verteilen", "gruppe": "miteinander" },
+    { "id": "weiss-noch-nicht", "label": "Weiß ich noch nicht", "gruppe": "offen" }
+  ],
+  "ziel_vorlagen": [
+    { "id": "zeit-mit-kind", "label": "{x} ungestörte Stunden pro Woche mit meinem Kind", "messbar": true, "einheit": "stunden/woche" },
+    { "id": "abendessen-familie", "label": "{x} gemeinsame Abendessen pro Woche", "messbar": true, "einheit": "abende/woche" },
+    { "id": "vorlese-abende", "label": "{x} Abende pro Woche Vorlesen oder Zeit zu zweit mit Kind", "messbar": true, "einheit": "abende/woche" },
+    { "id": "eltern-kontakt", "label": "Meine Eltern {x}-mal pro Monat anrufen oder besuchen", "messbar": true, "einheit": "kontakte/monat" },
+    { "id": "geschwister-treffen", "label": "{x} Treffen mit meinen Geschwistern pro Jahr", "messbar": true, "einheit": "treffen/jahr" },
+    { "id": "familienritual-etablieren", "label": "Ein festes Familienritual etablieren: {x}", "messbar": false },
+    { "id": "klaerendes-gespraech", "label": "Bis {x} ein klärendes Gespräch führen", "messbar": false },
+    { "id": "besuch-planen", "label": "Bis {x} einen Familienbesuch planen", "messbar": false }
+  ],
+  "radar_impulse": ["arbeiten-statt-pause", "scrollen", "serien", "nachricht-impulsiv", "zocken"]
+}

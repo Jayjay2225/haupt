@@ -1,0 +1,52 @@
+{
+  "bereich": "beziehung",
+  "name": "Beziehung & Partnerschaft",
+  "unterpunkte": [
+    {"id": "zweisamkeit", "label": "Zweisamkeit"},
+    {"id": "liebe", "label": "Liebe"},
+    {"id": "dating", "label": "Dating"},
+    {"id": "sexualitaet", "label": "Sexualität"}
+  ],
+  "wunschbild": [
+    {"id": "bewusst-single", "label": "Bewusst Single", "gruppe": "beziehungsform"},
+    {"id": "offen-fuer-partnerschaft", "label": "Offen für eine Partnerschaft", "gruppe": "beziehungsform"},
+    {"id": "feste-partnerschaft", "label": "Feste Partnerschaft", "gruppe": "beziehungsform"},
+    {"id": "ehe", "label": "Ehe", "gruppe": "beziehungsform"},
+    {"id": "offene-beziehung", "label": "Offene Beziehung", "gruppe": "beziehungsform"},
+    {"id": "fernbeziehung", "label": "Fernbeziehung", "gruppe": "beziehungsform"},
+    {"id": "zusammen-wohnen", "label": "Zusammenleben: ja", "gruppe": "beziehungsform"},
+    {"id": "getrennt-wohnen", "label": "Zusammenleben: nein, getrennte Wohnungen", "gruppe": "beziehungsform"},
+    {"id": "bewusst-daten", "label": "Bewusst daten", "gruppe": "kennenlernen"},
+    {"id": "begegnungen-schaffen", "label": "Gelegenheiten für Begegnungen schaffen", "gruppe": "kennenlernen"},
+    {"id": "zeit-beim-kennenlernen", "label": "Mir beim Kennenlernen Zeit lassen", "gruppe": "kennenlernen"},
+    {"id": "klar-sagen-was-ich-suche", "label": "Klar sagen, was ich suche", "gruppe": "kennenlernen"},
+    {"id": "mehr-zweisamkeit", "label": "Mehr Zweisamkeit im Alltag", "gruppe": "partnerschaft-leben"},
+    {"id": "tiefe-gespraeche", "label": "Tiefe Gespräche führen", "gruppe": "partnerschaft-leben"},
+    {"id": "gemeinsame-rituale", "label": "Gemeinsame Rituale pflegen", "gruppe": "partnerschaft-leben"},
+    {"id": "erfuellte-sexualitaet", "label": "Erfüllte Sexualität", "gruppe": "partnerschaft-leben"},
+    {"id": "fair-streiten", "label": "Fair streiten und versöhnen", "gruppe": "partnerschaft-leben"},
+    {"id": "gemeinsame-zukunft", "label": "Eine gemeinsame Zukunft planen", "gruppe": "partnerschaft-leben"},
+    {"id": "beduerfnis-tiefe", "label": "Tiefe", "gruppe": "beduerfnisse"},
+    {"id": "beduerfnis-freiheit", "label": "Freiheit", "gruppe": "beduerfnisse"},
+    {"id": "beduerfnis-verlaesslichkeit", "label": "Verlässlichkeit", "gruppe": "beduerfnisse"},
+    {"id": "beduerfnis-abenteuer", "label": "Abenteuer", "gruppe": "beduerfnisse"},
+    {"id": "beduerfnis-naehe", "label": "Nähe", "gruppe": "beduerfnisse"},
+    {"id": "beduerfnis-eigenstaendigkeit", "label": "Eigenständigkeit", "gruppe": "beduerfnisse"},
+    {"id": "weiss-noch-nicht", "label": "Weiß ich noch nicht", "gruppe": "offen"}
+  ],
+  "ziel_vorlagen": [
+    {"id": "date-abende", "label": "{x} Date-Abende pro Monat zu zweit", "messbar": true, "einheit": "Abende/Monat"},
+    {"id": "wochenende-zu-zweit", "label": "Alle {x} Monate ein Wochenende zu zweit", "messbar": true, "einheit": "Monate"},
+    {"id": "gespraechszeit", "label": "{x} Minuten ungestörte Gesprächszeit pro Tag", "messbar": true, "einheit": "Minuten/Tag"},
+    {"id": "verabredungen", "label": "{x} Verabredungen pro Monat", "messbar": true, "einheit": "pro Monat"},
+    {"id": "handyfreie-zeit", "label": "{x} Minuten handyfreie Zeit zu zweit am Abend", "messbar": true, "einheit": "Minuten"},
+    {"id": "paar-check-in", "label": "{x}-mal pro Monat ein Check-in-Gespräch zu zweit", "messbar": true, "einheit": "mal/Monat"},
+    {"id": "klarheit-beziehungsform", "label": "Bis {x} Klarheit darüber, welche Beziehungsform ich möchte", "messbar": false, "einheit": ""}
+  ],
+  "radar_impulse": [
+    "dating-apps",
+    "nachricht-impulsiv",
+    "scrollen",
+    "serien"
+  ]
+}

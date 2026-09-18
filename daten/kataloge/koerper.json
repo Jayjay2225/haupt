@@ -1,0 +1,55 @@
+{
+  "bereich": "koerper",
+  "name": "Körperliche Gesundheit",
+  "unterpunkte": [
+    {"id": "bewegung", "label": "Bewegung"},
+    {"id": "ernaehrung", "label": "Ernährung"},
+    {"id": "schlaf", "label": "Schlaf"},
+    {"id": "schmerzfreiheit", "label": "Schmerzfreiheit"},
+    {"id": "substanzen", "label": "Substanzen"}
+  ],
+  "wunschbild": [
+    {"id": "regelmaessig-bewegen", "label": "Mich regelmäßig bewegen", "gruppe": "bewegung"},
+    {"id": "kraft-aufbauen", "label": "Kraft aufbauen", "gruppe": "bewegung"},
+    {"id": "ausdauer-verbessern", "label": "Ausdauer verbessern", "gruppe": "bewegung"},
+    {"id": "beweglich-bis-80", "label": "Beweglich bis 80", "gruppe": "bewegung"},
+    {"id": "alltagsbewegung", "label": "Mehr Bewegung im Alltag", "gruppe": "bewegung"},
+    {"id": "sport-mit-freude", "label": "Einen Sport haben, der Freude macht", "gruppe": "bewegung"},
+    {"id": "ausgewogen-essen", "label": "Ausgewogen essen", "gruppe": "ernaehrung"},
+    {"id": "selbst-kochen", "label": "Öfter selbst kochen", "gruppe": "ernaehrung"},
+    {"id": "zucker-regeln", "label": "Klare Regeln für Zucker", "gruppe": "ernaehrung"},
+    {"id": "genug-trinken", "label": "Genug Wasser trinken", "gruppe": "ernaehrung"},
+    {"id": "hunger-saettigung", "label": "Auf Hunger und Sättigung hören", "gruppe": "ernaehrung"},
+    {"id": "wunschgewicht", "label": "Mein Wunschgewicht erreichen", "gruppe": "ernaehrung"},
+    {"id": "koerperfett-ziel", "label": "Einen bestimmten Körperfettanteil erreichen", "gruppe": "ernaehrung"},
+    {"id": "ausreichend-schlafen", "label": "Ausreichend schlafen", "gruppe": "schlaf-wohlbefinden"},
+    {"id": "fester-schlafrhythmus", "label": "Einen festen Schlafrhythmus haben", "gruppe": "schlaf-wohlbefinden"},
+    {"id": "erholt-aufwachen", "label": "Erholt aufwachen", "gruppe": "schlaf-wohlbefinden"},
+    {"id": "schmerzfrei-alltag", "label": "Schmerzfrei durch den Alltag kommen", "gruppe": "schlaf-wohlbefinden"},
+    {"id": "energiegeladen", "label": "Energiegeladen durch den Tag gehen", "gruppe": "schlaf-wohlbefinden"},
+    {"id": "regeneration", "label": "Regeneration ernst nehmen", "gruppe": "schlaf-wohlbefinden"},
+    {"id": "alkohol-regeln", "label": "Klare Regeln für Alkohol", "gruppe": "substanzen"},
+    {"id": "alkoholfrei", "label": "Alkoholfrei leben", "gruppe": "substanzen"},
+    {"id": "rauchfrei", "label": "Rauchfrei leben", "gruppe": "substanzen"},
+    {"id": "koffein-bewusst", "label": "Koffein bewusst dosieren", "gruppe": "substanzen"},
+    {"id": "weiss-noch-nicht", "label": "Weiß ich noch nicht", "gruppe": "offen"}
+  ],
+  "ziel_vorlagen": [
+    {"id": "koerperfett", "label": "Körperfettanteil von {x} % erreichen", "messbar": true, "einheit": "%"},
+    {"id": "gewicht", "label": "Gewicht von {x} kg erreichen", "messbar": true, "einheit": "kg"},
+    {"id": "training-pro-woche", "label": "{x} Trainingseinheiten pro Woche", "messbar": true, "einheit": "Einheiten/Woche"},
+    {"id": "schritte-pro-tag", "label": "Täglich {x} Schritte gehen", "messbar": true, "einheit": "Schritte/Tag"},
+    {"id": "schlafdauer", "label": "Im Schnitt {x} Stunden pro Nacht schlafen", "messbar": true, "einheit": "Stunden"},
+    {"id": "alkoholfreie-tage", "label": "{x} alkoholfreie Tage pro Woche", "messbar": true, "einheit": "Tage/Woche"},
+    {"id": "ausdauer-strecke", "label": "{x} km ohne Pause laufen können", "messbar": true, "einheit": "km"},
+    {"id": "koerpergefuehl", "label": "Mich im Alltag {x} fühlen (z. B. energiegeladen, beweglich)", "messbar": false, "einheit": ""}
+  ],
+  "radar_impulse": [
+    "suesses",
+    "snacks",
+    "alkohol",
+    "nikotin",
+    "koffein",
+    "essen-bestellen"
+  ]
+}

@@ -1,0 +1,152 @@
+[
+  {
+    "id": "ehrlichkeit",
+    "label": "Ehrlichkeit",
+    "beschreibung": "Sagen, was ist — zu anderen und zu dir selbst."
+  },
+  {
+    "id": "freiheit",
+    "label": "Freiheit",
+    "beschreibung": "Selbst entscheiden können, wie du lebst und wofür du deine Zeit gibst."
+  },
+  {
+    "id": "verbundenheit",
+    "label": "Verbundenheit",
+    "beschreibung": "Echte Beziehungen, in denen du dich zeigen kannst."
+  },
+  {
+    "id": "gesundheit",
+    "label": "Gesundheit",
+    "beschreibung": "Einen Körper und einen Kopf haben, auf die du dich verlassen kannst."
+  },
+  {
+    "id": "wachstum",
+    "label": "Wachstum",
+    "beschreibung": "Dazulernen und an Herausforderungen reifen."
+  },
+  {
+    "id": "ruhe",
+    "label": "Ruhe",
+    "beschreibung": "Momente ohne Lärm, Druck und Programm."
+  },
+  {
+    "id": "mut",
+    "label": "Mut",
+    "beschreibung": "Das Richtige tun, auch wenn es unbequem ist."
+  },
+  {
+    "id": "verlaesslichkeit",
+    "label": "Verlässlichkeit",
+    "beschreibung": "Da sein, wenn du gebraucht wirst, und halten, was du zusagst."
+  },
+  {
+    "id": "sinnlichkeit",
+    "label": "Sinnlichkeit",
+    "beschreibung": "Mit allen Sinnen erleben: schmecken, berühren, spüren."
+  },
+  {
+    "id": "grosszuegigkeit",
+    "label": "Großzügigkeit",
+    "beschreibung": "Geben, ohne aufzurechnen."
+  },
+  {
+    "id": "neugier",
+    "label": "Neugier",
+    "beschreibung": "Fragen stellen und Neues entdecken wollen."
+  },
+  {
+    "id": "kreativitaet",
+    "label": "Kreativität",
+    "beschreibung": "Eigene Ideen in die Welt bringen."
+  },
+  {
+    "id": "unabhaengigkeit",
+    "label": "Unabhängigkeit",
+    "beschreibung": "Auf eigenen Beinen stehen — finanziell und im Denken."
+  },
+  {
+    "id": "sicherheit",
+    "label": "Sicherheit",
+    "beschreibung": "Ein stabiles Fundament, das auch stürmische Zeiten aushält."
+  },
+  {
+    "id": "humor",
+    "label": "Humor",
+    "beschreibung": "Über dich selbst lachen können und das Leben leicht nehmen, wo es geht."
+  },
+  {
+    "id": "tiefe",
+    "label": "Tiefe",
+    "beschreibung": "Lieber wenige Dinge ganz als viele halb."
+  },
+  {
+    "id": "abenteuer",
+    "label": "Abenteuer",
+    "beschreibung": "Unbekanntes suchen und dich überraschen lassen."
+  },
+  {
+    "id": "gerechtigkeit",
+    "label": "Gerechtigkeit",
+    "beschreibung": "Fair handeln und Unfaires nicht einfach hinnehmen."
+  },
+  {
+    "id": "fuersorge",
+    "label": "Fürsorge",
+    "beschreibung": "Für Menschen da sein, die dich brauchen."
+  },
+  {
+    "id": "selbstbestimmung",
+    "label": "Selbstbestimmung",
+    "beschreibung": "Nach eigenen Maßstäben leben statt nach fremden Erwartungen."
+  },
+  {
+    "id": "bestaendigkeit",
+    "label": "Beständigkeit",
+    "beschreibung": "Dranbleiben, auch wenn der erste Schwung weg ist."
+  },
+  {
+    "id": "gelassenheit",
+    "label": "Gelassenheit",
+    "beschreibung": "Nicht alles persönlich nehmen und nicht alles sofort lösen müssen."
+  },
+  {
+    "id": "leistung",
+    "label": "Leistung",
+    "beschreibung": "Dinge richtig gut machen und etwas erreichen."
+  },
+  {
+    "id": "einfachheit",
+    "label": "Einfachheit",
+    "beschreibung": "Mit weniger auskommen und das Wesentliche sehen."
+  },
+  {
+    "id": "loyalitaet",
+    "label": "Loyalität",
+    "beschreibung": "Zu Menschen stehen, auch wenn es schwierig wird."
+  },
+  {
+    "id": "offenheit",
+    "label": "Offenheit",
+    "beschreibung": "Neuem und anderen Sichtweisen eine echte Chance geben."
+  },
+  {
+    "id": "verantwortung",
+    "label": "Verantwortung",
+    "beschreibung": "Für dein Handeln und seine Folgen einstehen."
+  },
+  {
+    "id": "genuss",
+    "label": "Genuss",
+    "beschreibung": "Das Gute im Leben bewusst auskosten."
+  },
+  {
+    "id": "naturverbundenheit",
+    "label": "Naturverbundenheit",
+    "beschreibung": "Zeit draußen als festen Teil deines Lebens."
+  },
+  {
+    "id": "klarheit",
+    "label": "Klarheit",
+    "beschreibung": "Wissen, was du willst, und es aussprechen können."
+  }
+]
