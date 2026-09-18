@@ -184,3 +184,130 @@ Prüfpunkte:
 - Geschäftsmodell A, B oder C – bei B und C: welche Kanzlei bzw. welcher Versicherungsberater die rechtliche Bewertung übernimmt.
 - Ob die Belehrungsprüfung Teil des Angebots ist oder nur die Berechnung (deutlich weniger RDG-Risiko).
 - Anwaltliche Abnahme von `legal-rules.json` und aller Berichtstexte vor dem Go-live.
+
+---
+
+# Teil 2 – Prompts 8–9 (nachgereicht am 18.09.2026: „Renten-Rettung Privat“)
+
+Die Prompts 8 und 9 wurden nach Abschluss von Prompt 7 als eigene Datei geliefert und sind hier unverändert (nur Überschriftenebenen angepasst) dokumentiert, damit das Repo das vollständige Prompt-Set enthält.
+
+## Prompt 8 – Der Checker wird renten-rettung.de (Privatkunden), der Geschäftsführer-Bereich zieht um
+
+Lies zuerst `docs/STATUS.md`, `docs/REVIEW.md` und `CLAUDE.md`. Dieser Prompt trifft die dort offenen Entscheidungen und baut darauf auf. Prinzip 1 gilt weiter: keine erfundenen Zahlen, Personen, Kundenstimmen oder Siegel. Die Wording-Tests aus `apps/report` und `packages/eligibility` bleiben in Kraft; neue Texte müssen sie bestehen.
+
+### Entscheidungen (in STATUS.md abhaken)
+
+1. **Marke und Domain:** Renten-Rettung, `renten-rettung.de`. Die Seite wird zur Privatkunden-Seite mit dem Checker als Kern.
+2. **Geschäftsführer-Bereich** (heutiger Inhalt von renten-rettung.de: Pensionszusage, Rückdeckungsversicherung) zieht auf eine eigene, nüchterne Domain. Arbeitstitel `[[B2B-DOMAIN]]`, Favorit wird von Jack noch registriert. Alles konfigurierbar halten.
+3. **Geschäftsmodell:** Hybrid. Kostenlose wirtschaftliche Ampel ohne Euro-Beträge, kostenpflichtiger Bericht (Start 89 € brutto, Preis in der Konfiguration). Belehrungsbewertung im Verbraucherprodukt abgeschaltet, stattdessen neutrale Unterlagen-Checkliste. Modell C (Kanzlei-Lizenz) bleibt im Code, **markenneutral**, ohne Renten-Rettung-Optik und mit Belehrungs-Check.
+4. **Absender (welche GmbH):** noch offen, Platzhalter `[[ANBIETER]]` bleibt.
+5. **Produktname des Checks:** Arbeitstitel „Policen-Check", in `config/brand.ts` änderbar.
+
+### Aufgabe 1 – Tonalität: Boulevard in der Form, Warentest im Inhalt
+
+Die Zielgruppe ist 45 bis 70, skeptisch, liest am Handy, will in drei Sekunden verstehen, worum es geht. Texte müssen auch **gehört** funktionieren (Telefon, Radio, Weitererzählen).
+
+Regeln für alle Überschriften und Knöpfe:
+- Kurze Hauptsätze, höchstens acht Wörter. Aktive Verben. Ein Gedanke pro Bildschirm.
+- Alltagswörter statt Fachwörter: „Police", „kündigen", „mehr drin", „rechnen". Fachbegriffe erst im Fließtext und dort erklärt.
+- Fragen und Bedingungen sind erlaubt („kann", „oft", „prüfen"), Versprechen nicht.
+- Zahlen nur aus dem eigenen Rechenkern oder mit Quelle. Der Musterfall nutzt **gerundete** Werte und trägt direkt am Wert den Zusatz „Musterfall, Schätzung mit Bandbreite".
+- Auch das Negativ-Ergebnis laut sagen. Das ist der Vertrauensanker der Marke.
+
+Beispiele für die Richtung (frei weiterentwickeln):
+- „Alte Lebensversicherung? Erst rechnen. Dann kündigen."
+- „Kündigen bringt den Rückkaufswert. Ein Widerspruch kann mehr bringen."
+- „5 Minuten. Ihre Police. Eine klare Ampel."
+- „Rot heißt: Finger weg. Das sagen wir Ihnen auch."
+- „Vertrag zwischen 1994 und 2007? Dann lohnt der Blick."
+
+Verboten: „bis zu … %", „garantiert", „sichern Sie sich", „steht Ihnen zu", „Anspruch" als Zusage, Zeitdruck („nur heute"), künstliche Verknappung, Vorher-Nachher-Versprechen, Emojis als Symbole, Großbuchstaben-Geschrei im Fließtext.
+
+Gehe mit dieser Tonalität über Startseite, Funnel-Texte, Ergebnis-Seite, Versicherer-Seiten und E-Mail-Vorlagen. Bericht (PDF) bleibt sachlich wie bisher.
+
+### Aufgabe 2 – Seitenstruktur renten-rettung.de
+
+- `/` Start: Überschrift, Schnellcheck mit vier Feldern (Versicherer, Beginn, Monatsbeitrag, Rückkaufswert), der in den Funnel überleitet und Eingaben mitnimmt. Darunter: So läuft es, Musterfall, Was kostet es, So verdienen wir, Fragen.
+- Funnel und Ergebnis wie vorhanden, mit Hybrid-Logik aus Entscheidung 3.
+- `/verkaufen` „Verkaufen statt kündigen": das Ankaufsangebot für Privatkunden. Inhalt als Platzhalter `[[ANKAUF-PRIVAT: Vertragsarten, Mindest-Rückkaufswert, Ablauf]]`, bis Jack die Konditionen liefert. Auf der Ergebnis-Seite erscheint der Hinweis darauf als eigener Block mit separater, nicht vorangekreuzter Einwilligung zur Kontaktaufnahme.
+- `/so-verdienen-wir` Transparenz in Klartext: Wir verdienen am Bericht. Wir verdienen, wenn Sie über uns verkaufen. Wir verdienen nichts daran, ob Sie klagen. Kurzfassung davon als Kasten auf Start- und Ergebnis-Seite. Dieser Kasten ist Pflicht, weil Rechner und Ankauf unter einer Marke laufen.
+- `/lebensversicherung/[versicherer]` bleibt, Texte im neuen Ton, Zahlen unverändert streng.
+- `/unternehmer` kurze Brückenseite mit Verweis auf `[[B2B-DOMAIN]]`, zusätzlich Link „Für Unternehmer" in Kopf- und Fußzeile.
+- „Später am Rechner fortsetzen": Link per E-Mail, der den Zwischenstand wiederherstellt (erst mit Persistenz scharf schalten, bis dahin vorbereitet und abgeschaltet).
+
+### Aufgabe 3 – Kommunikationsregeln Ankauf (verbindlich, auch für `/verkaufen`)
+
+- Keine Erwähnung der BaFin oder einer Erlaubnis oder Zulassung.
+- Der Aufkäufer wird nie namentlich genannt und nie im Zusammenhang mit Mehrerlösen beworben.
+- Keine Prozentangaben zu Auszahlungen oder Mehrerlösen.
+- Abwicklungspartner sind Organisationspartner, keine Wirtschaftsprüfer.
+- Keine Empfehlung zu kündigen, zu verkaufen oder zu behalten (Linie aus REVIEW.md 1.4 beibehalten). Die Seite stellt Wege nebeneinander: behalten, beitragsfrei stellen, kündigen, Widerspruch anwaltlich prüfen lassen, verkaufen, jeweils mit dem, was man dabei aufgibt.
+
+### Aufgabe 4 – Geschäftsführer-Seite umziehen
+
+- Quelle: die heutige `index.html` von renten-rettung.de (eine statische Datei, CSS inline, Schriften Cormorant Garamond und Manrope, Farben u. a. `#0A1F33`, `#B89968`, `#F7F3EC`). Jack liefert die Datei oder Zugang; nicht aus dem Netz nachbauen.
+- Inhalt und Gestaltung unverändert lassen, nur anpassen: Domain, Canonical, Seitentitel, Verweise, Kontaktadresse, Formularziel. Das Formular läuft heute über formsubmit.co; durch einen eigenen Endpunkt ersetzen oder als offenen Punkt für die Auftragsverarbeiter-Liste vermerken.
+- Bleibt statisches HTML in einem eigenen Ordner `sites/unternehmer/`, damit es weiter auf einfachem Webspace laufen kann.
+
+### Aufgabe 5 – Umzugs-Checkliste schreiben (`docs/DOMAIN-UMZUG.md`), nichts davon selbst ausführen
+
+Die Domain liegt bei united-domains im Konto eines Kollegen; auf demselben Webspace liegt im Ordner `/einkehr` eine andere Webseite. Die Checkliste muss deshalb enthalten:
+- Nur die Web-Einträge (A/AAAA/CNAME) von `renten-rettung.de` auf das neue Hosting umstellen. **MX-, SPF- und sonstige Mail-Einträge unverändert lassen**, `info@renten-rettung.de` muss weiterlaufen.
+- Webspace **nicht kündigen, nicht leeren, `/einkehr` nie anfassen**. Vor jeder Änderung Sicherung ziehen.
+- Reihenfolge: B2B-Seite auf neuer Domain live und geprüft → erst dann `renten-rettung.de` umstellen → TLS prüfen → alte Startseite als Sicherung aufbewahren.
+- Beta bleibt `noindex` mit Passwortschutz, bis Rechtstexte und Regelwerk anwaltlich abgenommen sind. Go-live-Kriterien als abhakbare Liste.
+
+### Aufgabe 6 – Gestaltung
+
+Erst Gestaltungsplan (Farben, Schrift, Startseiten-Skizze als ASCII) zur Freigabe, dann bauen.
+- Grundton Marineblau `#0A1F33` aus der bisherigen Marke als Vertrauensanker, Weiß, helles Blaugrau `#F1F4F8`.
+- Eine laute Signalfarbe „Rettungsorange" `#F2541B` nur für den Hauptknopf und Hervorhebungen in Überschriften.
+- Ampelfarben (Grün `#1E8E4E`, Gelb `#F2B705`, Rot `#C62828`) **ausschließlich** in der Ampel, nie als Dekoration.
+- Überschriften in einer kräftigen, breiten Grotesk (z. B. Archivo ExtraBold), Fließtext in einer gut lesbaren Humanist-Sans (z. B. Source Sans 3) ab 18 px, Beträge mit Tabellenziffern.
+- Das eine Erkennungszeichen: die große Ampel im Einstieg, die beim Ausfüllen des Schnellchecks sichtbar „anspringt". Sonst Ruhe: keine Archivfotos, keine Verläufe, keine Kartenraster.
+- Mobil zuerst, Hauptknopf unten fixiert, Kontraste nach WCAG AA neu prüfen (die validierte Diagramm-Palette entsprechend anpassen), reduzierte Bewegung respektieren.
+
+### Abnahme
+
+- `config/brand.ts` trägt Marke, Produktname, Farben, Schriften; kein „[MARKE]" mehr in der Oberfläche.
+- Gratis-Vorschau zeigt Ampel, Größenordnung in Worten, Gegenposition, Checkliste, aber **keine Euro-Beträge**; der Bericht zeigt die Spanne.
+- Transparenz-Kasten auf Start- und Ergebnis-Seite, Seite `/so-verdienen-wir` vorhanden.
+- Wording-Tests grün, zusätzlich neuer Test gegen die Verbotsliste aus Aufgabe 1.
+- `sites/unternehmer/` lauffähig als statische Seite, `docs/DOMAIN-UMZUG.md` vollständig.
+- Modell C lässt sich ohne Renten-Rettung-Optik starten.
+- `docs/STATUS.md` aktualisiert.
+
+---
+
+## Prompt 9 – Alte Jahrgänge: unternehmensindividuelle Kennzahlen vor 2004
+
+Voraussetzung: BaFin-Tabelle 160 (2011 bis heute als Excel, 2004 bis 2010 aus PDF) ist eingelesen. Jetzt geht es um 1990 bis 2003.
+
+### Ziel
+
+Reinverzinsung (Nettoverzinsung) und, wo vorhanden, laufende Durchschnittsverzinsung je Unternehmen und Jahr für die 20 Gesellschaften mit den größten Altbeständen, einschließlich ihrer damaligen Namen (z. B. Hamburg-Mannheimer, Volksfürsorge, Victoria, Deutscher Herold, Gerling, Colonia, Iduna, AachenMünchener). Jeder Wert mit Quelle, Fundstelle (Seite) und Qualitätsstufe. Lieber eine Lücke als ein geratener Wert.
+
+### Teil A – was du selbst beschaffen kannst
+
+1. **Geschäftsberichte der Versicherer.** Heutige Archivseiten der Gesellschaften, dazu archivierte Fassungen der Investor-Relations- und Presse-Seiten aus den Jahren 1999 bis 2008 über die Wayback Machine (CDX-Schnittstelle, höflich abfragen). Gesucht sind die PDF-Geschäftsberichte 1998 bis 2005.
+2. **Mehrjahresübersichten nutzen.** Viele Berichte enthalten eine Fünf- oder Zehnjahresübersicht mit der Nettoverzinsung. Ein Bericht 2003 liefert so oft 1994 bis 2003 auf einer Seite. Diese Tabellen gezielt suchen.
+3. **Pressemitteilungen zur Bilanz** der Gesellschaften aus denselben Archiven als Zweitbeleg.
+4. Werte aus PDFs immer mit zwei unabhängigen Lesedurchgängen; bei Abweichung Review-Liste.
+
+### Teil B – Eingang für Scans aus der Bibliothek
+
+Jack lässt die Statistik-Bände der früheren Versicherungsaufsicht (Geschäftsbericht des Bundesaufsichtsamts für das Versicherungswesen, Teil B, Jahrgänge ab 1994) und die BaFin-Statistiken 2002 und 2003 in der Bibliothek fotografieren.
+- Ordner `data/raw/scans/<jahr>/` anlegen, Befehl `pnpm data:scans`, der die Bilder einliest, die Kennzahlentabelle der Lebensversicherer erkennt, Werte mit doppeltem Lesedurchgang extrahiert und gegen Plausibilitätsgrenzen prüft (0 bis 15 %, Sprung zum Vorjahr über 3 Prozentpunkte → Review-Liste).
+- Eine kurze Anleitung `docs/SCAN-ANLEITUNG.md` für die Hilfskraft: welche Bände, welche Tabelle, wie fotografieren (gerade, ganze Seite, Seitenzahl sichtbar), wie benennen.
+
+### Teil C – Bedeutung messen und offenlegen
+
+1. **Sensitivitätsbericht** `docs/SENSITIVITAET-ALTJAHRE.md`: Für die Golden-Verträge und vier Mustertypen (laufend mit Dynamik, laufend ohne Dynamik, beitragsfrei seit 2006, Einmalbeitrag 1995) berechnen, wie stark sich die Nutzungen ändern, wenn alle Werte vor 2004 um ±1 Prozentpunkt verschoben werden.
+2. Im Bericht (PDF) ausweisen: **welcher Anteil der Nutzungen auf Unternehmenswerten und welcher auf Branchenwerten beruht.**
+3. `data/COVERAGE.md` um die Matrix 1990 bis 2003 erweitern, Versicherer-Seiten zeigen die Unternehmenskurve, sobald Werte vorliegen, und kennzeichnen Branchenjahre sichtbar.
+
+### Abnahme
+
+- Für mindestens 10 der 20 Gesellschaften liegen belegte Werte für 1998 bis 2003 vor oder es ist dokumentiert, warum nicht.
+- Kein Wert ohne Quelle und Fundstelle, Review-Liste gepflegt.
+- Sensitivitätsbericht vorhanden, Berichtsvorlage zeigt den Anteil Unternehmens- zu Branchenwerten.
