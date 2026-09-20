@@ -11,9 +11,12 @@
   "dependencies": {
     "@rueckab/calc": "workspace:*",
     "@rueckab/eligibility": "workspace:*",
+    "@rueckab/report": "workspace:*",
     "next": "^15.5.0",
+    "playwright-core": "^1.63.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "stripe": "^22.6.2"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

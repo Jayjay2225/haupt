@@ -2,21 +2,41 @@
  * Marken-Konfiguration (Prompt 8, Entscheidung 1, 4, 5).
  *
  * Renten-Rettung ist die Privatkunden-Marke mit dem Policen-Check als Kern.
- * Der Absender (welche GmbH) ist noch offen – Platzhalter „[[ANBIETER]]“.
+ * Anbieter ist die Kaufmannsladen Gebhard GmbH (Entscheidung 20.09.2026);
+ * die Registerdaten stammen aus dem Handelsregister (Abruf 20.09.2026 über
+ * online-handelsregister.de, Spiegel des Registerportals – vor Go-live gegen
+ * handelsregister.de zu verifizieren). Umsatzsteuer-ID und Telefon werden vom
+ * Anbieter nachgetragen (leer = Platzhalter im Impressum).
  * Der Geschäftsführer-Bereich zieht auf eine eigene Domain, Platzhalter
  * „[[B2B-DOMAIN]]“, bis die Registrierung steht.
  *
- * Für die markenneutrale Kanzlei-Lizenz (Modell C) liefert `markeFuerVariante`
- * eine neutrale Konfiguration ohne Renten-Rettung-Optik.
+ * Für die markenneutrale Kanzlei-Lizenz (Modell C) liefert die Umgebung der
+ * Kanzlei eine neutrale Konfiguration ohne Renten-Rettung-Optik.
  */
 import { PRODUKT_VARIANTE } from './variante';
+
+export interface Anschrift {
+  strasse: string;
+  plz: string;
+  ort: string;
+}
 
 export interface Marke {
   name: string;
   domain: string;
   produktname: string;
   claim: string;
+  /** Firma des Anbieters (Anbieterkennzeichnung, Rechnungen, E-Mails). */
   anbieter: string;
+  anbieterAnschrift: Anschrift;
+  /** Vertretungsberechtigte, z. B. „Geschäftsführer Vorname Name“. */
+  anbieterVertretung: string;
+  /** Registergericht und Registernummer. */
+  anbieterRegister: string;
+  /** Umsatzsteuer-Identifikationsnummer; leer = noch nachzutragen. */
+  anbieterUstId: string;
+  /** Telefonnummer für die Anbieterkennzeichnung; leer = noch nachzutragen. */
+  anbieterTelefon: string;
   b2bDomain: string;
   kontaktEmail: string;
   /** Optik-Schalter für CSS (data-optik am <html>). */
@@ -46,19 +66,33 @@ const RENTEN_RETTUNG: Marke = {
   domain: 'renten-rettung.de',
   produktname: 'Policen-Check',
   claim: 'Alte Lebensversicherung? Erst rechnen. Dann kündigen.',
-  anbieter: '[[ANBIETER]]',
+  anbieter: 'Kaufmannsladen Gebhard GmbH',
+  anbieterAnschrift: { strasse: 'Helmkrautstraße 35 A', plz: '13503', ort: 'Berlin' },
+  anbieterVertretung: 'Geschäftsführer Jerome Gebhard',
+  anbieterRegister: 'Amtsgericht Charlottenburg (Berlin), HRB 223190 B',
+  anbieterUstId: '',
+  anbieterTelefon: '',
   b2bDomain: '[[B2B-DOMAIN]]',
   kontaktEmail: 'info@renten-rettung.de',
   optik: 'renten-rettung',
 };
 
-/** Modell C: markenneutral; Name und Domain kommen aus der Umgebung der Kanzlei. */
+/** Modell C: markenneutral; Name, Domain und Anbieterdaten kommen aus der Umgebung der Kanzlei. */
 const KANZLEI_NEUTRAL: Marke = {
   name: process.env['NEXT_PUBLIC_KANZLEI_NAME'] ?? 'Policen-Check Kanzleiversion',
   domain: process.env['NEXT_PUBLIC_KANZLEI_DOMAIN'] ?? '[[KANZLEI-DOMAIN]]',
   produktname: 'Policen-Check',
   claim: 'Rückabwicklung von Lebens- und Rentenversicherungen – Kurzprüfung',
   anbieter: process.env['NEXT_PUBLIC_KANZLEI_ANBIETER'] ?? '[[KANZLEI]]',
+  anbieterAnschrift: {
+    strasse: process.env['NEXT_PUBLIC_KANZLEI_STRASSE'] ?? '',
+    plz: process.env['NEXT_PUBLIC_KANZLEI_PLZ'] ?? '',
+    ort: process.env['NEXT_PUBLIC_KANZLEI_ORT'] ?? '',
+  },
+  anbieterVertretung: process.env['NEXT_PUBLIC_KANZLEI_VERTRETUNG'] ?? '',
+  anbieterRegister: process.env['NEXT_PUBLIC_KANZLEI_REGISTER'] ?? '',
+  anbieterUstId: process.env['NEXT_PUBLIC_KANZLEI_USTID'] ?? '',
+  anbieterTelefon: process.env['NEXT_PUBLIC_KANZLEI_TELEFON'] ?? '',
   b2bDomain: '',
   kontaktEmail: process.env['NEXT_PUBLIC_KANZLEI_EMAIL'] ?? '[[KANZLEI-EMAIL]]',
   optik: 'neutral',

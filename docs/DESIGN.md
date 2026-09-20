@@ -1,6 +1,6 @@
 # Gestaltungsplan Renten-Rettung (Prompt 8, Aufgabe 6)
 
-Stand: 18.09.2026 · Grundlage für die Umsetzung in `apps/web` (Freigabe-Dokument). Alle Werte liegen in `apps/web/config/brand.ts`; Änderungen nach der Freigabe sind Konfigurationsänderungen, kein Umbau.
+Stand: 18.09.2026 · **Freigegeben am 20.09.2026 durch den Auftraggeber („so übernehmen“)** – Grundlage für die Umsetzung in `apps/web`. Alle Werte liegen in `apps/web/config/brand.ts`; Änderungen nach der Freigabe sind Konfigurationsänderungen, kein Umbau.
 
 ## 1. Farben
 

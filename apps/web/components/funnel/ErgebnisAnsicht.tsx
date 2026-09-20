@@ -156,8 +156,11 @@ export function ErgebnisAnsicht() {
                 Spanne in Euro, Rechnung Jahr für Jahr, jede Zahl mit Quelle, die Gegenposition –
                 zum Mitnehmen in die Kanzlei. {BERICHT_PREIS_BRUTTO_EUR} € {BERICHT_PREIS_HINWEIS}, einmalig.
               </p>
-              <p style={{ margin: 0 }}>
-                <Link href="/bericht" className="knopf haupt">
+              <p style={{ margin: 0, display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <Link href="/bestellen" className="knopf haupt">
+                  Bericht bestellen
+                </Link>
+                <Link href="/bericht" className="knopf">
                   Was im Bericht steht
                 </Link>
               </p>

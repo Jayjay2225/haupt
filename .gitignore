@@ -8,6 +8,9 @@ build/
 out/
 *.tsbuildinfo
 
+# Auslieferungen (Berichte, Mail-Protokolle) – nie ins Repo
+var/
+
 # Tests & Coverage
 coverage/
 test-results/

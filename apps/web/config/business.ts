@@ -19,8 +19,19 @@ export const BERICHT_PREIS_HINWEIS = 'inkl. gesetzlicher Umsatzsteuer';
 /** Ist „Später am Rechner fortsetzen“ (Link per E-Mail) aktiv? Erst mit Persistenz. */
 export const FORTSETZEN_AKTIV = false;
 
-/** Ist die Bestellung des Berichts technisch freigeschaltet (Zahlungsanbieter)? */
-export const BESTELLUNG_AKTIV = false;
+/**
+ * Zahlung (Entscheidung 20.09.2026): vorab, über Stripe Checkout; danach erhält
+ * die Kundin oder der Kunde Rechnung und Bericht (PDF) per E-Mail. Ob die
+ * Bestellung technisch freigeschaltet ist, entscheidet serverseitig
+ * `bestellungAktiv()` in lib/zahlung.ts (Stripe-Schlüssel vorhanden).
+ */
+export const ZAHLUNG = {
+  vorab: true,
+  abwicklung: 'Stripe',
+  wege: ['Kreditkarte oder Debitkarte', 'PayPal', 'Klarna'],
+  lieferung:
+    'Nach Zahlungseingang erhalten Sie Rechnung und Bericht als PDF per E-Mail – in der Regel innerhalb weniger Minuten.',
+} as const;
 
 export type BusinessModelId = 'hybrid' | 'kanzlei';
 

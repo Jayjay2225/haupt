@@ -54,18 +54,48 @@ ${abschluss()}`,
 }
 
 /** Versand des kostenpflichtigen Berichts. */
-export function berichtVersand(name: string, aktenzeichen: string): EmailVorlage {
+export function berichtVersand(name: string, aktenzeichen: string, rechnungLink?: string): EmailVorlage {
+  const rechnung =
+    rechnungLink === undefined
+      ? `Der Bericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}; die Rechnung liegt bei bzw. folgt in einer eigenen E-Mail.`
+      : `Der Bericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}. Ihre Rechnung zum Herunterladen:\n${rechnungLink}`;
   return {
     betreff: `Ihr Bericht ${aktenzeichen} ist fertig`,
     text: `${gruss(name)}
 
-anbei Ihr Bericht zum Policen-Check (Aktenzeichen ${aktenzeichen}) als PDF.
+anbei Ihr Bericht zum Policen-Check (Bestellnummer ${aktenzeichen}) als PDF.
 
 Darin: die Spanne in Euro, die Rechnung Jahr für Jahr, jede Zahl mit Quelle – und die Gegenposition des Versicherers. Nehmen Sie ihn mit in die Kanzlei, wenn Sie den Widerspruch prüfen lassen wollen. Ob Sie das tun, entscheiden Sie.
 
-Der Bericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}; die Rechnung liegt bei.
+${rechnung}
 
 ${abschluss()}`,
+  };
+}
+
+/** Zahlung ist da, der Bericht konnte aber noch nicht erzeugt werden – Kundin/Kunde informieren. */
+export function berichtVerzoegert(name: string, bestellnummer: string): EmailVorlage {
+  return {
+    betreff: `Ihre Zahlung ist eingegangen – Bericht ${bestellnummer} folgt`,
+    text: `${gruss(name)}
+
+Ihre Zahlung für den Policen-Check (Bestellnummer ${bestellnummer}) ist eingegangen. Beim Erstellen des Berichts hakt es gerade technisch. Wir kümmern uns darum und schicken Ihnen den Bericht so schnell wie möglich – spätestens am nächsten Werktag.
+
+Sie müssen nichts tun. Fragen? Antworten Sie einfach auf diese E-Mail.
+
+${abschluss()}`,
+  };
+}
+
+/** Interner Hinweis an den Anbieter, wenn eine bezahlte Bestellung nicht ausgeliefert werden konnte. */
+export function internerFehlerHinweis(bestellnummer: string, fehler: string): EmailVorlage {
+  return {
+    betreff: `[${BRAND.name}] Auslieferung fehlgeschlagen: ${bestellnummer}`,
+    text: `Bestellnummer ${bestellnummer}: Zahlung eingegangen, Bericht nicht ausgeliefert.
+
+Fehler: ${fehler}
+
+Bitte manuell nachliefern (Skript: pnpm --filter @rueckab/web auslieferung ${bestellnummer}) und die Kundin bzw. den Kunden informieren.`,
   };
 }
 

@@ -1,13 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS, BESTELLUNG_AKTIV } from '@/config/business';
+import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS, ZAHLUNG } from '@/config/business';
 import { VARIANTE } from '@/config/variante';
+import { bestellungAktiv } from '@/lib/zahlung';
 
 export const metadata: Metadata = {
   title: 'Der Bericht',
 };
 
+// Der Bestellknopf hängt von der Laufzeitumgebung ab (Stripe-Schlüssel).
+export const dynamic = 'force-dynamic';
+
 export default function BerichtSeite() {
+  const aktiv = bestellungAktiv();
   return (
     <div className="container schmal abschnitt">
       <h1>
@@ -37,16 +42,21 @@ export default function BerichtSeite() {
 
       {VARIANTE.berichtKostenpflichtig && (
         <>
-          <h2>Preis</h2>
+          <h2>Preis und Zahlung</h2>
           <p>
             <strong className="betrag">
               {BERICHT_PREIS_BRUTTO_EUR} € {BERICHT_PREIS_HINWEIS}
             </strong>
             , einmalig. Kein Abo, keine Folgekosten. Der Preis ist derselbe, egal was die Ampel zeigt.
           </p>
-          {BESTELLUNG_AKTIV ? (
+          <ol className="punkteliste">
+            <li>Sie bestellen und zahlen vorab – {ZAHLUNG.wege.join(', ')} – abgewickelt über {ZAHLUNG.abwicklung}.</li>
+            <li>Nach Zahlungseingang rechnen wir den Bericht aus Ihren Angaben im Rechner.</li>
+            <li>{ZAHLUNG.lieferung}</li>
+          </ol>
+          {aktiv ? (
             <p>
-              <Link href="/rechner" className="knopf haupt">
+              <Link href="/bestellen" className="knopf haupt">
                 Bericht bestellen
               </Link>
             </p>

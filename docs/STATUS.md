@@ -51,11 +51,31 @@ Am 18.09.2026 wurde das Website-Grundgerüst `apps/web` auf ausdrücklichen Wuns
 - E-Mail-Texte (Adressbestätigung, Ampel fertig, Berichtsversand, Erinnerung, Später weitermachen) in `apps/web/lib/emails.ts`, Versand nicht angebunden.
 
 **Offen (Prompt 8):**
-- [ ] Freigabe des Gestaltungsplans (`docs/DESIGN.md`).
+- [x] Freigabe des Gestaltungsplans (`docs/DESIGN.md`) – erteilt am 20.09.2026, unverändert übernommen.
 - [ ] Original-`index.html` von renten-rettung.de für `sites/unternehmer/` (Jack) und Ersatz für formsubmit.co (eigener Endpunkt oder Auftragsverarbeiter).
-- [ ] Anbieter (GmbH, Impressum), B2B-Domain, Ankauf-Konditionen (Vertragsarten, Mindest-Rückkaufswert, Ablauf).
-- [ ] Zahlung und Bestellprozess für den Bericht, Persistenz (Postgres/Prisma), E-Mail-Versand mit Double-Opt-in, Fortsetzen-Link.
+- [x] Anbieter: Kaufmannsladen Gebhard GmbH (20.09.2026, s. u.); offen bleiben USt-IdNr. und Telefon, B2B-Domain, Ankauf-Konditionen (Vertragsarten, Mindest-Rückkaufswert, Ablauf).
+- [x] Zahlung und Bestellprozess: Bestellstrecke mit Stripe Checkout gebaut (20.09.2026, s. u.); offen: Stripe-Konto und Schlüssel, E-Mail-Dienst, Persistenz (Postgres/Prisma), Double-Opt-in, Fortsetzen-Link.
 - [ ] Anwaltliche Abnahme von `data/legal-rules.json`, Rechtstexten und allen Berichtstexten vor dem Go-live; bis dahin Beta mit Passwort und `noindex`.
+
+## Stand 20.09.2026 – Anbieter, Design-Freigabe, Bestellung und Zahlung
+
+**Entscheidungen des Auftraggebers (20.09.2026):**
+- Gestaltungsplan `docs/DESIGN.md` freigegeben („so übernehmen“).
+- Anbieter ist die **Kaufmannsladen Gebhard GmbH**, Helmkrautstraße 35 A, 13503 Berlin, Geschäftsführer Jerome Gebhard, Amtsgericht Charlottenburg (Berlin) HRB 223190 B, Stammkapital 25.100 €, eingetragen 17.11.2020 (Handelsregister-Abruf 20.09.2026 über online-handelsregister.de, einen Spiegel des Registerportals; vor Go-live gegen handelsregister.de prüfen). Nicht im Register und daher nachzutragen: USt-IdNr., Telefonnummer (`apps/web/config/brand.ts`).
+- Zahlung **vorab**; danach erhält die Kundin bzw. der Kunde **Rechnung und PDF-Auswertung**; Zahlungsarten **Karte, PayPal, Klarna**.
+
+**Umgesetzt:**
+- Impressum vollständig aus `config/brand.ts` (Firma, Anschrift, Vertretung, Register, E-Mail; USt-IdNr. und Telefon als sichtbare Platzhalter), Entwurfshinweis angepasst, VSBG-Satz als Entwurf; kein Link zur eingestellten EU-ODR-Plattform.
+- Bestellstrecke: `/bestellen` (Police aus dem Rechner, Name und E-Mail für Rechnung/Versand, Bestätigung AGB + Widerrufsbelehrung, ausdrückliche Zustimmung zur sofortigen Ausführung – beides nicht vorangekreuzt –, Button „Zahlungspflichtig bestellen – 89 €“) → `POST /api/bestellung` (Formular- und Fallprüfung; Bericht nur für Altverträge im Policenmodell, sonst klare Absage ohne Zahlung; Stripe-Checkout-Sitzung mit Karte/PayPal/Klarna, Rechnungsadresse und Rechnung durch Stripe; Fall komprimiert in den Sitzungs-Metadaten, keine eigene Speicherung) → Stripe → `/bestellen/danke` → Webhook `POST /api/stripe/webhook` (Signaturprüfung; bei Zahlungseingang rechnen, PDF erzeugen, Rechnungslink holen, E-Mail mit PDF; Stand je Bestellung in `var/auslieferungen/<Bestellnummer>/status.json`; Stripe-Wiederholungen ohne Doppelversand; bei Fehlern Kundeninfo einmal, interne Meldung jedes Mal).
+- E-Mail-Versand austauschbar (`lib/versand.ts`): Resend-API mit `RESEND_API_KEY`, sonst Protokoll-Modus (Datei statt Versand). Alle Umgebungsvariablen in `apps/web/.env.example`.
+- Tests: Formularprüfung, Fall-Kodierung gegen Stripe-Grenzen, Bestellnummer, Auslieferung (Erfolg, Wiederholung, Fehlerpfad) – 109 Tests grün.
+
+**Offen (Bestellung und Zahlung):**
+- [ ] Stripe-Konto der Kaufmannsladen Gebhard GmbH: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (Webhook-Ziel `/api/stripe/webhook`, Ereignisse `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`), PayPal und Klarna im Dashboard aktivieren, Steuersatz „Umsatzsteuer 19 %“ (inklusiv) anlegen → `STRIPE_STEUERSATZ_ID`, Rechnungsangaben (Firma, Anschrift, Steuernummer/USt-IdNr., Nummernkreis) hinterlegen; Testlauf mit Stripe-Testkarten sowie PayPal-/Klarna-Test.
+- [ ] E-Mail-Dienst entscheiden (Resend vorbereitet) und Absenderdomain authentifizieren (SPF/DKIM nur ergänzen – bestehende Mail-Einträge laut `docs/DOMAIN-UMZUG.md` unangetastet).
+- [ ] Hosting mit Chromium für die PDF-Erzeugung im Webhook oder Auslieferung in einen Hintergrundjob; `var/` durch dauerhaften Speicher ersetzen (Persistenz weiterhin offen).
+- [ ] Anwaltliche Abnahme der Bestelltexte: Widerrufsbelehrung und Zustimmungstext (§ 356 Abs. 4 oder 5 BGB), AGB, Rechnungsangaben (§ 14 UStG, mit Steuerberatung), Impressum (§ 5 DDG, VSBG), Datenschutzerklärung um Stripe und E-Mail-Dienst ergänzen (`docs/LEGAL-OPEN-QUESTIONS.md` Nr. 13–15).
+- [ ] USt-IdNr. und Telefonnummer eintragen; Registerdaten gegen handelsregister.de prüfen.
 
 ## Stand Prompt 9 (Altjahres-Kennzahlen) – 18.09.2026
 
@@ -73,7 +93,7 @@ Am 18.09.2026 wurde das Website-Grundgerüst `apps/web` auf ausdrücklichen Wuns
 
 ## Entscheidungen aus dem Prompt-Set (Stand nach Prompt 8)
 
-- [x] Marke, Domain: Renten-Rettung / renten-rettung.de. Absender (GmbH) weiterhin `[[ANBIETER]]`.
+- [x] Marke, Domain: Renten-Rettung / renten-rettung.de. Absender: Kaufmannsladen Gebhard GmbH (20.09.2026).
 - [x] Geschäftsmodell: Hybrid (kostenlose Ampel + kostenpflichtiger Bericht); Modell C (Kanzlei-Lizenz) als Code-Variante. Welche Kanzlei ggf. die rechtliche Bewertung übernimmt: offen.
 - [x] Belehrungsprüfung im Verbraucherprodukt aus (nur Berechnung + Unterlagen-Checkliste); in der Kanzlei-Variante an.
 - [ ] Anwaltliche Abnahme von `data/legal-rules.json` und aller Berichts- und Rechtstexte vor dem Go-live.

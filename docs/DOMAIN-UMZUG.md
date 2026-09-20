@@ -58,7 +58,8 @@ Die Beta bleibt **passwortgeschützt und noindex**, bis alle Punkte abgehakt sin
 - [ ] Verbotslisten-Test grün (`pnpm test`), Wording-Review durch Jack.
 - [ ] Ankaufs-Konditionen (`[[ANKAUF-PRIVAT …]]`) eingetragen und rechtlich geprüft; Einwilligungstext für die Weitergabe abgenommen.
 - [ ] Zahlung für den Bericht eingerichtet (`BESTELLUNG_AKTIV`), Rechnungsstellung und Widerrufsbelehrung für den Fernabsatz passend.
-- [ ] Auftragsverarbeiter-Liste vollständig (Hosting, E-Mail-Versand, Zahlungsanbieter, ggf. formsubmit.co der B2B-Seite).
+- [ ] Auftragsverarbeiter-/Empfängerliste vollständig (Hosting, E-Mail-Dienst z. B. Resend, Zahlungsabwicklung Stripe inkl. Rechnungsstellung, ggf. formsubmit.co der B2B-Seite).
+- [ ] Für den E-Mail-Versand nötige SPF-/DKIM-Einträge nur **ergänzen**; bestehende MX-/SPF-Einträge bleiben, `info@renten-rettung.de` läuft weiter.
 - [ ] Datenschutz: Speicherdauern, Löschkonzept, Double-Opt-in getestet.
 - [ ] Barrierefreiheit: Kontraste nach docs/DESIGN.md geprüft, Tastaturbedienung des Funnels getestet, `prefers-reduced-motion` geprüft.
 - [ ] Ladezeit unter 2 s auf mobilem Netz (Messung dokumentiert).
