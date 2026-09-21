@@ -23,7 +23,8 @@ export function SiteFooter() {
         </nav>
         <p>
           {BRAND.name} rechnet und ordnet ein. Wir sind keine Anwälte und beraten nicht im Einzelfall.
-          Ob ein Widerspruch wirksam ist, prüft eine Kanzlei – wir bereiten das vor.
+          Ob ein Widerspruch wirksam ist, prüft am Ende eine Anwältin oder ein Anwalt – wir bereiten
+          das vor und organisieren auf Wunsch den Rest.
         </p>
         <p className="tabellenziffern">
           Rechenkern {CALC_VERSION} · Datenbank {insurersDaten.data.version} ({insurersDaten.data.stand}) ·

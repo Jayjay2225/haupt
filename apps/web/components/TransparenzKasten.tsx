@@ -11,11 +11,11 @@ export function TransparenzKasten({ kompakt }: { kompakt?: boolean | undefined }
   }
   return (
     <aside className="transparenz" aria-labelledby="transparenz-titel">
-      {kompakt === true ? <h3 id="transparenz-titel">So verdienen wir</h3> : <h2 id="transparenz-titel">So verdienen wir</h2>}
+      {kompakt === true ? <h3 id="transparenz-titel">So verdienen wir alle</h3> : <h2 id="transparenz-titel">So verdienen wir alle</h2>}
       <ul>
-        <li>Wir verdienen am Bericht.</li>
-        <li>Wir verdienen, wenn Sie über uns verkaufen.</li>
-        <li>Wir verdienen nichts daran, ob Sie klagen.</li>
+        <li>Sie: Auszahlung über unseren Abwicklungspartner, dazu alles, was die Durchsetzung zusätzlich bringt.</li>
+        <li>Wir: der Bericht und eine Vergütung vom Abwicklungspartner – nichts von Ihrem Erlös.</li>
+        <li>Und die Ampel zeigt Rot, wenn Rot dran ist. Auch das ist Teil des Geschäfts.</li>
       </ul>
       <p style={{ margin: '0.75rem 0 0' }}>
         <Link href="/so-verdienen-wir">Alles dazu in Klartext</Link>

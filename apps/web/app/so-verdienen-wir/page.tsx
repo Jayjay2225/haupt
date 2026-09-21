@@ -7,7 +7,7 @@ import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS } from '@/config/busine
 import { VARIANTE } from '@/config/variante';
 
 export const metadata: Metadata = {
-  title: 'So verdienen wir',
+  title: 'So verdienen wir alle',
 };
 
 export default function SoVerdienenWirSeite() {
@@ -17,11 +17,31 @@ export default function SoVerdienenWirSeite() {
   return (
     <div className="container schmal abschnitt">
       <h1>
-        So verdienen wir<span className="hervor">.</span> In Klartext.
+        So verdienen wir <span className="hervor">alle</span>. In Klartext.
       </h1>
       <p className="untertitel">
-        Rechner und Ankauf laufen unter einer Marke. Damit Sie wissen, woran wir Interesse haben –
-        und woran nicht.
+        Rechner, Bericht und Verkauf laufen unter einer Marke. Damit Sie wissen, was Sie bekommen –
+        und woran wir verdienen.
+      </p>
+
+      <h2>Ihr Weg zum Geld – in drei Schritten</h2>
+      <ol className="punkteliste">
+        <li>
+          <strong>Verkauf:</strong> Sie erhalten innerhalb von 18 Werktagen den vereinbarten
+          anteiligen Rückkaufswert, ausgezahlt über unseren Abwicklungspartner.
+        </li>
+        <li>
+          <strong>Steuer:</strong> Je nach Vertrag können Sie zusätzlich eine Steuererstattung
+          beantragen – das prüft Ihre Steuerberatung.
+        </li>
+        <li>
+          <strong>Durchsetzung:</strong> Unsere Partnerkanzleien setzen die Rückabwicklung durch.
+          Was dabei zusätzlich herauskommt, gehört allein Ihnen.
+        </li>
+      </ol>
+      <p className="erklaerung">
+        Die genauen Konditionen des Ankaufs veröffentlichen wir, sobald sie feststehen. Bis dahin
+        geben wir nichts weiter – vor jeder Weitergabe fragen wir Sie ausdrücklich.
       </p>
 
       <h2>Wir verdienen am Bericht.</h2>
@@ -38,11 +58,11 @@ export default function SoVerdienenWirSeite() {
         Häkchen. Und deshalb sagen wir es hier.
       </p>
 
-      <h2>Wir verdienen nichts daran, ob Sie klagen.</h2>
+      <h2>Ihr Erlös gehört Ihnen.</h2>
       <p>
-        Wir bekommen kein Geld von Kanzleien, keine Erfolgsbeteiligung, keine Provision für
-        vermittelte Mandate. Ob Sie einen Widerspruch prüfen lassen, ist allein Ihre Sache. Die
-        Ampel zeigt Rot, wenn Rot dran ist.
+        Von dem, was die Durchsetzung zusätzlich bringt, bekommen wir nichts – keine
+        Erfolgsbeteiligung, keine Provision aus Ihrem Erlös. Und die Ampel zeigt Rot, wenn Rot dran
+        ist. Auch das gehört zur Rechnung.
       </p>
 
       <h2>Was wir nicht tun</h2>

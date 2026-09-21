@@ -405,6 +405,7 @@ td,
 
 .ampel[data-zustand='gruen'] .licht--gruen {
   background: var(--ampel-gruen);
+  animation: ampel-puls-gruen 2.4s ease-in-out infinite;
   box-shadow: 0 0 0 4px rgba(30, 142, 78, 0.25);
 }
 
@@ -740,4 +741,94 @@ fieldset.feld legend {
     justify-self: center;
     grid-auto-flow: column;
   }
+}
+
+/* Grünes Licht „blinkt“ langsam (Ergebnis-Seite): Leuchten statt Geschrei. */
+@keyframes ampel-puls-gruen {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(30, 142, 78, 0.55);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: 0 0 0 16px rgba(30, 142, 78, 0);
+    filter: brightness(1.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ampel[data-zustand='gruen'] .licht--gruen {
+    animation: none;
+    box-shadow: 0 0 0 6px rgba(30, 142, 78, 0.25);
+  }
+}
+
+/* Monatsauswahl unter dem Eingabefeld (tippen oder klicken). */
+.monat-feld {
+  position: relative;
+}
+
+.monat-panel {
+  margin: -0.35rem 0 1rem;
+  padding: 0.75rem;
+  max-width: 22rem;
+  background: var(--weiss);
+  border: 1px solid var(--linie);
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(10, 31, 51, 0.08);
+}
+
+.monat-panel .jahr-zeile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.monat-panel .jahr-zeile button {
+  min-width: 2.4rem;
+  min-height: 2.4rem;
+  border: 1px solid var(--linie);
+  border-radius: 8px;
+  background: var(--blaugrau);
+  font: inherit;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--marine);
+}
+
+.monat-panel .jahr-zeile button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.monat-panel .monate {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+}
+
+.monat-panel .monate button {
+  padding: 0.5rem 0;
+  border: 1px solid var(--linie);
+  border-radius: 8px;
+  background: var(--blaugrau);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  color: var(--marine);
+}
+
+.monat-panel .monate button:hover,
+.monat-panel .jahr-zeile button:hover:not(:disabled) {
+  border-color: var(--marine);
+}
+
+.monat-panel .monate button[aria-pressed='true'] {
+  background: var(--marine);
+  color: var(--weiss);
+  border-color: var(--marine);
 }

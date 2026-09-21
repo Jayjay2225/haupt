@@ -19,8 +19,8 @@ export default function BerichtSeite() {
         Der Bericht: <span className="hervor">alle Zahlen</span>, jede mit Quelle.
       </h1>
       <p className="untertitel">
-        Die Ampel sagt, ob sich Rechnen lohnt. Der Bericht sagt, wie viel – als Spanne, Jahr für
-        Jahr, zum Mitnehmen in die Kanzlei.
+        Die Ampel sagt, ob sich Rechnen lohnt. Der Bericht sagt, wie viel – und dann: der Weg über
+        uns zu Ihrem Geld.
       </p>
 
       <h2>Was drinsteht</h2>

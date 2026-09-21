@@ -53,8 +53,8 @@ export default function Startseite() {
             <li>
               <h3>Bericht holen. Oder lassen.</h3>
               <p>
-                Wer die Zahlen will, bestellt den Bericht: Spanne, Jahrestabelle, Quellen. Für die
-                Kanzlei – oder für die Schublade.
+                Wer die Zahlen will, bestellt den Bericht: Spanne, Jahrestabelle, Quellen. Schwarz
+                auf weiß – und wenn es sich lohnt, übernehmen unsere Partner den Rest.
               </p>
             </li>
           </ol>
@@ -110,7 +110,7 @@ export default function Startseite() {
             </p>
           )}
           <p className="erklaerung">
-            Ob Sie danach eine Kanzlei beauftragen, entscheiden Sie. Wir verdienen daran nichts.
+            Ob Sie danach verkaufen, durchsetzen lassen oder alles behalten, entscheiden Sie.
           </p>
         </div>
       </section>
@@ -146,8 +146,9 @@ export default function Startseite() {
             <summary>Ist die Ampel eine Rechtsberatung?</summary>
             <p>
               Nein. Wir rechnen und ordnen ein. Ob ein Widerspruch in Ihrem Fall wirksam ist,
-              prüft eine Kanzlei. Unser Ergebnis begründet keinen Anspruch in bestimmter Höhe – es
-              ist eine Schätzung mit Bandbreite.
+              prüft am Ende eine Anwältin oder ein Anwalt – auf Wunsch über unsere Partner. Unser
+              Ergebnis begründet keinen Anspruch in bestimmter Höhe – es ist eine Schätzung mit
+              Bandbreite.
             </p>
           </details>
           <details>
@@ -161,7 +162,7 @@ export default function Startseite() {
           <details>
             <summary>Welche Unterlagen brauche ich?</summary>
             <p>
-              Für die Ampel: die letzte Standmitteilung. Für die Kanzlei später: Police,
+              Für die Ampel: die letzte Standmitteilung. Für die Durchsetzung später: Police,
               Begleitschreiben und Versicherungsbedingungen. Fehlt etwas, muss der Versicherer
               Zweitschriften liefern. Wie Sie die anfordern, steht im Ergebnis.
             </p>

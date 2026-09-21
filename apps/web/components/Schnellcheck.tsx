@@ -66,7 +66,7 @@ export function Schnellcheck({ versichererNamen }: { versichererNamen: string[] 
               <option key={name} value={name} />
             ))}
           </datalist>
-          <MonatsFeld id="sc-beginn" label="Beginn (Monat/Jahr)" wert={beginn} onChange={setBeginn} />
+          <MonatsFeld id="sc-beginn" label="Beginn (Monat/Jahr)" startJahr={2000} wert={beginn} onChange={setBeginn} />
           <TextFeld
             id="sc-monatsbeitrag"
             label="Monatsbeitrag"

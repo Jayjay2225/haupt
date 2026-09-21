@@ -65,7 +65,7 @@ export function berichtVersand(name: string, aktenzeichen: string, rechnungLink?
 
 anbei Ihr Bericht zum Policen-Check (Bestellnummer ${aktenzeichen}) als PDF.
 
-Darin: die Spanne in Euro, die Rechnung Jahr für Jahr, jede Zahl mit Quelle – und die Gegenposition des Versicherers. Nehmen Sie ihn mit in die Kanzlei, wenn Sie den Widerspruch prüfen lassen wollen. Ob Sie das tun, entscheiden Sie.
+Darin: die Spanne in Euro, die Rechnung Jahr für Jahr, jede Zahl mit Quelle – und die Gegenposition des Versicherers. Wollen Sie danach die Rückabwicklung durchsetzen lassen? Antworten Sie einfach auf diese E-Mail – unsere Partner übernehmen den Rest. Ob Sie das wollen, entscheiden Sie.
 
 ${rechnung}
 

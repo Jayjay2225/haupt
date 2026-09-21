@@ -130,6 +130,7 @@ export function SchrittVertrag({ draft, fehler, aendere, versichererNamen }: Sch
         id="beginn"
         label="Seit wann läuft er? (Monat/Jahr)"
         erklaerung="Zum Beispiel 03/2000 für März 2000 – der Monat steht auf der Police."
+        startJahr={2000}
         wert={draft.beginn}
         onChange={(wert) => aendere('beginn', wert)}
         fehler={fehler['beginn']}
@@ -137,6 +138,7 @@ export function SchrittVertrag({ draft, fehler, aendere, versichererNamen }: Sch
       <MonatsFeld
         id="ende"
         label="Geplantes Ende (Monat/Jahr, freiwillig)"
+        startJahr={2030}
         wert={draft.ende}
         onChange={(wert) => aendere('ende', wert)}
         fehler={fehler['ende']}
@@ -153,6 +155,7 @@ export function SchrittVertrag({ draft, fehler, aendere, versichererNamen }: Sch
         <MonatsFeld
           id="statusDatum"
           label={statusDatumLabel}
+          startJahr={2012}
           wert={draft.statusDatum}
           onChange={(wert) => aendere('statusDatum', wert)}
           fehler={fehler['statusDatum']}
@@ -232,6 +235,7 @@ export function SchrittBeitraege({ draft, fehler, aendere }: SchrittProps) {
         id="beitragszahlungBis"
         label="Beiträge gezahlt bis (Monat/Jahr, freiwillig)"
         erklaerung="Nur nötig, wenn Sie früher aufgehört haben zu zahlen als der Vertrag läuft."
+        startJahr={2012}
         wert={draft.beitragszahlungBis}
         onChange={(wert) => aendere('beitragszahlungBis', wert)}
         fehler={fehler['beitragszahlungBis']}
@@ -304,7 +308,7 @@ function SchrittUnterlagen({ draft, aendere }: SchrittProps) {
     <>
       <p>
         Welche Unterlagen haben Sie zur Hand? Das ändert nichts an der Ampel. Es zeigt Ihnen,
-        was für den Weg zur Kanzlei noch fehlt.
+        was für die Durchsetzung noch fehlt.
       </p>
       <div className="feld">
         <div className="optionen">

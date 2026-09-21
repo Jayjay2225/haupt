@@ -115,8 +115,8 @@ export function bestimmeWirtschaftlicheAmpel(calc: CalcResult, eligibility: Elig
     return {
       ampel: 'gruen',
       grund: 'vorteil',
-      titel: 'Grün: Da ist mehr drin.',
-      text: 'In allen drei Szenarien liegt der Widerspruch über Ihrem Rückkaufswert. Jetzt lohnt der Blick in die Unterlagen – und dann der Weg zur Kanzlei.',
+      titel: 'Grün: Da liegt richtig was drin.',
+      text: 'In allen drei Szenarien liegt der Widerspruch über Ihrem Rückkaufswert – selbst vorsichtig gerechnet. Der Bericht liefert die Zahlen. Und dann: der Weg über uns zu Ihrem Geld.',
       groessenordnung: `Mehr als bei Kündigung: voraussichtlich ${groessenordnungInWorten(basis.mehrwertGegenKuendigung)} (Schätzung mit Bandbreite: von ${groessenordnungInWorten(minMehrwert)} bis ${groessenordnungInWorten(maxMehrwert)}).`,
     };
   }

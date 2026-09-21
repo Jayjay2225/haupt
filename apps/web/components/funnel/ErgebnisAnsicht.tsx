@@ -2,8 +2,8 @@
 
 /**
  * Ergebnis-Seite. Verbraucherprodukt (privat): wirtschaftliche Ampel in
- * Worten ohne Euro-Beträge, Gegenposition, Unterlagen-Checkliste, Bericht-
- * Angebot, Ankauf-Block mit eigener Einwilligung, Transparenz-Kasten.
+ * Worten ohne Euro-Beträge, Bericht-Angebot, Weg-zum-Geld-Block mit eigener
+ * Einwilligung, Unterlagen-Checkliste; Annahmen/Gegenposition eingeklappt.
  * Kanzlei-Variante: Eignungs-Check mit Regel-IDs und Szenario-Beträge.
  */
 import { useEffect, useState } from 'react';
@@ -13,7 +13,6 @@ import type { EligibilityResult } from '@rueckab/eligibility';
 import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS } from '@/config/business';
 import { VARIANTE } from '@/config/variante';
 import { Ampel } from '@/components/Ampel';
-import { TransparenzKasten } from '@/components/TransparenzKasten';
 import type { WirtschaftlicheAmpel } from '@/lib/ampel';
 import { ladeDraft, leererDraft, loescheDraft, speichereDraft, type CaseDraft } from '@/lib/draft';
 import { formatEuro } from '@/lib/format';
@@ -46,7 +45,7 @@ const AMPEL_KANZLEI: Record<EligibilityResult['ampel'], string> = {
 };
 
 const GEGENPOSITION =
-  'Der Versicherer wird sagen: Zinsen nur aus den eigenen Zahlen, nicht aus dem Branchenschnitt; die Nettoverzinsung enthalte Einmaleffekte; Schutz- und Kostenanteile seien höher. Deshalb ist unser Ergebnis eine Schätzung mit Bandbreite – und der Weg zur Kanzlei der nächste Schritt.';
+  'Der Versicherer wird sagen: Zinsen nur aus den eigenen Zahlen, nicht aus dem Branchenschnitt; die Nettoverzinsung enthalte Einmaleffekte; Schutz- und Kostenanteile seien höher. Genau deshalb rechnen wir mit einer Spanne statt mit einer einzigen Zahl.';
 
 export function ErgebnisAnsicht() {
   const [draft, setDraft] = useState<CaseDraft>(leererDraft);
@@ -130,7 +129,7 @@ export function ErgebnisAnsicht() {
           <p style={{ marginTop: '1rem', fontSize: '1.25rem' }}>{vorschau.ampel.text}</p>
           {vorschau.ampel.groessenordnung !== undefined && (
             <div className="wert-karte">
-              <p style={{ margin: 0 }}>
+              <p style={{ margin: 0, fontSize: '1.3rem' }}>
                 <strong>Größenordnung:</strong> {vorschau.ampel.groessenordnung}
               </p>
               <p className="erklaerung" style={{ margin: '0.5rem 0 0' }}>
@@ -139,22 +138,15 @@ export function ErgebnisAnsicht() {
             </div>
           )}
 
-          {vorschau.regime === 'alt-policenmodell' && (
-            <div className="hinweis neutral">
-              <p>
-                <strong>Was der Versicherer sagen wird:</strong> {GEGENPOSITION}
-              </p>
-            </div>
-          )}
-
           {VARIANTE.berichtKostenpflichtig && vorschau.ampel.ampel !== 'rot' && (
             <section aria-labelledby="bericht-titel" className="wert-karte">
               <h2 id="bericht-titel" style={{ fontSize: '1.4rem' }}>
-                Die Zahlen dazu: der Bericht.
+                Wollen Sie wissen, was für Sie drin ist?
               </h2>
               <p>
-                Spanne in Euro, Rechnung Jahr für Jahr, jede Zahl mit Quelle, die Gegenposition –
-                zum Mitnehmen in die Kanzlei. {BERICHT_PREIS_BRUTTO_EUR} € {BERICHT_PREIS_HINWEIS}, einmalig.
+                Der Bericht nennt die Zahlen: die Spanne in Euro, die Rechnung Jahr für Jahr, jede mit
+                Quelle. {BERICHT_PREIS_BRUTTO_EUR} € {BERICHT_PREIS_HINWEIS}, einmalig. Und wenn es sich
+                lohnt, übernehmen unsere Partner auf Wunsch den Rest.
               </p>
               <p style={{ margin: 0, display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <Link href="/bestellen" className="knopf haupt">
@@ -198,12 +190,26 @@ export function ErgebnisAnsicht() {
           {VARIANTE.ankaufHinweis && (
             <section aria-labelledby="ankauf-titel" className="hinweis">
               <h2 id="ankauf-titel" style={{ fontSize: '1.4rem' }}>
-                Verkaufen statt kündigen?
+                Und danach? So verdienen wir alle.
               </h2>
+              <ol className="punkteliste">
+                <li>
+                  Sie verkaufen Ihre Police und erhalten innerhalb von 18 Werktagen den vereinbarten
+                  anteiligen Rückkaufswert – ausgezahlt über unseren Abwicklungspartner.
+                </li>
+                <li>
+                  Je nach Vertrag können Sie zusätzlich eine Steuererstattung beantragen; das prüft
+                  Ihre Steuerberatung.
+                </li>
+                <li>
+                  Unsere Partnerkanzleien setzen die Rückabwicklung durch. Was dabei zusätzlich
+                  herauskommt, gehört allein Ihnen.
+                </li>
+              </ol>
               <p>
-                Manche Policen sind für Käufer mehr wert als der Rückkaufswert. Wenn Sie wollen, holt
-                ein Organisationspartner ein Angebot ein. Wir geben nichts weiter, ohne Ihr Ja hier.{' '}
-                <Link href="/verkaufen">Wie das läuft – und was Sie dabei aufgeben</Link>
+                Wir verdienen am Bericht und erhalten vom Abwicklungspartner eine Vergütung – nicht
+                von Ihrem Erlös. Wir geben nichts weiter, ohne Ihr Ja hier.{' '}
+                <Link href="/verkaufen">Die Wege im Vergleich – und was Sie jeweils aufgeben</Link>
               </p>
               <div className="feld">
                 <div className="optionen">
@@ -230,10 +236,13 @@ export function ErgebnisAnsicht() {
             </section>
           )}
 
-          <TransparenzKasten kompakt />
-
           <details>
-            <summary>Annahmen und Datenherkunft</summary>
+            <summary>Wie wir rechnen: Annahmen, Datenherkunft, Gegenposition</summary>
+            {vorschau.regime === 'alt-policenmodell' && (
+              <p className="erklaerung" style={{ marginTop: '0.75rem' }}>
+                <strong>Was der Versicherer sagen wird:</strong> {GEGENPOSITION}
+              </p>
+            )}
             <ul className="punkteliste" style={{ marginTop: '0.75rem' }}>
               {vorschau.annahmen.map((text) => (
                 <li key={text}>{text}</li>
@@ -256,7 +265,8 @@ export function ErgebnisAnsicht() {
           <div className="hinweis neutral">
             <p>
               Diese Ampel ist eine Schätzung unter offengelegten Annahmen, keine Rechtsberatung. Ob ein
-              Widerspruch wirksam ist, prüft eine Kanzlei mit Ihren Originalunterlagen.
+              Widerspruch wirksam ist, prüft am Ende eine Anwältin oder ein Anwalt mit Ihren
+              Originalunterlagen – auf Wunsch organisieren unsere Partner das für Sie.
             </p>
           </div>
         </>
