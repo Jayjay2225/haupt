@@ -32,11 +32,11 @@ export default function SoVerdienenWirSeite() {
         </li>
         <li>
           <strong>Steuer:</strong> Je nach Vertrag können Sie zusätzlich eine Steuererstattung
-          beantragen – das prüft Ihre Steuerberatung.
+          beantragen – auch dabei unterstützen Sie unsere Partner.
         </li>
         <li>
           <strong>Durchsetzung:</strong> Unsere Partnerkanzleien setzen die Rückabwicklung durch.
-          Was dabei zusätzlich herauskommt, gehört allein Ihnen.
+          Jeglicher Mehrerlös bleibt bei Ihnen – ohne Abzüge.
         </li>
       </ol>
       <p className="erklaerung">

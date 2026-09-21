@@ -2,7 +2,7 @@
  * Verbotslisten-Test (Prompt 8, Aufgabe 1 und 3): Alle Oberflächentexte der
  * Website und die E-Mail-Vorlagen dürfen keine Versprechen, keine
  * Verknappung, keine Aufsichts-/Erlaubnisangaben, keinen Aufkäufer-Bezug mit
- * Mehrerlös, keine Emojis und keine Prozentangaben auf der Ankaufsseite
+ * Prozent-Mehrerlöse, keine Emojis und keine Prozentangaben auf der Ankaufsseite
  * enthalten. Der Test liest die Quelltexte direkt.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
@@ -47,7 +47,9 @@ const VERBOTEN: { muster: RegExp; grund: string }[] = [
   { muster: /BaFin|Bundesanstalt für Finanzdienstleistungsaufsicht/i, grund: 'Aufsichtsbezug im Ankauf-Kontext' },
   { muster: /\bErlaubnis\b|\bZulassung\b|\bzugelassen\b/i, grund: 'Erlaubnis-/Zulassungsangabe' },
   { muster: /Wirtschaftsprüfer/i, grund: 'Abwicklungspartner sind Organisationspartner' },
-  { muster: /Mehrerlös/i, grund: 'Mehrerlös-Werbung' },
+  // „Mehrerlös“ ist seit 21.09.2026 auf Wunsch des Auftraggebers erlaubt („Jeglicher
+  // Mehrerlös bleibt bei Ihnen“); verboten bleiben Prozentangaben dazu und die
+  // Nennung des Aufkäufers (eigener Test für die Ankaufsseite unten).
   { muster: /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, grund: 'Emoji als Symbol' },
 ];
 

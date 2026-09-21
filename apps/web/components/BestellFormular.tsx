@@ -9,7 +9,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS, ZAHLUNG } from '@/config/business';
+import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS, BERICHT_PREIS_REGULAER_EUR, ZAHLUNG } from '@/config/business';
 import { FEHLER_FALL_UNVOLLSTAENDIG, bestellformularAusDraft, pruefeBestellformular } from '@/lib/bestellung';
 import type { BestellFehler, Bestellformular as Formular } from '@/lib/bestellung';
 import { ladeDraft, leererDraft, validiereBis } from '@/lib/draft';
@@ -146,9 +146,9 @@ export function BestellFormular() {
       <h2>Bestellen</h2>
       <p>
         <strong className="betrag">
-          {BERICHT_PREIS_BRUTTO_EUR} € {BERICHT_PREIS_HINWEIS}
-        </strong>
-        , einmalig. Zahlung vorab: {ZAHLUNG.wege.join(', ')}. {ZAHLUNG.lieferung}
+          Einführungspreis: {BERICHT_PREIS_BRUTTO_EUR} € statt <s>{BERICHT_PREIS_REGULAER_EUR} €</s>
+        </strong>{' '}
+        {BERICHT_PREIS_HINWEIS}, einmalig. Zahlung vorab: {ZAHLUNG.wege.join(', ')}. {ZAHLUNG.lieferung}
       </p>
       <Kontrollkaestchen
         id="agbGelesen"

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS, ZAHLUNG } from '@/config/business';
+import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS, BERICHT_PREIS_REGULAER_EUR, ZAHLUNG } from '@/config/business';
 import { VARIANTE } from '@/config/variante';
 import { bestellungAktiv } from '@/lib/zahlung';
 
@@ -45,9 +45,10 @@ export default function BerichtSeite() {
           <h2>Preis und Zahlung</h2>
           <p>
             <strong className="betrag">
-              {BERICHT_PREIS_BRUTTO_EUR} € {BERICHT_PREIS_HINWEIS}
-            </strong>
-            , einmalig. Kein Abo, keine Folgekosten. Der Preis ist derselbe, egal was die Ampel zeigt.
+              Einführungspreis: {BERICHT_PREIS_BRUTTO_EUR} € statt <s>{BERICHT_PREIS_REGULAER_EUR} €</s>
+            </strong>{' '}
+            {BERICHT_PREIS_HINWEIS}, einmalig. Kein Abo, keine Folgekosten. Der Preis ist derselbe, egal
+            was die Ampel zeigt.
           </p>
           <ol className="punkteliste">
             <li>Sie bestellen und zahlen vorab – {ZAHLUNG.wege.join(', ')} – abgewickelt über {ZAHLUNG.abwicklung}.</li>

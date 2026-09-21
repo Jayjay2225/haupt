@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { CalcResult } from '@rueckab/calc';
 import type { EligibilityResult } from '@rueckab/eligibility';
-import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS } from '@/config/business';
+import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS, BERICHT_PREIS_REGULAER_EUR } from '@/config/business';
 import { VARIANTE } from '@/config/variante';
 import { Ampel } from '@/components/Ampel';
 import type { WirtschaftlicheAmpel } from '@/lib/ampel';
@@ -38,14 +38,15 @@ interface VorschauPrivat {
 
 type Vorschau = VorschauKanzlei | VorschauPrivat;
 
+/** Typische Einwände des Versicherers – in der Kanzlei-Variante sichtbar, im Verbraucherprodukt im Bericht. */
+const GEGENPOSITION =
+  'Der Versicherer wird sagen: Zinsen nur aus den eigenen Zahlen, nicht aus dem Branchenschnitt; die Nettoverzinsung enthalte Einmaleffekte; Schutz- und Kostenanteile seien höher. Genau deshalb rechnen wir mit einer Spanne statt mit einer einzigen Zahl.';
+
 const AMPEL_KANZLEI: Record<EligibilityResult['ampel'], string> = {
   gruen: 'Grün – Merkmale sprechen für eine vertiefte Prüfung',
   gelb: 'Gelb – offene Punkte, Unterlagen erforderlich',
   rot: 'Rot – kein geeigneter Fall erkennbar',
 };
-
-const GEGENPOSITION =
-  'Der Versicherer wird sagen: Zinsen nur aus den eigenen Zahlen, nicht aus dem Branchenschnitt; die Nettoverzinsung enthalte Einmaleffekte; Schutz- und Kostenanteile seien höher. Genau deshalb rechnen wir mit einer Spanne statt mit einer einzigen Zahl.';
 
 export function ErgebnisAnsicht() {
   const [draft, setDraft] = useState<CaseDraft>(leererDraft);
@@ -127,26 +128,20 @@ export function ErgebnisAnsicht() {
         <>
           <Ampel zustand={vorschau.ampel.ampel} gross beschriftung={vorschau.ampel.titel} />
           <p style={{ marginTop: '1rem', fontSize: '1.25rem' }}>{vorschau.ampel.text}</p>
-          {vorschau.ampel.groessenordnung !== undefined && (
-            <div className="wert-karte">
-              <p style={{ margin: 0, fontSize: '1.3rem' }}>
-                <strong>Größenordnung:</strong> {vorschau.ampel.groessenordnung}
-              </p>
-              <p className="erklaerung" style={{ margin: '0.5rem 0 0' }}>
-                Die Zahlen in Euro – Spanne und Rechnung Jahr für Jahr – stehen im Bericht.
-              </p>
-            </div>
-          )}
-
           {VARIANTE.berichtKostenpflichtig && vorschau.ampel.ampel !== 'rot' && (
             <section aria-labelledby="bericht-titel" className="wert-karte">
               <h2 id="bericht-titel" style={{ fontSize: '1.4rem' }}>
                 Wollen Sie wissen, was für Sie drin ist?
               </h2>
               <p>
-                Der Bericht nennt die Zahlen: die Spanne in Euro, die Rechnung Jahr für Jahr, jede mit
-                Quelle. {BERICHT_PREIS_BRUTTO_EUR} € {BERICHT_PREIS_HINWEIS}, einmalig. Und wenn es sich
-                lohnt, übernehmen unsere Partner auf Wunsch den Rest.
+                Der Bericht nennt die Zahlen, Jahr für Jahr, jede mit Quelle. Einführungspreis:{' '}
+                <strong>
+                  nur {BERICHT_PREIS_BRUTTO_EUR} € statt <s>{BERICHT_PREIS_REGULAER_EUR} €</s>
+                </strong>{' '}
+                {BERICHT_PREIS_HINWEIS}, einmalig.{' '}
+                {vorschau.ampel.ampel === 'gruen'
+                  ? 'Es lohnt sich – unsere Partner übernehmen den Rest.'
+                  : 'Und wenn es sich lohnt, übernehmen unsere Partner den Rest.'}
               </p>
               <p style={{ margin: 0, display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <Link href="/bestellen" className="knopf haupt">
@@ -190,7 +185,7 @@ export function ErgebnisAnsicht() {
           {VARIANTE.ankaufHinweis && (
             <section aria-labelledby="ankauf-titel" className="hinweis">
               <h2 id="ankauf-titel" style={{ fontSize: '1.4rem' }}>
-                Und danach? So verdienen wir alle.
+                Und danach? Das Rund-um-Sorglos-Paket.
               </h2>
               <ol className="punkteliste">
                 <li>
@@ -198,12 +193,12 @@ export function ErgebnisAnsicht() {
                   anteiligen Rückkaufswert – ausgezahlt über unseren Abwicklungspartner.
                 </li>
                 <li>
-                  Je nach Vertrag können Sie zusätzlich eine Steuererstattung beantragen; das prüft
-                  Ihre Steuerberatung.
+                  Je nach Vertrag können Sie zusätzlich eine Steuererstattung beantragen – auch dabei
+                  unterstützen Sie unsere Partner.
                 </li>
                 <li>
-                  Unsere Partnerkanzleien setzen die Rückabwicklung durch. Was dabei zusätzlich
-                  herauskommt, gehört allein Ihnen.
+                  Unsere Partnerkanzleien setzen die Rückabwicklung durch. Jeglicher Mehrerlös bleibt
+                  bei Ihnen – ohne Abzüge.
                 </li>
               </ol>
               <p>
@@ -237,25 +232,13 @@ export function ErgebnisAnsicht() {
           )}
 
           <details>
-            <summary>Wie wir rechnen: Annahmen, Datenherkunft, Gegenposition</summary>
-            {vorschau.regime === 'alt-policenmodell' && (
-              <p className="erklaerung" style={{ marginTop: '0.75rem' }}>
-                <strong>Was der Versicherer sagen wird:</strong> {GEGENPOSITION}
-              </p>
-            )}
-            <ul className="punkteliste" style={{ marginTop: '0.75rem' }}>
-              {vorschau.annahmen.map((text) => (
-                <li key={text}>{text}</li>
-              ))}
-              {vorschau.warnungen.map((text) => (
-                <li key={text}>
-                  <strong>Hinweis:</strong> {text}
-                </li>
-              ))}
-              {vorschau.hinweise.map((text) => (
-                <li key={text}>{text}</li>
-              ))}
-            </ul>
+            <summary>Wie wir rechnen: Annahmen, Datenherkunft, Gegenposition*</summary>
+            <p className="erklaerung" style={{ marginTop: '0.75rem' }}>
+              * Alle Annahmen, die vollständige Datenherkunft und die Gegenposition des Versicherers
+              stehen im Bericht. Die Grundlagen unserer Rechnung finden Sie in den{' '}
+              <Link href="/agb#rechenweg">AGB („So rechnen wir“)</Link>, den Umgang mit Ihren Daten in
+              der <Link href="/datenschutz">Datenschutzerklärung</Link>.
+            </p>
             <p className="erklaerung">
               Rechenkern {vorschau.meta.calcVersion}, Datenbank {vorschau.meta.dataVersion}, Regelwerk{' '}
               {vorschau.meta.rulesVersion}.

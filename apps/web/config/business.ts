@@ -10,8 +10,15 @@
  */
 import { PRODUKT_VARIANTE } from './variante';
 
-/** Bruttopreis des schriftlichen Berichts in Euro (Startpreis). */
+/** Bruttopreis des schriftlichen Berichts in Euro – Einführungspreis, wird berechnet. */
 export const BERICHT_PREIS_BRUTTO_EUR = 89;
+
+/**
+ * Regulärer Preis (Streichpreis, Entscheidung 21.09.2026). Darf nur beworben
+ * werden, solange er der tatsächliche reguläre Listenpreis ist; ohne
+ * Zeitdruck-Formulierungen (Verbotsliste Prompt 8).
+ */
+export const BERICHT_PREIS_REGULAER_EUR = 119;
 
 /** Enthaltene Umsatzsteuer, nur für die Preisangabe („inkl. MwSt.“). */
 export const BERICHT_PREIS_HINWEIS = 'inkl. gesetzlicher Umsatzsteuer';
@@ -49,7 +56,7 @@ export const BUSINESS_MODELS: Record<BusinessModelId, BusinessModel> = {
     name: 'Hybrid: kostenlose Ampel, kostenpflichtiger Bericht',
     beschreibung:
       'Die Ampel und die Einordnung in Worten sind kostenlos. Wer die Zahlen will – Spanne, Jahrestabelle, Quellen –, bestellt den schriftlichen Bericht zum Festpreis.',
-    preisHinweis: `Die Ampel kostet nichts. Der schriftliche Bericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}. Kein Abo, keine Folgekosten.`,
+    preisHinweis: `Die Ampel kostet nichts. Der schriftliche Bericht: Einführungspreis ${BERICHT_PREIS_BRUTTO_EUR} € statt ${BERICHT_PREIS_REGULAER_EUR} €, ${BERICHT_PREIS_HINWEIS}. Kein Abo, keine Folgekosten.`,
   },
   kanzlei: {
     id: 'kanzlei',
