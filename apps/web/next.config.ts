@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   transpilePackages: ['@rueckab/calc', '@rueckab/eligibility', '@rueckab/report'],
   // Playwright (PDF-Erzeugung im Webhook) wird zur Laufzeit aus node_modules geladen, nicht gebündelt.
-  serverExternalPackages: ['playwright-core'],
+  serverExternalPackages: ['playwright-core', '@sparticuz/chromium'],
 };
 
 export default nextConfig;

@@ -46,6 +46,10 @@ pnpm --filter @rueckab/report beispiele           # Beispielberichte in examples
 
 Umgebungsvariablen der Website (Vorlage: `apps/web/.env.example`): `NEXT_PUBLIC_PRODUKT_VARIANTE` (`privat` Standard | `kanzlei` für die markenneutrale Kanzlei-Lizenz), `BETA_PASSWORT` (Passwortschutz der Beta), `NEXT_PUBLIC_INDEXIERUNG` (erst zum Go-live `1`), `NEXT_PUBLIC_BASIS_URL`; Bestellung und Zahlung: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, optional `STRIPE_ZAHLUNGSARTEN`, `STRIPE_STEUERSATZ_ID`; Auslieferung: `AUSLIEFERUNG_VERZEICHNIS`, `RESEND_API_KEY`, `MAIL_ABSENDER`, `CHROMIUM_PATH`; in der Kanzlei-Variante zusätzlich `NEXT_PUBLIC_KANZLEI_*` (Name, Domain, Anbieter, Anschrift, Vertretung, Register, USt-ID, Telefon, E-Mail).
 
+## Bereitstellung
+
+Die Website läuft bei Vercel (Root Directory `apps/web`), die Domain bleibt bei united-domains: Anleitung in `docs/DEPLOY-VERCEL.md`, DNS-Umstellung in `docs/DOMAIN-UMZUG.md`.
+
 ## Bestellung und Zahlung
 
 Zahlung vorab über Stripe Checkout (Karte, PayPal, Klarna); nach Zahlungseingang erzeugt der Webhook `POST /api/stripe/webhook` den Bericht (PDF) und verschickt ihn zusammen mit dem Rechnungslink per E-Mail. Ohne `STRIPE_SECRET_KEY` ist die Bestellung ausgeblendet. Ablauf und offene Punkte: `docs/STATUS.md` (Stand 20.09.2026).

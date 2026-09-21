@@ -49,6 +49,7 @@ export interface SitzungsDaten {
   email: string;
   metadata: Record<string, string>;
   rechnungId?: string;
+  zahlungId?: string;
 }
 
 export interface Berichtsdatei {
@@ -60,12 +61,20 @@ export interface ErfuellungsAbhaengigkeiten {
   erzeugeBericht: (daten: SitzungsDaten, ordner: string, jetzt: Date) => Promise<Berichtsdatei>;
   sendeMail: typeof sendeMail;
   rechnungLink: (rechnungId: string) => Promise<string | undefined>;
+  /** Dauerhafte Markierung außerhalb des Dateisystems (Serverless): schon ausgeliefert? */
+  istAusgeliefert: (daten: SitzungsDaten) => Promise<boolean>;
+  markiereAusgeliefert: (daten: SitzungsDaten, zeitpunkt: string) => Promise<void>;
   jetzt: () => Date;
 }
 
 export function auslieferungsVerzeichnis(): string {
   const konfiguriert = process.env['AUSLIEFERUNG_VERZEICHNIS'];
-  return konfiguriert !== undefined && konfiguriert !== '' ? konfiguriert : resolve(process.cwd(), 'var/auslieferungen');
+  if (konfiguriert !== undefined && konfiguriert !== '') {
+    return konfiguriert;
+  }
+  // Serverless (Vercel): nur /tmp ist beschreibbar, und nur für die Dauer eines Aufrufs.
+  // Die dauerhafte „schon ausgeliefert“-Markierung liegt deshalb bei Stripe (PaymentIntent-Metadaten).
+  return process.env['VERCEL'] !== undefined ? '/tmp/auslieferungen' : resolve(process.cwd(), 'var/auslieferungen');
 }
 
 function statusPfad(ordner: string): string {
@@ -98,6 +107,8 @@ export function sitzungsDaten(sitzung: Stripe.Checkout.Session): SitzungsDaten {
   }
   const rechnung = sitzung.invoice;
   const rechnungId = typeof rechnung === 'string' ? rechnung : rechnung?.id;
+  const zahlung = sitzung.payment_intent;
+  const zahlungId = typeof zahlung === 'string' ? zahlung : zahlung?.id;
   return {
     id: sitzung.id,
     bestellnummer,
@@ -105,6 +116,7 @@ export function sitzungsDaten(sitzung: Stripe.Checkout.Session): SitzungsDaten {
     email,
     metadata,
     ...(rechnungId !== undefined ? { rechnungId } : {}),
+    ...(zahlungId !== undefined ? { zahlungId } : {}),
   };
 }
 
@@ -156,6 +168,18 @@ export function standardAbhaengigkeiten(stripe: Stripe): ErfuellungsAbhaengigkei
       const rechnung = await stripe.invoices.retrieve(rechnungId);
       return rechnung.hosted_invoice_url ?? rechnung.invoice_pdf ?? undefined;
     },
+    istAusgeliefert: async (daten) => {
+      if (daten.zahlungId === undefined) {
+        return false;
+      }
+      const zahlung = await stripe.paymentIntents.retrieve(daten.zahlungId);
+      return (zahlung.metadata['ausgeliefert_am'] ?? '') !== '';
+    },
+    markiereAusgeliefert: async (daten, zeitpunkt) => {
+      if (daten.zahlungId !== undefined) {
+        await stripe.paymentIntents.update(daten.zahlungId, { metadata: { ausgeliefert_am: zeitpunkt } });
+      }
+    },
     jetzt: () => new Date(),
   };
 }
@@ -175,6 +199,12 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
     bezahltAm: deps.jetzt().toISOString(),
   };
   if (status.mailVersendetAm !== undefined) {
+    return status;
+  }
+  // Serverless: Dateistatus überlebt den Aufruf nicht – dauerhafte Markierung bei Stripe prüfen.
+  if (await deps.istAusgeliefert(daten)) {
+    status.mailVersendetAm = status.mailVersendetAm ?? 'laut Zahlungsdienst bereits ausgeliefert';
+    speichereStatus(ordner, status);
     return status;
   }
   mkdirSync(ordner, { recursive: true });
@@ -217,6 +247,11 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
     status.mailVersendetAm = deps.jetzt().toISOString();
     status.mailWeg = ergebnis.weg;
     speichereStatus(ordner, status);
+    try {
+      await deps.markiereAusgeliefert(daten, status.mailVersendetAm);
+    } catch {
+      // Markierung fehlgeschlagen: Dateistatus verhindert Doppelversand innerhalb der Instanz.
+    }
     return status;
   } catch (fehler) {
     const text = fehler instanceof Error ? fehler.message : String(fehler);

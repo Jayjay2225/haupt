@@ -8,6 +8,8 @@ import { standardAbhaengigkeiten, verarbeiteStripeEreignis } from '@/lib/erfuell
 import { bestellungAktiv, stripeClient } from '@/lib/zahlung';
 
 export const runtime = 'nodejs';
+// PDF-Erzeugung mit Chromium braucht ein paar Sekunden (Kaltstart eingerechnet).
+export const maxDuration = 60;
 
 export async function POST(request: Request): Promise<NextResponse> {
   const geheimnis = process.env['STRIPE_WEBHOOK_SECRET'];

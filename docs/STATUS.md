@@ -114,3 +114,9 @@ Am 18.09.2026 wurde das Website-Grundgerüst `apps/web` auf ausdrücklichen Wuns
 - [ ] Abgenommene Rechtstexte (Datenschutz, AGB, Widerrufsbelehrung) liefern und einbauen; Datenschutz-Ergänzungen (Stripe, E-Mail-Dienst, Speicherdauern) vom Anwalt bestätigen lassen.
 - [ ] Einordnung des Berichts als Dienstleistung oder digitaler Inhalt für Widerrufsbelehrung und Zustimmungstext (docs/LEGAL-OPEN-QUESTIONS.md Nr. 13) – Frage des Auftraggebers vom 21.09.2026 dort beantwortet.
 - [ ] `auxinum-Logo-W.png` und übrige Dateien des alten Webspace sichern; `/einkehr`-Weg klären (docs/DOMAIN-UMZUG.md, Abschnitt 1).
+
+## Stand 21.09.2026 (2) – Bereitstellung bei Vercel vorbereitet
+
+- Entscheidung: Hosting bei Vercel (united-domains-Webspace kann kein Node.js; Domain bleibt dort, nur Web-DNS-Einträge zeigen auf Vercel). Anleitung `docs/DEPLOY-VERCEL.md`.
+- Code: Chromium in Serverless-Umgebungen aus `@sparticuz/chromium` (`apps/report/src/pdf.ts`), Webhook `maxDuration = 60`, Region `fra1` (`apps/web/vercel.json`), Auslieferungsordner auf Vercel `/tmp`, dauerhafte „ausgeliefert“-Markierung in den Stripe-PaymentIntent-Metadaten (idempotent ohne Dateisystem), Test dafür ergänzt.
+- Offen: Vercel-Projekt anlegen und Variablen setzen (Auftraggeber), Stripe-Webhook, Testbestellung unter der Vorschauadresse, dann DNS-Umstellung.

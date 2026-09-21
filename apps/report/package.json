@@ -12,6 +12,7 @@
   "dependencies": {
     "@rueckab/calc": "workspace:*",
     "@rueckab/eligibility": "workspace:*",
+    "@sparticuz/chromium": "^153.0.0",
     "playwright-core": "^1.49.0"
   }
 }

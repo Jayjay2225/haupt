@@ -8,6 +8,26 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 
+interface Start {
+  executablePath: string;
+  args: string[];
+}
+
+/**
+ * Chromium-Start ermitteln: lokal ein installiertes Chromium (CHROMIUM_PATH,
+ * Playwright-Verzeichnis); in Serverless-Umgebungen (Vercel/AWS Lambda,
+ * erkennbar an VERCEL bzw. AWS_LAMBDA_FUNCTION_NAME) das gepackte Chromium
+ * aus @sparticuz/chromium, das dort erst zur Laufzeit nach /tmp entpackt wird.
+ */
+async function chromiumStart(): Promise<Start> {
+  const serverless = process.env['VERCEL'] !== undefined || process.env['AWS_LAMBDA_FUNCTION_NAME'] !== undefined;
+  if (serverless && process.env['CHROMIUM_PATH'] === undefined) {
+    const paket = await import('@sparticuz/chromium');
+    return { executablePath: await paket.default.executablePath(), args: [...paket.default.args, '--font-render-hinting=none'] };
+  }
+  return { executablePath: findeChromium(), args: ['--no-sandbox', '--disable-dev-shm-usage', '--font-render-hinting=none'] };
+}
+
 function findeChromium(): string {
   const kandidaten: string[] = [];
   if (process.env['CHROMIUM_PATH'] !== undefined) {
@@ -41,10 +61,8 @@ export interface KopfzeilenDaten {
 }
 
 export async function htmlZuPdf(html: string, pfad: string, kopf: KopfzeilenDaten): Promise<void> {
-  const browser = await chromium.launch({
-    executablePath: findeChromium(),
-    args: ['--no-sandbox', '--disable-dev-shm-usage', '--font-render-hinting=none'],
-  });
+  const start = await chromiumStart();
+  const browser = await chromium.launch({ executablePath: start.executablePath, args: start.args });
   try {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'load' });

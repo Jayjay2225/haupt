@@ -19,6 +19,7 @@ function fakeSitzung(payment_status: 'paid' | 'unpaid' = 'paid'): Stripe.Checkou
     invoice: 'in_123',
     customer_email: 'muster@example.org',
     customer_details: { email: 'muster@example.org', name: 'Muster Person' },
+    payment_intent: 'pi_123',
     metadata: { bestellnummer: 'RR-2026-ABCDEF', kundenname: 'Muster Person', ...fallAlsMetadaten(vollstaendigerDraft()) },
   } as unknown as Stripe.Checkout.Session;
 }
@@ -30,6 +31,7 @@ function ereignis(typ: string, sitzung: Stripe.Checkout.Session): Stripe.Event {
 interface Protokoll {
   mails: MailNachricht[];
   berichte: number;
+  markiert?: string;
 }
 
 function fakeAbhaengigkeiten(protokoll: Protokoll, berichtFehler?: string): ErfuellungsAbhaengigkeiten {
@@ -48,6 +50,10 @@ function fakeAbhaengigkeiten(protokoll: Protokoll, berichtFehler?: string): Erfu
       return { weg: 'protokoll', kennung: `t${protokoll.mails.length}` };
     },
     rechnungLink: async () => 'https://rechnung.example/in_123',
+    istAusgeliefert: async () => protokoll.markiert !== undefined,
+    markiereAusgeliefert: async (_daten, zeitpunkt) => {
+      protokoll.markiert = zeitpunkt;
+    },
     jetzt: () => JETZT,
   };
 }
@@ -71,7 +77,7 @@ afterEach(() => {
 describe('Auslieferung nach Zahlungseingang', () => {
   it('liest Bestellnummer, E-Mail und Rechnung aus der Sitzung', () => {
     const daten = sitzungsDaten(fakeSitzung());
-    expect(daten).toMatchObject({ id: 'cs_test_123', bestellnummer: 'RR-2026-ABCDEF', email: 'muster@example.org', rechnungId: 'in_123' });
+    expect(daten).toMatchObject({ id: 'cs_test_123', bestellnummer: 'RR-2026-ABCDEF', email: 'muster@example.org', rechnungId: 'in_123', zahlungId: 'pi_123' });
   });
 
   it('erzeugt den Bericht, hängt ihn an und nennt den Rechnungslink – nur einmal', async () => {
@@ -96,9 +102,18 @@ describe('Auslieferung nach Zahlungseingang', () => {
     expect(status?.rechnungLink).toBe('https://rechnung.example/in_123');
 
     // Stripe schickt Ereignisse mehrfach: kein zweiter Bericht, keine zweite Mail.
+    expect(protokoll.markiert).toBe(JETZT.toISOString());
     expect(await verarbeiteStripeEreignis(ereignis('checkout.session.async_payment_succeeded', fakeSitzung()), deps)).toBe('ausgeliefert');
     expect(protokoll.berichte).toBe(1);
     expect(protokoll.mails).toHaveLength(2);
+  });
+
+  it('verlässt sich auf die Stripe-Markierung, wenn der Dateistatus fehlt (Serverless)', async () => {
+    const protokoll: Protokoll = { mails: [], berichte: 0, markiert: '2026-09-21T09:00:00.000Z' };
+    const deps = fakeAbhaengigkeiten(protokoll);
+    expect(await verarbeiteStripeEreignis(ereignis('checkout.session.completed', fakeSitzung()), deps)).toBe('ausgeliefert');
+    expect(protokoll.berichte).toBe(0);
+    expect(protokoll.mails).toHaveLength(0);
   });
 
   it('hält Fehler fest, informiert Kundin und Anbieter und wiederholt die Kundeninfo nicht', async () => {
