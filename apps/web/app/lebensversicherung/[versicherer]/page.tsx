@@ -251,7 +251,7 @@ export default async function VersichererSeite({ params }: { params: Promise<Par
 
       <h2>Police von dieser Gesellschaft?</h2>
       <p>
-        Vertrag zwischen 1994 und 2007? Dann lohnt der Blick. Fünf Minuten, eine klare Ampel –
+        Vertrag zwischen 1990 und 2016? Dann lohnt der Blick. Fünf Minuten, eine klare Ampel –
         kostenlos. Rot heißt Finger weg, das sagen wir Ihnen auch.
       </p>
       <p>

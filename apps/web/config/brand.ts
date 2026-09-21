@@ -65,7 +65,7 @@ const RENTEN_RETTUNG: Marke = {
   name: 'Renten-Rettung',
   domain: 'renten-rettung.de',
   produktname: 'Policen-Check',
-  claim: 'Alte Lebensversicherung? Erst rechnen. Dann kündigen.',
+  claim: 'Alte Lebensversicherung? Erst rechnen. Dann handeln.',
   anbieter: 'Kaufmannsladen Gebhard GmbH',
   anbieterAnschrift: { strasse: 'Helmkrautstraße 35 A', plz: '13503', ort: 'Berlin' },
   anbieterVertretung: 'Geschäftsführer Jerome Gebhard',

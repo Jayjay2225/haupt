@@ -75,17 +75,17 @@ describe('Verbotsliste (Website und E-Mails)', () => {
     expect(treffer).toEqual([]);
   });
 
-  it('„Anspruch“ nur verneint („kein … Anspruch“)', () => {
+  // „Anspruch errechnen“ / „Ansprüche durchsetzen“ sind seit 21.09.2026 auf Wunsch des
+  // Auftraggebers erlaubt (anwaltlich zu prüfen, LEGAL-OPEN-QUESTIONS Nr. 18). Verboten
+  // bleibt die bezifferte Zusage: „Anspruch von/in Höhe von … €“ und „steht Ihnen zu“.
+  it('kein bezifferter Anspruch („Anspruch in Höhe von … €“)', () => {
     const treffer: string[] = [];
     for (const datei of OBERFLAECHE) {
       const inhalt = textInhalt(datei);
-      const muster = /Anspruch/g;
+      const muster = /Anspruch\w*\s+(von|in Höhe von)\s*[\d.]+/gi;
       let m: RegExpExecArray | null;
       while ((m = muster.exec(inhalt)) !== null) {
-        const davor = inhalt.slice(Math.max(0, m.index - 40), m.index);
-        if (!/kein/i.test(davor)) {
-          treffer.push(`${datei.replace(WEB, 'apps/web')}: „…${davor.slice(-25)}Anspruch“`);
-        }
+        treffer.push(`${datei.replace(WEB, 'apps/web')}: „${m[0]}“`);
       }
     }
     expect(treffer).toEqual([]);

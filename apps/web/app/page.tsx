@@ -20,15 +20,14 @@ export default function Startseite() {
         <div className="container hero-raster">
           <div>
             <h1>
-              Alte Lebensversicherung? <span className="hervor">Erst rechnen.</span> Dann kündigen.
+              Alte Lebensversicherung? <span className="hervor">Erst rechnen.</span> Dann handeln.
             </h1>
             <p className="untertitel">
-              Kündigen bringt den Rückkaufswert. Ein Widerspruch kann mehr bringen. Wir rechnen es
-              aus – kostenlos, mit klarer Ampel.
+              Kündigen bringt Ihnen maximal den Rückkaufswert. Ein Widerspruch bringt häufig mehr.
+              Kostenlose Einschätzung, mit klarer Ampel.
             </p>
             <p>
-              <strong>Vertrag zwischen 1994 und 2007?</strong> Dann lohnt der Blick. Rot heißt: Finger
-              weg. Das sagen wir Ihnen auch.
+              <strong>Vertrag zwischen 1990 und 2016?</strong> Dann lohnt der Blick.
             </p>
           </div>
           <Schnellcheck versichererNamen={namen} />
@@ -45,16 +44,13 @@ export default function Startseite() {
             </li>
             <li>
               <h3>Ampel lesen</h3>
-              <p>
-                Grün, Gelb oder Rot – mit Erklärung in Worten. Der Rückkaufswert ist immer der
-                Vergleich. Kostenlos.
-              </p>
+              <p>Grün, Gelb oder Rot. So wissen Sie Bescheid.</p>
             </li>
             <li>
-              <h3>Bericht holen. Oder lassen.</h3>
+              <h3>Was ist für Sie drin?</h3>
               <p>
-                Wer die Zahlen will, bestellt den Bericht: Spanne, Jahrestabelle, Quellen. Schwarz
-                auf weiß – und wenn es sich lohnt, übernehmen unsere Partner den Rest.
+                Anspruch errechnen lassen: Spanne, Jahrestabelle, Quellen – schwarz auf weiß. Und
+                dann durchsetzen: unsere Partner stehen für Sie bereit.
               </p>
             </li>
           </ol>
