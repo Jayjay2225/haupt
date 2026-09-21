@@ -49,7 +49,7 @@ function eignung(anpassung: Partial<EligibilityInput> = {}) {
 }
 
 function ampelFuer(c: ContractInput, e = eignung({ vertragsschluss: c.beginn, vertragsart: c.vertragsart as EligibilityInput['vertragsart'] })) {
-  return bestimmeWirtschaftlicheAmpel(berechneRueckabwicklung(c, daten, defaults), e);
+  return bestimmeWirtschaftlicheAmpel(berechneRueckabwicklung(c, daten, defaults), e, Number(c.beginn.slice(0, 4)));
 }
 
 describe('Größenordnung in Worten', () => {
@@ -98,9 +98,21 @@ describe('Wirtschaftliche Ampel', () => {
     expect(a.groessenordnung).toMatch(/sechsstelliger Betrag/);
   });
 
-  it('Rot für Verträge vor dem 29.07.1994 und ab 2008', () => {
-    expect(ampelFuer(vertrag({ beginn: '1993-05' })).grund).toBe('vor-1994');
-    expect(ampelFuer(vertrag({ beginn: '2010-05', erstbeitrag: { betrag: 100, waehrung: 'EUR' } })).grund).toBe('neu-2008');
+  it('Gelb für Verträge vor dem 29.07.1994 und 2008–2016, Rot erst ab 2017', () => {
+    const alt1993 = ampelFuer(vertrag({ beginn: '1993-05' }));
+    expect(alt1993.ampel).toBe('gelb');
+    expect(alt1993.grund).toBe('vor-1994');
+
+    const neu2010 = ampelFuer(vertrag({ beginn: '2010-05', erstbeitrag: { betrag: 100, waehrung: 'EUR' } }));
+    expect(neu2010.ampel).toBe('gelb');
+    expect(neu2010.grund).toBe('neu-2008');
+
+    const neu2016 = ampelFuer(vertrag({ beginn: '2016-12', erstbeitrag: { betrag: 100, waehrung: 'EUR' } }));
+    expect(neu2016.ampel).toBe('gelb');
+
+    const neu2017 = ampelFuer(vertrag({ beginn: '2017-01', erstbeitrag: { betrag: 100, waehrung: 'EUR' } }));
+    expect(neu2017.ampel).toBe('rot');
+    expect(neu2017.grund).toBe('ab-2017');
   });
 
   it('Rot für reine Risikopolicen (Ausschluss)', () => {

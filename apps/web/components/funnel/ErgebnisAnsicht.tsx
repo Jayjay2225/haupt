@@ -128,7 +128,7 @@ export function ErgebnisAnsicht() {
         <>
           <Ampel zustand={vorschau.ampel.ampel} gross beschriftung={vorschau.ampel.titel} />
           <p style={{ marginTop: '1rem', fontSize: '1.25rem' }}>{vorschau.ampel.text}</p>
-          {VARIANTE.berichtKostenpflichtig && vorschau.ampel.ampel !== 'rot' && (
+          {VARIANTE.berichtKostenpflichtig && vorschau.regime === 'alt-policenmodell' && vorschau.ampel.ampel !== 'rot' && (
             <section aria-labelledby="bericht-titel" className="wert-karte">
               <h2 id="bericht-titel" style={{ fontSize: '1.4rem' }}>
                 Wollen Sie wissen, was für Sie drin ist?
@@ -153,11 +153,21 @@ export function ErgebnisAnsicht() {
               </p>
             </section>
           )}
-          {VARIANTE.berichtKostenpflichtig && vorschau.ampel.ampel === 'rot' && (
+          {VARIANTE.berichtKostenpflichtig && vorschau.regime === 'alt-policenmodell' && vorschau.ampel.ampel === 'rot' && (
             <p className="erklaerung">
               Bei Rot brauchen Sie den Bericht in der Regel nicht. Wer ihn trotzdem will, findet ihn{' '}
               <Link href="/bericht">hier</Link>.
             </p>
+          )}
+
+          {VARIANTE.berichtKostenpflichtig && vorschau.regime !== 'alt-policenmodell' && vorschau.ampel.ampel === 'gelb' && (
+            <div className="hinweis neutral">
+              <p>
+                Für diesen Jahrgang rechnet unser Bericht noch nicht – die Prüfung läuft hier über
+                die Belehrung und die Abrechnung Ihres Vertrags. Genau das übernehmen unsere Partner:
+                siehe unten.
+              </p>
+            </div>
           )}
 
           <section aria-labelledby="checkliste-titel">

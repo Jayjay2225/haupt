@@ -65,7 +65,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       });
     }
 
-    const ampel = bestimmeWirtschaftlicheAmpel(calc, eligibility);
+    const ampel = bestimmeWirtschaftlicheAmpel(calc, eligibility, Number(abbildung.contract.beginn.slice(0, 4)));
     return NextResponse.json({
       variante: 'privat',
       ampel,

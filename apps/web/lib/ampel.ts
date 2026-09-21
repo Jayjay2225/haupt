@@ -21,7 +21,7 @@ export interface WirtschaftlicheAmpel {
   text: string;
   /** Größenordnung in Worten (Basis) mit Bandbreite, falls berechenbar. */
   groessenordnung?: string;
-  grund: 'vor-1994' | 'neu-2008' | 'ausschluss' | 'kein-vorteil' | 'knapp' | 'vorteil' | 'kein-rueckkaufswert';
+  grund: 'vor-1994' | 'neu-2008' | 'ab-2017' | 'ausschluss' | 'kein-vorteil' | 'knapp' | 'vorteil' | 'kein-rueckkaufswert';
 }
 
 /** Größenordnung eines Betrags in Worten – bewusst ohne Ziffern. */
@@ -60,7 +60,21 @@ export function groessenordnungInWorten(betrag: number): string {
   return 'ein siebenstelliger Betrag';
 }
 
-export function bestimmeWirtschaftlicheAmpel(calc: CalcResult, eligibility: EligibilityResult): WirtschaftlicheAmpel {
+/**
+ * Regime-Bewertung (Stand 21.09.2026, docs/RECHERCHE-ZEITRAEUME.md):
+ * - vor 29.07.1994: kein Widerspruch, aber Widerruf nach § 8 Abs. 4 VVG i.d.F.
+ *   1990 (ab 1991) ohne belehrungsunabhängige Erlöschensfrist; dazu die
+ *   Mindestrückkaufswert-Rechtsprechung → Gelb (Partner prüfen; unsere
+ *   Zahlenschätzung passt nur eingeschränkt).
+ * - ab 2008 bis 2016: Widerruf nach § 8 VVG n.F.; bei fehlerhafter Belehrung
+ *   läuft die Frist nicht (BGH IV ZR 384/14) → Gelb, einzelfallabhängig.
+ * - ab 2017: Belehrungen praktisch durchgehend musterkonform → Rot.
+ */
+export function bestimmeWirtschaftlicheAmpel(
+  calc: CalcResult,
+  eligibility: EligibilityResult,
+  beginnJahr?: number,
+): WirtschaftlicheAmpel {
   if (eligibility.angewendeteRegeln.includes('R-AUS-RISIKO-LV')) {
     return {
       ampel: 'rot',
@@ -71,18 +85,26 @@ export function bestimmeWirtschaftlicheAmpel(calc: CalcResult, eligibility: Elig
   }
   if (calc.regime === 'vor-1994') {
     return {
-      ampel: 'rot',
+      ampel: 'gelb',
       grund: 'vor-1994',
-      titel: 'Rot: zu alt für diesen Weg.',
-      text: 'Verträge vor dem 29. Juli 1994 kennen den Widerspruch nach altem Recht nicht. Der Widerspruch bringt hier nichts. Kündigen oder behalten entscheiden Sie in Ruhe.',
+      titel: 'Gelb: alter Vertrag, anderer Hebel.',
+      text: 'Vor dem 29.07.1994 gab es den Widerspruch noch nicht – aber ein Widerrufsrecht nach altem Recht (ab 1991), das ohne korrekte Belehrung bis heute nicht erloschen ist. Dazu kommen oft zu niedrig abgerechnete Rückkaufswerte. Unsere Zahlenschätzung passt hier nur eingeschränkt – unsere Partner prüfen Ihren Jahrgang.',
     };
   }
   if (calc.regime === 'neu-2008') {
+    if (beginnJahr !== undefined && beginnJahr >= 2017) {
+      return {
+        ampel: 'rot',
+        grund: 'ab-2017',
+        titel: 'Rot: Vertrag ab 2017.',
+        text: 'Ab 2017 sind die Widerrufsbelehrungen praktisch durchgehend musterkonform; ein Widerruf läuft ins Leere. Kündigen oder behalten entscheiden Sie in Ruhe – teure Versprechen brauchen Sie nicht.',
+      };
+    }
     return {
-      ampel: 'rot',
+      ampel: 'gelb',
       grund: 'neu-2008',
-      titel: 'Rot: Vertrag ab 2008.',
-      text: 'Für Verträge ab 2008 gilt das neue Widerrufsrecht. Es bringt meist kaum mehr als die Kündigung. Das sagen wir Ihnen auch.',
+      titel: 'Gelb: Vertrag ab 2008 – Widerruf prüfen.',
+      text: 'Auch nach 2008 waren viele Widerrufsbelehrungen fehlerhaft – dann läuft die Widerrufsfrist bis heute (BGH). Der Hebel ist meist kleiner als beim Widerspruch und hängt an Ihrer Belehrung. Prüfen lohnt, versprechen nicht – unsere Partner schauen drauf.',
     };
   }
 
