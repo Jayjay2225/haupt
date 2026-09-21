@@ -79,8 +79,12 @@ describe('Auslieferung nach Zahlungseingang', () => {
     const deps = fakeAbhaengigkeiten(protokoll);
     expect(await verarbeiteStripeEreignis(ereignis('checkout.session.completed', fakeSitzung()), deps)).toBe('ausgeliefert');
     expect(protokoll.berichte).toBe(1);
-    expect(protokoll.mails).toHaveLength(1);
-    const mail = protokoll.mails[0]!;
+    // Erst die Vertragsbestätigung (§ 312f BGB), dann der Bericht.
+    expect(protokoll.mails).toHaveLength(2);
+    expect(protokoll.mails[0]?.betreff).toContain('Bestätigung');
+    expect(protokoll.mails[0]?.text).toContain('Widerrufsbelehrung: http://localhost:3000/widerrufsbelehrung');
+    expect(protokoll.mails[0]?.text).toContain('sofort erstellen');
+    const mail = protokoll.mails[1]!;
     expect(mail.an).toBe('muster@example.org');
     expect(mail.text).toContain('RR-2026-ABCDEF');
     expect(mail.text).toContain('https://rechnung.example/in_123');
@@ -94,7 +98,7 @@ describe('Auslieferung nach Zahlungseingang', () => {
     // Stripe schickt Ereignisse mehrfach: kein zweiter Bericht, keine zweite Mail.
     expect(await verarbeiteStripeEreignis(ereignis('checkout.session.async_payment_succeeded', fakeSitzung()), deps)).toBe('ausgeliefert');
     expect(protokoll.berichte).toBe(1);
-    expect(protokoll.mails).toHaveLength(1);
+    expect(protokoll.mails).toHaveLength(2);
   });
 
   it('hält Fehler fest, informiert Kundin und Anbieter und wiederholt die Kundeninfo nicht', async () => {
@@ -105,14 +109,20 @@ describe('Auslieferung nach Zahlungseingang', () => {
     expect(status.mailVersendetAm).toBeUndefined();
     expect(status.fehler).toHaveLength(1);
     expect(status.fehler?.[0]).toContain('Chromium nicht gefunden');
-    expect(protokoll.mails.map((m) => m.an)).toEqual(['muster@example.org', 'info@renten-rettung.de']);
-    expect(protokoll.mails[0]?.betreff).toContain('Zahlung ist eingegangen');
+    // Bestätigung, dann Verzögerungsinfo an die Kundin, dann interne Meldung.
+    expect(protokoll.mails.map((m) => m.an)).toEqual(['muster@example.org', 'muster@example.org', 'info@renten-rettung.de']);
+    expect(protokoll.mails[1]?.betreff).toContain('Zahlung ist eingegangen');
     expect(existsSync(join(verzeichnis, 'RR-2026-ABCDEF', 'status.json'))).toBe(true);
 
     const zweiter = await erfuelleBestellung(daten, deps);
     expect(zweiter.fehler).toHaveLength(2);
     // Kundin nur einmal informiert, Anbieter bei jedem Fehlschlag.
-    expect(protokoll.mails.map((m) => m.an)).toEqual(['muster@example.org', 'info@renten-rettung.de', 'info@renten-rettung.de']);
+    expect(protokoll.mails.map((m) => m.an)).toEqual([
+      'muster@example.org',
+      'muster@example.org',
+      'info@renten-rettung.de',
+      'info@renten-rettung.de',
+    ]);
     expect(JSON.parse(readFileSync(join(verzeichnis, 'RR-2026-ABCDEF', 'status.json'), 'utf8')).verzoegerungGemeldetAm).toBe(JETZT.toISOString());
   });
 

@@ -1,14 +1,13 @@
-# sites/unternehmer – Geschäftsführer-Bereich (statische Seite)
+# sites/unternehmer – Geschäftsführer-Bereich (geparkt)
 
-Der bisherige Inhalt von renten-rettung.de (Pensionszusage, Rückdeckungsversicherung) zieht auf die eigene Domain `[[B2B-DOMAIN]]` um (Prompt 8, Aufgabe 4). Er bleibt **statisches HTML** in diesem Ordner, damit er weiter auf einfachem Webspace laufen kann.
+**Entscheidung 21.09.2026:** `renten-rettung.de` wird die Privatkunden-Seite (`apps/web`). Der bisherige Geschäftsführer-Bereich (Pensionszusage, Rückdeckungsversicherung, Verkauf statt Kündigung) geht **vorerst nicht** wieder online; für dieses Modell wird später eine andere Website gefunden. Ein Umzug auf eine eigene B2B-Domain findet deshalb nicht statt (`b2bDomain` in `apps/web/config/brand.ts` ist leer, die Brückenseite `/unternehmer` und die Links „Für Unternehmer“ sind damit aus).
 
-## Status
+## Archiv
 
-**Wartet auf die Quelldatei.** Die heutige `index.html` (eine Datei, CSS inline, Schriften Cormorant Garamond und Manrope, Farben u. a. `#0A1F33`, `#B89968`, `#F7F3EC`) liefert Jack als Datei oder per Zugang. Sie wird **nicht** aus dem Netz nachgebaut. Bis dahin liegt hier `index.html` als neutraler Platzhalter („Seite wird eingerichtet“), damit der Ordner deploybar bleibt.
+`archiv/index-b2b-2026-09.html` ist die am 21.09.2026 gelieferte Original-Startseite von renten-rettung.de – **unverändert, nur als Sicherung**. Sie wird nicht ausgeliefert und nicht in die Privatkunden-Seite übernommen: Sie enthält Aussagen (Mehrerlös „bis zu +200 %“, Praxiswerte, Kundenstimmen, Partnernennungen, Anbieterkennzeichnung einer anderen Gesellschaft), die den Kommunikationsregeln des Privatkundenangebots (docs/PROMPTS.md, Prompt 8) widersprechen. Nicht mitgeliefert: `auxinum-Logo-W.png` (im HTML referenziert).
 
-## Vorgehen, sobald die Datei da ist
+Das dortige Kontaktformular sendet an formsubmit.co mit abgeschaltetem Captcha (`_captcha=false`) – eine wahrscheinliche Quelle des aktuellen Spam-Aufkommens. Mit der Umstellung der Domain auf die neue Seite ist dieses Formular abgeschaltet.
 
-1. Original als `sites/unternehmer/index.html` ablegen (Kopie des Originals zusätzlich unter `sites/unternehmer/original/index.html` als Sicherung).
-2. Nur die Punkte aus `ANPASSUNGEN.md` ändern – Inhalt und Gestaltung bleiben unverändert.
-3. Lokal prüfen: `python3 -m http.server 8080 --directory sites/unternehmer` und im Browser öffnen; alle Links klicken, Formular testen.
-4. Auf das neue Hosting der B2B-Domain hochladen; erst danach die Domain-Umstellung nach `docs/DOMAIN-UMZUG.md`.
+## Falls die B2B-Seite später wieder online geht
+
+`ANPASSUNGEN.md` beschreibt, was beim Umzug auf eine eigene Domain zu ändern wäre (Titel, Canonical, Links, Kontakt, Formularziel). Inhaltlich wäre die Seite vorher gegen die Verbotsliste (docs/PROMPTS.md, Prompt 8, Aufgabe 1 und 3) zu prüfen.

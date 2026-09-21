@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { KontaktAdresse } from '@/components/KontaktAdresse';
 import { BRAND } from '@/config/brand';
 
 export const metadata: Metadata = {
@@ -34,7 +35,7 @@ export default function UnternehmerSeite() {
           <p>
             Die Unternehmerseite zieht gerade auf ihre eigene Adresse um: <strong>{BRAND.b2bDomain}</strong>.
             Sobald die Domain steht, führt dieser Knopf dorthin. Bis dahin erreichen Sie uns unter{' '}
-            <a href={`mailto:${BRAND.kontaktEmail}`}>{BRAND.kontaktEmail}</a>.
+            <KontaktAdresse adresse={BRAND.kontaktEmail} />.
           </p>
         </div>
       )}

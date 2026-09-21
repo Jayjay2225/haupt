@@ -73,6 +73,35 @@ ${abschluss()}`,
   };
 }
 
+/**
+ * Vertragsbestätigung auf dauerhaftem Datenträger (§ 312f BGB) – geht vor Beginn
+ * der Ausführung raus: Inhalt, Preis, Anbieter, die abgegebene Zustimmung zur
+ * sofortigen Ausführung und die Belehrungen.
+ */
+export function vertragsbestaetigung(name: string, bestellnummer: string, links: { agb: string; widerruf: string }): EmailVorlage {
+  const a = BRAND.anbieterAnschrift;
+  return {
+    betreff: `Ihre Bestellung ${bestellnummer}: Bestätigung`,
+    text: `${gruss(name)}
+
+vielen Dank für Ihre Bestellung bei ${BRAND.name}. Das ist Ihre Vertragsbestätigung – bitte aufbewahren.
+
+Bestellnummer: ${bestellnummer}
+Leistung: ${BRAND.produktname} – schriftlicher Bericht (PDF) zur Rückabwicklung Ihrer Lebens- oder Rentenversicherung, gerechnet aus Ihren Angaben im Rechner. Schätzung mit Bandbreite, keine Rechtsberatung.
+Preis: ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}, vorab bezahlt. Die Rechnung erhalten Sie gesondert.
+Anbieter: ${BRAND.anbieter}, ${a.strasse}, ${a.plz} ${a.ort}
+
+Ihre Erklärung bei der Bestellung: Sie haben ausdrücklich verlangt, dass wir den Bericht sofort erstellen, und bestätigt, dass Sie Ihr Widerrufsrecht verlieren, sobald der Bericht vollständig geliefert ist.
+
+Widerrufsbelehrung: ${links.widerruf}
+AGB: ${links.agb}
+
+Der Bericht folgt in einer eigenen E-Mail, in der Regel innerhalb weniger Minuten.
+
+${abschluss()}`,
+  };
+}
+
 /** Zahlung ist da, der Bericht konnte aber noch nicht erzeugt werden – Kundin/Kunde informieren. */
 export function berichtVerzoegert(name: string, bestellnummer: string): EmailVorlage {
   return {

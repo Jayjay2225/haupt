@@ -30,9 +30,9 @@ export const metadata: Metadata = {
   description:
     'Alte Lebens- oder Rentenversicherung? Der Policen-Check rechnet, ob ein Widerspruch mehr bringen kann als die Kündigung – kostenlose Ampel, klare Worte, auch beim Nein.',
   robots: {
-    // Beta: nicht indexieren, bis Rechtstexte und Regelwerk anwaltlich abgenommen sind.
-    index: false,
-    follow: false,
+    // Beta bleibt noindex; erst mit NEXT_PUBLIC_INDEXIERUNG=1 (Go-live nach docs/DOMAIN-UMZUG.md) indexierbar.
+    index: process.env['NEXT_PUBLIC_INDEXIERUNG'] === '1',
+    follow: process.env['NEXT_PUBLIC_INDEXIERUNG'] === '1',
   },
 };
 

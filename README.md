@@ -22,7 +22,7 @@ apps/
   report/               PDF-Berichtsgenerator (Playwright/Chromium)
 scripts/                Datenpflege: update-insurers, import-bafin, import-altjahre, data-scans, sensitivitaet-altjahre
 data/raw/               Rohdaten mit Provenienz: BaFin Tabelle 160 (bafin/), Altjahres-Belege (altjahre/), Bibliotheks-Scans (scans/)
-sites/unternehmer/      Statische B2B-Seite (Geschäftsführer-Bereich) für den Domain-Umzug
+sites/unternehmer/      Geparkter Geschäftsführer-Bereich (Archiv der alten Startseite, nicht ausgeliefert)
 brand/                  Logo, Farben, Typografie (Gestaltungsplan in docs/DESIGN.md)
 ```
 
@@ -44,7 +44,7 @@ pnpm exec tsx scripts/sensitivitaet-altjahre.ts   # docs/SENSITIVITAET-ALTJAHRE.
 pnpm --filter @rueckab/report beispiele           # Beispielberichte in examples/ erzeugen
 ```
 
-Umgebungsvariablen der Website (Vorlage: `apps/web/.env.example`): `NEXT_PUBLIC_PRODUKT_VARIANTE` (`privat` Standard | `kanzlei` für die markenneutrale Kanzlei-Lizenz), `BETA_PASSWORT` (Passwortschutz der Beta), `NEXT_PUBLIC_BASIS_URL`; Bestellung und Zahlung: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, optional `STRIPE_ZAHLUNGSARTEN`, `STRIPE_STEUERSATZ_ID`; Auslieferung: `AUSLIEFERUNG_VERZEICHNIS`, `RESEND_API_KEY`, `MAIL_ABSENDER`, `CHROMIUM_PATH`; in der Kanzlei-Variante zusätzlich `NEXT_PUBLIC_KANZLEI_*` (Name, Domain, Anbieter, Anschrift, Vertretung, Register, USt-ID, Telefon, E-Mail).
+Umgebungsvariablen der Website (Vorlage: `apps/web/.env.example`): `NEXT_PUBLIC_PRODUKT_VARIANTE` (`privat` Standard | `kanzlei` für die markenneutrale Kanzlei-Lizenz), `BETA_PASSWORT` (Passwortschutz der Beta), `NEXT_PUBLIC_INDEXIERUNG` (erst zum Go-live `1`), `NEXT_PUBLIC_BASIS_URL`; Bestellung und Zahlung: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, optional `STRIPE_ZAHLUNGSARTEN`, `STRIPE_STEUERSATZ_ID`; Auslieferung: `AUSLIEFERUNG_VERZEICHNIS`, `RESEND_API_KEY`, `MAIL_ABSENDER`, `CHROMIUM_PATH`; in der Kanzlei-Variante zusätzlich `NEXT_PUBLIC_KANZLEI_*` (Name, Domain, Anbieter, Anschrift, Vertretung, Register, USt-ID, Telefon, E-Mail).
 
 ## Bestellung und Zahlung
 

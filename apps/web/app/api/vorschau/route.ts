@@ -20,6 +20,7 @@ import { bestimmeWirtschaftlicheAmpel } from '@/lib/ampel';
 import { draftZuEingaben } from '@/lib/berechnung';
 import { uebernehmeBekannteFelder } from '@/lib/draft';
 import { findeVersichererId, insurersDaten } from '@/lib/insurers-data';
+import { begrenzt, clientSchluessel } from '@/lib/ratenlimit';
 
 const riskDefaults = riskJson as unknown as RiskDefaults;
 const regelwerk = rulesJson as unknown as Regelwerk;
@@ -29,6 +30,10 @@ function ohneEuro(texte: string[]): string[] {
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
+  // Spam-/Skriptschutz: höchstens 60 Vorschauen je Client in zehn Minuten.
+  if (begrenzt(`vorschau:${clientSchluessel(request)}`, 60, 10 * 60 * 1000)) {
+    return NextResponse.json({ fehler: 'Zu viele Anfragen. Bitte einen Moment warten.' }, { status: 429 });
+  }
   let roh: unknown;
   try {
     roh = await request.json();

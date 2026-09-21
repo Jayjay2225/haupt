@@ -28,8 +28,12 @@ export function BestellFormular() {
   const [formular, setFormular] = useState<Formular>(bestellformularAusDraft(leererDraft()));
   const [fehler, setFehler] = useState<BestellFehler>({});
   const [laeuft, setLaeuft] = useState(false);
+  // Spam-Schutz: unsichtbares Feld (nur Bots füllen es) und Startzeit des Formulars.
+  const [honig, setHonig] = useState('');
+  const [gestartet, setGestartet] = useState(0);
 
   useEffect(() => {
+    setGestartet(Date.now());
     const gespeichert = ladeDraft();
     setDraft(gespeichert);
     setFormular(bestellformularAusDraft(gespeichert));
@@ -50,7 +54,7 @@ export function BestellFormular() {
       const antwort = await fetch('/api/bestellung', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ draft, ...formular }),
+        body: JSON.stringify({ draft, ...formular, firma_webseite: honig, gestartet }),
       });
       const daten = (await antwort.json()) as { url?: string; fehler?: BestellFehler };
       if (antwort.ok && daten.url !== undefined) {
@@ -80,6 +84,10 @@ export function BestellFormular() {
 
   return (
     <form onSubmit={absenden} noValidate>
+      <div style={{ position: 'absolute', left: '-10000px', width: '1px', height: '1px', overflow: 'hidden' }} aria-hidden="true">
+        <label htmlFor="firma_webseite">Firmen-Webseite (bitte leer lassen)</label>
+        <input id="firma_webseite" name="firma_webseite" type="text" tabIndex={-1} autoComplete="off" value={honig} onChange={(e) => setHonig(e.target.value)} />
+      </div>
       <h2>Ihre Police</h2>
       <table className="zusammenfassung">
         <caption className="sr-nur">Angaben, aus denen der Bericht gerechnet wird</caption>

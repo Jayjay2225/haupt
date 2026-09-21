@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { KontaktAdresse } from '@/components/KontaktAdresse';
 import { BRAND } from '@/config/brand';
 import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS } from '@/config/business';
 import { VARIANTE } from '@/config/variante';
@@ -53,7 +54,7 @@ export default function SoVerdienenWirSeite() {
       </ul>
 
       <p className="erklaerung">
-        Anbieter: {BRAND.anbieter}. Fragen dazu: <a href={`mailto:${BRAND.kontaktEmail}`}>{BRAND.kontaktEmail}</a>
+        Anbieter: {BRAND.anbieter}. Fragen dazu: <KontaktAdresse adresse={BRAND.kontaktEmail} />
       </p>
       <p>
         <Link href="/rechner" className="knopf haupt">

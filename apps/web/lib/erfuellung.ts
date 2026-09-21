@@ -17,10 +17,11 @@ import riskJson from '../../../data/risk-defaults.json';
 import rulesJson from '../../../data/legal-rules.json';
 import { BRAND } from '@/config/brand';
 import { draftZuEingaben } from './berechnung';
-import { berichtVerzoegert, berichtVersand, internerFehlerHinweis } from './emails';
+import { berichtVerzoegert, berichtVersand, internerFehlerHinweis, vertragsbestaetigung } from './emails';
 import { fallAusMetadaten } from './fall-kodierung';
 import { findeVersichererId, insurersDaten, versichererNachId } from './insurers-data';
 import { sendeMail } from './versand';
+import { basisUrl } from './zahlung';
 
 const riskDefaults = riskJson as unknown as RiskDefaults;
 const regelwerk = rulesJson as unknown as Regelwerk;
@@ -34,6 +35,7 @@ export interface AuslieferungsStatus {
   berichtDatei?: string;
   berichtErstelltAm?: string;
   rechnungLink?: string;
+  bestaetigungGesendetAm?: string;
   mailVersendetAm?: string;
   mailWeg?: string;
   verzoegerungGemeldetAm?: string;
@@ -177,6 +179,17 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
   }
   mkdirSync(ordner, { recursive: true });
   try {
+    // Vertragsbestätigung (§ 312f BGB) vor Beginn der Ausführung, genau einmal.
+    if (status.bestaetigungGesendetAm === undefined) {
+      const basis = basisUrl();
+      const bestaetigung = vertragsbestaetigung(daten.kundenname, daten.bestellnummer, {
+        agb: `${basis}/agb`,
+        widerruf: `${basis}/widerrufsbelehrung`,
+      });
+      await deps.sendeMail({ an: daten.email, betreff: bestaetigung.betreff, text: bestaetigung.text }, ordner);
+      status.bestaetigungGesendetAm = deps.jetzt().toISOString();
+      speichereStatus(ordner, status);
+    }
     if (status.berichtDatei === undefined || !existsSync(status.berichtDatei)) {
       const bericht = await deps.erzeugeBericht(daten, ordner, deps.jetzt());
       status.berichtDatei = bericht.pfad;

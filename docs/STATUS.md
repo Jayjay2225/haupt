@@ -97,3 +97,20 @@ Am 18.09.2026 wurde das Website-Grundgerüst `apps/web` auf ausdrücklichen Wuns
 - [x] Geschäftsmodell: Hybrid (kostenlose Ampel + kostenpflichtiger Bericht); Modell C (Kanzlei-Lizenz) als Code-Variante. Welche Kanzlei ggf. die rechtliche Bewertung übernimmt: offen.
 - [x] Belehrungsprüfung im Verbraucherprodukt aus (nur Berechnung + Unterlagen-Checkliste); in der Kanzlei-Variante an.
 - [ ] Anwaltliche Abnahme von `data/legal-rules.json` und aller Berichts- und Rechtstexte vor dem Go-live.
+
+## Stand 21.09.2026 – renten-rettung.de wird die Privatkunden-Seite; Spam-Schutz; Vertragsbestätigung
+
+**Entscheidungen des Auftraggebers (21.09.2026):**
+- Die heutige Startseite (Geschäftsführer-Bereich) wird durch die neue Privatkunden-Seite **ersetzt**; das B2B-Modell läuft vorerst nicht, dafür wird später eine andere Website gefunden. Gelieferte Original-`index.html` als Archiv unter `sites/unternehmer/archiv/`, kein B2B-Umzug (`b2bDomain` leer, `/unternehmer` und „Für Unternehmer“ aus), Umstellungs-Checkliste neu geschrieben (`docs/DOMAIN-UMZUG.md`).
+- USt-IdNr. DE815896163 und Telefon 01573 7634466 (vorerst) im Impressum; Anbieterkennzeichnung damit vollständig.
+- Rechtstexte laut Auftraggeber anwaltlich abgenommen; Warnhinweise ebenfalls. **Achtung:** Datenschutz, AGB und Widerrufsbelehrung liegen im Repo weiterhin nur als Entwurf/Platzhalter vor – die abgenommenen Fassungen müssen geliefert und eingebaut werden (dann `EntwurfHinweis` entfernen). Die Datenschutzerklärung wurde als sachlicher Entwurf auf den heutigen Stand gebracht (Stripe, E-Mail-Dienst, Ratenbegrenzung, Ankauf-Einwilligung) – nicht Teil der Abnahme.
+
+**Umgesetzt:**
+- Spam-Schutz: E-Mail-Adressen werden erst im Browser zusammengesetzt (`KontaktAdresse`, kein `mailto:` im HTML), Ratenbegrenzung je Client auf `/api/vorschau` (60/10 min) und `/api/bestellung` (10/h), Honigtopf-Feld und Mindest-Ausfüllzeit im Bestellformular; das captcha-lose formsubmit-Formular der alten Seite fällt mit der Umstellung weg (`lib/ratenlimit.ts`).
+- Vertragsbestätigung nach § 312f BGB als E-Mail **vor** Beginn der Berichtserstellung (Inhalt, Preis, Anbieter, abgegebene Zustimmung, Links zu Widerrufsbelehrung und AGB), einmalig je Bestellung.
+- Indexierung schaltbar: `NEXT_PUBLIC_INDEXIERUNG=1` erst zum Go-live.
+
+**Offen:**
+- [ ] Abgenommene Rechtstexte (Datenschutz, AGB, Widerrufsbelehrung) liefern und einbauen; Datenschutz-Ergänzungen (Stripe, E-Mail-Dienst, Speicherdauern) vom Anwalt bestätigen lassen.
+- [ ] Einordnung des Berichts als Dienstleistung oder digitaler Inhalt für Widerrufsbelehrung und Zustimmungstext (docs/LEGAL-OPEN-QUESTIONS.md Nr. 13) – Frage des Auftraggebers vom 21.09.2026 dort beantwortet.
+- [ ] `auxinum-Logo-W.png` und übrige Dateien des alten Webspace sichern; `/einkehr`-Weg klären (docs/DOMAIN-UMZUG.md, Abschnitt 1).

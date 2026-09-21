@@ -1,10 +1,17 @@
 import type { Metadata } from 'next';
 import { EntwurfHinweis } from '@/components/EntwurfHinweis';
+import { KontaktAdresse } from '@/components/KontaktAdresse';
 import { BRAND } from '@/config/brand';
 
 export const metadata: Metadata = {
   title: 'Impressum',
 };
+
+/** Telefonnummer als tel:-Link (0… → +49…). */
+function telefonLink(nummer: string): string {
+  const ziffern = nummer.replace(/[^\d+]/g, '');
+  return `tel:${ziffern.startsWith('0') ? `+49${ziffern.slice(1)}` : ziffern}`;
+}
 
 /** Leere Pflichtangabe → sichtbarer Platzhalter statt stiller Lücke. */
 function oderPlatzhalter(wert: string, name: string): string {
@@ -28,9 +35,14 @@ export default function ImpressumSeite() {
       <p>
         Vertreten durch: {oderPlatzhalter(BRAND.anbieterVertretung, 'Vertretungsberechtigte')}
         <br />
-        E-Mail: <a href={`mailto:${BRAND.kontaktEmail}`}>{BRAND.kontaktEmail}</a>
+        E-Mail: <KontaktAdresse adresse={BRAND.kontaktEmail} />
         <br />
-        Telefon: {oderPlatzhalter(BRAND.anbieterTelefon, 'Telefon')}
+        Telefon:{' '}
+        {BRAND.anbieterTelefon.trim() === '' ? (
+          oderPlatzhalter('', 'Telefon')
+        ) : (
+          <a href={telefonLink(BRAND.anbieterTelefon)}>{BRAND.anbieterTelefon}</a>
+        )}
         <br />
         Registereintrag: {oderPlatzhalter(BRAND.anbieterRegister, 'Registergericht und Registernummer')}
         <br />
@@ -45,7 +57,7 @@ export default function ImpressumSeite() {
       <p>
         Zur Teilnahme an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle sind wir
         nicht verpflichtet und nicht bereit. Bei Fragen zu einer Bestellung schreiben Sie uns an{' '}
-        <a href={`mailto:${BRAND.kontaktEmail}`}>{BRAND.kontaktEmail}</a>.
+        <KontaktAdresse adresse={BRAND.kontaktEmail} />.
       </p>
       <h2>Hinweis</h2>
       <p>

@@ -5,10 +5,10 @@
  * Anbieter ist die Kaufmannsladen Gebhard GmbH (Entscheidung 20.09.2026);
  * die Registerdaten stammen aus dem Handelsregister (Abruf 20.09.2026 über
  * online-handelsregister.de, Spiegel des Registerportals – vor Go-live gegen
- * handelsregister.de zu verifizieren). Umsatzsteuer-ID und Telefon werden vom
- * Anbieter nachgetragen (leer = Platzhalter im Impressum).
- * Der Geschäftsführer-Bereich zieht auf eine eigene Domain, Platzhalter
- * „[[B2B-DOMAIN]]“, bis die Registrierung steht.
+ * handelsregister.de zu verifizieren). Umsatzsteuer-ID und Telefon hat der
+ * Anbieter am 21.09.2026 geliefert.
+ * Der Geschäftsführer-Bereich (B2B) ist geparkt: renten-rettung.de wird die
+ * Privatkunden-Seite; eine B2B-Domain gibt es vorerst nicht (b2bDomain leer).
  *
  * Für die markenneutrale Kanzlei-Lizenz (Modell C) liefert die Umgebung der
  * Kanzlei eine neutrale Konfiguration ohne Renten-Rettung-Optik.
@@ -70,9 +70,11 @@ const RENTEN_RETTUNG: Marke = {
   anbieterAnschrift: { strasse: 'Helmkrautstraße 35 A', plz: '13503', ort: 'Berlin' },
   anbieterVertretung: 'Geschäftsführer Jerome Gebhard',
   anbieterRegister: 'Amtsgericht Charlottenburg (Berlin), HRB 223190 B',
-  anbieterUstId: '',
-  anbieterTelefon: '',
-  b2bDomain: '[[B2B-DOMAIN]]',
+  anbieterUstId: 'DE815896163',
+  anbieterTelefon: '01573 7634466',
+  // Entscheidung 21.09.2026: renten-rettung.de wird die Privatkunden-Seite; der
+  // Geschäftsführer-Bereich ist geparkt (sites/unternehmer/archiv), keine B2B-Domain.
+  b2bDomain: '',
   kontaktEmail: 'info@renten-rettung.de',
   optik: 'renten-rettung',
 };

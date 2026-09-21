@@ -12,11 +12,15 @@ import { pruefeBestellformular } from '@/lib/bestellung';
 import type { Bestellformular } from '@/lib/bestellung';
 import { uebernehmeBekannteFelder } from '@/lib/draft';
 import { findeVersichererId, insurersDaten } from '@/lib/insurers-data';
+import { begrenzt, clientSchluessel } from '@/lib/ratenlimit';
 import { bestellungAktiv, erstelleCheckoutSitzung } from '@/lib/zahlung';
 
 export const runtime = 'nodejs';
 
 const riskDefaults = riskJson as unknown as RiskDefaults;
+
+/** Schneller als drei Sekunden füllt kein Mensch das Bestellformular aus. */
+const MINDESTZEIT_MS = 3000;
 
 export async function POST(request: Request): Promise<NextResponse> {
   if (!bestellungAktiv()) {
@@ -32,6 +36,17 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ fehler: { fall: 'Ungültige Anfrage.' } }, { status: 400 });
   }
   const eingabe = roh as Record<string, unknown>;
+  // Spam-Schutz: Honigtopf-Feld (nur Bots füllen es), Mindestzeit im Formular, Ratenbegrenzung.
+  if (typeof eingabe['firma_webseite'] === 'string' && eingabe['firma_webseite'] !== '') {
+    return NextResponse.json({ fehler: { fall: 'Ungültige Anfrage.' } }, { status: 400 });
+  }
+  const gestartet = typeof eingabe['gestartet'] === 'number' ? eingabe['gestartet'] : 0;
+  if (gestartet > 0 && Date.now() - gestartet < MINDESTZEIT_MS) {
+    return NextResponse.json({ fehler: { fall: 'Bitte einen Moment warten und dann erneut senden.' } }, { status: 429 });
+  }
+  if (begrenzt(`bestellung:${clientSchluessel(request)}`, 10, 60 * 60 * 1000)) {
+    return NextResponse.json({ fehler: { fall: 'Zu viele Versuche. Bitte in einer Stunde erneut versuchen.' } }, { status: 429 });
+  }
   const draft = uebernehmeBekannteFelder(
     typeof eingabe['draft'] === 'object' && eingabe['draft'] !== null ? (eingabe['draft'] as Record<string, unknown>) : {},
   );

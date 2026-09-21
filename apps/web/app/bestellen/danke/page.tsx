@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { KontaktAdresse } from '@/components/KontaktAdresse';
 import { BRAND } from '@/config/brand';
 import { bestellungAktiv, stripeClient } from '@/lib/zahlung';
 
@@ -57,7 +58,7 @@ export default async function DankeSeite({ searchParams }: { searchParams: Promi
         <p className="untertitel">Rechnung und Bericht (PDF) kommen per E-Mail – in der Regel innerhalb weniger Minuten.</p>
       )}
       <p>
-        Nichts angekommen? Schreiben Sie an <a href={`mailto:${BRAND.kontaktEmail}`}>{BRAND.kontaktEmail}</a>
+        Nichts angekommen? Schreiben Sie an <KontaktAdresse adresse={BRAND.kontaktEmail} />
         {stand !== undefined ? ` und nennen Sie die Bestellnummer ${stand.bestellnummer}` : ''}.
       </p>
       <p>

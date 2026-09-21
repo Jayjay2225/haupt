@@ -1,6 +1,6 @@
-# Anpassungen an der Geschäftsführer-Seite beim Umzug
+# Anpassungen an der Geschäftsführer-Seite – nur relevant, falls sie später wieder online geht
 
-Nur diese Stellen ändern; Inhalt und Gestaltung bleiben, wie sie sind.
+Stand 21.09.2026: Die Seite ist geparkt (siehe README.md). Sollte sie auf einer eigenen Domain wieder erscheinen, wären mindestens diese Stellen zu ändern; Inhalt und Gestaltung blieben, wie sie sind.
 
 | Stelle | Heute | Neu |
 |---|---|---|
