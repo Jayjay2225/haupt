@@ -120,3 +120,9 @@ Am 18.09.2026 wurde das Website-Grundgerüst `apps/web` auf ausdrücklichen Wuns
 - Entscheidung: Hosting bei Vercel (united-domains-Webspace kann kein Node.js; Domain bleibt dort, nur Web-DNS-Einträge zeigen auf Vercel). Anleitung `docs/DEPLOY-VERCEL.md`.
 - Code: Chromium in Serverless-Umgebungen aus `@sparticuz/chromium` (`apps/report/src/pdf.ts`), Webhook `maxDuration = 60`, Region `fra1` (`apps/web/vercel.json`), Auslieferungsordner auf Vercel `/tmp`, dauerhafte „ausgeliefert“-Markierung in den Stripe-PaymentIntent-Metadaten (idempotent ohne Dateisystem), Test dafür ergänzt.
 - Offen: Vercel-Projekt anlegen und Variablen setzen (Auftraggeber), Stripe-Webhook, Testbestellung unter der Vorschauadresse, dann DNS-Umstellung.
+
+## Stand 21.09.2026 (3) – Monatseingabe im Rechner korrigiert
+
+Die Monatsfelder (Beginn, Ende, Status-Datum, Beitragszahlung bis, Schnellcheck) waren `input type="month"`. Browser ohne Monatsauswahl (u. a. Safari) zeigen dafür ein leeres Textfeld, das stillschweigend nur die ISO-Form „2000-03“ annahm – die Eingabe war damit praktisch nicht zu treffen (im Test des Auftraggebers gescheitert).
+
+Neu: eigene Komponente `MonatsFeld` (Textfeld, Platzhalter `MM/JJJJ`, Ziffern-Tastatur). Getippt wird deutsch, gespeichert ISO. `parseMonatDe` (apps/web/lib/format.ts) liest „03/2000“, „3/2000“, „03.2000“, „03-2000“, „03 2000“, „032000“, „2000-03“, „200003“ und zweistellige Jahre („10/95“ → 1995; bis 30 → 20xx). Unter dem Feld erscheint der erkannte Monat ausgeschrieben („März 2000“), die Fehlermeldungen nennen ein Beispiel. Sieben neue Tests; im Browser gegen den Produktionsbuild geprüft.

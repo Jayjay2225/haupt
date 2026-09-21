@@ -216,15 +216,15 @@ export function validiereSchritt(
         fehler['vertragsart'] = 'Bitte die Vertragsart auswählen.';
       }
       if (!MONAT_MUSTER.test(draft.beginn)) {
-        fehler['beginn'] = 'Bitte Monat und Jahr des Beginns angeben.';
+        fehler['beginn'] = 'Bitte Monat und Jahr des Beginns angeben, zum Beispiel 03/2000.';
       }
       if (draft.ende !== '' && !MONAT_MUSTER.test(draft.ende)) {
-        fehler['ende'] = 'Bitte Monat und Jahr angeben oder das Feld leer lassen.';
+        fehler['ende'] = 'Bitte Monat und Jahr angeben (zum Beispiel 03/2030) oder das Feld leer lassen.';
       }
       if (draft.status === '') {
         fehler['status'] = 'Bitte auswählen, wie es um den Vertrag steht.';
       } else if (draft.status !== 'laufend' && !MONAT_MUSTER.test(draft.statusDatum)) {
-        fehler['statusDatum'] = 'Bitte angeben, seit wann bzw. zu wann das gilt (Monat und Jahr).';
+        fehler['statusDatum'] = 'Bitte angeben, seit wann bzw. zu wann das gilt – Monat und Jahr, zum Beispiel 03/2015.';
       }
       break;
     }
@@ -246,7 +246,7 @@ export function validiereSchritt(
       }
       pruefeBetragsfeld(fehler, 'gesamtsummeLautMitteilung', draft.gesamtsummeLautMitteilung, false, '');
       if (draft.beitragszahlungBis !== '' && !MONAT_MUSTER.test(draft.beitragszahlungBis)) {
-        fehler['beitragszahlungBis'] = 'Bitte Monat und Jahr angeben oder das Feld leer lassen.';
+        fehler['beitragszahlungBis'] = 'Bitte Monat und Jahr angeben (zum Beispiel 03/2015) oder das Feld leer lassen.';
       }
       break;
     }

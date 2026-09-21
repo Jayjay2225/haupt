@@ -5,7 +5,9 @@
  * Fehlertexte hängen per aria-describedby am Feld, Radiogruppen nutzen
  * fieldset/legend.
  */
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import { formatMonatDe, monatNameDe, parseMonatDe } from '@/lib/format';
 
 interface BasisProps {
   id: string;
@@ -29,7 +31,7 @@ interface TextFeldProps extends BasisProps {
   wert: string;
   onChange: (wert: string) => void;
   typ?: 'text' | 'email' | 'tel' | 'month' | undefined;
-  inputMode?: 'decimal' | 'email' | 'tel' | undefined;
+  inputMode?: 'decimal' | 'email' | 'tel' | 'numeric' | undefined;
   platzhalter?: string | undefined;
   liste?: string | undefined;
   /** Rückmeldung unter dem Feld, z. B. der erkannte Betrag. */
@@ -67,6 +69,48 @@ export function TextFeld(props: TextFeldProps) {
         </p>
       )}
     </div>
+  );
+}
+
+interface MonatsFeldProps extends BasisProps {
+  /** ISO-Monat (YYYY-MM) oder Leerstring. */
+  wert: string;
+  onChange: (isoMonat: string) => void;
+}
+
+/**
+ * Monatsangabe als normales Textfeld: Getippt wird deutsch („03/2000“),
+ * gespeichert wird ISO. Das frühere `input type="month"` zeigte in Browsern
+ * ohne Monatsauswahl ein leeres Textfeld, das stillschweigend nur „2000-03“
+ * akzeptierte – daran scheiterte die Eingabe.
+ */
+export function MonatsFeld(props: MonatsFeldProps) {
+  const { id, label, erklaerung, fehler, wert, onChange } = props;
+  const [text, setText] = useState(() => formatMonatDe(wert));
+
+  // Änderungen von außen übernehmen (Entwurf geladen, Schritt gewechselt),
+  // ohne eine noch unvollständige Eingabe zu überschreiben.
+  useEffect(() => {
+    setText((bisher) => ((parseMonatDe(bisher) ?? '') === wert ? bisher : formatMonatDe(wert)));
+  }, [wert]);
+
+  const erkannt = monatNameDe(parseMonatDe(text) ?? '');
+  return (
+    <TextFeld
+      id={id}
+      label={label}
+      erklaerung={erklaerung}
+      fehler={fehler}
+      wert={text}
+      onChange={(roh) => {
+        setText(roh);
+        onChange(parseMonatDe(roh) ?? '');
+      }}
+      inputMode="numeric"
+      platzhalter="MM/JJJJ"
+      autoComplete="off"
+      echo={erkannt !== '' ? erkannt : undefined}
+    />
   );
 }
 

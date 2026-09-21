@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Ampel, type AmpelZustand } from './Ampel';
-import { TextFeld } from './funnel/fields';
+import { MonatsFeld, TextFeld } from './funnel/fields';
 import { ladeDraft, speichereDraft } from '@/lib/draft';
 import { formatEuro, parseDecimalDe } from '@/lib/format';
 
@@ -66,7 +66,7 @@ export function Schnellcheck({ versichererNamen }: { versichererNamen: string[] 
               <option key={name} value={name} />
             ))}
           </datalist>
-          <TextFeld id="sc-beginn" label="Beginn (Monat/Jahr)" typ="month" wert={beginn} onChange={setBeginn} />
+          <MonatsFeld id="sc-beginn" label="Beginn (Monat/Jahr)" wert={beginn} onChange={setBeginn} />
           <TextFeld
             id="sc-monatsbeitrag"
             label="Monatsbeitrag"

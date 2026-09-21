@@ -21,7 +21,7 @@ import {
   ZAHLWEISE_LABEL,
   ZUSTANDEKOMMEN_LABEL,
 } from '@/lib/labels';
-import { AuswahlFeld, Kontrollkaestchen, RadioGruppe, TextFeld, type Option } from './fields';
+import { AuswahlFeld, Kontrollkaestchen, RadioGruppe, MonatsFeld, TextFeld, type Option } from './fields';
 import { ZusammenfassungAnsicht } from './Zusammenfassung';
 
 export interface SchrittProps {
@@ -126,18 +126,17 @@ export function SchrittVertrag({ draft, fehler, aendere, versichererNamen }: Sch
         optionen={optionen(VERTRAGSART_LABEL)}
         fehler={fehler['vertragsart']}
       />
-      <TextFeld
+      <MonatsFeld
         id="beginn"
         label="Seit wann läuft er? (Monat/Jahr)"
-        typ="month"
+        erklaerung="Zum Beispiel 03/2000 für März 2000 – der Monat steht auf der Police."
         wert={draft.beginn}
         onChange={(wert) => aendere('beginn', wert)}
         fehler={fehler['beginn']}
       />
-      <TextFeld
+      <MonatsFeld
         id="ende"
         label="Geplantes Ende (Monat/Jahr, freiwillig)"
-        typ="month"
         wert={draft.ende}
         onChange={(wert) => aendere('ende', wert)}
         fehler={fehler['ende']}
@@ -151,10 +150,9 @@ export function SchrittVertrag({ draft, fehler, aendere, versichererNamen }: Sch
         fehler={fehler['status']}
       />
       {draft.status !== '' && draft.status !== 'laufend' && (
-        <TextFeld
+        <MonatsFeld
           id="statusDatum"
           label={statusDatumLabel}
-          typ="month"
           wert={draft.statusDatum}
           onChange={(wert) => aendere('statusDatum', wert)}
           fehler={fehler['statusDatum']}
@@ -230,11 +228,10 @@ export function SchrittBeitraege({ draft, fehler, aendere }: SchrittProps) {
         fehler={fehler['gesamtsummeLautMitteilung']}
         echo={betragEcho(draft.gesamtsummeLautMitteilung)}
       />
-      <TextFeld
+      <MonatsFeld
         id="beitragszahlungBis"
         label="Beiträge gezahlt bis (Monat/Jahr, freiwillig)"
         erklaerung="Nur nötig, wenn Sie früher aufgehört haben zu zahlen als der Vertrag läuft."
-        typ="month"
         wert={draft.beitragszahlungBis}
         onChange={(wert) => aendere('beitragszahlungBis', wert)}
         fehler={fehler['beitragszahlungBis']}
