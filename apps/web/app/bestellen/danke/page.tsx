@@ -33,13 +33,36 @@ async function ladeStand(sitzungId: string | undefined): Promise<Stand | undefin
   }
 }
 
-export default async function DankeSeite({ searchParams }: { searchParams: Promise<{ sitzung?: string }> }) {
-  const { sitzung } = await searchParams;
+export default async function DankeSeite({ searchParams }: { searchParams: Promise<{ sitzung?: string; ek?: string }> }) {
+  const { sitzung, ek } = await searchParams;
   const stand = await ladeStand(sitzung);
+  if (ek === '1') {
+    return (
+      <div className="container schmal abschnitt">
+        <h1>
+          Danke. <span className="hervor">Ihr Erstkunden-Prüfbericht</span> ist unterwegs.
+        </h1>
+        <p className="untertitel">
+          Kostenlos, wie versprochen. Vertragsbestätigung und Prüfbericht (PDF) kommen per E-Mail –
+          bitte auch den Spam-Ordner prüfen.
+        </p>
+        <p>
+          Unsere Bitte im Gegenzug: Antworten Sie kurz auf die E-Mail – war der Prüfbericht
+          verständlich, hat er geholfen? Ein Zitat zeigen wir nur mit Ihrer dokumentierten
+          Einwilligung.
+        </p>
+        <p>
+          <Link href="/" className="knopf">
+            Zur Startseite
+          </Link>
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="container schmal abschnitt">
       <h1>
-        Danke. <span className="hervor">Ihr Bericht</span> wird erstellt.
+        Danke. <span className="hervor">Ihr Prüfbericht</span> wird erstellt.
       </h1>
       {stand !== undefined ? (
         <>
@@ -50,12 +73,14 @@ export default async function DankeSeite({ searchParams }: { searchParams: Promi
             Bestellnummer <strong className="tabellenziffern">{stand.bestellnummer}</strong>.
           </p>
           <p>
-            Rechnung und Bericht (PDF) schicken wir an <strong>{stand.email}</strong> – in der Regel innerhalb weniger
-            Minuten. Bitte auch den Spam-Ordner prüfen.
+            Rechnung und Prüfbericht (PDF) schicken wir an <strong>{stand.email}</strong> – in der
+            Regel innerhalb weniger Minuten. Bitte auch den Spam-Ordner prüfen. Drucken Sie den
+            Prüfbericht danach aus und nehmen Sie ihn mit zum Anwalt oder zu Ihrer
+            Rechtsschutzversicherung.
           </p>
         </>
       ) : (
-        <p className="untertitel">Rechnung und Bericht (PDF) kommen per E-Mail – in der Regel innerhalb weniger Minuten.</p>
+        <p className="untertitel">Rechnung und Prüfbericht (PDF) kommen per E-Mail – in der Regel innerhalb weniger Minuten.</p>
       )}
       <p>
         Nichts angekommen? Schreiben Sie an <KontaktAdresse adresse={BRAND.kontaktEmail} />

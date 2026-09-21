@@ -495,8 +495,8 @@ export function renderBerichtHtml(b: BerichtInput): string {
   <div class="disclaimer">
     <strong>Rechtlicher Hinweis:</strong> Diese Kurzprüfung ist eine strukturierte Berechnung und keine
     Rechtsdienstleistung im Sinne des RDG; die rechtliche Prüfung des Einzelfalls obliegt einem Rechtsanwalt.
-    Alle Werte sind Schätzungen mit Bandbreite auf Basis der genannten Quellen und Annahmen; ein Anspruch in
-    bestimmter Höhe wird nicht zugesagt. ${esc(ZITAT_QUELLENHINWEIS)}<br>
+    Alle Werte sind Schätzungen mit Bandbreite auf Basis der genannten Quellen und Annahmen; es wird kein Anspruch in
+    bestimmter Höhe zugesagt. ${esc(ZITAT_QUELLENHINWEIS)}<br>
     Datenstand: insurers-Datenbank ${esc(b.calc.meta.dataVersion)} · Rechenkern ${esc(b.calc.meta.calcVersion)} ·
     Regelwerk ${esc(b.eligibility.meta.rulesVersion)} (${esc(b.eligibility.meta.rulesStand)}) ·
     Eignungs-Check ${esc(b.eligibility.meta.eligibilityVersion)} · Stichtag ${formatMonat(b.calc.meta.stichtag)}.

@@ -5,7 +5,7 @@ import { VARIANTE } from '@/config/variante';
 import { bestellungAktiv } from '@/lib/zahlung';
 
 export const metadata: Metadata = {
-  title: 'Der Bericht',
+  title: 'Der Prüfbericht',
 };
 
 // Der Bestellknopf hängt von der Laufzeitumgebung ab (Stripe-Schlüssel).
@@ -16,10 +16,10 @@ export default function BerichtSeite() {
   return (
     <div className="container schmal abschnitt">
       <h1>
-        Der Bericht: <span className="hervor">alle Zahlen</span>, jede mit Quelle.
+        Der Prüfbericht: <span className="hervor">alle Zahlen</span>, jede mit Quelle.
       </h1>
       <p className="untertitel">
-        Die Ampel sagt, ob sich Rechnen lohnt. Der Bericht sagt, wie viel – und dann: der Weg über
+        Die Ampel sagt, ob sich Rechnen lohnt. Der Prüfbericht sagt, wie viel – und dann: der Weg über
         uns zu Ihrem Geld.
       </p>
 
@@ -51,14 +51,14 @@ export default function BerichtSeite() {
             was die Ampel zeigt.
           </p>
           <ol className="punkteliste">
-            <li>Sie bestellen und zahlen vorab – {ZAHLUNG.wege.join(', ')} – abgewickelt über {ZAHLUNG.abwicklung}.</li>
-            <li>Nach Zahlungseingang rechnen wir den Bericht aus Ihren Angaben im Rechner.</li>
+            <li>Sie bestellen den Prüfbericht und zahlen vorab – {ZAHLUNG.wege.join(', ')} – abgewickelt über {ZAHLUNG.abwicklung}.</li>
+            <li>Nach Zahlungseingang rechnen wir den Prüfbericht aus Ihren Angaben im Rechner.</li>
             <li>{ZAHLUNG.lieferung}</li>
           </ol>
           {aktiv ? (
             <p>
               <Link href="/bestellen" className="knopf haupt">
-                Bericht bestellen
+                Prüfbericht bestellen
               </Link>
             </p>
           ) : (

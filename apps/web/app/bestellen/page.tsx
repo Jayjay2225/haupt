@@ -7,7 +7,7 @@ import { VARIANTE } from '@/config/variante';
 import { bestellungAktiv } from '@/lib/zahlung';
 
 export const metadata: Metadata = {
-  title: 'Bericht bestellen',
+  title: 'Prüfbericht bestellen',
 };
 
 // Ob bestellt werden kann, hängt von der Laufzeitumgebung ab (Stripe-Schlüssel).
@@ -22,9 +22,9 @@ export default async function BestellenSeite({ searchParams }: { searchParams: P
   return (
     <div className="container schmal abschnitt">
       <h1>
-        Der Bericht: <span className="hervor">{BERICHT_PREIS_BRUTTO_EUR} €</span>, einmal bezahlt.
+        Der Prüfbericht: <span className="hervor">{BERICHT_PREIS_BRUTTO_EUR} €</span>, einmal bezahlt.
       </h1>
-      <p className="untertitel">Zahlung vorab. Danach kommen Rechnung und Bericht als PDF per E-Mail.</p>
+      <p className="untertitel">Zahlung vorab. Danach kommen Rechnung und Prüfbericht als PDF per E-Mail.</p>
       {abgebrochen !== undefined && (
         <div className="hinweis" role="status">
           <p>Die Zahlung wurde abgebrochen. Es wurde nichts berechnet. Sie können es hier noch einmal versuchen.</p>

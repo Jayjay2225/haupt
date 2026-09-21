@@ -20,6 +20,8 @@ export interface Musterfall {
   id: string;
   titel: string;
   beschreibung: string;
+  /** Eingezahlte Beiträge laut Mitteilung, gerundet. */
+  eingezahlt: number;
   rueckkaufswert: number;
   basis: number;
   min: number;
@@ -97,6 +99,7 @@ export function musterfaelle(): Musterfall[] {
       id,
       titel,
       beschreibung,
+      eingezahlt: rundeMusterwert(contract.gesamtsummeLautMitteilung ?? 0),
       rueckkaufswert: rundeMusterwert(contract.rueckkaufswert!.betrag),
       basis: rundeMusterwert(calc.szenarien.basis.rueckabwicklungswert),
       min: rundeMusterwert(calc.szenarien.min.rueckabwicklungswert),

@@ -212,10 +212,13 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
     // Vertragsbestätigung (§ 312f BGB) vor Beginn der Ausführung, genau einmal.
     if (status.bestaetigungGesendetAm === undefined) {
       const basis = basisUrl();
-      const bestaetigung = vertragsbestaetigung(daten.kundenname, daten.bestellnummer, {
-        agb: `${basis}/agb`,
-        widerruf: `${basis}/widerrufsbelehrung`,
-      });
+      const erstkunde = daten.bestellnummer.startsWith('EK-');
+      const bestaetigung = vertragsbestaetigung(
+        daten.kundenname,
+        daten.bestellnummer,
+        { agb: `${basis}/agb`, widerruf: `${basis}/widerrufsbelehrung` },
+        erstkunde ? 'kostenlos im Erstkunden-Programm (gegen Feedback, siehe docs/ERSTKUNDEN)' : undefined,
+      );
       await deps.sendeMail({ an: daten.email, betreff: bestaetigung.betreff, text: bestaetigung.text }, ordner);
       status.bestaetigungGesendetAm = deps.jetzt().toISOString();
       speichereStatus(ordner, status);
@@ -233,7 +236,7 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
         speichereStatus(ordner, status);
       }
     }
-    const vorlage = berichtVersand(daten.kundenname, daten.bestellnummer, status.rechnungLink);
+    const vorlage = berichtVersand(daten.kundenname, daten.bestellnummer, status.rechnungLink, daten.bestellnummer.startsWith('EK-'));
     const dateiname = status.berichtDatei.split('/').pop() ?? `${daten.bestellnummer}.pdf`;
     const ergebnis = await deps.sendeMail(
       {

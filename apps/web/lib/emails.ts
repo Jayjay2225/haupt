@@ -54,18 +54,19 @@ ${abschluss()}`,
 }
 
 /** Versand des kostenpflichtigen Berichts. */
-export function berichtVersand(name: string, aktenzeichen: string, rechnungLink?: string): EmailVorlage {
-  const rechnung =
-    rechnungLink === undefined
-      ? `Der Bericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}; die Rechnung liegt bei bzw. folgt in einer eigenen E-Mail.`
-      : `Der Bericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}. Ihre Rechnung zum Herunterladen:\n${rechnungLink}`;
+export function berichtVersand(name: string, aktenzeichen: string, rechnungLink?: string, erstkunde: boolean = false): EmailVorlage {
+  const rechnung = erstkunde
+    ? 'Als Erstkunde zahlen Sie nichts. Im Gegenzug bitten wir Sie: Antworten Sie kurz auf diese E-Mail – war der Prüfbericht verständlich, hat er Ihnen weitergeholfen? Wenn Sie mögen, geben Sie uns ein Zitat mit Vorname, Alter und Bundesland frei; erst mit Ihrer dokumentierten Einwilligung zeigen wir es.'
+    : rechnungLink === undefined
+      ? `Der Prüfbericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}; die Rechnung liegt bei bzw. folgt in einer eigenen E-Mail.`
+      : `Der Prüfbericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}. Ihre Rechnung zum Herunterladen:\n${rechnungLink}`;
   return {
-    betreff: `Ihr Bericht ${aktenzeichen} ist fertig`,
+    betreff: `Ihr Prüfbericht ${aktenzeichen} ist fertig`,
     text: `${gruss(name)}
 
-anbei Ihr Bericht zum Policen-Check (Bestellnummer ${aktenzeichen}) als PDF.
+anbei Ihr Prüfbericht zum Policen-Check (Bestellnummer ${aktenzeichen}) als PDF.
 
-Darin: die Spanne in Euro, die Rechnung Jahr für Jahr, jede Zahl mit Quelle – und die Gegenposition des Versicherers. Wollen Sie danach die Rückabwicklung durchsetzen lassen? Antworten Sie einfach auf diese E-Mail – unsere Partner übernehmen den Rest. Ob Sie das wollen, entscheiden Sie.
+Darin: die Spanne in Euro, die Rechnung Jahr für Jahr, jede Zahl mit Quelle – und die Gegenposition des Versicherers. Drucken Sie ihn aus und nehmen Sie ihn mit zum Anwalt oder zu Ihrer Rechtsschutzversicherung. Oder antworten Sie einfach auf diese E-Mail – unsere Partner übernehmen den Rest. Ob Sie das wollen, entscheiden Sie.
 
 ${rechnung}
 
@@ -78,7 +79,7 @@ ${abschluss()}`,
  * der Ausführung raus: Inhalt, Preis, Anbieter, die abgegebene Zustimmung zur
  * sofortigen Ausführung und die Belehrungen.
  */
-export function vertragsbestaetigung(name: string, bestellnummer: string, links: { agb: string; widerruf: string }): EmailVorlage {
+export function vertragsbestaetigung(name: string, bestellnummer: string, links: { agb: string; widerruf: string }, preisText?: string): EmailVorlage {
   const a = BRAND.anbieterAnschrift;
   return {
     betreff: `Ihre Bestellung ${bestellnummer}: Bestätigung`,
@@ -87,8 +88,8 @@ export function vertragsbestaetigung(name: string, bestellnummer: string, links:
 vielen Dank für Ihre Bestellung bei ${BRAND.name}. Das ist Ihre Vertragsbestätigung – bitte aufbewahren.
 
 Bestellnummer: ${bestellnummer}
-Leistung: ${BRAND.produktname} – schriftlicher Bericht (PDF) zur Rückabwicklung Ihrer Lebens- oder Rentenversicherung, gerechnet aus Ihren Angaben im Rechner. Schätzung mit Bandbreite, keine Rechtsberatung.
-Preis: ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}, vorab bezahlt. Die Rechnung erhalten Sie gesondert.
+Leistung: ${BRAND.produktname} – Prüfbericht (PDF) zur Rückabwicklung Ihrer Lebens- oder Rentenversicherung, gerechnet aus Ihren Angaben im Rechner. Schätzung mit Bandbreite, keine Rechtsberatung.
+Preis: ${preisText ?? `${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}, vorab bezahlt. Die Rechnung kommt gesondert.`}
 Anbieter: ${BRAND.anbieter}, ${a.strasse}, ${a.plz} ${a.ort}
 
 Ihre Erklärung bei der Bestellung: Sie haben ausdrücklich verlangt, dass wir den Bericht sofort erstellen, und bestätigt, dass Sie Ihr Widerrufsrecht verlieren, sobald der Bericht vollständig geliefert ist.
@@ -96,7 +97,7 @@ Ihre Erklärung bei der Bestellung: Sie haben ausdrücklich verlangt, dass wir d
 Widerrufsbelehrung: ${links.widerruf}
 AGB: ${links.agb}
 
-Der Bericht folgt in einer eigenen E-Mail, in der Regel innerhalb weniger Minuten.
+Der Prüfbericht folgt in einer eigenen E-Mail, in der Regel innerhalb weniger Minuten.
 
 ${abschluss()}`,
   };

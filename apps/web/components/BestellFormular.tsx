@@ -28,6 +28,7 @@ export function BestellFormular() {
   const [formular, setFormular] = useState<Formular>(bestellformularAusDraft(leererDraft()));
   const [fehler, setFehler] = useState<BestellFehler>({});
   const [laeuft, setLaeuft] = useState(false);
+  const [freischaltcode, setFreischaltcode] = useState('');
   // Spam-Schutz: unsichtbares Feld (nur Bots füllen es) und Startzeit des Formulars.
   const [honig, setHonig] = useState('');
   const [gestartet, setGestartet] = useState(0);
@@ -54,9 +55,13 @@ export function BestellFormular() {
       const antwort = await fetch('/api/bestellung', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ draft, ...formular, firma_webseite: honig, gestartet }),
+        body: JSON.stringify({ draft, ...formular, freischaltcode: freischaltcode.trim(), firma_webseite: honig, gestartet }),
       });
-      const daten = (await antwort.json()) as { url?: string; fehler?: BestellFehler };
+      const daten = (await antwort.json()) as { url?: string; erstkunde?: boolean; fehler?: BestellFehler };
+      if (antwort.ok && daten.erstkunde === true) {
+        window.location.assign('/bestellen/danke?ek=1');
+        return;
+      }
       if (antwort.ok && daten.url !== undefined) {
         window.location.assign(daten.url);
         return;
@@ -121,7 +126,7 @@ export function BestellFormular() {
       <h2>Rechnung und Versand</h2>
       <TextFeld
         id="bestellName"
-        label="Name für Rechnung und Bericht"
+        label="Name für Rechnung und Prüfbericht"
         wert={formular.name}
         onChange={(wert) => setFormular({ ...formular, name: wert })}
         autoComplete="name"
@@ -135,13 +140,22 @@ export function BestellFormular() {
         wert={formular.email}
         onChange={(wert) => setFormular({ ...formular, email: wert })}
         autoComplete="email"
-        erklaerung="Dorthin schicken wir Rechnung und Bericht."
+        erklaerung="Dorthin schicken wir Rechnung und Prüfbericht."
         fehler={fehler.email}
       />
       <p className="erklaerung">
         Ihre Rechnungsadresse fragt die Zahlungsseite ab. Zur Abwicklung übermitteln wir Name und E-Mail-Adresse an{' '}
         {ZAHLUNG.abwicklung}; mehr dazu in der <Link href="/datenschutz">Datenschutzerklärung</Link>.
       </p>
+
+      <TextFeld
+        id="freischaltcode"
+        label="Freischaltcode (Erstkunden-Programm, freiwillig)"
+        wert={freischaltcode}
+        onChange={setFreischaltcode}
+        autoComplete="off"
+        erklaerung="Mit gültigem Code ist der Prüfbericht kostenlos; im Gegenzug bitten wir um Ihr Feedback."
+      />
 
       <h2>Bestellen</h2>
       <p>
@@ -176,7 +190,11 @@ export function BestellFormular() {
       )}
       <div className="formular-aktionen">
         <button type="submit" className="knopf haupt" disabled={laeuft}>
-          {laeuft ? 'Zahlungsseite wird geöffnet …' : `Zahlungspflichtig bestellen – ${BERICHT_PREIS_BRUTTO_EUR} €`}
+          {laeuft
+            ? 'Wird gesendet …'
+            : freischaltcode.trim() !== ''
+              ? 'Kostenlos anfordern (Erstkunde)'
+              : `Zahlungspflichtig bestellen – ${BERICHT_PREIS_BRUTTO_EUR} €`}
         </button>
       </div>
     </form>

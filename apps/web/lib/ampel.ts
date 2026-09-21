@@ -110,14 +110,13 @@ export function bestimmeWirtschaftlicheAmpel(
 
   const basis = calc.szenarien.basis;
   const min = calc.szenarien.min;
-  const max = calc.szenarien.max;
 
   if (basis.mehrwertGegenKuendigung === undefined) {
     return {
       ampel: 'gelb',
       grund: 'kein-rueckkaufswert',
-      titel: 'Gelb: Rückkaufswert fehlt.',
-      text: 'Ohne Ihren Rückkaufswert können wir nicht vergleichen. Er steht in der letzten Standmitteilung. Tragen Sie ihn nach, dann wird die Ampel klar.',
+      titel: 'Gelb: Eine Zahl fehlt noch.',
+      text: 'Ohne Ihren Rückkaufswert können wir nicht vergleichen. Er steht in der letzten Standmitteilung. Tragen Sie ihn nach – dann wird die Ampel klar.',
       groessenordnung: `Der geschätzte Rückabwicklungswert ist ${groessenordnungInWorten(basis.rueckabwicklungswert)} (Schätzung mit Bandbreite).`,
     };
   }
@@ -126,28 +125,27 @@ export function bestimmeWirtschaftlicheAmpel(
     return {
       ampel: 'rot',
       grund: 'kein-vorteil',
-      titel: 'Rot: Kündigen bringt hier nicht weniger.',
-      text: 'Nach unserer Schätzung liegt der Widerspruch unter Ihrem Rückkaufswert. Ein Anwalt kostet Geld und bringt hier voraussichtlich nichts. Finger weg – das sagen wir Ihnen auch.',
+      titel: 'Rot. Ehrlich gesagt: Hier lohnt es nicht.',
+      text: 'Nach unserer Schätzung liegt der Widerspruch unter Ihrem Rückkaufswert. Sparen Sie sich das Geld für den Prüfbericht. Wenn Sie den Vertrag loswerden wollen, ist Verkaufen vielleicht der bessere Weg.',
     };
   }
 
   const minMehrwert = min.mehrwertGegenKuendigung ?? 0;
-  const maxMehrwert = max.mehrwertGegenKuendigung ?? basis.mehrwertGegenKuendigung;
   if (minMehrwert > 0) {
     return {
       ampel: 'gruen',
       grund: 'vorteil',
-      titel: 'Grün: Da liegt richtig was drin.',
-      text: 'In allen drei Szenarien liegt der Widerspruch über Ihrem Rückkaufswert. Der Bericht liefert die Zahlen, danach der Weg über uns zu Ihrem Geld.',
-      groessenordnung: `Mehr als bei Kündigung: voraussichtlich ${groessenordnungInWorten(basis.mehrwertGegenKuendigung)} (Schätzung mit Bandbreite: von ${groessenordnungInWorten(minMehrwert)} bis ${groessenordnungInWorten(maxMehrwert)}).`,
+      titel: 'Grün. Rechnerisch ist deutlich mehr drin.',
+      text: 'Bei Ihrem Vertrag ist rechnerisch mehr drin als der Rückkaufswert – in allen drei Szenarien. Wollen Sie die genaue Zahl?',
+      groessenordnung: `Größenordnung: ${groessenordnungInWorten(basis.mehrwertGegenKuendigung)} über dem Rückkaufswert (Schätzung mit Bandbreite).`,
     };
   }
 
   return {
     ampel: 'gelb',
     grund: 'knapp',
-    titel: 'Gelb: knapp. Rechnen lohnt, versprechen nicht.',
-    text: 'Im mittleren Szenario etwas mehr als bei Kündigung, im vorsichtigen nicht. Ob es sich lohnt, entscheidet der Blick in Ihre Unterlagen.',
-    groessenordnung: `Im mittleren Szenario ${groessenordnungInWorten(basis.mehrwertGegenKuendigung)} mehr als bei Kündigung – im vorsichtigen Szenario nicht.`,
+    titel: 'Gelb. Knapp.',
+    text: 'Es könnte sich lohnen, muss aber nicht: Im mittleren Szenario liegt der Widerspruch über Ihrem Rückkaufswert, im vorsichtigen nicht. Der Prüfbericht zeigt, ob es reicht.',
+    groessenordnung: `Im mittleren Szenario ${groessenordnungInWorten(basis.mehrwertGegenKuendigung)} über dem Rückkaufswert – im vorsichtigen Szenario nicht.`,
   };
 }

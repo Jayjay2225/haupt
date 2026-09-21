@@ -86,7 +86,7 @@ describe('Wirtschaftliche Ampel', () => {
     );
     expect(a.ampel).toBe('rot');
     expect(a.grund).toBe('kein-vorteil');
-    expect(a.text).toMatch(/Finger weg/);
+    expect(a.text).toMatch(/Sparen Sie sich das Geld/);
   });
 
   it('Gelb ohne Rückkaufswert, mit Größenordnung des Rückabwicklungswerts', () => {

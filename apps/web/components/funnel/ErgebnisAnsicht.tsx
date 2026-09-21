@@ -13,6 +13,7 @@ import type { EligibilityResult } from '@rueckab/eligibility';
 import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS, BERICHT_PREIS_REGULAER_EUR } from '@/config/business';
 import { VARIANTE } from '@/config/variante';
 import { Ampel } from '@/components/Ampel';
+import { TransparenzKasten } from '@/components/TransparenzKasten';
 import type { WirtschaftlicheAmpel } from '@/lib/ampel';
 import { ladeDraft, leererDraft, loescheDraft, speichereDraft, type CaseDraft } from '@/lib/draft';
 import { formatEuro } from '@/lib/format';
@@ -128,42 +129,60 @@ export function ErgebnisAnsicht() {
         <>
           <Ampel zustand={vorschau.ampel.ampel} gross beschriftung={vorschau.ampel.titel} />
           <p style={{ marginTop: '1rem', fontSize: '1.25rem' }}>{vorschau.ampel.text}</p>
+          {vorschau.ampel.groessenordnung !== undefined && (
+            <p style={{ fontSize: '1.15rem' }}>
+              <strong>{vorschau.ampel.groessenordnung}</strong>
+            </p>
+          )}
           {VARIANTE.berichtKostenpflichtig && vorschau.regime === 'alt-policenmodell' && vorschau.ampel.ampel !== 'rot' && (
             <section aria-labelledby="bericht-titel" className="wert-karte">
-              <h2 id="bericht-titel" style={{ fontSize: '1.4rem' }}>
-                Wollen Sie wissen, was für Sie drin ist?
-              </h2>
-              <p>
-                Der Bericht nennt die Zahlen, Jahr für Jahr, jede mit Quelle. Einführungspreis:{' '}
+              <p id="bericht-titel">
+                Der Prüfbericht nennt die Zahlen: Jahr für Jahr, jede mit Quelle. Einführungspreis:{' '}
                 <strong>
                   nur {BERICHT_PREIS_BRUTTO_EUR} € statt <s>{BERICHT_PREIS_REGULAER_EUR} €</s>
                 </strong>{' '}
-                {BERICHT_PREIS_HINWEIS}, einmalig.{' '}
-                {vorschau.ampel.ampel === 'gruen'
-                  ? 'Es lohnt sich – unsere Partner übernehmen den Rest.'
-                  : 'Und wenn es sich lohnt, übernehmen unsere Partner den Rest.'}
+                {BERICHT_PREIS_HINWEIS}, einmalig.
               </p>
               <p style={{ margin: 0, display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <Link href="/bestellen" className="knopf haupt">
-                  Bericht bestellen
+                  {vorschau.ampel.ampel === 'gruen'
+                    ? `Ja, ich will die Zahl. ${BERICHT_PREIS_BRUTTO_EUR} €`
+                    : `Genau wissen. ${BERICHT_PREIS_BRUTTO_EUR} €`}
                 </Link>
                 <Link href="/bericht" className="knopf">
-                  Was im Bericht steht
+                  Was im Prüfbericht steht
                 </Link>
               </p>
             </section>
           )}
-          {VARIANTE.berichtKostenpflichtig && vorschau.regime === 'alt-policenmodell' && vorschau.ampel.ampel === 'rot' && (
-            <p className="erklaerung">
-              Bei Rot brauchen Sie den Bericht in der Regel nicht. Wer ihn trotzdem will, findet ihn{' '}
-              <Link href="/bericht">hier</Link>.
-            </p>
+          {VARIANTE.berichtKostenpflichtig && vorschau.ampel.ampel === 'rot' && (
+            <div>
+              {VARIANTE.ankaufHinweis && (
+                <p>
+                  <Link href="/verkaufen" className="knopf haupt">
+                    Ankaufsangebot ansehen
+                  </Link>
+                </p>
+              )}
+              <p className="erklaerung">
+                Bei Rot brauchen Sie den Prüfbericht in der Regel nicht. Wer ihn trotzdem will, findet
+                ihn <Link href="/bericht">hier</Link>.
+              </p>
+            </div>
+          )}
+
+          {vorschau.regime === 'alt-policenmodell' && (
+            <div className="hinweis neutral">
+              <p>
+                <strong>Was der Versicherer sagen wird:</strong> {GEGENPOSITION}
+              </p>
+            </div>
           )}
 
           {VARIANTE.berichtKostenpflichtig && vorschau.regime !== 'alt-policenmodell' && vorschau.ampel.ampel === 'gelb' && (
             <div className="hinweis neutral">
               <p>
-                Für diesen Jahrgang rechnet unser Bericht noch nicht – die Prüfung läuft hier über
+                Für diesen Jahrgang rechnet unser Prüfbericht noch nicht – die Prüfung läuft hier über
                 die Belehrung und die Abrechnung Ihres Vertrags. Genau das übernehmen unsere Partner:
                 siehe unten.
               </p>
@@ -241,11 +260,13 @@ export function ErgebnisAnsicht() {
             </section>
           )}
 
+          <TransparenzKasten kompakt />
+
           <details>
-            <summary>Wie wir rechnen: Annahmen, Datenherkunft, Gegenposition*</summary>
+            <summary>Wie wir rechnen: Annahmen und Datenherkunft*</summary>
             <p className="erklaerung" style={{ marginTop: '0.75rem' }}>
-              * Alle Annahmen, die vollständige Datenherkunft und die Gegenposition des Versicherers
-              stehen im Bericht. Die Grundlagen unserer Rechnung finden Sie in den{' '}
+              * Alle Annahmen und die vollständige Datenherkunft stehen im Prüfbericht. Die
+              Grundlagen unserer Rechnung finden Sie in den{' '}
               <Link href="/agb#rechenweg">AGB („So rechnen wir“)</Link>, den Umgang mit Ihren Daten in
               der <Link href="/datenschutz">Datenschutzerklärung</Link>.
             </p>

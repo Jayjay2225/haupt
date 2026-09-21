@@ -13,6 +13,10 @@ import type { Bestellformular } from '@/lib/bestellung';
 import { uebernehmeBekannteFelder } from '@/lib/draft';
 import { findeVersichererId, insurersDaten } from '@/lib/insurers-data';
 import { begrenzt, clientSchluessel } from '@/lib/ratenlimit';
+import { erfuelleBestellung, erzeugeBericht } from '@/lib/erfuellung';
+import { markiereCodeVerwendet, pruefeFreischaltcode } from '@/lib/erstkunden';
+import { fallAlsMetadaten } from '@/lib/fall-kodierung';
+import { sendeMail } from '@/lib/versand';
 import { bestellungAktiv, erstelleCheckoutSitzung } from '@/lib/zahlung';
 
 export const runtime = 'nodejs';
@@ -23,9 +27,6 @@ const riskDefaults = riskJson as unknown as RiskDefaults;
 const MINDESTZEIT_MS = 3000;
 
 export async function POST(request: Request): Promise<NextResponse> {
-  if (!bestellungAktiv()) {
-    return NextResponse.json({ fehler: { fall: 'Die Bestellung ist noch nicht freigeschaltet.' } }, { status: 503 });
-  }
   let roh: unknown;
   try {
     roh = await request.json();
@@ -56,6 +57,13 @@ export async function POST(request: Request): Promise<NextResponse> {
     agbGelesen: eingabe['agbGelesen'] === true,
     ausfuehrungZugestimmt: eingabe['ausfuehrungZugestimmt'] === true,
   };
+  const freischaltcode = typeof eingabe['freischaltcode'] === 'string' ? eingabe['freischaltcode'].trim() : '';
+
+  // Ohne Zahlungsanbieter ist nur der Erstkunden-Weg offen.
+  if (!bestellungAktiv() && freischaltcode === '') {
+    return NextResponse.json({ fehler: { fall: 'Die Bestellung ist noch nicht freigeschaltet.' } }, { status: 503 });
+  }
+
   const fehler = pruefeBestellformular(formular, draft);
   if (Object.keys(fehler).length > 0) {
     return NextResponse.json({ fehler }, { status: 422 });
@@ -75,6 +83,43 @@ export async function POST(request: Request): Promise<NextResponse> {
         },
       },
       { status: 422 },
+    );
+  }
+
+  // Erstkunden-Programm: gültiger Code → Prüfbericht kostenlos, direkte Auslieferung.
+  if (freischaltcode !== '') {
+    const stand = pruefeFreischaltcode(freischaltcode);
+    if (stand !== 'gueltig') {
+      return NextResponse.json(
+        { fehler: { fall: stand === 'verbraucht' ? 'Dieser Freischaltcode wurde bereits verwendet.' : 'Dieser Freischaltcode ist nicht gültig.' } },
+        { status: 422 },
+      );
+    }
+    const code = freischaltcode.toUpperCase();
+    const bestellnummer = `EK-${code}`;
+    const status = await erfuelleBestellung(
+      {
+        id: `ek_${code}`,
+        bestellnummer,
+        kundenname: formular.name.trim(),
+        email: formular.email.trim(),
+        metadata: { bestellnummer, kundenname: formular.name.trim(), ...fallAlsMetadaten(draft) },
+      },
+      {
+        erzeugeBericht,
+        sendeMail,
+        rechnungLink: async () => undefined,
+        istAusgeliefert: async () => false,
+        markiereAusgeliefert: async () => markiereCodeVerwendet(code),
+        jetzt: () => new Date(),
+      },
+    );
+    if (status.mailVersendetAm !== undefined) {
+      return NextResponse.json({ erstkunde: true, bestellnummer });
+    }
+    return NextResponse.json(
+      { fehler: { fall: 'Der Prüfbericht ließ sich gerade nicht erstellen. Ihr Code bleibt gültig; wir haben eine Meldung erhalten und melden uns.' } },
+      { status: 502 },
     );
   }
 
