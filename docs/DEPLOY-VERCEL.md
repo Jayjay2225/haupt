@@ -7,7 +7,7 @@ Die Website (`apps/web`) ist eine Next.js-Anwendung mit Server-Funktionen (Ampel
 1. Bei [vercel.com](https://vercel.com) mit dem GitHub-Konto anmelden, das Zugriff auf `Jayjay2225/haupt` hat.
 2. „Add New… → Project“ → Repository `haupt` importieren.
 3. Einstellungen beim Import:
-   - **Root Directory:** `apps/web` (wichtig – Vercel erkennt dann den pnpm-Workspace und installiert im Repo-Stamm).
+   - **Root Directory:** `apps/web` (wichtig – ohne diese Angabe schlägt die Bereitstellung fehl, siehe Abschnitt 1a). Vercel erkennt dann den pnpm-Workspace und installiert im Repo-Stamm; das Häkchen „Include source files outside of the Root Directory in the Build Step“ bleibt gesetzt, weil die Website `data/*.json` aus dem Repo-Stamm liest.
    - **Framework Preset:** Next.js (wird erkannt).
    - **Production Branch:** zunächst `claude/affectionate-brown-s1gjas` (bis der PR gemergt ist), danach `main`.
    - Build- und Install-Befehle: Standard lassen (`next build`, `pnpm install`).
@@ -28,6 +28,26 @@ Die Website (`apps/web`) ist eine Next.js-Anwendung mit Server-Funktionen (Ampel
 5. „Deploy“. Nach dem Build gibt es eine Vorschauadresse `https://<projekt>.vercel.app` – damit Schritt 3 und 4 testen.
 
 Jeder weitere Push auf den Production-Branch löst automatisch eine neue Bereitstellung aus; kein Hochladen von Hand.
+
+## 1a. Wenn alle Bereitstellungen mit „Error“ enden
+
+**Fehlerprotokoll lesen (immer zuerst):** Deployments → auf die fehlgeschlagene Zeile klicken → Abschnitt **„Building“** aufklappen. Die letzten roten Zeilen nennen den Grund.
+
+Die häufigsten Ursachen und ihre Behebung:
+
+| Meldung im Protokoll | Ursache | Behebung |
+|---|---|---|
+| `No Output Directory named "public" found` oder `No Next.js version detected` | **Root Directory nicht gesetzt** – Vercel baut im Repo-Stamm | Settings → Build and Deployment → **Root Directory = `apps/web`** → Save → neu bereitstellen |
+| `Module not found: Can't resolve '../../../../../data/risk-defaults.json'` | Dateien außerhalb des Root Directory fehlen im Build | Settings → Build and Deployment → Häkchen **„Include source files outside of the Root Directory in the Build Step“** setzen |
+| `ERR_PNPM_OUTDATED_LOCKFILE` | `pnpm-lock.yaml` passt nicht zu den `package.json` | im Repo `pnpm install` ausführen und die geänderte `pnpm-lock.yaml` committen |
+| `Serverless Functions in multiple regions …Pro` | Regionsangabe im Hobby-Tarif | `"regions": ["fra1"]` aus `apps/web/vercel.json` entfernen und die Region stattdessen unter Settings → Functions wählen |
+| `A Serverless Function has exceeded the unzipped maximum size of 250 MB` | Chromium-Paket zu groß | tritt bei diesem Projekt nicht auf (81 MB); sonst PDF-Erzeugung in einen eigenen Dienst auslagern |
+
+**Nur ein Projekt behalten:** Wird dasselbe Repository in zwei Vercel-Projekten importiert, baut jeder Push doppelt und beide melden denselben Fehler. Überflüssiges Projekt entfernen: Projekt öffnen → Settings → ganz unten **Delete Project**.
+
+**Neu bereitstellen nach einer Einstellungsänderung:** Deployments → beim obersten Eintrag auf **⋯ → Redeploy** (Haken bei „Use existing Build Cache“ entfernen).
+
+Der Build ist am 21.09.2026 aus einem frischen Klon mit `pnpm install --frozen-lockfile` und `next build` in `apps/web` erfolgreich durchgelaufen – schlägt die Bereitstellung fehl, liegt es an den Projekteinstellungen, nicht am Code.
 
 ## 2. Was auf Vercel anders läuft (bereits im Code berücksichtigt)
 
