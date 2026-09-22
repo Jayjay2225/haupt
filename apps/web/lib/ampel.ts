@@ -21,7 +21,7 @@ export interface WirtschaftlicheAmpel {
   text: string;
   /** Größenordnung in Worten (Basis) mit Bandbreite, falls berechenbar. */
   groessenordnung?: string;
-  grund: 'vor-1994' | 'neu-2008' | 'ab-2017' | 'ausschluss' | 'kein-vorteil' | 'knapp' | 'vorteil' | 'kein-rueckkaufswert';
+  grund: 'vor-1994' | 'neu-2008' | 'ab-2017' | 'ausschluss' | 'kein-vorteil' | 'knapp' | 'vorteil' | 'kein-rueckkaufswert' | 'beendet';
 }
 
 /** Größenordnung eines Betrags in Worten – bewusst ohne Ziffern. */
@@ -70,10 +70,13 @@ export function groessenordnungInWorten(betrag: number): string {
  *   läuft die Frist nicht (BGH IV ZR 384/14) → Gelb, einzelfallabhängig.
  * - ab 2017: Belehrungen praktisch durchgehend musterkonform → Rot.
  */
+export type AmpelVertragsstatus = 'laufend' | 'beitragsfrei' | 'gekuendigt' | 'abgelaufen';
+
 export function bestimmeWirtschaftlicheAmpel(
   calc: CalcResult,
   eligibility: EligibilityResult,
   beginnJahr?: number,
+  vertragsstatus?: AmpelVertragsstatus,
 ): WirtschaftlicheAmpel {
   if (eligibility.angewendeteRegeln.includes('R-AUS-RISIKO-LV')) {
     return {
@@ -110,6 +113,29 @@ export function bestimmeWirtschaftlicheAmpel(
 
   const basis = calc.szenarien.basis;
   const min = calc.szenarien.min;
+
+  // Beendete Verträge: Es gibt keine Kündigung mehr, mit der man vergleichen
+  // könnte – der Maßstab ist der Netto-Anspruch über das bereits Erhaltene hinaus.
+  if (
+    basis.mehrwertGegenKuendigung === undefined &&
+    (vertragsstatus === 'gekuendigt' || vertragsstatus === 'abgelaufen')
+  ) {
+    if (basis.nettoanspruch > 0) {
+      return {
+        ampel: 'gelb',
+        grund: 'beendet',
+        titel: 'Gelb. Beendeter Vertrag – rechnerisch noch offen.',
+        text: 'Ihr Vertrag ist schon beendet; verglichen wird deshalb mit dem, was Sie bereits bekommen haben. Darüber hinaus bleibt rechnerisch etwas offen. Der Prüfbericht zeigt, wie belastbar das ist.',
+        groessenordnung: `Rechnerisch offen: ${groessenordnungInWorten(basis.nettoanspruch)} über dem bereits Erhaltenen (Schätzung mit Bandbreite).`,
+      };
+    }
+    return {
+      ampel: 'rot',
+      grund: 'kein-vorteil',
+      titel: 'Rot. Ehrlich gesagt: Hier lohnt es nicht.',
+      text: 'Ihr Vertrag ist beendet, und über das bereits Erhaltene hinaus bleibt nach unserer Schätzung rechnerisch nichts offen. Sparen Sie sich das Geld für den Prüfbericht.',
+    };
+  }
 
   if (basis.mehrwertGegenKuendigung === undefined) {
     return {

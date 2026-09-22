@@ -35,16 +35,50 @@ export function alleVersichererNamen(): string[] {
   return [...namen].sort((a, b) => a.localeCompare(b, 'de'));
 }
 
-/** Ordnet eine Freitexteingabe einem Versicherer zu (Name oder Altname). */
+/** Gattungsbegriffe, die niemals eine bestimmte Gesellschaft meinen. */
+const GENERISCHE_EINGABEN = new Set([
+  'leben',
+  'lebensversicherung',
+  'lebensversicherungen',
+  'rentenversicherung',
+  'versicherung',
+  'versicherungen',
+  'versicherung ag',
+  'lebensversicherung ag',
+  'ag',
+  'gmbh',
+  'se',
+  'a.g.',
+  'aktiengesellschaft',
+  'lv',
+  'rv',
+  'police',
+  'vertrag',
+]);
+
+/**
+ * Ordnet eine Freitexteingabe einem Versicherer zu (Name oder Altname).
+ * Bewusst konservativ: Gattungsbegriffe („Lebensversicherung“, „AG“) und sehr
+ * kurze Eingaben liefern 'unbekannt' (Branchendurchschnitt) statt zufällig die
+ * erste Gesellschaft der Liste; Teiltreffer nur, wenn die Eingabe im Namen
+ * enthalten ist – nie umgekehrt.
+ */
 export function findeVersichererId(eingabe: string): string {
-  const gesucht = eingabe.trim().toLowerCase();
-  if (gesucht === '') {
+  const gesucht = eingabe.trim().toLowerCase().replace(/\s+/g, ' ');
+  if (gesucht === '' || gesucht.length < 4 || GENERISCHE_EINGABEN.has(gesucht)) {
     return 'unbekannt';
   }
-  for (const v of insurersDaten.insurers) {
-    const kandidaten = [v.kanonischerName, ...v.altnamen].map((n) => n.toLowerCase());
-    if (kandidaten.some((n) => n === gesucht || n.includes(gesucht) || gesucht.includes(n))) {
-      return v.id;
+  // 1. exakter Name/Altname, 2. Namensanfang, 3. Teilzeichenkette (ab 6 Zeichen).
+  for (const pruefung of [
+    (n: string) => n === gesucht,
+    (n: string) => n.startsWith(gesucht),
+    (n: string) => gesucht.length >= 6 && n.includes(gesucht),
+  ]) {
+    for (const v of insurersDaten.insurers) {
+      const kandidaten = [v.kanonischerName, ...v.altnamen].map((n) => n.toLowerCase());
+      if (kandidaten.some(pruefung)) {
+        return v.id;
+      }
     }
   }
   return 'unbekannt';

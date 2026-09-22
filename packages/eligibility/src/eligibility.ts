@@ -62,11 +62,13 @@ export function pruefeEignung(input: EligibilityInput, regelwerk: Regelwerk): El
   if (grenzmonatJuli94) {
     input = { ...input, vertragsschluss: '1994-07-29' };
   }
-  if (input.vertragsschluss === '2004-12') {
+  const grenzmonatDez04 = input.vertragsschluss === '2004-12';
+  if (grenzmonatDez04) {
     hinweise.push({
-      text: 'Vertragsschluss im Dezember 2004: Für die maßgebliche Widerspruchsfrist (14 oder 30 Tage) entscheidet der genaue Tag (Gesetzesänderung zum 08.12.2004).',
+      text: 'Vertragsschluss im Dezember 2004: Für die maßgebliche Widerspruchsfrist (14 oder 30 Tage) entscheidet der genaue Tag (Gesetzesänderung zum 08.12.2004). Die Ampel bleibt höchstens Gelb, bis das genaue Datum anhand der Police belegt ist.',
       regelIds: ['R-FEHLER-FRIST-ZU-KURZ'],
     });
+    benoetigteDokumente.add('Police mit genauem Vertragsschluss- bzw. Policierungsdatum');
   }
 
   // 1. Regime bestimmen (Regeln mit folge.typ regime/ausschluss auf Regime-Ebene).
@@ -93,6 +95,26 @@ export function pruefeEignung(input: EligibilityInput, regelwerk: Regelwerk): El
 
   if (regimeAusschluss !== undefined) {
     nutze(regimeAusschluss, begruendungen);
+    // Vor dem 29.07.1994 ist der Policenmodell-Widerspruch ausgeschlossen, der
+    // Fall aber nicht wertlos: Widerruf nach § 8 Abs. 4 VVG i.d.F. 1990 (ab
+    // 1991, ohne belehrungsunabhängiges Erlöschen) und die Mindestrückkaufswert-
+    // Rechtsprechung bleiben (docs/RECHERCHE-ZEITRAEUME.md) → Gelb mit Prüfweg.
+    if (regimeAusschluss.id === 'R-REGIME-VOR1994') {
+      begruendungen.push({
+        text: 'Für Verträge vor dem 29.07.1994 kommen stattdessen der Widerruf nach § 8 Abs. 4 VVG in der Fassung von 1990 (bei fehlender oder fehlerhafter Belehrung ohne Erlöschensfrist) und Nachforderungen aus der Mindestrückkaufswert-Rechtsprechung in Betracht; diesen Weg prüfen die Partner anhand der Originalunterlagen.',
+        regelIds: ['R-REGIME-VOR1994'],
+      });
+      benoetigteDokumente.add('Police und Belehrungstexte (Widerruf nach § 8 Abs. 4 VVG i.d.F. 1990)');
+      return {
+        ampel: 'gelb',
+        regime: 'keins',
+        begruendungen,
+        hinweise,
+        benoetigteDokumente: [...benoetigteDokumente],
+        angewendeteRegeln: angewendet,
+        meta,
+      };
+    }
     return {
       ampel: 'rot',
       regime: 'keins',
@@ -212,7 +234,7 @@ export function pruefeEignung(input: EligibilityInput, regelwerk: Regelwerk): El
     ampel = 'gelb';
     benoetigteDokumente.add(DOKUMENT_ZUSTANDEKOMMEN);
   }
-  if (ampel === 'gruen' && grenzmonatJuli94) {
+  if (ampel === 'gruen' && (grenzmonatJuli94 || grenzmonatDez04)) {
     ampel = 'gelb';
   }
   if (regime === 'alt-unbekannt') {

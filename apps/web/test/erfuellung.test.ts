@@ -31,7 +31,7 @@ function ereignis(typ: string, sitzung: Stripe.Checkout.Session): Stripe.Event {
 interface Protokoll {
   mails: MailNachricht[];
   berichte: number;
-  markiert?: string;
+  marker: { ausgeliefert?: string; bestaetigt?: string; verzoegert?: string };
 }
 
 function fakeAbhaengigkeiten(protokoll: Protokoll, berichtFehler?: string): ErfuellungsAbhaengigkeiten {
@@ -50,9 +50,9 @@ function fakeAbhaengigkeiten(protokoll: Protokoll, berichtFehler?: string): Erfu
       return { weg: 'protokoll', kennung: `t${protokoll.mails.length}` };
     },
     rechnungLink: async () => 'https://rechnung.example/in_123',
-    istAusgeliefert: async () => protokoll.markiert !== undefined,
-    markiereAusgeliefert: async (_daten, zeitpunkt) => {
-      protokoll.markiert = zeitpunkt;
+    holeMarker: async () => ({ ...protokoll.marker }),
+    setzeMarker: async (_daten, patch) => {
+      Object.assign(protokoll.marker, patch);
     },
     jetzt: () => JETZT,
   };
@@ -81,7 +81,7 @@ describe('Auslieferung nach Zahlungseingang', () => {
   });
 
   it('erzeugt den Bericht, hängt ihn an und nennt den Rechnungslink – nur einmal', async () => {
-    const protokoll: Protokoll = { mails: [], berichte: 0 };
+    const protokoll: Protokoll = { mails: [], berichte: 0, marker: {} };
     const deps = fakeAbhaengigkeiten(protokoll);
     expect(await verarbeiteStripeEreignis(ereignis('checkout.session.completed', fakeSitzung()), deps)).toBe('ausgeliefert');
     expect(protokoll.berichte).toBe(1);
@@ -102,14 +102,15 @@ describe('Auslieferung nach Zahlungseingang', () => {
     expect(status?.rechnungLink).toBe('https://rechnung.example/in_123');
 
     // Stripe schickt Ereignisse mehrfach: kein zweiter Bericht, keine zweite Mail.
-    expect(protokoll.markiert).toBe(JETZT.toISOString());
+    expect(protokoll.marker.ausgeliefert).toBe(JETZT.toISOString());
+    expect(protokoll.marker.bestaetigt).toBe(JETZT.toISOString());
     expect(await verarbeiteStripeEreignis(ereignis('checkout.session.async_payment_succeeded', fakeSitzung()), deps)).toBe('ausgeliefert');
     expect(protokoll.berichte).toBe(1);
     expect(protokoll.mails).toHaveLength(2);
   });
 
   it('verlässt sich auf die Stripe-Markierung, wenn der Dateistatus fehlt (Serverless)', async () => {
-    const protokoll: Protokoll = { mails: [], berichte: 0, markiert: '2026-09-21T09:00:00.000Z' };
+    const protokoll: Protokoll = { mails: [], berichte: 0, marker: { ausgeliefert: '2026-09-21T09:00:00.000Z' } };
     const deps = fakeAbhaengigkeiten(protokoll);
     expect(await verarbeiteStripeEreignis(ereignis('checkout.session.completed', fakeSitzung()), deps)).toBe('ausgeliefert');
     expect(protokoll.berichte).toBe(0);
@@ -117,7 +118,7 @@ describe('Auslieferung nach Zahlungseingang', () => {
   });
 
   it('hält Fehler fest, informiert Kundin und Anbieter und wiederholt die Kundeninfo nicht', async () => {
-    const protokoll: Protokoll = { mails: [], berichte: 0 };
+    const protokoll: Protokoll = { mails: [], berichte: 0, marker: {} };
     const deps = fakeAbhaengigkeiten(protokoll, 'Chromium nicht gefunden');
     const daten = sitzungsDaten(fakeSitzung());
     const status = await erfuelleBestellung(daten, deps);
@@ -142,7 +143,7 @@ describe('Auslieferung nach Zahlungseingang', () => {
   });
 
   it('liefert bei ausstehender Zahlung und fremden Ereignissen nicht aus', async () => {
-    const protokoll: Protokoll = { mails: [], berichte: 0 };
+    const protokoll: Protokoll = { mails: [], berichte: 0, marker: {} };
     const deps = fakeAbhaengigkeiten(protokoll);
     expect(await verarbeiteStripeEreignis(ereignis('checkout.session.completed', fakeSitzung('unpaid')), deps)).toBe('zahlung-ausstehend');
     expect(await verarbeiteStripeEreignis(ereignis('checkout.session.async_payment_failed', fakeSitzung('unpaid')), deps)).toBe('zahlung-fehlgeschlagen');

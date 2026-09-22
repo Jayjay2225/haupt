@@ -437,7 +437,7 @@ export function SchrittZusammenfassung({ draft, fehler, aendere }: SchrittProps)
       />
       <Kontrollkaestchen
         id="einwilligungKontakt"
-        label="Ja, schickt mir Rückfragen und das Ergebnis per E-Mail. (freiwillig)"
+        label="Ja, ihr dürft mir zu meiner Anfrage per E-Mail schreiben. (freiwillig)"
         angehakt={draft.einwilligungKontakt}
         onChange={(angehakt) => aendere('einwilligungKontakt', angehakt)}
       />

@@ -28,6 +28,15 @@ export async function POST(request: Request): Promise<NextResponse> {
   } catch {
     return NextResponse.json({ fehler: 'Signatur ungültig.' }, { status: 400 });
   }
-  const ergebnis = await verarbeiteStripeEreignis(ereignis, standardAbhaengigkeiten(stripe));
-  return NextResponse.json({ empfangen: true, ergebnis });
+  try {
+    const ergebnis = await verarbeiteStripeEreignis(ereignis, standardAbhaengigkeiten(stripe));
+    // Bei fehlgeschlagener Auslieferung mit 500 antworten: Stripe stellt dann
+    // automatisch erneut zu; erledigte Schritte werden über die Marker übersprungen.
+    return NextResponse.json({ empfangen: true, ergebnis }, { status: ergebnis === 'fehler' ? 500 : 200 });
+  } catch (grund) {
+    // Strukturell unverarbeitbar (z. B. Sitzung ohne Bestellnummer): 200, sonst
+    // wiederholt Stripe ein Ereignis endlos, das nie verarbeitbar wird.
+    console.error('Webhook unverarbeitbar:', grund instanceof Error ? grund.message : 'unbekannt');
+    return NextResponse.json({ empfangen: true, ergebnis: 'unverarbeitbar' });
+  }
 }

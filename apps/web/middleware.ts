@@ -8,6 +8,12 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest): NextResponse {
+  // Der Stripe-Webhook authentifiziert sich selbst über die Signaturprüfung
+  // (constructEvent); Basic-Auth würde jede Zustellung mit 401 abweisen und
+  // bezahlte Bestellungen unausgeliefert lassen.
+  if (request.nextUrl.pathname === '/api/stripe/webhook') {
+    return NextResponse.next();
+  }
   const passwort = process.env['BETA_PASSWORT'];
   if (passwort === undefined || passwort === '') {
     return NextResponse.next();
@@ -32,5 +38,5 @@ export function middleware(request: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/stripe/webhook).*)'],
 };

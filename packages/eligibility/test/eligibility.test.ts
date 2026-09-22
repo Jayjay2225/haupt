@@ -96,11 +96,18 @@ describe('Eignungs-Check – Konstellationen', () => {
     expect(regelIds(e)).toContain('R-VERW-ABTRETUNG');
   });
 
-  it('7. Vertrag vor dem 29.07.1994 → rot (kein Anwendungsfall)', () => {
+  it('7. Vertrag vor dem 29.07.1994 → gelb (anderer Hebel: Widerruf a.F./Rückkaufswert), kein Policenmodell-Regime', () => {
     const e = pruefeEignung(frage({ vertragsschluss: '1993-01-15' }), regelwerk);
-    expect(e.ampel).toBe('rot');
+    expect(e.ampel).toBe('gelb');
     expect(e.regime).toBe('keins');
     expect(regelIds(e)).toContain('R-REGIME-VOR1994');
+    expect(e.benoetigteDokumente.join(' ')).toContain('§ 8 Abs. 4');
+  });
+
+  it('7b. Grenzmonat Dezember 2004 (nur Monat bekannt) → höchstens gelb trotz 14-Tage-Belehrung', () => {
+    const e = pruefeEignung(frage({ vertragsschluss: '2004-12', belehrungFrist: '14-tage' }), regelwerk);
+    expect(e.ampel).toBe('gelb');
+    expect(e.benoetigteDokumente.join(' ')).toContain('Policierungsdatum');
   });
 
   it('8. Unbekannte Belehrung → gelb, nie grün, mit benötigtem Dokument', () => {

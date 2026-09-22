@@ -7,6 +7,7 @@
  */
 import { existsSync, readdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
+import { esc } from './format';
 
 interface Start {
   executablePath: string;
@@ -73,10 +74,10 @@ export async function htmlZuPdf(html: string, pfad: string, kopf: KopfzeilenDate
       printBackground: true,
       displayHeaderFooter: true,
       headerTemplate: `<div style="${stil}display:flex;justify-content:space-between;">
-          <span>${kopf.aktenzeichen} · ${kopf.kundenname}</span><span>${kopf.datum}</span>
+          <span>${esc(kopf.aktenzeichen)} · ${esc(kopf.kundenname)}</span><span>${esc(kopf.datum)}</span>
         </div>`,
       footerTemplate: `<div style="${stil}display:flex;justify-content:space-between;">
-          <span>${kopf.marke} – Kurzprüfung (Schätzung, keine Rechtsberatung)</span>
+          <span>${esc(kopf.marke)} – Kurzprüfung (Schätzung, keine Rechtsberatung)</span>
           <span>Seite <span class="pageNumber"></span> von <span class="totalPages"></span></span>
         </div>`,
       margin: { top: '18mm', bottom: '16mm', left: '14mm', right: '14mm' },

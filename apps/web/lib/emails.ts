@@ -125,7 +125,7 @@ export function internerFehlerHinweis(bestellnummer: string, fehler: string): Em
 
 Fehler: ${fehler}
 
-Bitte manuell nachliefern (Skript: pnpm --filter @rueckab/web auslieferung ${bestellnummer}) und die Kundin bzw. den Kunden informieren.`,
+Rettungsweg: Stripe stellt das Webhook-Ereignis wegen der 500-Antwort automatisch erneut zu; zusätzlich kann es im Stripe-Dashboard (Entwickler → Webhooks → Ereignis → „Erneut senden“) von Hand ausgelöst werden. Bereits erledigte Schritte werden übersprungen. Danach prüfen, ob die Kundin bzw. der Kunde den Prüfbericht erhalten hat.`,
   };
 }
 

@@ -49,7 +49,7 @@ function eignung(anpassung: Partial<EligibilityInput> = {}) {
 }
 
 function ampelFuer(c: ContractInput, e = eignung({ vertragsschluss: c.beginn, vertragsart: c.vertragsart as EligibilityInput['vertragsart'] })) {
-  return bestimmeWirtschaftlicheAmpel(berechneRueckabwicklung(c, daten, defaults), e, Number(c.beginn.slice(0, 4)));
+  return bestimmeWirtschaftlicheAmpel(berechneRueckabwicklung(c, daten, defaults), e, Number(c.beginn.slice(0, 4)), c.status);
 }
 
 describe('Größenordnung in Worten', () => {
@@ -113,6 +113,15 @@ describe('Wirtschaftliche Ampel', () => {
     const neu2017 = ampelFuer(vertrag({ beginn: '2017-01', erstbeitrag: { betrag: 100, waehrung: 'EUR' } }));
     expect(neu2017.ampel).toBe('rot');
     expect(neu2017.grund).toBe('ab-2017');
+  });
+
+  it('Gelb für gekündigte Verträge mit offenem Netto-Anspruch (kein Kündigungs-Vergleich mehr)', () => {
+    const a = ampelFuer(
+      vertrag({ status: 'gekuendigt', statusDatum: '2020-06', rueckkaufswert: { betrag: 310658, standMonat: '2020-06' } }),
+    );
+    expect(a.ampel).toBe('gelb');
+    expect(a.grund).toBe('beendet');
+    expect(a.text).toContain('bereits bekommen');
   });
 
   it('Rot für reine Risikopolicen (Ausschluss)', () => {

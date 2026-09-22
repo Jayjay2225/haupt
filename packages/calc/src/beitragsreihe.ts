@@ -66,7 +66,7 @@ export function baueBeitragsreihe(input: ContractInput): BeitragsreihenErgebnis 
       text: `Erstbeitrag in DM angegeben; Umrechnung mit dem amtlichen Kurs 1 € = ${DM_KURS} DM. Der nominale DM-Beitrag läuft ab 2002 als identischer Euro-Gegenwert weiter.`,
     });
   }
-  if (erst <= 0 && input.zahlweise !== 'einmalbeitrag') {
+  if (erst <= 0) {
     throw new Error('Erstbeitrag muss größer 0 sein.');
   }
 

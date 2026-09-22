@@ -44,6 +44,16 @@ export function markiereCodeVerwendet(code: string): void {
   }
 }
 
+/** Gibt einen reservierten Code wieder frei (z. B. wenn die Auslieferung scheiterte). */
+export function entferneCodeVerwendet(code: string): void {
+  const pfad = verwendetPfad();
+  if (!existsSync(pfad)) {
+    return;
+  }
+  const liste = (JSON.parse(readFileSync(pfad, 'utf8')) as string[]).filter((c) => c !== code.toUpperCase());
+  writeFileSync(pfad, `${JSON.stringify(liste, null, 2)}\n`);
+}
+
 /** Gültig = konfiguriert und noch nicht verwendet. */
 export function pruefeFreischaltcode(code: string): 'gueltig' | 'unbekannt' | 'verbraucht' {
   const normiert = code.trim().toUpperCase();

@@ -135,24 +135,24 @@ describe('Golden-Vertrag (b): Kapitallebensversicherung 10/1995 mit Dynamik', ()
       {
         "basis": {
           "erstattung": 413087.7,
-          "mehrwertGegenKuendigung": 348892.36,
-          "nutzungen": 246462.66,
-          "nutzungenProzent": 56.1,
-          "rueckabwicklungswert": 659550.36,
+          "mehrwertGegenKuendigung": 328937.68,
+          "nutzungen": 226507.98,
+          "nutzungenProzent": 51.5,
+          "rueckabwicklungswert": 639595.68,
         },
         "max": {
           "erstattung": 426271.35,
-          "mehrwertGegenKuendigung": 377898.02,
-          "nutzungen": 262284.67,
-          "nutzungenProzent": 59.7,
-          "rueckabwicklungswert": 688556.02,
+          "mehrwertGegenKuendigung": 356799.77,
+          "nutzungen": 241186.42,
+          "nutzungenProzent": 54.9,
+          "rueckabwicklungswert": 667457.77,
         },
         "min": {
           "erstattung": 395509.5,
-          "mehrwertGegenKuendigung": 304392.24,
-          "nutzungen": 219540.74,
-          "nutzungenProzent": 50,
-          "rueckabwicklungswert": 615050.24,
+          "mehrwertGegenKuendigung": 285901.44,
+          "nutzungen": 201049.94,
+          "nutzungenProzent": 45.7,
+          "rueckabwicklungswert": 596559.44,
         },
       }
     `);

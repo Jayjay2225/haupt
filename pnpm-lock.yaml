@@ -47,6 +47,9 @@ importers:
       '@rueckab/report':
         specifier: workspace:*
         version: link:../report
+      '@sparticuz/chromium':
+        specifier: 153.0.0
+        version: 153.0.0
       next:
         specifier: ^15.5.0
         version: 15.5.25(@types/node@22.20.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)

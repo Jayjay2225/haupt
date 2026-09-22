@@ -57,13 +57,19 @@ export interface Berichtsdatei {
   dateiname: string;
 }
 
+/** Dauerhafte Marker außerhalb des Dateisystems (Serverless: /tmp überlebt den Aufruf nicht). */
+export interface AuslieferungsMarker {
+  ausgeliefert?: string;
+  bestaetigt?: string;
+  verzoegert?: string;
+}
+
 export interface ErfuellungsAbhaengigkeiten {
   erzeugeBericht: (daten: SitzungsDaten, ordner: string, jetzt: Date) => Promise<Berichtsdatei>;
   sendeMail: typeof sendeMail;
   rechnungLink: (rechnungId: string) => Promise<string | undefined>;
-  /** Dauerhafte Markierung außerhalb des Dateisystems (Serverless): schon ausgeliefert? */
-  istAusgeliefert: (daten: SitzungsDaten) => Promise<boolean>;
-  markiereAusgeliefert: (daten: SitzungsDaten, zeitpunkt: string) => Promise<void>;
+  holeMarker: (daten: SitzungsDaten) => Promise<AuslieferungsMarker>;
+  setzeMarker: (daten: SitzungsDaten, patch: AuslieferungsMarker) => Promise<void>;
   jetzt: () => Date;
 }
 
@@ -168,24 +174,37 @@ export function standardAbhaengigkeiten(stripe: Stripe): ErfuellungsAbhaengigkei
       const rechnung = await stripe.invoices.retrieve(rechnungId);
       return rechnung.hosted_invoice_url ?? rechnung.invoice_pdf ?? undefined;
     },
-    istAusgeliefert: async (daten) => {
+    holeMarker: async (daten) => {
       if (daten.zahlungId === undefined) {
-        return false;
+        return {};
       }
       const zahlung = await stripe.paymentIntents.retrieve(daten.zahlungId);
-      return (zahlung.metadata['ausgeliefert_am'] ?? '') !== '';
+      const m = zahlung.metadata;
+      return {
+        ...((m['ausgeliefert_am'] ?? '') !== '' ? { ausgeliefert: m['ausgeliefert_am'] } : {}),
+        ...((m['bestaetigt_am'] ?? '') !== '' ? { bestaetigt: m['bestaetigt_am'] } : {}),
+        ...((m['verzoegert_am'] ?? '') !== '' ? { verzoegert: m['verzoegert_am'] } : {}),
+      };
     },
-    markiereAusgeliefert: async (daten, zeitpunkt) => {
-      if (daten.zahlungId !== undefined) {
-        await stripe.paymentIntents.update(daten.zahlungId, { metadata: { ausgeliefert_am: zeitpunkt } });
+    setzeMarker: async (daten, patch) => {
+      if (daten.zahlungId === undefined) {
+        return;
       }
+      await stripe.paymentIntents.update(daten.zahlungId, {
+        metadata: {
+          ...(patch.ausgeliefert !== undefined ? { ausgeliefert_am: patch.ausgeliefert } : {}),
+          ...(patch.bestaetigt !== undefined ? { bestaetigt_am: patch.bestaetigt } : {}),
+          ...(patch.verzoegert !== undefined ? { verzoegert_am: patch.verzoegert } : {}),
+        },
+      });
     },
     jetzt: () => new Date(),
   };
 }
 
 /**
- * Liefert eine bezahlte Bestellung aus. Wiederholte Aufrufe (Stripe-Retries)
+ * Liefert eine bezahlte Bestellung aus. Wiederholte Zustellungen (der Webhook
+ * antwortet bei Fehlern mit 500, sodass Stripe automatisch erneut zustellt)
  * überspringen bereits erledigte Schritte; Fehler werden im Status festgehalten,
  * die Kundin bzw. der Kunde einmal informiert und der Anbieter benachrichtigt.
  */
@@ -201,11 +220,23 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
   if (status.mailVersendetAm !== undefined) {
     return status;
   }
-  // Serverless: Dateistatus überlebt den Aufruf nicht – dauerhafte Markierung bei Stripe prüfen.
-  if (await deps.istAusgeliefert(daten)) {
-    status.mailVersendetAm = status.mailVersendetAm ?? 'laut Zahlungsdienst bereits ausgeliefert';
+  // Serverless: Dateistatus überlebt den Aufruf nicht – dauerhafte Marker beim Zahlungsdienst prüfen.
+  let marker: AuslieferungsMarker = {};
+  try {
+    marker = await deps.holeMarker(daten);
+  } catch {
+    // Marker nicht lesbar → weiter mit Dateistatus; schlimmstenfalls doppelte Bestätigung.
+  }
+  if (marker.ausgeliefert !== undefined) {
+    status.mailVersendetAm = marker.ausgeliefert;
     speichereStatus(ordner, status);
     return status;
+  }
+  if (status.bestaetigungGesendetAm === undefined && marker.bestaetigt !== undefined) {
+    status.bestaetigungGesendetAm = marker.bestaetigt;
+  }
+  if (status.verzoegerungGemeldetAm === undefined && marker.verzoegert !== undefined) {
+    status.verzoegerungGemeldetAm = marker.verzoegert;
   }
   mkdirSync(ordner, { recursive: true });
   try {
@@ -217,11 +248,16 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
         daten.kundenname,
         daten.bestellnummer,
         { agb: `${basis}/agb`, widerruf: `${basis}/widerrufsbelehrung` },
-        erstkunde ? 'kostenlos im Erstkunden-Programm (gegen Feedback, siehe docs/ERSTKUNDEN)' : undefined,
+        erstkunde ? 'kostenlos im Erstkunden-Programm – als Dank bitten wir nach dem Prüfbericht um Ihr kurzes Feedback' : undefined,
       );
       await deps.sendeMail({ an: daten.email, betreff: bestaetigung.betreff, text: bestaetigung.text }, ordner);
       status.bestaetigungGesendetAm = deps.jetzt().toISOString();
       speichereStatus(ordner, status);
+      try {
+        await deps.setzeMarker(daten, { bestaetigt: status.bestaetigungGesendetAm });
+      } catch {
+        // Marker optional; Dateistatus trägt innerhalb der Instanz.
+      }
     }
     if (status.berichtDatei === undefined || !existsSync(status.berichtDatei)) {
       const bericht = await deps.erzeugeBericht(daten, ordner, deps.jetzt());
@@ -230,10 +266,14 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
       speichereStatus(ordner, status);
     }
     if (status.rechnungLink === undefined && daten.rechnungId !== undefined) {
-      const link = await deps.rechnungLink(daten.rechnungId);
-      if (link !== undefined) {
-        status.rechnungLink = link;
-        speichereStatus(ordner, status);
+      try {
+        const link = await deps.rechnungLink(daten.rechnungId);
+        if (link !== undefined) {
+          status.rechnungLink = link;
+          speichereStatus(ordner, status);
+        }
+      } catch {
+        // Rechnungslink ist optional – die Auslieferung darf daran nicht scheitern.
       }
     }
     const vorlage = berichtVersand(daten.kundenname, daten.bestellnummer, status.rechnungLink, daten.bestellnummer.startsWith('EK-'));
@@ -251,7 +291,7 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
     status.mailWeg = ergebnis.weg;
     speichereStatus(ordner, status);
     try {
-      await deps.markiereAusgeliefert(daten, status.mailVersendetAm);
+      await deps.setzeMarker(daten, { ausgeliefert: status.mailVersendetAm });
     } catch {
       // Markierung fehlgeschlagen: Dateistatus verhindert Doppelversand innerhalb der Instanz.
     }
@@ -266,6 +306,11 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
         await deps.sendeMail({ an: daten.email, betreff: info.betreff, text: info.text }, ordner);
         status.verzoegerungGemeldetAm = deps.jetzt().toISOString();
         speichereStatus(ordner, status);
+        try {
+          await deps.setzeMarker(daten, { verzoegert: status.verzoegerungGemeldetAm });
+        } catch {
+          // Marker optional.
+        }
       } catch {
         // Der Fehler steht bereits im Status; der Anbieter wird unten informiert.
       }

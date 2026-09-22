@@ -118,7 +118,7 @@ Fixture-Daten sind ausdrücklich Testdaten (synthetische, als solche gekennzeich
 
 ## 10. Golden-Ergebnisse (Stand data.version 0.4.0, calc.version 0.2.0, Stichtag 09/2026)
 
-Vertrag (a) rechnet mangels Unternehmenskennzahlen (`versichererId: unbekannt`) mit dem **Branchendurchschnitt** (als Schätzung markiert). Vertrag (b) nutzt ab 2011 die aus der BaFin-Tabelle 160 importierten Kennzahlen der Allianz Lebensversicherungs-AG (Nettoverzinsung Basis/Max, laufende Durchschnittsverzinsung Min), davor den Branchendurchschnitt. Fehlende Jahre 1996–1998 und 2025–2026 werden per Fallback überbrückt (Warnung `ZINSREIHE_LUECKE`). Im Min-Szenario gilt für Branchenjahre ab 2011 der kleinere Wert aus Branchen-Nettoverzinsung und Branchen-laufender Verzinsung. Die mit data.version 0.4.0 ergänzten Allianz-Werte 1995/1996 (Geschäftsbericht 1996) ändern das Ergebnis von Vertrag (b) nicht, weil in den Zillmer-Jahren 1995–1997 kein Sparanteil verzinst wird.
+Vertrag (a) rechnet mangels Unternehmenskennzahlen (`versichererId: unbekannt`) mit dem **Branchendurchschnitt** (als Schätzung markiert). Vertrag (b) nutzt ab 2011 die aus der BaFin-Tabelle 160 importierten Kennzahlen der Allianz Lebensversicherungs-AG (Nettoverzinsung Basis/Max, laufende Durchschnittsverzinsung Min), davor den Branchendurchschnitt. Fehlende Jahre 1996–1998 und 2025–2026 werden per Fallback überbrückt (Warnung `ZINSREIHE_LUECKE`). Im Min-Szenario gilt für Branchenjahre ab 2011 der kleinere Wert aus Branchen-Nettoverzinsung und Branchen-laufender Verzinsung. Die mit data.version 0.4.0 ergänzten Allianz-Werte 1995/1996 ändern Vertrag (b) nicht (Zillmer-Jahre ohne Sparanteil). **Korrektur 22.09.2026:** Der Lücken-Fallback verwendet jetzt den zeitlich nächstliegenden früheren Branchenwert zum jeweiligen Lückenjahr (2025/2026 → Branchenwert 2024) statt fälschlich des zuletzt benutzten Branchenjahres vor den Unternehmensjahren (2010) – dadurch sind die Nutzungen von Vertrag (b) gegenüber dem vorigen Stand gesunken.
 
 **Vertrag (a) – private RV, Beginn 12/2004, 1.200 € jährlich, 25.600 € eingezahlt, Rückkaufswert 39.857 €:**
 
@@ -134,8 +134,8 @@ Bewertung: In allen drei Szenarien liegt der Rückabwicklungswert **unter** dem 
 
 | Szenario | erstattungsfähige Beiträge | Nutzungen | Rückabwicklungswert | Mehrwert ggü. Kündigung |
 |---|---|---|---|---|
-| Min | 395.509,50 € | 219.540,74 € | 615.050,24 € | +304.392,24 € |
-| Basis | 413.087,70 € | 246.462,66 € | 659.550,36 € | **+348.892,36 €** |
-| Max | 426.271,35 € | 262.284,67 € | 688.556,02 € | +377.898,02 € |
+| Min | 395.509,50 € | 201.049,94 € | 596.559,44 € | +285.901,44 € |
+| Basis | 413.087,70 € | 226.507,98 € | 639.595,68 € | **+328.937,68 €** |
+| Max | 426.271,35 € | 241.186,42 € | 667.457,77 € | +356.799,77 € |
 
 Bewertung: Deutlicher rechnerischer Mehrwert in allen Szenarien (Nutzungen 55,5–61,5 % der Beiträge – getragen von den hohen Nettoverzinsungen der 1990er/2000er und den über dem Branchendurchschnitt liegenden Allianz-Werten ab 2011). Gegenüber data.version 0.1.0 (nur Branchendurchschnitt) sind die Nutzungen im Basis-Szenario um rund 35.000 € gestiegen; der Bericht weist den Anteil der Nutzungen aus Unternehmens-, Branchen- und Näherungswerten aus („Datenbasis der Nutzungen“). Im Bericht zwingend mit Annahmenliste (pauschaler Risikoanteil, Branchendurchschnitt vor 2011, Zins-Lücken) und ohne Anspruchszusage auszuweisen.

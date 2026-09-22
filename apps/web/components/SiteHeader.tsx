@@ -3,9 +3,10 @@ import { BRAND } from '@/config/brand';
 import { VARIANTE } from '@/config/variante';
 
 export function SiteHeader() {
+  const beta = (process.env['BETA_PASSWORT'] ?? '') !== '';
   return (
     <>
-      <p className="vorab-banner">Beta-Version – nur mit Passwort erreichbar, noch nicht freigeschaltet.</p>
+      {beta && <p className="vorab-banner">Beta-Version – nur mit Passwort erreichbar, noch nicht freigeschaltet.</p>}
       <header className="kopf">
         <div className="container kopf-innen">
           <Link href="/" className="marke">

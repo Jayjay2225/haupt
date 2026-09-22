@@ -220,11 +220,20 @@ export function validiereSchritt(
       }
       if (draft.ende !== '' && !MONAT_MUSTER.test(draft.ende)) {
         fehler['ende'] = 'Bitte Monat und Jahr angeben (zum Beispiel 03/2030) oder das Feld leer lassen.';
+      } else if (draft.ende !== '' && MONAT_MUSTER.test(draft.beginn) && draft.ende < draft.beginn) {
+        fehler['ende'] =
+          'Das geplante Ende liegt vor dem Beginn. Zweistellige Jahre wie „35“ lesen wir als 1935 – bitte das Jahr vierstellig angeben.';
       }
       if (draft.status === '') {
         fehler['status'] = 'Bitte auswählen, wie es um den Vertrag steht.';
       } else if (draft.status !== 'laufend' && !MONAT_MUSTER.test(draft.statusDatum)) {
         fehler['statusDatum'] = 'Bitte angeben, seit wann bzw. zu wann das gilt – Monat und Jahr, zum Beispiel 03/2015.';
+      } else if (
+        draft.status !== 'laufend' &&
+        MONAT_MUSTER.test(draft.beginn) &&
+        draft.statusDatum < draft.beginn
+      ) {
+        fehler['statusDatum'] = 'Dieses Datum liegt vor dem Vertragsbeginn – bitte prüfen (Jahr vierstellig?).';
       }
       break;
     }
@@ -247,6 +256,12 @@ export function validiereSchritt(
       pruefeBetragsfeld(fehler, 'gesamtsummeLautMitteilung', draft.gesamtsummeLautMitteilung, false, '');
       if (draft.beitragszahlungBis !== '' && !MONAT_MUSTER.test(draft.beitragszahlungBis)) {
         fehler['beitragszahlungBis'] = 'Bitte Monat und Jahr angeben (zum Beispiel 03/2015) oder das Feld leer lassen.';
+      } else if (
+        draft.beitragszahlungBis !== '' &&
+        MONAT_MUSTER.test(draft.beginn) &&
+        draft.beitragszahlungBis < draft.beginn
+      ) {
+        fehler['beitragszahlungBis'] = 'Dieses Datum liegt vor dem Vertragsbeginn – bitte prüfen (Jahr vierstellig?).';
       }
       break;
     }

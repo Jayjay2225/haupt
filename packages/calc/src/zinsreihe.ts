@@ -84,7 +84,6 @@ export function loeseZinsreihe(
   }
 
   let brancheJahreGenutzt = 0;
-  let letzterBranchenwert: { jahr: number; wert: number } | undefined;
 
   for (let jahr = jahrVon; jahr <= jahrBis; jahr += 1) {
     const kennzahlen = versichererBekannt ? kennzahlenFuerJahr(daten, versichererId, jahr) : undefined;
@@ -113,25 +112,25 @@ export function loeseZinsreihe(
       }
       jahre.push({ jahr, satzProzent: satz, herkunft: 'branche', quelle });
       brancheJahreGenutzt += 1;
-      letzterBranchenwert = { jahr, wert: satz };
       continue;
     }
 
-    if (letzterBranchenwert === undefined) {
-      // Auch rückwärts nach dem nächstliegenden Branchenwert suchen.
-      for (let suchJahr = jahr - 1; suchJahr >= jahrVon - 30; suchJahr -= 1) {
-        const kandidat = daten.branchendurchschnitt.nettoverzinsung[String(suchJahr)];
-        if (kandidat !== undefined) {
-          letzterBranchenwert = { jahr: suchJahr, wert: kandidat.wert };
-          break;
-        }
+    // Lücke: den zeitlich nächstliegenden FRÜHEREN Branchenwert zu DIESEM Jahr
+    // verwenden – nicht den zuletzt zufällig benutzten (der kann bei
+    // Unternehmensjahren dazwischen Jahrzehnte zurückliegen).
+    let fallback: { jahr: number; wert: number } | undefined;
+    for (let suchJahr = jahr - 1; suchJahr >= jahrVon - 30; suchJahr -= 1) {
+      const kandidat = daten.branchendurchschnitt.nettoverzinsung[String(suchJahr)];
+      if (kandidat !== undefined) {
+        fallback = { jahr: suchJahr, wert: kandidat.wert };
+        break;
       }
     }
-    if (letzterBranchenwert !== undefined) {
-      jahre.push({ jahr, satzProzent: letzterBranchenwert.wert, herkunft: 'fallback' });
+    if (fallback !== undefined) {
+      jahre.push({ jahr, satzProzent: fallback.wert, herkunft: 'fallback' });
       warnungen.push({
         code: 'ZINSREIHE_LUECKE',
-        text: `Für ${jahr} liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert ${letzterBranchenwert.jahr} (${letzterBranchenwert.wert} %) verwendet.`,
+        text: `Für ${jahr} liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert ${fallback.jahr} (${fallback.wert} %) verwendet.`,
       });
     } else {
       throw new Error(

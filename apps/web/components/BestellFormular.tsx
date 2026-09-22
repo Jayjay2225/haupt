@@ -29,12 +29,10 @@ export function BestellFormular() {
   const [fehler, setFehler] = useState<BestellFehler>({});
   const [laeuft, setLaeuft] = useState(false);
   const [freischaltcode, setFreischaltcode] = useState('');
-  // Spam-Schutz: unsichtbares Feld (nur Bots füllen es) und Startzeit des Formulars.
+  // Spam-Schutz: unsichtbares Feld (nur Bots füllen es aus).
   const [honig, setHonig] = useState('');
-  const [gestartet, setGestartet] = useState(0);
 
   useEffect(() => {
-    setGestartet(Date.now());
     const gespeichert = ladeDraft();
     setDraft(gespeichert);
     setFormular(bestellformularAusDraft(gespeichert));
@@ -55,7 +53,7 @@ export function BestellFormular() {
       const antwort = await fetch('/api/bestellung', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ draft, ...formular, freischaltcode: freischaltcode.trim(), firma_webseite: honig, gestartet }),
+        body: JSON.stringify({ draft, ...formular, freischaltcode: freischaltcode.trim(), firma_webseite: honig }),
       });
       const daten = (await antwort.json()) as { url?: string; erstkunde?: boolean; fehler?: BestellFehler };
       if (antwort.ok && daten.erstkunde === true) {
@@ -112,7 +110,7 @@ export function BestellFormular() {
           <tr>
             <th scope="row">Beitrag</th>
             <td>
-              {draft.erstbeitrag} {draft.erstbeitragWaehrung}
+              {draft.erstbeitrag !== '' ? draft.erstbeitrag : draft.aktuellerBeitrag} {draft.erstbeitragWaehrung}
               {draft.zahlweise !== '' ? `, ${ZAHLWEISE_LABEL[draft.zahlweise]}` : ''}
             </td>
           </tr>

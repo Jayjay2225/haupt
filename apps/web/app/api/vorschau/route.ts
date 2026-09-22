@@ -46,12 +46,12 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   const draft = uebernehmeBekannteFelder(roh as Record<string, unknown>);
   const stichtag = new Date().toISOString().slice(0, 7);
-  const abbildung = draftZuEingaben(draft, findeVersichererId, stichtag);
-  if (abbildung.fehler.length > 0) {
-    return NextResponse.json({ fehler: abbildung.fehler.join(' ') }, { status: 422 });
-  }
-
   try {
+    const abbildung = draftZuEingaben(draft, findeVersichererId, stichtag);
+    if (abbildung.fehler.length > 0) {
+      return NextResponse.json({ fehler: abbildung.fehler.join(' ') }, { status: 422 });
+    }
+
     const eligibility = pruefeEignung(abbildung.eligibility, regelwerk);
     const calc = berechneRueckabwicklung(abbildung.contract, insurersDaten, riskDefaults);
 
@@ -65,7 +65,12 @@ export async function POST(request: Request): Promise<NextResponse> {
       });
     }
 
-    const ampel = bestimmeWirtschaftlicheAmpel(calc, eligibility, Number(abbildung.contract.beginn.slice(0, 4)));
+    const ampel = bestimmeWirtschaftlicheAmpel(
+      calc,
+      eligibility,
+      Number(abbildung.contract.beginn.slice(0, 4)),
+      abbildung.contract.status,
+    );
     return NextResponse.json({
       variante: 'privat',
       ampel,

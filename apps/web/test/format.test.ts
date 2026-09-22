@@ -7,6 +7,11 @@ describe('parseDecimalDe', () => {
     expect(parseDecimalDe('439.455')).toBe(439455);
     expect(parseDecimalDe('1200')).toBe(1200);
     expect(parseDecimalDe('0,5')).toBe(0.5);
+    // englischer Dezimalpunkt (1–2 Nachkommastellen) wird als Komma gelesen
+    expect(parseDecimalDe('12345.67')).toBe(12345.67);
+    expect(parseDecimalDe('89.5')).toBe(89.5);
+    // drei Ziffern nach dem Punkt bleiben Tausendertrennung
+    expect(parseDecimalDe('439.455')).toBe(439455);
   });
 
   it('toleriert €-Zeichen und Leerzeichen', () => {

@@ -284,8 +284,9 @@ export default function Startseite() {
           <details>
             <summary>Was passiert mit meinen Daten?</summary>
             <p>
-              Ihre Eingaben bleiben in Ihrem Browser, bis Sie sie abschicken; gerechnet wird ohne
-              Speicherung. Weitergegeben wird nichts ohne Ihr ausdrückliches Ja. Einzelheiten in der{' '}
+              Ihre Eingaben bleiben auf Ihrem Gerät gespeichert, bis Sie sie auf der Ergebnis-Seite
+              löschen. Zum Rechnen werden sie einmal übertragen und dabei nicht gespeichert.
+              Weitergegeben wird nichts ohne Ihr ausdrückliches Ja. Einzelheiten in der{' '}
               <Link href="/datenschutz">Datenschutzerklärung</Link>.
             </p>
           </details>

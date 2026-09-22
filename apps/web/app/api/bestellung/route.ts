@@ -14,17 +14,16 @@ import { uebernehmeBekannteFelder } from '@/lib/draft';
 import { findeVersichererId, insurersDaten } from '@/lib/insurers-data';
 import { begrenzt, clientSchluessel } from '@/lib/ratenlimit';
 import { erfuelleBestellung, erzeugeBericht } from '@/lib/erfuellung';
-import { markiereCodeVerwendet, pruefeFreischaltcode } from '@/lib/erstkunden';
+import { entferneCodeVerwendet, markiereCodeVerwendet, pruefeFreischaltcode } from '@/lib/erstkunden';
 import { fallAlsMetadaten } from '@/lib/fall-kodierung';
 import { sendeMail } from '@/lib/versand';
 import { bestellungAktiv, erstelleCheckoutSitzung } from '@/lib/zahlung';
 
 export const runtime = 'nodejs';
+// Erstkunden-Pfad erzeugt das PDF synchron (Chromium-Kaltstart eingerechnet).
+export const maxDuration = 60;
 
 const riskDefaults = riskJson as unknown as RiskDefaults;
-
-/** Schneller als drei Sekunden füllt kein Mensch das Bestellformular aus. */
-const MINDESTZEIT_MS = 3000;
 
 export async function POST(request: Request): Promise<NextResponse> {
   let roh: unknown;
@@ -41,10 +40,9 @@ export async function POST(request: Request): Promise<NextResponse> {
   if (typeof eingabe['firma_webseite'] === 'string' && eingabe['firma_webseite'] !== '') {
     return NextResponse.json({ fehler: { fall: 'Ungültige Anfrage.' } }, { status: 400 });
   }
-  const gestartet = typeof eingabe['gestartet'] === 'number' ? eingabe['gestartet'] : 0;
-  if (gestartet > 0 && Date.now() - gestartet < MINDESTZEIT_MS) {
-    return NextResponse.json({ fehler: { fall: 'Bitte einen Moment warten und dann erneut senden.' } }, { status: 429 });
-  }
+  // (Eine Mindest-Ausfüllzeit über die Client-Uhr wurde entfernt: Bots lassen das
+  // Feld einfach weg, und ein Uhrenversatz sperrt echte Kundschaft aus. Es bleiben
+  // Honigtopf und Ratenbegrenzung.)
   if (begrenzt(`bestellung:${clientSchluessel(request)}`, 10, 60 * 60 * 1000)) {
     return NextResponse.json({ fehler: { fall: 'Zu viele Versuche. Bitte in einer Stunde erneut versuchen.' } }, { status: 429 });
   }
@@ -70,12 +68,20 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   // Gibt es für diesen Vertrag schon eine Berichtsvorlage? Sonst nichts verkaufen.
-  const abbildung = draftZuEingaben(draft, findeVersichererId, new Date().toISOString().slice(0, 7));
-  if (abbildung.fehler.length > 0) {
-    return NextResponse.json({ fehler: { fall: abbildung.fehler.join(' ') } }, { status: 422 });
+  let regime: string;
+  try {
+    const abbildung = draftZuEingaben(draft, findeVersichererId, new Date().toISOString().slice(0, 7));
+    if (abbildung.fehler.length > 0) {
+      return NextResponse.json({ fehler: { fall: abbildung.fehler.join(' ') } }, { status: 422 });
+    }
+    regime = berechneRueckabwicklung(abbildung.contract, insurersDaten, riskDefaults).regime;
+  } catch {
+    return NextResponse.json(
+      { fehler: { fall: 'Die Angaben zur Police lassen sich so nicht durchrechnen. Bitte prüfen Sie Beginn, Beitrag und Daten im Rechner.' } },
+      { status: 422 },
+    );
   }
-  const calc = berechneRueckabwicklung(abbildung.contract, insurersDaten, riskDefaults);
-  if (calc.regime !== 'alt-policenmodell') {
+  if (regime !== 'alt-policenmodell') {
     return NextResponse.json(
       {
         fehler: {
@@ -88,6 +94,10 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   // Erstkunden-Programm: gültiger Code → Prüfbericht kostenlos, direkte Auslieferung.
   if (freischaltcode !== '') {
+    // Enger als die allgemeine Bremse: Gratis-PDF + Mail sind teuer und missbrauchbar.
+    if (begrenzt(`erstkunde:${clientSchluessel(request)}`, 3, 60 * 60 * 1000)) {
+      return NextResponse.json({ fehler: { fall: 'Zu viele Versuche mit Freischaltcode. Bitte später erneut.' } }, { status: 429 });
+    }
     const stand = pruefeFreischaltcode(freischaltcode);
     if (stand !== 'gueltig') {
       return NextResponse.json(
@@ -96,6 +106,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
     }
     const code = freischaltcode.toUpperCase();
+    // Code SOFORT reservieren (Check-then-act-Fenster schließen); bei Fehlschlag wieder freigeben.
+    markiereCodeVerwendet(code);
     const bestellnummer = `EK-${code}`;
     const status = await erfuelleBestellung(
       {
@@ -109,14 +121,15 @@ export async function POST(request: Request): Promise<NextResponse> {
         erzeugeBericht,
         sendeMail,
         rechnungLink: async () => undefined,
-        istAusgeliefert: async () => false,
-        markiereAusgeliefert: async () => markiereCodeVerwendet(code),
+        holeMarker: async () => ({}),
+        setzeMarker: async () => {},
         jetzt: () => new Date(),
       },
     );
     if (status.mailVersendetAm !== undefined) {
       return NextResponse.json({ erstkunde: true, bestellnummer });
     }
+    entferneCodeVerwendet(code);
     return NextResponse.json(
       { fehler: { fall: 'Der Prüfbericht ließ sich gerade nicht erstellen. Ihr Code bleibt gültig; wir haben eine Meldung erhalten und melden uns.' } },
       { status: 502 },

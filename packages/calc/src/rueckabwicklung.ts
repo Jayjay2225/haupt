@@ -253,7 +253,10 @@ export function berechneRueckabwicklung(
       (input.status === 'laufend' || input.status === 'beitragsfrei') &&
       input.rueckkaufswert !== undefined
     ) {
-      ergebnis.mehrwertGegenKuendigung = rund(rueckabwicklungswert - input.rueckkaufswert.betrag);
+      // Vergleichsmaßstab ist der NETTO-Anspruch: Erhaltene Auszahlungen sind bei
+      // der Rückabwicklung (aufgezinst) gegenzurechnen; bei der Kündigung behielte
+      // der Kunde sie ebenfalls und bekäme den (bereits geminderten) Rückkaufswert.
+      ergebnis.mehrwertGegenKuendigung = rund(nettoanspruch - input.rueckkaufswert.betrag);
       if (name === 'basis') {
         ergebnis.wirtschaftlichKeinVorteil = ergebnis.mehrwertGegenKuendigung <= 0;
       }

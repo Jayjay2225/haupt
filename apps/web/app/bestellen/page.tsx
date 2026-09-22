@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { BestellFormular } from '@/components/BestellFormular';
 import { BERICHT_PREIS_BRUTTO_EUR, ZAHLUNG } from '@/config/business';
 import { VARIANTE } from '@/config/variante';
+import { erstkundenCodes } from '@/lib/erstkunden';
 import { bestellungAktiv } from '@/lib/zahlung';
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default async function BestellenSeite({ searchParams }: { searchParams: P
   }
   const { abgebrochen } = await searchParams;
   const aktiv = bestellungAktiv();
+  const erstkundenOffen = erstkundenCodes().size > 0;
   return (
     <div className="container schmal abschnitt">
       <h1>
@@ -40,7 +42,15 @@ export default async function BestellenSeite({ searchParams }: { searchParams: P
           <li>{ZAHLUNG.lieferung}</li>
         </ol>
       </section>
-      {aktiv ? (
+      {!aktiv && erstkundenOffen && (
+        <div className="hinweis neutral">
+          <p>
+            Die Bezahlung ist noch nicht freigeschaltet – mit einem Freischaltcode aus dem
+            Erstkunden-Programm können Sie den Prüfbericht trotzdem kostenlos anfordern.
+          </p>
+        </div>
+      )}
+      {aktiv || erstkundenOffen ? (
         <BestellFormular />
       ) : (
         <div className="hinweis">

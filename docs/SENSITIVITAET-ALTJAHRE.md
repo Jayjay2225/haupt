@@ -1,11 +1,11 @@
 # Sensitivität der Altjahre (vor 2004)
 
-Automatisch erzeugt von `scripts/sensitivitaet-altjahre.ts` am 2026-09-18 aus `data/insurers.json` (data.version 0.4.0). Frage: Wie stark ändern sich die Nutzungen des **Basis-Szenarios**, wenn alle Zinswerte der Jahre vor 2004 um ±1 Prozentpunkt verschoben werden? Das misst, wie viel an der Beschaffung unternehmensindividueller Altjahres-Werte hängt.
+Automatisch erzeugt von `scripts/sensitivitaet-altjahre.ts` am 2026-09-22 aus `data/insurers.json` (data.version 0.4.0). Frage: Wie stark ändern sich die Nutzungen des **Basis-Szenarios**, wenn alle Zinswerte der Jahre vor 2004 um ±1 Prozentpunkt verschoben werden? Das misst, wie viel an der Beschaffung unternehmensindividueller Altjahres-Werte hängt.
 
 | Vertrag | Nutzungen Basis | −1 Pp vor 2004 | +1 Pp vor 2004 | Änderung | Anteil Nutzungen aus Jahren vor 2004* |
 |---|---|---|---|---|---|
 | Golden (a): private RV 12/2004, 1.200 €/Jahr, laufend | 11.474 € | 11.474 € | 11.474 € | ±0,0 % | 0,0 % |
-| Golden (b): Kapital-LV 10/1995, Dynamik, laufend (Allianz) | 246.463 € | 243.386 € | 249.648 € | ±1,3 % | 2,5 % |
+| Golden (b): Kapital-LV 10/1995, Dynamik, laufend (Allianz) | 226.508 € | 223.532 € | 229.590 € | ±1,4 % | 2,7 % |
 | Laufend mit Dynamik: Kapital-LV 03/1996, 200 DM/Monat, 3 % Dynamik | 35.059 € | 34.431 € | 35.712 € | ±1,9 % | 3,9 % |
 | Laufend ohne Dynamik: Kapital-LV 09/1999, 150 €/Monat | 28.307 € | 28.092 € | 28.525 € | ±0,8 % | 1,5 % |
 | Beitragsfrei seit 2006: Kapital-LV 01/1997, 300 DM/Monat | 26.095 € | 24.975 € | 27.266 € | ±4,5 % | 9,4 % |

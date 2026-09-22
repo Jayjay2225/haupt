@@ -12,6 +12,7 @@
     "@rueckab/calc": "workspace:*",
     "@rueckab/eligibility": "workspace:*",
     "@rueckab/report": "workspace:*",
+    "@sparticuz/chromium": "153.0.0",
     "next": "^15.5.0",
     "playwright-core": "^1.63.0",
     "react": "^19.0.0",

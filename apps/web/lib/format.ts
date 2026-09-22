@@ -23,6 +23,12 @@ export function parseDecimalDe(eingabe: string): number | null {
   if (bereinigt === '') {
     return null;
   }
+  // Ein einzelner Punkt mit ein bis zwei Nachkommastellen ist ein (englischer)
+  // Dezimalpunkt, kein Tausendertrennzeichen: „12345.67“ → 12345,67.
+  if (/^-?\d+\.\d{1,2}$/.test(bereinigt)) {
+    const direkt = Number(bereinigt);
+    return Number.isFinite(direkt) ? direkt : null;
+  }
   if (!/^-?[\d.]*,?\d*$/.test(bereinigt) || !/\d/.test(bereinigt)) {
     return null;
   }
