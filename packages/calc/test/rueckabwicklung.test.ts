@@ -3,41 +3,28 @@ import { berechneRueckabwicklung } from '../src/rueckabwicklung';
 import { zinseAuf } from '../src/nutzungen';
 import { monatsIndex } from '../src/monat';
 import { riskDefaults, testDaten, vertrag } from './fixtures';
-import type { CalcResultAlt, ContractInput } from '../src/types';
+import type { CalcResult, ContractInput } from '../src/types';
 
 const daten = testDaten();
 const defaults = riskDefaults();
 
-function alt(input: ContractInput): CalcResultAlt {
-  const ergebnis = berechneRueckabwicklung(input, daten, defaults);
-  if (ergebnis.regime !== 'alt-policenmodell') {
-    throw new Error(`Unerwartetes Regime: ${ergebnis.regime}`);
-  }
-  return ergebnis;
+function alt(input: ContractInput): CalcResult {
+  return berechneRueckabwicklung(input, daten, defaults);
 }
 
-describe('Regime-Bestimmung', () => {
-  it('lehnt Verträge vor dem 29.07.1994 ab', () => {
-    const ergebnis = berechneRueckabwicklung(vertrag({ beginn: '1994-06' }), daten, defaults);
-    expect(ergebnis.regime).toBe('vor-1994');
+describe('Eine Formel für alle Jahrgänge (Prompt 12)', () => {
+  it('rechnet Verträge vor 1994 mit derselben Szenariorechnung durch', () => {
+    const ergebnis = alt(vertrag({ beginn: '1990-06', stichtag: '2000-01' }));
+    expect(ergebnis.szenarien.basis.rueckabwicklungswert).toBeGreaterThan(0);
+    expect(ergebnis.jahrestabelle[0]?.jahr).toBe(1990);
   });
 
-  it('warnt beim Grenzmonat Juli 1994', () => {
-    const ergebnis = alt(vertrag({ beginn: '1994-07', stichtag: '2000-01' }));
-    expect(ergebnis.warnungen.some((w) => w.code === 'GRENZMONAT')).toBe(true);
-  });
-
-  it('liefert für Verträge ab 2008 die vereinfachte Widerrufs-Darstellung', () => {
-    const ergebnis = berechneRueckabwicklung(
+  it('rechnet Verträge ab 2008 mit derselben Szenariorechnung durch', () => {
+    const ergebnis = alt(
       vertrag({ beginn: '2010-01', stichtag: '2020-01', rueckkaufswert: { betrag: 5000 } }),
-      daten,
-      defaults,
     );
-    expect(ergebnis.regime).toBe('neu-2008');
-    if (ergebnis.regime === 'neu-2008') {
-      expect(ergebnis.vergleich.praemienErstesJahr).toBeCloseTo(1200, 2);
-      expect(ergebnis.vergleich.rueckkaufswert).toBe(5000);
-    }
+    expect(ergebnis.szenarien.basis.rueckabwicklungswert).toBeGreaterThan(0);
+    expect(ergebnis.szenarien.basis.mehrwertGegenKuendigung).toBeDefined();
   });
 });
 

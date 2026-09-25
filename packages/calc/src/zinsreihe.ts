@@ -110,14 +110,16 @@ export function loeseZinsreihe(
         satz = brancheLaufend.wert;
         quelle = brancheLaufend.quelle;
       }
-      jahre.push({ jahr, satzProzent: satz, herkunft: 'branche', quelle });
+      jahre.push({ jahr, satzProzent: satz, herkunft: 'branche', kennzeichen: 'estimated_branch', quelle });
       brancheJahreGenutzt += 1;
       continue;
     }
 
     // Lücke: den zeitlich nächstliegenden FRÜHEREN Branchenwert zu DIESEM Jahr
     // verwenden – nicht den zuletzt zufällig benutzten (der kann bei
-    // Unternehmensjahren dazwischen Jahrzehnte zurückliegen).
+    // Unternehmensjahren dazwischen Jahrzehnte zurückliegen). Gibt es keinen
+    // früheren (Lücke am Reihenanfang), wird der nächstliegende SPÄTERE
+    // Branchenwert genommen – ebenfalls mit Warnung und Kennzeichen.
     let fallback: { jahr: number; wert: number } | undefined;
     for (let suchJahr = jahr - 1; suchJahr >= jahrVon - 30; suchJahr -= 1) {
       const kandidat = daten.branchendurchschnitt.nettoverzinsung[String(suchJahr)];
@@ -126,8 +128,17 @@ export function loeseZinsreihe(
         break;
       }
     }
+    if (fallback === undefined) {
+      for (let suchJahr = jahr + 1; suchJahr <= jahrBis + 30; suchJahr += 1) {
+        const kandidat = daten.branchendurchschnitt.nettoverzinsung[String(suchJahr)];
+        if (kandidat !== undefined) {
+          fallback = { jahr: suchJahr, wert: kandidat.wert };
+          break;
+        }
+      }
+    }
     if (fallback !== undefined) {
-      jahre.push({ jahr, satzProzent: fallback.wert, herkunft: 'fallback' });
+      jahre.push({ jahr, satzProzent: fallback.wert, herkunft: 'fallback', kennzeichen: 'estimated_branch' });
       warnungen.push({
         code: 'ZINSREIHE_LUECKE',
         text: `Für ${jahr} liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert ${fallback.jahr} (${fallback.wert} %) verwendet.`,

@@ -9,13 +9,15 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type Stripe from 'stripe';
 import { berechneRueckabwicklung } from '@rueckab/calc';
-import type { CalcResultAlt, RiskDefaults } from '@rueckab/calc';
+import type { RiskDefaults } from '@rueckab/calc';
 import { pruefeEignung } from '@rueckab/eligibility';
 import type { Regelwerk } from '@rueckab/eligibility';
 import { formatDatum, htmlZuPdf, renderBerichtHtml } from '@rueckab/report';
 import riskJson from '../../../data/risk-defaults.json';
 import rulesJson from '../../../data/legal-rules.json';
+import { AMPEL } from '@/config/ampel';
 import { BRAND } from '@/config/brand';
+import { VARIANTE } from '@/config/variante';
 import { draftZuEingaben } from './berechnung';
 import { berichtVerzoegert, berichtVersand, internerFehlerHinweis, vertragsbestaetigung } from './emails';
 import { fallAusMetadaten } from './fall-kodierung';
@@ -138,9 +140,6 @@ export async function erzeugeBericht(daten: SitzungsDaten, ordner: string, jetzt
     throw new Error(`Falldaten unvollständig: ${abbildung.fehler.join(' ')}`);
   }
   const calc = berechneRueckabwicklung(abbildung.contract, insurersDaten, riskDefaults);
-  if (calc.regime !== 'alt-policenmodell') {
-    throw new Error(`Für das Regime „${calc.regime}“ gibt es noch keine Berichtsvorlage.`);
-  }
   const eligibility = pruefeEignung(abbildung.eligibility, regelwerk);
   const versicherer = versichererNachId(abbildung.contract.versichererId);
   const html = renderBerichtHtml({
@@ -150,8 +149,11 @@ export async function erzeugeBericht(daten: SitzungsDaten, ordner: string, jetzt
     erstelltAm: heute,
     versichererAnzeigename: versicherer?.kanonischerName ?? 'nicht benannt (Branchendurchschnitt)',
     contract: abbildung.contract,
-    calc: calc as CalcResultAlt,
+    calc,
     eligibility,
+    // Verbraucherprodukt ohne Belehrungsbewertung; Ampel-Schwelle aus config/ampel.ts.
+    belehrungsCheck: VARIANTE.belehrungsCheck,
+    ampelSchwellen: { mehrwertMinAbsolut: AMPEL.gruen.mehrwertMinAbsolut },
   });
   mkdirSync(ordner, { recursive: true });
   const basisname = `${BRAND.produktname.replace(/\s+/g, '-')}_${daten.bestellnummer}`;

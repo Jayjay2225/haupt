@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { berechneRueckabwicklung } from '../src/rueckabwicklung';
-import type { CalcResultAlt, ContractInput, InsurersDaten, RiskDefaults } from '../src/types';
+import type { CalcResult, ContractInput, InsurersDaten, RiskDefaults } from '../src/types';
 import insurersJson from '../../../data/insurers.json';
 import riskJson from '../../../data/risk-defaults.json';
 
@@ -46,15 +46,11 @@ const vertragB: ContractInput = {
   stichtag: '2026-09',
 };
 
-function alt(input: ContractInput): CalcResultAlt {
-  const ergebnis = berechneRueckabwicklung(input, daten, defaults);
-  if (ergebnis.regime !== 'alt-policenmodell') {
-    throw new Error(`Unerwartetes Regime: ${ergebnis.regime}`);
-  }
-  return ergebnis;
+function alt(input: ContractInput): CalcResult {
+  return berechneRueckabwicklung(input, daten, defaults);
 }
 
-function szenarienKompakt(e: CalcResultAlt) {
+function szenarienKompakt(e: CalcResult) {
   return Object.fromEntries(
     (['min', 'basis', 'max'] as const).map((name) => {
       const s = e.szenarien[name];
@@ -135,24 +131,24 @@ describe('Golden-Vertrag (b): Kapitallebensversicherung 10/1995 mit Dynamik', ()
       {
         "basis": {
           "erstattung": 413087.7,
-          "mehrwertGegenKuendigung": 328937.68,
-          "nutzungen": 226507.98,
+          "mehrwertGegenKuendigung": 328940.15,
+          "nutzungen": 226510.45,
           "nutzungenProzent": 51.5,
-          "rueckabwicklungswert": 639595.68,
+          "rueckabwicklungswert": 639598.15,
         },
         "max": {
           "erstattung": 426271.35,
-          "mehrwertGegenKuendigung": 356799.77,
-          "nutzungen": 241186.42,
+          "mehrwertGegenKuendigung": 356803.91,
+          "nutzungen": 241190.56,
           "nutzungenProzent": 54.9,
-          "rueckabwicklungswert": 667457.77,
+          "rueckabwicklungswert": 667461.91,
         },
         "min": {
           "erstattung": 395509.5,
-          "mehrwertGegenKuendigung": 285901.44,
-          "nutzungen": 201049.94,
-          "nutzungenProzent": 45.7,
-          "rueckabwicklungswert": 596559.44,
+          "mehrwertGegenKuendigung": 285902.33,
+          "nutzungen": 201050.83,
+          "nutzungenProzent": 45.8,
+          "rueckabwicklungswert": 596560.33,
         },
       }
     `);

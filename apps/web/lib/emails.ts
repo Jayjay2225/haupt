@@ -1,11 +1,10 @@
 /**
- * E-Mail-Vorlagen (Prompt 8, Aufgabe 1 – Tonalität) für Bestätigung, Bericht,
- * Erinnerung und „Später weitermachen“. Reine Textbausteine; der Versand
- * (Double-Opt-in, Anbieter) ist noch nicht angebunden. Alle Texte laufen
- * durch den Verbotslisten-Test (test/wording.test.ts).
+ * E-Mail-Vorlagen (Prompt 12, Abschnitt 3.4). Reine Textbausteine; der
+ * Versand läuft über lib/versand.ts. Alle Texte laufen durch den
+ * Wording-Test (test/wording.test.ts).
  */
 import { BRAND } from '@/config/brand';
-import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS } from '@/config/business';
+import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS, FORTSETZEN_TAGE } from '@/config/business';
 
 export interface EmailVorlage {
   betreff: string;
@@ -20,53 +19,52 @@ function abschluss(): string {
   return `Freundliche Grüße\nIhr Team von ${BRAND.name}\n${BRAND.kontaktEmail}\n\nAnbieter: ${BRAND.anbieter}. Diese E-Mail ist keine Rechtsberatung. Alle Werte sind Schätzungen mit Bandbreite.`;
 }
 
-/** Double-Opt-in: Bestätigung der E-Mail-Adresse. */
-export function bestaetigungAdresse(name: string, bestaetigungsLink: string): EmailVorlage {
+/** Ergebnis-Link nach dem Rechner (Deck 3.4). */
+export function ergebnisLink(link: string): EmailVorlage {
   return {
-    betreff: 'Bitte einmal bestätigen – dann kommt Ihre Ampel',
-    text: `${gruss(name)}
+    betreff: 'Ihre Ampel steht',
+    text: `Guten Tag,
 
-Sie haben bei ${BRAND.name} eine Police eingegeben. Damit wir Ihnen schreiben dürfen, bestätigen Sie bitte Ihre Adresse:
+Ihr Ergebnis wartet. Der Link ist ${FORTSETZEN_TAGE} Tage gültig.
 
-${bestaetigungsLink}
-
-Kein Klick, keine weitere E-Mail. So einfach.
+Ergebnis öffnen:
+${link}
 
 ${abschluss()}`,
   };
 }
 
-/** Ergebnis: Ampel ist da. */
-export function ampelFertig(name: string, ampelTitel: string, ergebnisLink: string): EmailVorlage {
+/** „Später weitermachen“ (Deck 3.4). */
+export function spaeterWeitermachen(name: string, link: string): EmailVorlage {
   return {
-    betreff: `Ihre Ampel steht: ${ampelTitel}`,
+    betreff: 'Weitermachen, wo Sie aufgehört haben',
     text: `${gruss(name)}
 
-wir haben Ihre Police durchgerechnet. Das Ergebnis: ${ampelTitel}
+Ihre Angaben sind noch da. Der Link stellt sie wieder her, auch auf einem anderen Gerät:
 
-Was das heißt und was Sie jetzt tun können, lesen Sie hier:
-${ergebnisLink}
+Fortsetzen:
+${link}
 
-Rot heißt Finger weg – das sagen wir Ihnen auch. Grün heißt: rechnen lohnt, versprechen können wir nichts.
+Der Link gilt ${FORTSETZEN_TAGE} Tage.
 
 ${abschluss()}`,
   };
 }
 
-/** Versand des kostenpflichtigen Berichts. */
+/** Versand des kostenpflichtigen Berichts (Deck 3.4: „Ihr Prüfbericht ist fertig“). */
 export function berichtVersand(name: string, aktenzeichen: string, rechnungLink?: string, erstkunde: boolean = false): EmailVorlage {
   const rechnung = erstkunde
-    ? 'Als Erstkunde zahlen Sie nichts. Im Gegenzug bitten wir Sie: Antworten Sie kurz auf diese E-Mail – war der Prüfbericht verständlich, hat er Ihnen weitergeholfen? Wenn Sie mögen, geben Sie uns ein Zitat mit Vorname, Alter und Bundesland frei; erst mit Ihrer dokumentierten Einwilligung zeigen wir es.'
+    ? 'Als Erstkunde zahlen Sie nichts. Im Gegenzug bitten wir Sie: Antworten Sie kurz auf diese E-Mail – war der Prüfbericht verständlich, hat er Ihnen weitergeholfen? Wenn Sie mögen, geben Sie uns ein Zitat mit Vorname, Alter und Vertragsart frei; erst mit Ihrer dokumentierten Einwilligung zeigen wir es.'
     : rechnungLink === undefined
       ? `Der Prüfbericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}; die Rechnung liegt bei bzw. folgt in einer eigenen E-Mail.`
       : `Der Prüfbericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}. Ihre Rechnung zum Herunterladen:\n${rechnungLink}`;
   return {
-    betreff: `Ihr Prüfbericht ${aktenzeichen} ist fertig`,
+    betreff: 'Ihr Prüfbericht ist fertig',
     text: `${gruss(name)}
 
-anbei Ihr Prüfbericht zum Policen-Check (Bestellnummer ${aktenzeichen}) als PDF.
+anbei Ihr Prüfbericht (Bestellnummer ${aktenzeichen}) als PDF.
 
-Darin: die Spanne in Euro, die Rechnung Jahr für Jahr, jede Zahl mit Quelle – und die Gegenposition des Versicherers. Drucken Sie ihn aus und nehmen Sie ihn mit zum Anwalt oder zu Ihrer Rechtsschutzversicherung. Oder antworten Sie einfach auf diese E-Mail – unsere Partner übernehmen den Rest. Ob Sie das wollen, entscheiden Sie.
+Darin: Ihre Zahl, Jahr für Jahr aufgeschlüsselt, jede Rendite mit Quelle – und die Gegenposition des Versicherers. Drucken Sie ihn aus und nehmen Sie ihn mit zum Anwalt oder zu Ihrer Rechtsschutzversicherung.
 
 ${rechnung}
 
@@ -88,7 +86,7 @@ export function vertragsbestaetigung(name: string, bestellnummer: string, links:
 vielen Dank für Ihre Bestellung bei ${BRAND.name}. Das ist Ihre Vertragsbestätigung – bitte aufbewahren.
 
 Bestellnummer: ${bestellnummer}
-Leistung: ${BRAND.produktname} – Prüfbericht (PDF) zur Rückabwicklung Ihrer Lebens- oder Rentenversicherung, gerechnet aus Ihren Angaben im Rechner. Schätzung mit Bandbreite, keine Rechtsberatung.
+Leistung: ${BRAND.produktname} (PDF) zu Ihrer Lebens- oder Rentenversicherung, gerechnet aus Ihren Angaben im Rechner. Schätzung mit Bandbreite, keine Rechtsberatung.
 Preis: ${preisText ?? `${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}, vorab bezahlt. Die Rechnung kommt gesondert.`}
 Anbieter: ${BRAND.anbieter}, ${a.strasse}, ${a.plz} ${a.ort}
 
@@ -109,7 +107,7 @@ export function berichtVerzoegert(name: string, bestellnummer: string): EmailVor
     betreff: `Ihre Zahlung ist eingegangen – Bericht ${bestellnummer} folgt`,
     text: `${gruss(name)}
 
-Ihre Zahlung für den Policen-Check (Bestellnummer ${bestellnummer}) ist eingegangen. Beim Erstellen des Berichts hakt es gerade technisch. Wir kümmern uns darum und schicken Ihnen den Bericht so schnell wie möglich – spätestens am nächsten Werktag.
+Ihre Zahlung für den Prüfbericht (Bestellnummer ${bestellnummer}) ist eingegangen. Beim Erstellen hakt es gerade technisch. Wir kümmern uns darum und schicken Ihnen den Bericht so schnell wie möglich – spätestens am nächsten Werktag.
 
 Sie müssen nichts tun. Fragen? Antworten Sie einfach auf diese E-Mail.
 
@@ -129,33 +127,13 @@ Rettungsweg: Stripe stellt das Webhook-Ereignis wegen der 500-Antwort automatisc
   };
 }
 
-/** Erinnerung, wenn der Rechner nicht abgeschlossen wurde. */
-export function erinnerung(name: string, rechnerLink: string): EmailVorlage {
+/** Anfrage zur individuellen Prüfung (Fonds, andere Jahrgänge, „Lieber persönlich?“). */
+export function anfrageEingegangen(name: string): EmailVorlage {
   return {
-    betreff: 'Ihre Police wartet – fünf Minuten fehlen noch',
+    betreff: 'Ihre Anfrage ist da',
     text: `${gruss(name)}
 
-Sie haben angefangen, Ihre Police einzugeben, und nicht zu Ende gerechnet. Kein Problem – Ihre Angaben sind noch da:
-
-${rechnerLink}
-
-Fünf Minuten, dann steht die Ampel. Wenn Sie nicht mehr wollen, tun Sie nichts. Wir schreiben dazu nicht noch einmal.
-
-${abschluss()}`,
-  };
-}
-
-/** Link zum Weitermachen (erst mit Persistenz aktiv). */
-export function spaeterWeitermachen(name: string, fortsetzenLink: string): EmailVorlage {
-  return {
-    betreff: 'Ihr Link zum Weitermachen',
-    text: `${gruss(name)}
-
-hier ist Ihr Link. Er stellt Ihre Eingaben wieder her, auch auf einem anderen Gerät:
-
-${fortsetzenLink}
-
-Der Link gilt 30 Tage. Danach löschen wir den Zwischenstand.
+Ihre Anfrage zur individuellen Prüfung ist angekommen. Wir sehen uns Ihren Vertrag an und melden uns per E-Mail – in der Regel innerhalb von zwei Werktagen.
 
 ${abschluss()}`,
   };

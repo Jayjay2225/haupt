@@ -171,3 +171,30 @@ Auftrag: Begründung der bisherigen Rot-Schaltung liefern und Urteile recherchie
 ## Stand 22.09.2026 – Ultracode-Code-Checkup: 22 bestätigte Funde behoben
 
 Sechs Prüf-Dimensionen, jede Meldung dreifach adversarial verifiziert (78 Agenten). Alle 22 bestätigten Funde behoben, dazu die eindeutigen aus der Rest-Liste – vollständige Tabelle in `docs/CHECKUP-2026-09-22.md`. Schwerste Punkte: Basic-Auth hätte den Stripe-Webhook blockiert; `@sparticuz/chromium` wäre auf Vercel falsch gebündelt gewesen (PDF-Erzeugung tot); kein automatischer Retry bei Auslieferungsfehlern; Erstkunden-Code-Race; Zinsreihen-Fallback nutzte 2010er-Branchenwert für 2025/26 (**Golden (b) korrigiert**: Basis-Rückabwicklungswert jetzt 639.595,68 €, CALC-SPEC §10, Beispiele und Sensitivität regeneriert); Mehrwert rechnet erhaltene Auszahlungen gegen; beendete Verträge haben einen eigenen Ampel-Zweig; Verträge vor 29.07.1994 sind auch im Eignungs-Check Gelb. 122 Tests, Typecheck und Build grün; Externalisierung des Chromium-Pakets im Build-Output nachgewiesen.
+
+## Stand 25.09.2026 – Prompt 12: eine Ampel für 1980–2020, Design B, alle Texte
+
+Prompt 12 (Upload 25.09.2026) ersetzt die Prompts 8–11, wo sie widersprechen. Vollständig umgesetzt in der Reihenfolge von Abschnitt 8:
+
+**0. Entscheidungen:**
+- [x] Zeitraum **1980 bis 2020**, einheitlich, ohne Zonen (`BRAND.range`, überall referenziert; Startseite, Versichererseiten, Anzeigen, Funnel-Validierung).
+- [x] Genau **eine wirtschaftliche Ampel** (Basis-Szenario gegen Rückkaufswert; beendete Verträge: gegen das bereits Erhaltene) – gleiche Formel für alle Jahrgänge.
+- [x] Keine Pflicht-Handprüfung; individuelle Prüfung als Angebot (`/anfrage`, Karte „Lieber persönlich?“, Fonds-Weg).
+- [x] Rechtsgrundlagen von der Website entfernt (kein § 5a, kein „1994 bis 2007“ – Wording-Test erzwingt das); `RECHTSWEG_SATZ` + Methodikabsatz 1.4 wörtlich im Bericht; optionaler Ansatzpunkte-Kasten aus `config/ansatzpunkte.json` (leer = ungedruckt).
+- [x] Design B „Nachtblau & Salbei“ (Token in `config/brand.ts`, `globals.css`, Bericht; Schriften Newsreader/Manrope vendored `brand/fonts/`, Bericht Base64-eingebettet; Kontraste gemessen in `docs/DESIGN.md`).
+- [x] Hybrid/`ACCESS_MODE='lead'`; Streichpreis 119 € entfernt → „89 € einmalig“; Freischaltcodes mit einmalig/mehrfach/Ablauf/Partner; SEPA als Zahlungsart ergänzt.
+- [x] Kundenstimmen Manfred/Ulla in `data/testimonials.json` angelegt – **verified erst mit Freigabe-Dateien** unter `docs/freigaben/` (fehlen noch; Prinzip 1 – siehe TEXT-REVIEW Nr. 16).
+
+**Rechenkern/Daten:** Regime-Sonderpfade entfernt (CalcResult einheitlich; `estimated_branch`-Kennzeichen je Branchen-/Näherungsjahr); Fallback am Reihenanfang auch vorwärts. **data.version 0.5.0**: Branchen-Nettoverzinsung 1980/1985/1990–1998 aus GDV-Primärquellen (DNB-Archiv, kreuzgeprüft), Lücken 1981–84/1986–89 bewusst offen; Einlagenzins 1980–2002 aus Bundesbank-Spareckzins (SU0022, Rohdaten `data/raw/bundesbank/`). Abdeckungsmatrix: `data/DATA_REPORT.md`. Golden (b) Basis jetzt 639.598,15 € (1996–98 belegt statt Näherung; CALC-SPEC §10). Sensitivität regeneriert.
+
+**Website:** Startseite exakt nach 3.1 (Hero, Einstiegskarte „Vier Angaben. Ergebnis sofort.“ mit live anspringender Ampel über /api/vorschau, Vertrauenszeile, „So läuft es“, Berichtsvorschau = Seite 1 des echten Musterfall-PDFs (`pnpm vorschau:bild` → `public/bericht-vorschau.png`), Preis, Kundenstimmen (leer bis Freigaben), Verkaufen, Transparenz-Kasten, 6 FAQ, Fußzeile). Funnel = Assistent mit 10 Fragen (3.2; Kanzlei-Variante +1 Eignungs-Schritt), Fortschrittsbalken, festem Weiter-Knopf, DM/€-Schalter vor 2002, Auszahlungs-Liste, E-Mail-Schritt; Ergebnis-Link per Mail (Link trägt die Daten selbst, 30 Tage – `/rechner/fortsetzen`, `FORTSETZEN_AKTIV=true`). Ergebnis-Seite nach 3.3 (≤ 40 Wörter über dem Knopf – Test; Rot ohne Kaufknopf mit Verkaufen-Karte zuerst; vier Accordions; Einwilligungs-Karte; „Lieber persönlich?“). `/verkaufen` (drei Wege + Formular + `[[ANKAUF-PRIVAT]]`), `/so-verdienen-wir` (drei Absätze), `/anfrage` neu; E-Mails nach 3.4. Anzeigen nach Abschnitt 6 (`docs/ADS.md`; drei Zeilen wegen Google-Limits gekürzt – gemeldet in TEXT-REVIEW Nr. 9–11).
+
+**Bericht:** Design B (Kopfbalken, Newsreader/Manrope eingebettet, Zebra-Tabellen, Beträge rechtsbündig, Mehrwert-Balken in CTA), Methodikabsatz 1.4, wirtschaftliche Ampel auf dem Deckblatt, Belehrungsteil nur noch in der Kanzlei-Variante (`belehrungsCheck`), Methodik-Zitate (IV ZR 76/11, IV ZR 513/14) statt Belehrungs-Zitaten, Datenbasis-Ausweis samt `estimated_branch`. Beispiele regeneriert (`examples/Pruefbericht_BSP-2026-{A,B,C}…`, C = Vertrag 05/1986, 150 DM).
+
+**Abnahme (Abschnitt 8):** 1986er- und 2015er-Vertrag laufen ohne Sonderpfad durch (Tests); Ampel aus `config/ampel.ts`; Rot ohne Kaufknopf (Test); Startseite zeigt „1980 bis 2020“, nirgends § 5a/„1994 bis 2007“ (Test); Textbudgets ≤ 8/25/40/40 (Test, Auslegung ASSUMPTIONS Nr. 53); Bericht mit Methodikabsatz, Anteils-Ausweis, Design B, eingebetteten Schriften (Tests); Kundenstimmen nur mit Freigabe-Feldern (Test); Kontraste dokumentiert; mobil 360 px geprüft (Screenshots); **Typecheck, 135 Tests, Build (48 Seiten) grün**.
+
+**Offen aus Prompt 12:**
+- [ ] Freigabe-Dateien für Manfred/Ulla nach `docs/freigaben/` → `verified: true` (docs/freigaben/README.md).
+- [ ] `[[ANSATZPUNKTE: von Jack/Kanzlei]]` in `config/ansatzpunkte.json` füllen (sonst bleibt der Kasten ungedruckt).
+- [ ] Anwaltliche Abnahme des Prompt-12-Pakets (LEGAL-OPEN-QUESTIONS **Nr. 21**: Ampeldefinition/Schwellen, Rechtsweg-Satz, Methodikabsatz, Zeitraum 1980–2020 in der Werbung, Kundenstimmen, Website-Texte, SEPA, Anfrage-Formulare); Banner/Beta bleiben bis dahin.
+- [ ] Branchen-Lücken 1981–84/1986–89 (Spuren in `data/DATA_REPORT.md`); `[[ANKAUF-PRIVAT]]`-Konditionen; Vercel-/Stripe-Einrichtung wie gehabt (docs/DEPLOY-VERCEL.md).

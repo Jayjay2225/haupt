@@ -1,23 +1,26 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { Archivo, Source_Sans_3 } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
-import { BRAND } from '@/config/brand';
+import { BRAND, RANGE_TEXT } from '@/config/brand';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 
-// Beide Schriften sind Open-Font-License; Next lädt sie beim Build und liefert
-// sie von der eigenen Domain (kein Drittanbieter-Request zur Laufzeit).
-const schriftTitel = Archivo({
-  subsets: ['latin'],
-  weight: ['800'],
+// Design B (Prompt 12, 4.2): Newsreader für Überschriften, Manrope für Text.
+// Beide OFL, vendored unter brand/fonts/ und von der eigenen Domain geliefert
+// (kein Drittanbieter-Request zur Laufzeit).
+const schriftTitel = localFont({
+  src: '../../../brand/fonts/newsreader-latin-var.woff2',
+  weight: '200 800',
+  style: 'normal',
   variable: '--schrift-titel',
   display: 'swap',
 });
 
-const schriftText = Source_Sans_3({
-  subsets: ['latin'],
-  weight: ['400', '600'],
+const schriftText = localFont({
+  src: '../../../brand/fonts/manrope-latin-var.woff2',
+  weight: '200 800',
+  style: 'normal',
   variable: '--schrift-text',
   display: 'swap',
 });
@@ -27,8 +30,7 @@ export const metadata: Metadata = {
     default: `${BRAND.name} – ${BRAND.claim}`,
     template: `%s · ${BRAND.name}`,
   },
-  description:
-    'Alte Lebens- oder Rentenversicherung? Der Policen-Check rechnet, ob ein Widerspruch mehr bringen kann als die Kündigung – kostenlose Ampel, klare Worte, auch beim Nein.',
+  description: `Lebens- oder Rentenversicherung von ${RANGE_TEXT}? In 5 Minuten wissen Sie, ob rechnerisch mehr drin ist als der Rückkaufswert – kostenlose Ampel, klare Worte, auch beim Nein.`,
   robots: {
     // Beta bleibt noindex; erst mit NEXT_PUBLIC_INDEXIERUNG=1 (Go-live nach docs/DOMAIN-UMZUG.md) indexierbar.
     index: process.env['NEXT_PUBLIC_INDEXIERUNG'] === '1',

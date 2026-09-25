@@ -11,7 +11,7 @@ export default function AgbSeite() {
       <h1>Allgemeine Geschäftsbedingungen</h1>
       <EntwurfHinweis />
       <p>
-        Die AGB werden mit der Entscheidung über das Geschäftsmodell (Festpreis-Kurzprüfung,
+        Die AGB werden mit der Entscheidung über das Geschäftsmodell (Festpreis-Prüfbericht,
         kostenlose Vorschau mit optionaler Weitergabe an eine Partnerkanzlei oder
         B2B-Zugang) anwaltlich erstellt. Feststehen wird insbesondere:
       </p>
@@ -29,8 +29,14 @@ export default function AgbSeite() {
       </p>
       <ul className="punkteliste">
         <li>
-          Alle Ergebnisse sind <strong>Schätzungen mit Bandbreite</strong> (drei Szenarien: vorsichtig,
-          mittel, oben), keine Zusage eines Betrags und keine Rechtsberatung.
+          Alle Ergebnisse sind <strong>Schätzungen mit Bandbreite</strong> (drei Szenarien:
+          konservativ, Basis, maximal), keine Zusage eines Betrags und keine Rechtsberatung.
+        </li>
+        <li>
+          Die Rückabwicklungsformel (Beiträge abzüglich Risikoanteil, zuzüglich gezogener Nutzungen)
+          wird für alle Vertragsjahrgänge gleich angewendet. Welche rechtliche Grundlage im
+          Einzelfall trägt, prüft der Rechtsanwalt anhand der Vertragsunterlagen; die meisten
+          Verfahren enden durch Vergleich – das Ergebnis ist eine Verhandlungsbasis.
         </li>
         <li>
           Gerechnet wird nach der Methodik der BGH-Rechtsprechung: Zinsen („Nutzungen“) nur auf den

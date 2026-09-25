@@ -146,6 +146,8 @@ export interface JahresZins {
   jahr: number;
   satzProzent: number;
   herkunft: Zinsherkunft;
+  /** Datenkennzeichen: Branchen- oder Ersatzwert statt Unternehmenswert (Schätzung). */
+  kennzeichen?: 'estimated_branch';
   quelle?: Quelle;
 }
 
@@ -196,42 +198,23 @@ export interface Warnung {
   text: string;
 }
 
-export type Regime = 'alt-policenmodell' | 'neu-2008' | 'vor-1994';
-
 export interface CalcMeta {
   calcVersion: string;
   dataVersion: string;
   stichtag: string;
-  regime: Regime;
 }
 
-export interface CalcResultAlt {
-  regime: 'alt-policenmodell';
+/**
+ * Ergebnis der Rückabwicklungsrechnung. Seit Prompt 12 gibt es keine
+ * Regime-Sonderpfade mehr: Die Formel (Beitragsstrom → Sparanteil →
+ * Nutzungen → drei Szenarien → Vergleich mit dem Rückkaufswert) wird für
+ * alle Vertragsjahrgänge gleich angewendet. Welche rechtliche Grundlage im
+ * Einzelfall trägt, prüft der Rechtsanwalt (docs/CALC-SPEC.md).
+ */
+export interface CalcResult {
   szenarien: Record<SzenarioName, SzenarioErgebnis>;
   jahrestabelle: Jahreszeile[];
   annahmen: Annahme[];
   warnungen: Warnung[];
   meta: CalcMeta;
 }
-
-export interface CalcResultNeu {
-  regime: 'neu-2008';
-  hinweis: string;
-  vergleich: {
-    rueckkaufswert?: number;
-    praemienErstesJahr: number;
-  };
-  annahmen: Annahme[];
-  warnungen: Warnung[];
-  meta: CalcMeta;
-}
-
-export interface CalcResultKeinFall {
-  regime: 'vor-1994';
-  hinweis: string;
-  annahmen: Annahme[];
-  warnungen: Warnung[];
-  meta: CalcMeta;
-}
-
-export type CalcResult = CalcResultAlt | CalcResultNeu | CalcResultKeinFall;

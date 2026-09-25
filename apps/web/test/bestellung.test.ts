@@ -5,7 +5,7 @@ import type { CaseDraft } from '../lib/draft';
 import { TEIL_LAENGE, dekodiereFall, fallAlsMetadaten, fallAusMetadaten, kodiereFall } from '../lib/fall-kodierung';
 import { neueBestellnummer } from '../lib/zahlung';
 
-/** Entwurf, der bis zum Schritt „Werte“ vollständig ist (Golden b als Vorlage). */
+/** Entwurf, der bis zum Schritt „Auszahlungen“ vollständig ist (Golden b als Vorlage). */
 export function vollstaendigerDraft(): CaseDraft {
   return {
     ...leererDraft(),
@@ -20,6 +20,7 @@ export function vollstaendigerDraft(): CaseDraft {
     erstbeitragWaehrung: 'DM',
     aktuellerBeitrag: '1.200',
     dynamik: 'ja',
+    dynamikSatz: '5',
     gesamtsummeLautMitteilung: '439.455',
     rueckkaufswert: '310.658',
     auszahlungenErhalten: 'nein',
@@ -29,8 +30,8 @@ export function vollstaendigerDraft(): CaseDraft {
 }
 
 describe('Bestellformular', () => {
-  it('der Testentwurf ist bis „Werte“ vollständig', () => {
-    expect(validiereBis('werte', vollstaendigerDraft())).toEqual({});
+  it('der Testentwurf ist bis „Auszahlungen“ vollständig', () => {
+    expect(validiereBis('auszahlungen', vollstaendigerDraft())).toEqual({});
   });
 
   it('meldet fehlende Angaben und Bestätigungen einzeln', () => {
@@ -67,7 +68,10 @@ describe('Fall-Kodierung für Zahlungs-Metadaten', () => {
       ende: '2030-10',
       beitragszahlungBis: '2030-10',
       auszahlungenErhalten: 'ja',
-      auszahlungenSumme: '12.345,67',
+      auszahlungenListe: [
+        { monat: '2005-06', betrag: '12.345,67' },
+        { monat: '2015-01', betrag: '2.000' },
+      ],
       zustandekommen: 'policenmodell',
       belehrungVorhanden: 'ja',
       belehrungFrist: '14-tage',

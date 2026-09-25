@@ -1,26 +1,25 @@
 /**
- * Das Erkennungszeichen: die Ampel (docs/DESIGN.md, Abschnitt 3).
- * Ampelfarben werden ausschließlich hier verwendet. Zustände:
- * - aus:    alle Lichter grau (Ausgangszustand)
- * - bereit: Schnellcheck vollständig, oberstes Licht pulsiert einmal kurz
- *           (bei prefers-reduced-motion nur Zustandswechsel)
- * - gruen | gelb | rot: genau ein Licht leuchtet
- * `fortschritt` (0–4) lässt beim Ausfüllen des Schnellchecks die Segmente
- * nacheinander hell werden.
+ * Das Ampel-Element (Prompt 12, Abschnitt 4.4): eine Pille in Salbei-Hell mit
+ * drei Punkten – bewusst KEINE Straßenampel-Grafik. Ampelfarben werden
+ * ausschließlich hier verwendet. Zustände:
+ * - aus:            alle Punkte neutral (Ausgangszustand)
+ * - gruen|gelb|rot: genau ein Punkt leuchtet (Glow, kein Dauerblinken)
+ * `fortschritt` (0–4) lässt die Punkte beim Ausfüllen der Einstiegskarte
+ * nacheinander heller werden.
  */
-export type AmpelZustand = 'aus' | 'bereit' | 'gruen' | 'gelb' | 'rot';
+export type AmpelZustand = 'aus' | 'gruen' | 'gelb' | 'rot';
 
 interface AmpelProps {
   zustand: AmpelZustand;
   fortschritt?: number | undefined;
+  /** Ergebnis-Seite: 40-px-Punkte. */
   gross?: boolean | undefined;
-  /** Sichtbare Beschriftung (in Marineblau, neben der Ampel). */
+  /** Sichtbare Beschriftung neben der Pille (z. B. „Grün“). */
   beschriftung?: string | undefined;
 }
 
 const BESCHREIBUNG: Record<AmpelZustand, string> = {
   aus: 'Ampel aus – noch kein Ergebnis',
-  bereit: 'Ampel bereit – Angaben vollständig',
   gruen: 'Ampel zeigt Grün',
   gelb: 'Ampel zeigt Gelb',
   rot: 'Ampel zeigt Rot',
@@ -34,11 +33,11 @@ export function Ampel({ zustand, fortschritt, gross, beschriftung }: AmpelProps)
         data-zustand={zustand}
         data-fortschritt={fortschritt !== undefined ? Math.min(Math.max(fortschritt, 0), 4) : undefined}
         role="img"
-        aria-label={beschriftung ?? BESCHREIBUNG[zustand]}
+        aria-label={beschriftung !== undefined ? `Ampel: ${beschriftung}` : BESCHREIBUNG[zustand]}
       >
-        <span className="licht licht--rot" />
-        <span className="licht licht--gelb" />
-        <span className="licht licht--gruen" />
+        <span className="punkt punkt--gruen" />
+        <span className="punkt punkt--gelb" />
+        <span className="punkt punkt--rot" />
       </div>
       {beschriftung !== undefined && <div className="ampel-text">{beschriftung}</div>}
     </div>

@@ -4,29 +4,26 @@ import { BRAND } from '@/config/brand';
 import { VARIANTE } from '@/config/variante';
 import { insurersDaten } from '@/lib/insurers-data';
 
+/** Fußzeile (Prompt 12, Abschnitt 3.1). */
 export function SiteFooter() {
   return (
     <footer className="fuss">
       <div className="container fuss-innen">
-        <nav className="fuss-nav" aria-label="Weitere Seiten">
-          <Link href="/rechner">Rechner</Link>
-          {VARIANTE.ankaufHinweis && <Link href="/verkaufen">Verkaufen statt kündigen</Link>}
-          {VARIANTE.transparenzKasten && <Link href="/so-verdienen-wir">So verdienen wir</Link>}
-          <Link href="/lebensversicherung">Versicherer</Link>
-          {BRAND.b2bDomain !== '' && <Link href="/unternehmer">Für Unternehmer</Link>}
-        </nav>
+        <p style={{ margin: 0, fontWeight: 600 }}>Schätzung mit Bandbreite · keine Rechtsberatung</p>
         <nav className="fuss-nav" aria-label="Rechtliches">
           <Link href="/impressum">Impressum</Link>
           <Link href="/datenschutz">Datenschutz</Link>
           <Link href="/agb">AGB</Link>
-          <Link href="/widerrufsbelehrung">Widerrufsbelehrung</Link>
+          <Link href="/widerrufsbelehrung">Widerruf</Link>
         </nav>
-        <p>
-          {BRAND.name} rechnet und ordnet ein. Wir sind keine Anwälte und beraten nicht im Einzelfall.
-          Ob ein Widerspruch wirksam ist, prüft am Ende eine Anwältin oder ein Anwalt – wir bereiten
-          das vor und organisieren auf Wunsch den Rest.
-        </p>
-        <p className="tabellenziffern">
+        <nav className="fuss-nav" aria-label="Weitere Seiten">
+          <Link href="/rechner">Rechner</Link>
+          {VARIANTE.ankaufHinweis && <Link href="/verkaufen">Verkaufen</Link>}
+          {VARIANTE.transparenzKasten && <Link href="/so-verdienen-wir">So verdienen wir</Link>}
+          <Link href="/anfrage">Individuelle Prüfung</Link>
+          <Link href="/lebensversicherung">Versicherer</Link>
+        </nav>
+        <p className="tabellenziffern" style={{ margin: 0 }}>
           Rechenkern {CALC_VERSION} · Datenbank {insurersDaten.data.version} ({insurersDaten.data.stand}) ·
           Anbieter: {BRAND.anbieter}
         </p>

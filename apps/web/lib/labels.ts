@@ -15,7 +15,7 @@ import type {
 export const VERTRAGSART_LABEL: Record<Exclude<Vertragsart, ''>, string> = {
   'kapital-lv': 'Kapitallebensversicherung',
   'private-rv': 'Private Rentenversicherung',
-  'fonds-lv': 'Fondsgebundene Lebensversicherung',
+  'fonds-lv': 'Fondsgebunden',
   'fonds-rv': 'Fondsgebundene Rentenversicherung',
   rueckdeckung: 'Rückdeckungsversicherung',
   'risiko-lv': 'Risikolebensversicherung (ohne Sparanteil)',
@@ -23,10 +23,10 @@ export const VERTRAGSART_LABEL: Record<Exclude<Vertragsart, ''>, string> = {
 };
 
 export const STATUS_LABEL: Record<Exclude<Vertragsstatus, ''>, string> = {
-  laufend: 'Läuft noch',
-  beitragsfrei: 'Beitragsfrei gestellt',
+  laufend: 'Ja, er läuft noch',
+  beitragsfrei: 'Beitragsfrei',
   gekuendigt: 'Gekündigt',
-  abgelaufen: 'Abgelaufen / ausgezahlt',
+  abgelaufen: 'Ausgezahlt',
 };
 
 export const ZAHLWEISE_LABEL: Record<Exclude<Zahlweise, ''>, string> = {
@@ -72,20 +72,11 @@ export function labelOderLeer<T extends string>(
   return wert === '' ? '–' : labels[wert];
 }
 
-/** Unterlagen-Checkliste (Verbraucherprodukt, Schritt 5). */
-export type UnterlageFeld =
-  | 'unterlagePolice'
-  | 'unterlageBegleitschreiben'
-  | 'unterlageBedingungen'
-  | 'unterlageStandmitteilung'
-  | 'unterlageAbrechnung';
-
-export const UNTERLAGEN_LABEL: Record<UnterlageFeld, string> = {
-  unterlagePolice: 'Police (Versicherungsschein)',
-  unterlageBegleitschreiben: 'Begleitschreiben, das mit der Police kam',
-  unterlageBedingungen: 'Versicherungsbedingungen und Verbraucherinformation',
-  unterlageStandmitteilung: 'Letzte Standmitteilung',
-  unterlageAbrechnung: 'Kündigungs- oder Auszahlungsabrechnung (falls vorhanden)',
-};
-
-export const UNTERLAGEN_FELDER = Object.keys(UNTERLAGEN_LABEL) as UnterlageFeld[];
+/** „Diese Unterlagen braucht ein Anwalt“ – statische Liste (Ergebnis-Seite). */
+export const UNTERLAGEN_LISTE: string[] = [
+  'Police (Versicherungsschein)',
+  'Begleitschreiben, das mit der Police kam',
+  'Versicherungsbedingungen und Verbraucherinformation',
+  'Letzte Standmitteilung',
+  'Kündigungs- oder Auszahlungsabrechnung (falls vorhanden)',
+];

@@ -1,142 +1,165 @@
+/**
+ * Die eine, wirtschaftliche Ampel (Prompt 12, Abschnitt 1.3 und 1.6):
+ * Schwellen aus config/ampel.ts, Größenordnung in Worten, keine
+ * Vertragsbeginn-Zonen. Dazu die beiden Pflichtfälle aus 1.6:
+ * Vertrag 05/1986 (150 DM) rechnet mit estimated_branch-Kennzeichen durch;
+ * Vertrag 03/2015 mit Rückkaufswert nahe der Beitragssumme wird Gelb oder
+ * Rot – und Rot rendert keinen Kaufknopf.
+ */
+import { readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { berechneRueckabwicklung } from '@rueckab/calc';
-import type { ContractInput, InsurersDaten, RiskDefaults } from '@rueckab/calc';
-import { pruefeEignung } from '@rueckab/eligibility';
-import type { EligibilityInput, Regelwerk } from '@rueckab/eligibility';
-import insurersJson from '../../../data/insurers.json';
+import type { CalcResult, ContractInput, RiskDefaults, SzenarioErgebnis } from '@rueckab/calc';
 import riskJson from '../../../data/risk-defaults.json';
-import rulesJson from '../../../data/legal-rules.json';
+import { AMPEL, RECHTSWEG_SATZ } from '../config/ampel';
 import { bestimmeWirtschaftlicheAmpel, groessenordnungInWorten } from '../lib/ampel';
+import { insurersDaten } from '../lib/insurers-data';
 
-const daten = insurersJson as unknown as InsurersDaten;
-const defaults = riskJson as unknown as RiskDefaults;
-const regelwerk = rulesJson as unknown as Regelwerk;
+const WEB = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const riskDefaults = riskJson as unknown as RiskDefaults;
 
-function vertrag(anpassung: Partial<ContractInput> = {}): ContractInput {
+function szenario(mehrwert: number | undefined, nettoanspruch = 0): SzenarioErgebnis {
   return {
-    versichererId: 'unbekannt',
-    vertragsart: 'kapital-lv',
-    beginn: '1995-10',
-    zahlweise: 'monatlich',
-    erstbeitrag: { betrag: 1000, waehrung: 'DM' },
-    dynamik: { aktiv: true, satzProzent: 5 },
-    gesamtsummeLautMitteilung: 439455,
-    status: 'laufend',
-    rueckkaufswert: { betrag: 310658 },
-    eintrittsalter: 35,
-    stichtag: '2026-09',
-    ...anpassung,
+    name: 'basis',
+    summeBeitraege: 10000,
+    summeBuz: 0,
+    summeRisiko: 500,
+    summeAbschluss: 400,
+    summeVerwaltung: 300,
+    summeSparanteil: 8800,
+    erstattungsfaehigeBeitraege: 9500,
+    nutzungen: 3000,
+    rueckabwicklungswert: 12500,
+    erhalteneLeistungenAufgezinst: 0,
+    nettoanspruch,
+    ...(mehrwert !== undefined ? { mehrwertGegenKuendigung: mehrwert, wirtschaftlichKeinVorteil: mehrwert <= 0 } : {}),
+    nutzungenProzentDerBeitraege: 30,
+    nutzungenNachHerkunft: { insurer: 0, branche: 3000, fallback: 0, override: 0 },
+    anteilUnternehmenswerteProzent: 0,
+    zinsreihe: [],
   };
 }
 
-function eignung(anpassung: Partial<EligibilityInput> = {}) {
-  return pruefeEignung(
-    {
-      vertragsschluss: '1995-10',
-      vertragsart: 'kapital-lv',
-      zustandekommen: 'policenmodell',
-      belehrungVorhanden: 'unbekannt',
-      belehrungFrist: 'unbekannt',
-      belehrungForm: 'unbekannt',
-      hervorhebung: 'unbekannt',
-      status: 'laufend',
-      abgetretenOderBeliehen: 'nein',
-      auszahlungenErhalten: 'nein',
-      ...anpassung,
-    },
-    regelwerk,
-  );
+function calcMit(mehrwert: number | undefined, nettoanspruch = 0): CalcResult {
+  const s = szenario(mehrwert, nettoanspruch);
+  return {
+    szenarien: { min: s, basis: s, max: s },
+    jahrestabelle: [],
+    annahmen: [],
+    warnungen: [],
+    meta: { calcVersion: 'test', dataVersion: 'test', stichtag: '2026-09' },
+  };
 }
 
-function ampelFuer(c: ContractInput, e = eignung({ vertragsschluss: c.beginn, vertragsart: c.vertragsart as EligibilityInput['vertragsart'] })) {
-  return bestimmeWirtschaftlicheAmpel(berechneRueckabwicklung(c, daten, defaults), e, Number(c.beginn.slice(0, 4)), c.status);
-}
+describe('Ampel-Schwellen (config/ampel.ts)', () => {
+  it('Grün ab 2.000 € Mehrwert im Basis-Szenario', () => {
+    const ampel = bestimmeWirtschaftlicheAmpel(calcMit(AMPEL.gruen.mehrwertMinAbsolut), 'laufend');
+    expect(ampel.ampel).toBe('gruen');
+    expect(ampel.zeile).toContain('Größenordnung');
+    expect(ampel.zeile).toContain('geschätzt, mit Bandbreite');
+  });
 
-describe('Größenordnung in Worten', () => {
-  it('enthält nie Ziffern und wächst mit dem Betrag', () => {
-    const werte = [120, 700, 3000, 8000, 15000, 50000, 90000, 200000, 500000, 900000, 2000000];
-    const worte = werte.map(groessenordnungInWorten);
-    for (const w of worte) {
-      expect(w).not.toMatch(/\d/);
-    }
-    expect(new Set(worte).size).toBe(worte.length);
+  it('Gelb zwischen 0 und der Grün-Schwelle', () => {
+    const ampel = bestimmeWirtschaftlicheAmpel(calcMit(AMPEL.gruen.mehrwertMinAbsolut - 1), 'laufend');
+    expect(ampel.ampel).toBe('gelb');
+    expect(ampel.titel).toBe('Gelb. Knapp – es könnte sich lohnen.');
+    expect(ampel.zeile).toBe('Der Prüfbericht zeigt, ob es reicht.');
+  });
+
+  it('Rot, wenn das Basis-Szenario nicht über dem Rückkaufswert liegt – ehrlich formuliert', () => {
+    const ampel = bestimmeWirtschaftlicheAmpel(calcMit(0), 'laufend');
+    expect(ampel.ampel).toBe('rot');
+    expect(ampel.zeile).toBe('Sparen Sie sich den Bericht.');
+  });
+
+  it('Gelb ohne Rückkaufswert (laufender Vertrag)', () => {
+    const ampel = bestimmeWirtschaftlicheAmpel(calcMit(undefined), 'laufend');
+    expect(ampel.ampel).toBe('gelb');
+    expect(ampel.grund).toBe('kein-rueckkaufswert');
+  });
+
+  it('beendete Verträge: dieselben Schwellen auf den Netto-Wert', () => {
+    expect(bestimmeWirtschaftlicheAmpel(calcMit(undefined, 2500), 'gekuendigt').ampel).toBe('gruen');
+    expect(bestimmeWirtschaftlicheAmpel(calcMit(undefined, 500), 'abgelaufen').ampel).toBe('gelb');
+    expect(bestimmeWirtschaftlicheAmpel(calcMit(undefined, -100), 'gekuendigt').ampel).toBe('rot');
+  });
+
+  it('der Rechtsweg-Satz ist konfiguriert (Prompt 12, 1.4)', () => {
+    expect(RECHTSWEG_SATZ).toContain('prüft Ihr Anwalt mit dem Bericht in der Hand');
   });
 });
 
-describe('Wirtschaftliche Ampel', () => {
-  it('Grün, wenn alle Szenarien über dem Rückkaufswert liegen (Golden-Vertrag b)', () => {
-    const a = ampelFuer(vertrag());
-    expect(a.ampel).toBe('gruen');
-    expect(a.grund).toBe('vorteil');
-    expect(a.groessenordnung).toBeDefined();
+describe('Größenordnung in Worten (Wortbänder aus config/ampel.ts)', () => {
+  it('folgt den konfigurierten Stufen', () => {
+    expect(groessenordnungInWorten(2500)).toBe('im niedrigen vierstelligen Bereich');
+    expect(groessenordnungInWorten(7500)).toBe('im hohen vierstelligen Bereich');
+    expect(groessenordnungInWorten(25000)).toBe('im fünfstelligen Bereich');
+    expect(groessenordnungInWorten(75000)).toBe('im hohen fünfstelligen Bereich');
+    expect(groessenordnungInWorten(250000)).toBe('im sechsstelligen Bereich');
+  });
+});
+
+describe('Pflichtfälle aus Prompt 12, Abschnitt 1.6 (echte Datenbasis)', () => {
+  it('Vertrag 05/1986, 150 DM monatlich: rechnet durch, estimated_branch 1986–2003 vorhanden, Ampel aus Config', () => {
+    const contract: ContractInput = {
+      versichererId: 'unbekannt',
+      vertragsart: 'kapital-lv',
+      beginn: '1986-05',
+      zahlweise: 'monatlich',
+      erstbeitrag: { betrag: 150, waehrung: 'DM' },
+      dynamik: { aktiv: false },
+      status: 'laufend',
+      rueckkaufswert: { betrag: 32000 },
+      stichtag: '2026-09',
+    };
+    const calc = berechneRueckabwicklung(contract, insurersDaten, riskDefaults);
+    expect(calc.szenarien.basis.rueckabwicklungswert).toBeGreaterThan(0);
+    const markiert = calc.szenarien.basis.zinsreihe
+      .filter((j) => j.jahr >= 1986 && j.jahr <= 2003)
+      .filter((j) => j.kennzeichen === 'estimated_branch');
+    expect(markiert.length).toBe(2003 - 1986 + 1);
+    const ampel = bestimmeWirtschaftlicheAmpel(calc, contract.status);
+    const mehrwert = calc.szenarien.basis.mehrwertGegenKuendigung ?? 0;
+    const erwartet =
+      mehrwert >= AMPEL.gruen.mehrwertMinAbsolut ? 'gruen' : mehrwert > AMPEL.gelb.mehrwertMin ? 'gelb' : 'rot';
+    expect(ampel.ampel).toBe(erwartet);
   });
 
-  it('Rot bei „kein Vorteil“ (Golden-Vertrag a) – und sagt es laut', () => {
-    const a = ampelFuer(
-      vertrag({
-        vertragsart: 'private-rv',
-        beginn: '2004-12',
-        zahlweise: 'jaehrlich',
-        erstbeitrag: { betrag: 1200, waehrung: 'EUR' },
-        dynamik: { aktiv: false },
-        gesamtsummeLautMitteilung: 25600,
-        rueckkaufswert: { betrag: 39857 },
-        eintrittsalter: 40,
-      }),
-    );
-    expect(a.ampel).toBe('rot');
-    expect(a.grund).toBe('kein-vorteil');
-    expect(a.text).toMatch(/Sparen Sie sich das Geld/);
+  it('Vertrag 03/2015, 100 €, Rückkaufswert nahe Beitragssumme: Gelb oder Rot', () => {
+    const contract: ContractInput = {
+      versichererId: 'unbekannt',
+      vertragsart: 'kapital-lv',
+      beginn: '2015-03',
+      zahlweise: 'monatlich',
+      erstbeitrag: { betrag: 100, waehrung: 'EUR' },
+      dynamik: { aktiv: false },
+      status: 'laufend',
+      gesamtsummeLautMitteilung: 13800,
+      rueckkaufswert: { betrag: 13500 },
+      stichtag: '2026-09',
+    };
+    const calc = berechneRueckabwicklung(contract, insurersDaten, riskDefaults);
+    const ampel = bestimmeWirtschaftlicheAmpel(calc, contract.status);
+    expect(['gelb', 'rot']).toContain(ampel.ampel);
   });
 
-  it('Gelb ohne Rückkaufswert, mit Größenordnung des Rückabwicklungswerts', () => {
-    const c = vertrag();
-    delete c.rueckkaufswert;
-    const a = ampelFuer(c);
-    expect(a.ampel).toBe('gelb');
-    expect(a.grund).toBe('kein-rueckkaufswert');
-    expect(a.groessenordnung).toMatch(/sechsstelliger Betrag/);
+  it('Rot wird in der Oberfläche ohne Kaufknopf gerendert (Ergebnis-Seite)', () => {
+    const quelle = readFileSync(join(WEB, 'components', 'funnel', 'ErgebnisAnsicht.tsx'), 'utf8');
+    // Der Kaufknopf existiert genau einmal – im Nicht-Rot-Zweig des Ternärs.
+    const kaufknopf = quelle.match(/href="\/bestellen"/g) ?? [];
+    expect(kaufknopf).toHaveLength(1);
+    const rotZweig = quelle.indexOf("ampel.ampel === 'rot' ? (");
+    const kaufPosition = quelle.indexOf('href="/bestellen"');
+    expect(rotZweig).toBeGreaterThan(-1);
+    // Der Kaufknopf steht nach dem Rot-Zweig (im Else-Teil), nie davor.
+    expect(kaufPosition).toBeGreaterThan(rotZweig);
+    expect(quelle.slice(rotZweig, kaufPosition)).toContain('VerkaufenKarte');
   });
 
-  it('Gelb für Verträge vor dem 29.07.1994 und 2008–2016, Rot erst ab 2017', () => {
-    const alt1993 = ampelFuer(vertrag({ beginn: '1993-05' }));
-    expect(alt1993.ampel).toBe('gelb');
-    expect(alt1993.grund).toBe('vor-1994');
-
-    const neu2010 = ampelFuer(vertrag({ beginn: '2010-05', erstbeitrag: { betrag: 100, waehrung: 'EUR' } }));
-    expect(neu2010.ampel).toBe('gelb');
-    expect(neu2010.grund).toBe('neu-2008');
-
-    const neu2016 = ampelFuer(vertrag({ beginn: '2016-12', erstbeitrag: { betrag: 100, waehrung: 'EUR' } }));
-    expect(neu2016.ampel).toBe('gelb');
-
-    const neu2017 = ampelFuer(vertrag({ beginn: '2017-01', erstbeitrag: { betrag: 100, waehrung: 'EUR' } }));
-    expect(neu2017.ampel).toBe('rot');
-    expect(neu2017.grund).toBe('ab-2017');
-  });
-
-  it('Gelb für gekündigte Verträge mit offenem Netto-Anspruch (kein Kündigungs-Vergleich mehr)', () => {
-    const a = ampelFuer(
-      vertrag({ status: 'gekuendigt', statusDatum: '2020-06', rueckkaufswert: { betrag: 310658, standMonat: '2020-06' } }),
-    );
-    expect(a.ampel).toBe('gelb');
-    expect(a.grund).toBe('beendet');
-    expect(a.text).toContain('bereits bekommen');
-  });
-
-  it('Rot für reine Risikopolicen (Ausschluss)', () => {
-    const e = eignung({ vertragsart: 'risiko-lv' });
-    const a = bestimmeWirtschaftlicheAmpel(berechneRueckabwicklung(vertrag(), daten, defaults), e);
-    expect(a.grund).toBe('ausschluss');
-    expect(a.ampel).toBe('rot');
-  });
-
-  it('spricht ohne Euro-Beträge und mit kurzen Überschriften', () => {
-    const faelle = [ampelFuer(vertrag()), ampelFuer(vertrag({ beginn: '2010-05', erstbeitrag: { betrag: 100, waehrung: 'EUR' } }))];
-    for (const a of faelle) {
-      expect(a.titel.split(/\s+/).length).toBeLessThanOrEqual(8);
-      expect(`${a.titel} ${a.text} ${a.groessenordnung ?? ''}`).not.toContain('€');
-      expect(a.groessenordnung ?? '').not.toMatch(/\d/);
-    }
+  it('kein Test und keine Ampel-Logik verweist mehr auf Vertragsbeginn-Zonen', () => {
+    const quelle = readFileSync(join(WEB, 'lib', 'ampel.ts'), 'utf8');
+    expect(quelle).not.toMatch(/vor-1994|neu-2008|ab-2017|beginnJahr/);
   });
 });

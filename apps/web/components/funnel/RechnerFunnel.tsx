@@ -1,19 +1,17 @@
 'use client';
 
 /**
- * Mehrstufiges Rechner-Formular: mobil zuerst, Hauptknopf unten fixiert,
- * Zwischenspeicherung im Browser, Validierung je Schritt. Abgesendet wird
- * zustandslos an /api/vorschau (Ergebnis-Seite).
- *
- * „Später am Rechner fortsetzen“ (Link per E-Mail) ist vorbereitet, aber
- * abgeschaltet, bis Persistenz existiert (config/business.ts FORTSETZEN_AKTIV).
+ * Rechner-Assistent (Prompt 12, Abschnitt 3.2): eine Frage je Bildschirm,
+ * Fortschrittsbalken, großer Weiter-Knopf unten fest. Zwischenspeicherung im
+ * Browser; abgesendet wird zustandslos an /api/vorschau (Ergebnis-Seite).
+ * Nach dem letzten Schritt geht zusätzlich der Ergebnis-Link per E-Mail raus
+ * (/api/ergebnis-link, bestmöglich – das Ergebnis erscheint unabhängig davon).
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FORTSETZEN_AKTIV } from '@/config/business';
 import {
   SCHRITTE,
-  SCHRITT_TITEL,
+  SCHRITT_FRAGE,
   ladeDraft,
   leererDraft,
   speichereDraft,
@@ -22,25 +20,37 @@ import {
   type Fehlerliste,
   type Schritt,
 } from '@/lib/draft';
-import { erzeugeFortsetzenAnfrage } from '@/lib/fortsetzen';
 import {
-  SchrittBeitraege,
+  SchrittAuszahlungen,
+  SchrittBeginn,
+  SchrittBeitrag,
+  SchrittBeitragssumme,
+  SchrittDynamik,
   SchrittEignung,
   SchrittKontakt,
-  SchrittVertrag,
-  SchrittWerte,
-  SchrittZusammenfassung,
+  SchrittRueckkaufswert,
+  SchrittStatus,
+  SchrittTyp,
+  SchrittVersicherer,
   type SchrittProps,
 } from './steps';
 
 const SCHRITT_KOMPONENTEN: Record<Schritt, (props: SchrittProps) => React.JSX.Element> = {
-  kontakt: SchrittKontakt,
-  vertrag: SchrittVertrag,
-  beitraege: SchrittBeitraege,
-  werte: SchrittWerte,
+  typ: SchrittTyp,
+  status: SchrittStatus,
+  versicherer: SchrittVersicherer,
+  beginn: SchrittBeginn,
+  beitrag: SchrittBeitrag,
+  dynamik: SchrittDynamik,
+  beitragssumme: SchrittBeitragssumme,
+  rueckkaufswert: SchrittRueckkaufswert,
+  auszahlungen: SchrittAuszahlungen,
   eignung: SchrittEignung,
-  zusammenfassung: SchrittZusammenfassung,
+  kontakt: SchrittKontakt,
 };
+
+/** Schritte ohne Pflichtangabe: „Überspringen“ statt erzwungener Eingabe. */
+const UEBERSPRINGBAR: ReadonlySet<Schritt> = new Set<Schritt>(['beitragssumme']);
 
 export function RechnerFunnel({ versichererNamen }: { versichererNamen: string[] }) {
   const router = useRouter();
@@ -48,7 +58,6 @@ export function RechnerFunnel({ versichererNamen }: { versichererNamen: string[]
   const [schrittIndex, setSchrittIndex] = useState(0);
   const [fehler, setFehler] = useState<Fehlerliste>({});
   const [geladen, setGeladen] = useState(false);
-  const [fortsetzenHinweis, setFortsetzenHinweis] = useState<string | null>(null);
 
   useEffect(() => {
     setDraft(ladeDraft());
@@ -77,17 +86,22 @@ export function RechnerFunnel({ versichererNamen }: { versichererNamen: string[]
   );
 
   if (!geladen) {
-    return <p>Das Formular lädt …</p>;
+    return <p>Der Rechner lädt …</p>;
   }
 
-  const schritt = SCHRITTE[schrittIndex] ?? 'kontakt';
+  const schritt = SCHRITTE[schrittIndex] ?? 'typ';
   const istLetzter = schrittIndex === SCHRITTE.length - 1;
   const AktuellerSchritt = SCHRITT_KOMPONENTEN[schritt];
+  const fortschrittProzent = Math.round(((schrittIndex + 1) / SCHRITTE.length) * 100);
 
   function weiter() {
     const neueFehler = validiereSchritt(schritt, draft);
     setFehler(neueFehler);
     if (Object.keys(neueFehler).length > 0) {
+      return;
+    }
+    if (istLetzter) {
+      absenden();
       return;
     }
     setSchrittIndex((index) => Math.min(index + 1, SCHRITTE.length - 1));
@@ -114,42 +128,41 @@ export function RechnerFunnel({ versichererNamen }: { versichererNamen: string[]
     const abgesendet: CaseDraft = { ...draft, eingereichtAm: new Date().toISOString() };
     setDraft(abgesendet);
     speichereDraft(abgesendet);
+    // Ergebnis-Link per E-Mail (bestmöglich; das Ergebnis erscheint unabhängig davon).
+    void fetch('/api/ergebnis-link', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ draft: abgesendet }),
+    }).catch(() => undefined);
     router.push('/rechner/ergebnis');
-  }
-
-  function spaeterFortsetzen() {
-    const anfrage = erzeugeFortsetzenAnfrage(draft);
-    setFortsetzenHinweis(anfrage.hinweis);
   }
 
   const hatFehler = Object.keys(fehler).length > 0;
 
   return (
-    <div>
-      <ol className="formular-schritte" aria-label="Schritte des Formulars">
-        {SCHRITTE.map((name, index) => (
-          <li
-            key={name}
-            aria-current={index === schrittIndex ? 'step' : undefined}
-            className={index < schrittIndex ? 'erledigt' : undefined}
-          >
-            {index + 1}. {SCHRITT_TITEL[name]}
-          </li>
-        ))}
-      </ol>
+    <div className="assistent">
+      <div
+        className="fortschritt"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={fortschrittProzent}
+        aria-label={`Frage ${schrittIndex + 1} von ${SCHRITTE.length}`}
+      >
+        <span style={{ width: `${fortschrittProzent}%` }} />
+      </div>
+      <p className="erklaerung fortschritt-text">
+        Frage {schrittIndex + 1} von {SCHRITTE.length}
+      </p>
 
       <form
         noValidate
         onSubmit={(ereignis) => {
           ereignis.preventDefault();
-          if (istLetzter) {
-            absenden();
-          } else {
-            weiter();
-          }
+          weiter();
         }}
       >
-        <h2>{SCHRITT_TITEL[schritt]}</h2>
+        <h1 className="assistent-frage">{SCHRITT_FRAGE[schritt]}</h1>
         {hatFehler && (
           <p className="feld-fehler" role="alert">
             Bitte die markierten Felder prüfen.
@@ -163,20 +176,18 @@ export function RechnerFunnel({ versichererNamen }: { versichererNamen: string[]
             </button>
           )}
           <button type="submit" className="knopf haupt fix-unten">
-            {istLetzter ? 'Ampel anzeigen' : 'Weiter'}
+            {istLetzter
+              ? 'Ampel anzeigen – kostenlos'
+              : UEBERSPRINGBAR.has(schritt) && draft.gesamtsummeLautMitteilung.trim() === ''
+                ? 'Überspringen'
+                : 'Weiter'}
           </button>
-          {FORTSETZEN_AKTIV && (
-            <button type="button" className="knopf zweitrangig" onClick={spaeterFortsetzen}>
-              Später weitermachen
-            </button>
-          )}
         </div>
-        {fortsetzenHinweis !== null && <p className="erklaerung">{fortsetzenHinweis}</p>}
       </form>
 
       <p className="erklaerung" style={{ marginTop: '1.5rem' }}>
-        Ihre Eingaben bleiben auf diesem Gerät gespeichert. Sie können die Seite schließen und
-        später hier weitermachen.
+        Ihre Eingaben bleiben auf diesem Gerät gespeichert, bis Sie sie löschen. Sie können die
+        Seite schließen und später hier weitermachen.
       </p>
     </div>
   );

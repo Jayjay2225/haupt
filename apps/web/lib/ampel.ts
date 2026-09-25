@@ -1,139 +1,76 @@
 /**
- * Wirtschaftliche Ampel für das Verbraucherprodukt (Prompt 8, Entscheidung 3):
- * Sie vergleicht die Schätzung des Rechenkerns mit dem Rückkaufswert und
- * spricht in Worten – ohne Euro-Beträge. Reine Funktionen, testbar.
+ * Die eine, wirtschaftliche Ampel (Prompt 12, Abschnitt 0.2 und 1.3):
+ * Sie vergleicht das Basis-Szenario des Rechenkerns mit dem Rückkaufswert –
+ * für alle Jahrgänge (1980–2020) und alle klassischen Vertragsarten mit
+ * derselben Formel. Schwellen und Wortbänder kommen aus config/ampel.ts.
  *
- * Grün  = in allen drei Szenarien mehr drin als bei Kündigung
- * Gelb  = knapp, offen oder ohne Rückkaufswert nicht vergleichbar
- * Rot   = kein Vorteil erkennbar oder kein Anwendungsfall (vor 1994, ab 2008,
- *         reine Risikopolice) – „das sagen wir Ihnen auch“
+ * Grün  = Basis über RKW und mindestens 2.000 € Mehrwert.
+ * Gelb  = Basis über RKW, aber unter der Grün-Schwelle.
+ * Rot   = Basis nicht über RKW – „das sagen wir Ihnen auch“.
+ *
+ * Beendete Verträge (gekündigt/ausgezahlt): Es gibt keine Kündigung mehr,
+ * mit der man vergleichen könnte – Maßstab ist der Netto-Wert über das
+ * bereits Erhaltene hinaus, mit denselben Schwellen.
  */
 import type { CalcResult } from '@rueckab/calc';
-import type { EligibilityResult } from '@rueckab/eligibility';
+import { AMPEL } from '@/config/ampel';
 
 export type AmpelFarbe = 'gruen' | 'gelb' | 'rot';
 
+export type AmpelVertragsstatus = 'laufend' | 'beitragsfrei' | 'gekuendigt' | 'abgelaufen';
+
 export interface WirtschaftlicheAmpel {
   ampel: AmpelFarbe;
-  /** Kurze Überschrift, höchstens acht Wörter. */
+  /** Überschrift der Ergebnis-Seite (Deck 3.3). */
   titel: string;
-  /** Erklärung in zwei bis drei kurzen Sätzen, ohne Euro-Beträge. */
-  text: string;
-  /** Größenordnung in Worten (Basis) mit Bandbreite, falls berechenbar. */
-  groessenordnung?: string;
-  grund: 'vor-1994' | 'neu-2008' | 'ab-2017' | 'ausschluss' | 'kein-vorteil' | 'knapp' | 'vorteil' | 'kein-rueckkaufswert' | 'beendet';
+  /** Eine Zeile unter der Überschrift, ohne Euro-Beträge. */
+  zeile: string;
+  grund: 'vorteil' | 'knapp' | 'kein-vorteil' | 'kein-rueckkaufswert' | 'beendet';
 }
 
-/** Größenordnung eines Betrags in Worten – bewusst ohne Ziffern. */
+/** Mehrwert in Worten nach den Stufen aus config/ampel.ts – nie als Betrag. */
 export function groessenordnungInWorten(betrag: number): string {
   const b = Math.abs(betrag);
-  if (b < 500) {
-    return 'wenige hundert Euro';
+  for (const stufe of AMPEL.groessenordnung) {
+    if (stufe.bis === null || b < stufe.bis) {
+      return stufe.text;
+    }
   }
-  if (b < 1000) {
-    return 'einige hundert Euro';
-  }
-  if (b < 5000) {
-    return 'ein niedriger vierstelliger Betrag';
-  }
-  if (b < 10000) {
-    return 'ein hoher vierstelliger Betrag';
-  }
-  if (b < 30000) {
-    return 'ein niedriger fünfstelliger Betrag';
-  }
-  if (b < 70000) {
-    return 'ein mittlerer fünfstelliger Betrag';
-  }
-  if (b < 100000) {
-    return 'ein hoher fünfstelliger Betrag';
-  }
-  if (b < 300000) {
-    return 'ein niedriger sechsstelliger Betrag';
-  }
-  if (b < 700000) {
-    return 'ein mittlerer sechsstelliger Betrag';
-  }
-  if (b < 1000000) {
-    return 'ein hoher sechsstelliger Betrag';
-  }
-  return 'ein siebenstelliger Betrag';
+  return AMPEL.groessenordnung[AMPEL.groessenordnung.length - 1]?.text ?? '';
 }
-
-/**
- * Regime-Bewertung (Stand 21.09.2026, docs/RECHERCHE-ZEITRAEUME.md):
- * - vor 29.07.1994: kein Widerspruch, aber Widerruf nach § 8 Abs. 4 VVG i.d.F.
- *   1990 (ab 1991) ohne belehrungsunabhängige Erlöschensfrist; dazu die
- *   Mindestrückkaufswert-Rechtsprechung → Gelb (Partner prüfen; unsere
- *   Zahlenschätzung passt nur eingeschränkt).
- * - ab 2008 bis 2016: Widerruf nach § 8 VVG n.F.; bei fehlerhafter Belehrung
- *   läuft die Frist nicht (BGH IV ZR 384/14) → Gelb, einzelfallabhängig.
- * - ab 2017: Belehrungen praktisch durchgehend musterkonform → Rot.
- */
-export type AmpelVertragsstatus = 'laufend' | 'beitragsfrei' | 'gekuendigt' | 'abgelaufen';
 
 export function bestimmeWirtschaftlicheAmpel(
   calc: CalcResult,
-  eligibility: EligibilityResult,
-  beginnJahr?: number,
   vertragsstatus?: AmpelVertragsstatus,
 ): WirtschaftlicheAmpel {
-  if (eligibility.angewendeteRegeln.includes('R-AUS-RISIKO-LV')) {
-    return {
-      ampel: 'rot',
-      grund: 'ausschluss',
-      titel: 'Rot: reine Risikopolice.',
-      text: 'Eine Risikolebensversicherung hat keinen Sparanteil. Da gibt es nichts zurückzurechnen. Finger weg von teuren Versprechen.',
-    };
-  }
-  if (calc.regime === 'vor-1994') {
-    return {
-      ampel: 'gelb',
-      grund: 'vor-1994',
-      titel: 'Gelb: alter Vertrag, anderer Hebel.',
-      text: 'Vor dem 29.07.1994 gab es den Widerspruch noch nicht – aber ein Widerrufsrecht nach altem Recht (ab 1991), das ohne korrekte Belehrung bis heute nicht erloschen ist. Dazu kommen oft zu niedrig abgerechnete Rückkaufswerte. Unsere Zahlenschätzung passt hier nur eingeschränkt – unsere Partner prüfen Ihren Jahrgang.',
-    };
-  }
-  if (calc.regime === 'neu-2008') {
-    if (beginnJahr !== undefined && beginnJahr >= 2017) {
+  const basis = calc.szenarien.basis;
+  const beendet = vertragsstatus === 'gekuendigt' || vertragsstatus === 'abgelaufen';
+
+  // Beendete Verträge: Vergleichsmaßstab ist der Netto-Wert über das bereits
+  // Erhaltene hinaus (Rückkaufswert bzw. Ablaufleistung sind gegengerechnet).
+  if (basis.mehrwertGegenKuendigung === undefined && beendet) {
+    const offen = basis.nettoanspruch;
+    if (offen >= AMPEL.gruen.mehrwertMinAbsolut) {
       return {
-        ampel: 'rot',
-        grund: 'ab-2017',
-        titel: 'Rot: Vertrag ab 2017.',
-        text: 'Ab 2017 sind die Widerrufsbelehrungen praktisch durchgehend musterkonform; ein Widerruf läuft ins Leere. Kündigen oder behalten entscheiden Sie in Ruhe – teure Versprechen brauchen Sie nicht.',
+        ampel: 'gruen',
+        grund: 'beendet',
+        titel: 'Rechnerisch ist deutlich mehr drin, als Sie erhalten haben.',
+        zeile: `Größenordnung: ${groessenordnungInWorten(offen)} über dem bereits Erhaltenen – geschätzt, mit Bandbreite.`,
       };
     }
-    return {
-      ampel: 'gelb',
-      grund: 'neu-2008',
-      titel: 'Gelb: Vertrag ab 2008 – Widerruf prüfen.',
-      text: 'Auch nach 2008 waren viele Widerrufsbelehrungen fehlerhaft – dann läuft die Widerrufsfrist bis heute (BGH). Der Hebel ist meist kleiner als beim Widerspruch und hängt an Ihrer Belehrung. Prüfen lohnt, versprechen nicht – unsere Partner schauen drauf.',
-    };
-  }
-
-  const basis = calc.szenarien.basis;
-  const min = calc.szenarien.min;
-
-  // Beendete Verträge: Es gibt keine Kündigung mehr, mit der man vergleichen
-  // könnte – der Maßstab ist der Netto-Anspruch über das bereits Erhaltene hinaus.
-  if (
-    basis.mehrwertGegenKuendigung === undefined &&
-    (vertragsstatus === 'gekuendigt' || vertragsstatus === 'abgelaufen')
-  ) {
-    if (basis.nettoanspruch > 0) {
+    if (offen > AMPEL.gelb.mehrwertMin) {
       return {
         ampel: 'gelb',
         grund: 'beendet',
-        titel: 'Gelb. Beendeter Vertrag – rechnerisch noch offen.',
-        text: 'Ihr Vertrag ist schon beendet; verglichen wird deshalb mit dem, was Sie bereits bekommen haben. Darüber hinaus bleibt rechnerisch etwas offen. Der Prüfbericht zeigt, wie belastbar das ist.',
-        groessenordnung: `Rechnerisch offen: ${groessenordnungInWorten(basis.nettoanspruch)} über dem bereits Erhaltenen (Schätzung mit Bandbreite).`,
+        titel: 'Gelb. Knapp – es könnte sich lohnen.',
+        zeile: 'Der Prüfbericht zeigt, ob es reicht.',
       };
     }
     return {
       ampel: 'rot',
       grund: 'kein-vorteil',
-      titel: 'Rot. Ehrlich gesagt: Hier lohnt es nicht.',
-      text: 'Ihr Vertrag ist beendet, und über das bereits Erhaltene hinaus bleibt nach unserer Schätzung rechnerisch nichts offen. Sparen Sie sich das Geld für den Prüfbericht.',
+      titel: 'Rot. Rechnerisch ist hier nicht mehr drin, als Sie erhalten haben.',
+      zeile: 'Sparen Sie sich den Bericht.',
     };
   }
 
@@ -141,37 +78,35 @@ export function bestimmeWirtschaftlicheAmpel(
     return {
       ampel: 'gelb',
       grund: 'kein-rueckkaufswert',
-      titel: 'Gelb: Eine Zahl fehlt noch.',
-      text: 'Ohne Ihren Rückkaufswert können wir nicht vergleichen. Er steht in der letzten Standmitteilung. Tragen Sie ihn nach – dann wird die Ampel klar.',
-      groessenordnung: `Der geschätzte Rückabwicklungswert ist ${groessenordnungInWorten(basis.rueckabwicklungswert)} (Schätzung mit Bandbreite).`,
+      titel: 'Gelb. Eine Zahl fehlt noch.',
+      zeile: 'Ohne Ihren Rückkaufswert können wir nicht vergleichen. Er steht in der letzten Standmitteilung.',
     };
   }
 
-  if (basis.wirtschaftlichKeinVorteil === true) {
-    return {
-      ampel: 'rot',
-      grund: 'kein-vorteil',
-      titel: 'Rot. Ehrlich gesagt: Hier lohnt es nicht.',
-      text: 'Nach unserer Schätzung liegt der Widerspruch unter Ihrem Rückkaufswert. Sparen Sie sich das Geld für den Prüfbericht. Wenn Sie den Vertrag loswerden wollen, ist Verkaufen vielleicht der bessere Weg.',
-    };
-  }
+  const mehrwert = basis.mehrwertGegenKuendigung;
 
-  const minMehrwert = min.mehrwertGegenKuendigung ?? 0;
-  if (minMehrwert > 0) {
+  if (mehrwert > AMPEL.gruen.mehrwertMin && mehrwert >= AMPEL.gruen.mehrwertMinAbsolut) {
     return {
       ampel: 'gruen',
       grund: 'vorteil',
-      titel: 'Grün. Rechnerisch ist deutlich mehr drin.',
-      text: 'Bei Ihrem Vertrag ist rechnerisch mehr drin als der Rückkaufswert – in allen drei Szenarien. Wollen Sie die genaue Zahl?',
-      groessenordnung: `Größenordnung: ${groessenordnungInWorten(basis.mehrwertGegenKuendigung)} über dem Rückkaufswert (Schätzung mit Bandbreite).`,
+      titel: 'Rechnerisch ist deutlich mehr drin als der Rückkaufswert.',
+      zeile: `Größenordnung: ${groessenordnungInWorten(mehrwert)} über dem Rückkaufswert – geschätzt, mit Bandbreite.`,
+    };
+  }
+
+  if (mehrwert > AMPEL.gelb.mehrwertMin) {
+    return {
+      ampel: 'gelb',
+      grund: 'knapp',
+      titel: 'Gelb. Knapp – es könnte sich lohnen.',
+      zeile: 'Der Prüfbericht zeigt, ob es reicht.',
     };
   }
 
   return {
-    ampel: 'gelb',
-    grund: 'knapp',
-    titel: 'Gelb. Knapp.',
-    text: 'Es könnte sich lohnen, muss aber nicht: Im mittleren Szenario liegt der Widerspruch über Ihrem Rückkaufswert, im vorsichtigen nicht. Der Prüfbericht zeigt, ob es reicht.',
-    groessenordnung: `Im mittleren Szenario ${groessenordnungInWorten(basis.mehrwertGegenKuendigung)} über dem Rückkaufswert – im vorsichtigen Szenario nicht.`,
+    ampel: 'rot',
+    grund: 'kein-vorteil',
+    titel: 'Rot. Rechnerisch ist hier nicht mehr drin als der Rückkaufswert.',
+    zeile: 'Sparen Sie sich den Bericht.',
   };
 }

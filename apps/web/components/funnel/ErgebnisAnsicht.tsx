@@ -1,23 +1,24 @@
 'use client';
 
 /**
- * Ergebnis-Seite. Verbraucherprodukt (privat): wirtschaftliche Ampel in
- * Worten ohne Euro-Beträge, Bericht-Angebot, Weg-zum-Geld-Block mit eigener
- * Einwilligung, Unterlagen-Checkliste; Annahmen/Gegenposition eingeklappt.
+ * Ergebnis-Seite (Prompt 12, Abschnitt 3.3). Verbraucherprodukt: die eine
+ * wirtschaftliche Ampel, über dem Knopf höchstens 40 Wörter, keine
+ * Euro-Beträge; darunter vier aufklappbare Zeilen, Verkaufen-Karte mit
+ * eigener Einwilligung und die Karte „Lieber persönlich?“.
  * Kanzlei-Variante: Eignungs-Check mit Regel-IDs und Szenario-Beträge.
  */
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { CalcResult } from '@rueckab/calc';
 import type { EligibilityResult } from '@rueckab/eligibility';
-import { BERICHT_PREIS_BRUTTO_EUR, BERICHT_PREIS_HINWEIS, BERICHT_PREIS_REGULAER_EUR } from '@/config/business';
+import { BERICHT_PREIS_BRUTTO_EUR } from '@/config/business';
+import { BRAND } from '@/config/brand';
 import { VARIANTE } from '@/config/variante';
 import { Ampel } from '@/components/Ampel';
-import { TransparenzKasten } from '@/components/TransparenzKasten';
 import type { WirtschaftlicheAmpel } from '@/lib/ampel';
 import { ladeDraft, leererDraft, loescheDraft, speichereDraft, type CaseDraft } from '@/lib/draft';
 import { formatEuro } from '@/lib/format';
-import { UNTERLAGEN_FELDER, UNTERLAGEN_LABEL } from '@/lib/labels';
+import { UNTERLAGEN_LISTE } from '@/lib/labels';
 import { ZusammenfassungAnsicht } from './Zusammenfassung';
 
 interface VorschauKanzlei {
@@ -30,18 +31,30 @@ interface VorschauKanzlei {
 interface VorschauPrivat {
   variante: 'privat';
   ampel: WirtschaftlicheAmpel;
-  regime: CalcResult['regime'];
-  hinweise: string[];
+  rechtswegSatz: string;
+  warum: string[];
   annahmen: string[];
   warnungen: string[];
-  meta: { calcVersion: string; dataVersion: string; rulesVersion: string };
+  meta: { calcVersion: string; dataVersion: string };
 }
 
-type Vorschau = VorschauKanzlei | VorschauPrivat;
+interface VorschauAnfrage {
+  variante: 'anfrage';
+  grund: string;
+  text: string;
+}
 
-/** Typische Einwände des Versicherers – in der Kanzlei-Variante sichtbar, im Verbraucherprodukt im Bericht. */
+type Vorschau = VorschauKanzlei | VorschauPrivat | VorschauAnfrage;
+
+/** Typische Einwände des Versicherers – vollständig, eingeklappt. */
 const GEGENPOSITION =
-  'Der Versicherer wird sagen: Zinsen nur aus den eigenen Zahlen, nicht aus dem Branchenschnitt; die Nettoverzinsung enthalte Einmaleffekte; Schutz- und Kostenanteile seien höher. Genau deshalb rechnen wir mit einer Spanne statt mit einer einzigen Zahl.';
+  'Der Versicherer wird sagen: Zinsen nur aus den eigenen Zahlen, nicht aus dem Branchenschnitt; die Nettoverzinsung enthalte Einmaleffekte; Schutz- und Kostenanteile seien höher. Genau deshalb rechnen wir mit einer Spanne statt mit einer einzigen Zahl – und legen im Bericht jede Quelle offen.';
+
+const AMPEL_WORT: Record<WirtschaftlicheAmpel['ampel'], string> = {
+  gruen: 'Grün',
+  gelb: 'Gelb',
+  rot: 'Rot',
+};
 
 const AMPEL_KANZLEI: Record<EligibilityResult['ampel'], string> = {
   gruen: 'Grün – Merkmale sprechen für eine vertiefte Prüfung',
@@ -49,12 +62,62 @@ const AMPEL_KANZLEI: Record<EligibilityResult['ampel'], string> = {
   rot: 'Rot – kein geeigneter Fall erkennbar',
 };
 
+function VerkaufenKarte({
+  einwilligung,
+  onEinwilligung,
+}: {
+  einwilligung: boolean;
+  onEinwilligung: (angehakt: boolean) => void;
+}) {
+  return (
+    <section aria-labelledby="verkaufen-titel" className="karte">
+      <h2 id="verkaufen-titel">Nicht streiten? Verkaufen prüfen.</h2>
+      <p>Der dritte Weg neben Kündigen und Rückabwicklung.</p>
+      <div className="feld">
+        <div className="optionen">
+          <label>
+            <input
+              type="checkbox"
+              checked={einwilligung}
+              onChange={(ereignis) => onEinwilligung(ereignis.target.checked)}
+            />
+            <span>
+              Ja, {BRAND.name} darf mich zu einem Ankaufsangebot kontaktieren und dafür meine
+              Vertragsangaben nutzen. (freiwillig, jederzeit widerrufbar)
+            </span>
+          </label>
+        </div>
+      </div>
+      <p style={{ marginBottom: 0 }}>
+        <Link
+          href="/verkaufen"
+          className="knopf zweitrangig"
+          aria-disabled={!einwilligung}
+          onClick={(ereignis) => {
+            if (!einwilligung) {
+              ereignis.preventDefault();
+            }
+          }}
+        >
+          Unverbindliches Ankaufsangebot anfordern
+        </Link>
+      </p>
+      {!einwilligung && (
+        <p className="erklaerung" style={{ marginTop: '0.5rem', marginBottom: 0 }}>
+          Erst mit Ihrem Häkchen geht es weiter – ohne Ja geben wir nichts weiter.
+        </p>
+      )}
+    </section>
+  );
+}
+
 export function ErgebnisAnsicht() {
   const [draft, setDraft] = useState<CaseDraft>(leererDraft);
   const [geladen, setGeladen] = useState(false);
   const [vorschau, setVorschau] = useState<Vorschau | null>(null);
   const [fehler, setFehler] = useState<string | null>(null);
   const [laedt, setLaedt] = useState(false);
+  const [linkHinweis, setLinkHinweis] = useState<string | null>(null);
 
   useEffect(() => {
     const d = ladeDraft();
@@ -93,7 +156,7 @@ export function ErgebnisAnsicht() {
         <p>Auf diesem Gerät liegen keine abgeschickten Angaben. Fünf Minuten, dann steht die Ampel.</p>
         <p>
           <Link href="/rechner" className="knopf haupt">
-            Jetzt rechnen – kostenlos
+            Jetzt prüfen
           </Link>
         </p>
       </>
@@ -112,12 +175,17 @@ export function ErgebnisAnsicht() {
     speichereDraft(neu);
   }
 
-  const fehlendeUnterlagen = UNTERLAGEN_FELDER.filter((feld) => !draft[feld]);
+  function linkErneutSenden() {
+    setLinkHinweis('Der Link ist unterwegs an Ihre E-Mail-Adresse.');
+    void fetch('/api/ergebnis-link', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ draft }),
+    }).catch(() => undefined);
+  }
 
   return (
     <>
-      <h1>{vorschau?.variante === 'privat' ? 'Ihre Ampel.' : 'Ihre Ersteinschätzung.'}</h1>
-
       {laedt && <p>Wir rechnen …</p>}
       {fehler !== null && (
         <div className="hinweis">
@@ -125,162 +193,110 @@ export function ErgebnisAnsicht() {
         </div>
       )}
 
+      {vorschau?.variante === 'anfrage' && (
+        <>
+          <h1>Diesen Vertrag prüfen wir persönlich.</h1>
+          <p style={{ fontSize: '1.15rem' }}>{vorschau.text}</p>
+          <p>
+            <Link href="/anfrage" className="knopf haupt">
+              Anfrage senden
+            </Link>
+          </p>
+        </>
+      )}
+
       {vorschau?.variante === 'privat' && (
         <>
-          <Ampel zustand={vorschau.ampel.ampel} gross beschriftung={vorschau.ampel.titel} />
-          <p style={{ marginTop: '1rem', fontSize: '1.25rem' }}>{vorschau.ampel.text}</p>
-          {vorschau.ampel.groessenordnung !== undefined && (
-            <p style={{ fontSize: '1.15rem' }}>
-              <strong>{vorschau.ampel.groessenordnung}</strong>
-            </p>
-          )}
-          {VARIANTE.berichtKostenpflichtig && vorschau.regime === 'alt-policenmodell' && vorschau.ampel.ampel !== 'rot' && (
-            <section aria-labelledby="bericht-titel" className="wert-karte">
-              <p id="bericht-titel">
-                Der Prüfbericht nennt die Zahlen: Jahr für Jahr, jede mit Quelle. Einführungspreis:{' '}
-                <strong>
-                  nur {BERICHT_PREIS_BRUTTO_EUR} € statt <s>{BERICHT_PREIS_REGULAER_EUR} €</s>
-                </strong>{' '}
-                {BERICHT_PREIS_HINWEIS}, einmalig.
-              </p>
-              <p style={{ margin: 0, display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <Ampel zustand={vorschau.ampel.ampel} gross beschriftung={AMPEL_WORT[vorschau.ampel.ampel]} />
+          <h1 style={{ marginTop: '1rem' }}>{vorschau.ampel.titel}</h1>
+          {/* Über dem Knopf: höchstens 40 Wörter (Zeile + Rechtsweg-Satz). */}
+          <p style={{ fontSize: '1.2rem' }}>{vorschau.ampel.zeile}</p>
+          <p>{vorschau.rechtswegSatz}</p>
+
+          {vorschau.ampel.ampel === 'rot' ? (
+            <VerkaufenKarte einwilligung={draft.einwilligungAnkaufKontakt} onEinwilligung={ankaufEinwilligung} />
+          ) : (
+            VARIANTE.berichtKostenpflichtig && (
+              <div className="formular-aktionen" style={{ marginTop: '1rem' }}>
                 <Link href="/bestellen" className="knopf haupt">
                   {vorschau.ampel.ampel === 'gruen'
-                    ? `Ja, ich will die Zahl. ${BERICHT_PREIS_BRUTTO_EUR} €`
-                    : `Genau wissen. ${BERICHT_PREIS_BRUTTO_EUR} €`}
+                    ? `Genaue Zahl holen · ${BERICHT_PREIS_BRUTTO_EUR} €`
+                    : `Genau wissen · ${BERICHT_PREIS_BRUTTO_EUR} €`}
                 </Link>
-                <Link href="/bericht" className="knopf">
-                  Was im Prüfbericht steht
-                </Link>
-              </p>
-            </section>
+                <button type="button" className="knopf zweitrangig" onClick={linkErneutSenden}>
+                  Später weitermachen – Link per E-Mail
+                </button>
+              </div>
+            )
           )}
-          {VARIANTE.berichtKostenpflichtig && vorschau.ampel.ampel === 'rot' && (
-            <div>
-              {VARIANTE.ankaufHinweis && (
-                <p>
-                  <Link href="/verkaufen" className="knopf haupt">
-                    Ankaufsangebot ansehen
-                  </Link>
-                </p>
-              )}
+          {linkHinweis !== null && <p className="erklaerung">{linkHinweis}</p>}
+
+          <div className="accordion-liste" style={{ marginTop: '2rem' }}>
+            <details>
+              <summary>Warum {AMPEL_WORT[vorschau.ampel.ampel]}?</summary>
+              <ul className="punkteliste" style={{ marginTop: '0.75rem' }}>
+                {vorschau.warum.map((zeile) => (
+                  <li key={zeile}>{zeile}</li>
+                ))}
+                {vorschau.annahmen.map((text) => (
+                  <li key={text}>{text}</li>
+                ))}
+                {vorschau.warnungen.map((text) => (
+                  <li key={text}>
+                    <strong>Hinweis:</strong> {text}
+                  </li>
+                ))}
+              </ul>
               <p className="erklaerung">
-                Bei Rot brauchen Sie den Prüfbericht in der Regel nicht. Wer ihn trotzdem will, findet
-                ihn <Link href="/bericht">hier</Link>.
+                Rechenkern {vorschau.meta.calcVersion}, Datenbank {vorschau.meta.dataVersion}. Grundlagen in den{' '}
+                <Link href="/agb#rechenweg">AGB („So rechnen wir“)</Link>.
               </p>
-            </div>
+            </details>
+            <details>
+              <summary>Was sagt der Versicherer dazu?</summary>
+              <p style={{ marginTop: '0.75rem' }}>{GEGENPOSITION}</p>
+            </details>
+            <details>
+              <summary>Diese Unterlagen braucht ein Anwalt</summary>
+              <ul className="punkteliste" style={{ marginTop: '0.75rem' }}>
+                {UNTERLAGEN_LISTE.map((eintrag) => (
+                  <li key={eintrag}>{eintrag}</li>
+                ))}
+              </ul>
+              <p className="erklaerung">
+                Fehlt etwas? Schreiben Sie dem Versicherer kurz: „Bitte schicken Sie mir eine
+                Zweitschrift von Police, Begleitschreiben und Versicherungsbedingungen zu Vertrag
+                Nummer …“ – das muss er liefern.
+              </p>
+            </details>
+            <details>
+              <summary>So verdienen wir</summary>
+              <p style={{ marginTop: '0.75rem' }}>
+                Am Prüfbericht und wenn Sie über uns verkaufen. Nicht daran, ob Sie klagen. Deshalb
+                sagen wir Ihnen auch, wenn es sich nicht lohnt.{' '}
+                <Link href="/so-verdienen-wir">Mehr dazu</Link>
+              </p>
+            </details>
+          </div>
+
+          {vorschau.ampel.ampel !== 'rot' && (
+            <VerkaufenKarte einwilligung={draft.einwilligungAnkaufKontakt} onEinwilligung={ankaufEinwilligung} />
           )}
 
-          {vorschau.regime === 'alt-policenmodell' && (
-            <div className="hinweis neutral">
-              <p>
-                <strong>Was der Versicherer sagen wird:</strong> {GEGENPOSITION}
-              </p>
-            </div>
-          )}
-
-          {VARIANTE.berichtKostenpflichtig && vorschau.regime !== 'alt-policenmodell' && vorschau.ampel.ampel === 'gelb' && (
-            <div className="hinweis neutral">
-              <p>
-                Für diesen Jahrgang rechnet unser Prüfbericht noch nicht – die Prüfung läuft hier über
-                die Belehrung und die Abrechnung Ihres Vertrags. Genau das übernehmen unsere Partner:
-                siehe unten.
-              </p>
-            </div>
-          )}
-
-          <section aria-labelledby="checkliste-titel">
-            <h2 id="checkliste-titel">Ihre Unterlagen</h2>
-            <ul className="checkliste">
-              {UNTERLAGEN_FELDER.map((feld) => (
-                <li key={feld}>
-                  <span className="status">{draft[feld] ? 'vorhanden' : 'fehlt noch'}</span>
-                  <span>{UNTERLAGEN_LABEL[feld]}</span>
-                </li>
-              ))}
-            </ul>
-            {fehlendeUnterlagen.length > 0 && (
-              <div className="hinweis neutral">
-                <p>
-                  <strong>So besorgen Sie Fehlendes:</strong> Schreiben Sie dem Versicherer kurz: „Bitte
-                  schicken Sie mir eine Zweitschrift von Police, Begleitschreiben und
-                  Versicherungsbedingungen zu Vertrag Nummer …“. Das muss er liefern. Bewahren Sie die
-                  Antwort mit Datum auf.
-                </p>
-              </div>
-            )}
+          <section aria-labelledby="persoenlich-titel" className="karte klein">
+            <h2 id="persoenlich-titel" style={{ fontSize: '1.2rem' }}>
+              Lieber persönlich?
+            </h2>
+            <p>Wir prüfen Ihren Vertrag auch individuell.</p>
+            <p style={{ marginBottom: 0 }}>
+              <Link href="/anfrage">Anfrage senden</Link>
+            </p>
           </section>
-
-          {VARIANTE.ankaufHinweis && (
-            <section aria-labelledby="ankauf-titel" className="hinweis">
-              <h2 id="ankauf-titel" style={{ fontSize: '1.4rem' }}>
-                Und danach? Das Rund-um-Sorglos-Paket.
-              </h2>
-              <ol className="punkteliste">
-                <li>
-                  Sie verkaufen Ihre Police und erhalten innerhalb von 18 Werktagen den vereinbarten
-                  anteiligen Rückkaufswert – ausgezahlt über unseren Abwicklungspartner.
-                </li>
-                <li>
-                  Je nach Vertrag können Sie zusätzlich eine Steuererstattung beantragen – auch dabei
-                  unterstützen Sie unsere Partner.
-                </li>
-                <li>
-                  Unsere Partnerkanzleien setzen die Rückabwicklung durch. Jeglicher Mehrerlös bleibt
-                  bei Ihnen – ohne Abzüge.
-                </li>
-              </ol>
-              <p>
-                Wir verdienen am Bericht und erhalten vom Abwicklungspartner eine Vergütung – nicht
-                von Ihrem Erlös. Wir geben nichts weiter, ohne Ihr Ja hier.{' '}
-                <Link href="/verkaufen">Die Wege im Vergleich – und was Sie jeweils aufgeben</Link>
-              </p>
-              <div className="feld">
-                <div className="optionen">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={draft.einwilligungAnkaufKontakt}
-                      onChange={(ereignis) => ankaufEinwilligung(ereignis.target.checked)}
-                    />
-                    <span>
-                      Ja, ich möchte ein Angebot für den Verkauf meiner Police. Dafür dürfen meine
-                      Vertragsangaben an den Organisationspartner gehen. (freiwillig, jederzeit
-                      widerrufbar)
-                    </span>
-                  </label>
-                </div>
-              </div>
-              {draft.einwilligungAnkaufKontakt && (
-                <p className="erklaerung" style={{ margin: 0 }}>
-                  Vermerkt. Die Weitergabe schalten wir frei, sobald die Konditionen des Ankaufs
-                  feststehen – bis dahin bleibt Ihr Ja auf diesem Gerät.
-                </p>
-              )}
-            </section>
-          )}
-
-          <TransparenzKasten kompakt />
-
-          <details>
-            <summary>Wie wir rechnen: Annahmen und Datenherkunft*</summary>
-            <p className="erklaerung" style={{ marginTop: '0.75rem' }}>
-              * Alle Annahmen und die vollständige Datenherkunft stehen im Prüfbericht. Die
-              Grundlagen unserer Rechnung finden Sie in den{' '}
-              <Link href="/agb#rechenweg">AGB („So rechnen wir“)</Link>, den Umgang mit Ihren Daten in
-              der <Link href="/datenschutz">Datenschutzerklärung</Link>.
-            </p>
-            <p className="erklaerung">
-              Rechenkern {vorschau.meta.calcVersion}, Datenbank {vorschau.meta.dataVersion}, Regelwerk{' '}
-              {vorschau.meta.rulesVersion}.
-            </p>
-          </details>
 
           <div className="hinweis neutral">
             <p>
-              Diese Ampel ist eine Schätzung unter offengelegten Annahmen, keine Rechtsberatung. Ob ein
-              Widerspruch wirksam ist, prüft am Ende eine Anwältin oder ein Anwalt mit Ihren
-              Originalunterlagen – auf Wunsch organisieren unsere Partner das für Sie.
+              Diese Ampel ist eine Schätzung unter offengelegten Annahmen, keine Rechtsberatung –
+              und keine Empfehlung, zu kündigen, zu verkaufen oder zu behalten.
             </p>
           </div>
         </>
@@ -288,7 +304,7 @@ export function ErgebnisAnsicht() {
 
       {vorschau?.variante === 'kanzlei' && (
         <>
-          <Ampel zustand={vorschau.eligibility.ampel} gross beschriftung={`Eignungs-Check: ${AMPEL_KANZLEI[vorschau.eligibility.ampel]}`} />
+          <Ampel zustand={vorschau.eligibility.ampel} gross beschriftung={AMPEL_KANZLEI[vorschau.eligibility.ampel]} />
           <ul className="punkteliste" style={{ marginTop: '1rem' }}>
             {vorschau.eligibility.begruendungen.map((b) => (
               <li key={b.text}>
@@ -305,70 +321,57 @@ export function ErgebnisAnsicht() {
             </div>
           )}
 
-          {vorschau.calc.regime === 'alt-policenmodell' && (
-            <section aria-labelledby="werte-titel">
-              <h2 id="werte-titel">Geschätzter Rückabwicklungswert</h2>
-              <div className="wert-karte">
-                <p className="erklaerung" style={{ margin: 0 }}>
-                  Basis-Szenario (geschätzt)
-                </p>
-                <p className="wert-zahl">{formatEuro(vorschau.calc.szenarien.basis.rueckabwicklungswert)}</p>
-                <p className="erklaerung">
-                  Spanne Min–Max: {formatEuro(vorschau.calc.szenarien.min.rueckabwicklungswert)} bis{' '}
-                  {formatEuro(vorschau.calc.szenarien.max.rueckabwicklungswert)}
-                </p>
-                {vorschau.calc.szenarien.basis.mehrwertGegenKuendigung !== undefined && (
-                  <p>
-                    {vorschau.calc.szenarien.basis.wirtschaftlichKeinVorteil === true ? (
-                      <strong>
-                        Gegenüber dem angegebenen Rückkaufswert ist nach dieser Schätzung wirtschaftlich kein
-                        Vorteil erkennbar ({formatEuro(vorschau.calc.szenarien.basis.mehrwertGegenKuendigung)}).
-                      </strong>
-                    ) : (
-                      <>
-                        Geschätzter Mehrwert gegenüber dem angegebenen Rückkaufswert (Basis-Szenario):{' '}
-                        <strong>{formatEuro(vorschau.calc.szenarien.basis.mehrwertGegenKuendigung)}</strong> – unter
-                        den unten genannten Annahmen.
-                      </>
-                    )}
-                  </p>
-                )}
-              </div>
-              <div className="hinweis neutral">
+          <section aria-labelledby="werte-titel">
+            <h2 id="werte-titel">Geschätzter Rückabwicklungswert</h2>
+            <div className="karte">
+              <p className="erklaerung" style={{ margin: 0 }}>
+                Basis-Szenario (geschätzt)
+              </p>
+              <p className="wert-zahl">{formatEuro(vorschau.calc.szenarien.basis.rueckabwicklungswert)}</p>
+              <p className="erklaerung">
+                Spanne Min–Max: {formatEuro(vorschau.calc.szenarien.min.rueckabwicklungswert)} bis{' '}
+                {formatEuro(vorschau.calc.szenarien.max.rueckabwicklungswert)}
+              </p>
+              {vorschau.calc.szenarien.basis.mehrwertGegenKuendigung !== undefined && (
                 <p>
-                  <strong>Gegenposition des Versicherers (typische Einwände):</strong> {GEGENPOSITION}
+                  {vorschau.calc.szenarien.basis.wirtschaftlichKeinVorteil === true ? (
+                    <strong>
+                      Gegenüber dem angegebenen Rückkaufswert ist nach dieser Schätzung wirtschaftlich kein
+                      Vorteil erkennbar ({formatEuro(vorschau.calc.szenarien.basis.mehrwertGegenKuendigung)}).
+                    </strong>
+                  ) : (
+                    <>
+                      Geschätzter Mehrwert gegenüber dem angegebenen Rückkaufswert (Basis-Szenario):{' '}
+                      <strong>{formatEuro(vorschau.calc.szenarien.basis.mehrwertGegenKuendigung)}</strong> – unter
+                      den unten genannten Annahmen.
+                    </>
+                  )}
                 </p>
-              </div>
-              <details>
-                <summary>Annahmen und Datenherkunft dieser Schätzung</summary>
-                <ul className="punkteliste" style={{ marginTop: '0.75rem' }}>
-                  {[...vorschau.zusatzAnnahmen, ...vorschau.calc.annahmen.map((a) => a.text)].map((text) => (
-                    <li key={text}>{text}</li>
-                  ))}
-                  {vorschau.calc.warnungen.map((w) => (
-                    <li key={w.text}>
-                      <strong>Warnung:</strong> {w.text}
-                    </li>
-                  ))}
-                </ul>
-                <p className="erklaerung">
-                  Datenstand: Rechenkern {vorschau.calc.meta.calcVersion}, Datenbank {vorschau.calc.meta.dataVersion},
-                  Regelwerk {vorschau.eligibility.meta.rulesVersion}.
-                </p>
-              </details>
-            </section>
-          )}
-
-          {vorschau.calc.regime === 'neu-2008' && (
-            <div className="hinweis">
-              <p>{vorschau.calc.hinweis}</p>
+              )}
             </div>
-          )}
-          {vorschau.calc.regime === 'vor-1994' && (
-            <div className="hinweis">
-              <p>{vorschau.calc.hinweis}</p>
+            <div className="hinweis neutral">
+              <p>
+                <strong>Gegenposition des Versicherers (typische Einwände):</strong> {GEGENPOSITION}
+              </p>
             </div>
-          )}
+            <details>
+              <summary>Annahmen und Datenherkunft dieser Schätzung</summary>
+              <ul className="punkteliste" style={{ marginTop: '0.75rem' }}>
+                {[...vorschau.zusatzAnnahmen, ...vorschau.calc.annahmen.map((a) => a.text)].map((text) => (
+                  <li key={text}>{text}</li>
+                ))}
+                {vorschau.calc.warnungen.map((w) => (
+                  <li key={w.text}>
+                    <strong>Warnung:</strong> {w.text}
+                  </li>
+                ))}
+              </ul>
+              <p className="erklaerung">
+                Datenstand: Rechenkern {vorschau.calc.meta.calcVersion}, Datenbank {vorschau.calc.meta.dataVersion},
+                Regelwerk {vorschau.eligibility.meta.rulesVersion}.
+              </p>
+            </details>
+          </section>
 
           {vorschau.eligibility.hinweise.length > 0 && (
             <details>

@@ -45,7 +45,7 @@ export function pruefeBestellformular(formular: Bestellformular, draft: CaseDraf
   if (!formular.ausfuehrungZugestimmt) {
     fehler.ausfuehrungZugestimmt = 'Ohne diese Zustimmung dürfen wir den Bericht nicht sofort erstellen.';
   }
-  if (Object.keys(validiereBis('werte', draft)).length > 0) {
+  if (Object.keys(validiereBis('auszahlungen', draft)).length > 0) {
     fehler.fall = FEHLER_FALL_UNVOLLSTAENDIG;
   }
   return fehler;

@@ -1,13 +1,20 @@
 /**
- * HTML-Template der PDF-Kurzprüfung (Prompt 5): sieben Abschnitte/Seiten,
- * de-DE-Formate, eigenständiges Design, Diagramme als Inline-SVG mit
- * validierter Palette (Details docs/PROMPTS.md Prompt 5; Farb-Validierung
- * per dataviz-Referenzpalette).
+ * HTML-Template des Prüfberichts (Prompt 5, umgebaut nach Prompt 12):
+ * sieben Abschnitte/Seiten, de-DE-Formate, Design B (Nachtblau & Salbei,
+ * Abschnitt 4.5), Diagramme als Inline-SVG, Schriften Base64-eingebettet
+ * (kein Netzzugriff bei der Erzeugung).
+ *
+ * Die Berechnung folgt der Rückabwicklungsformel für alle Vertragsjahrgänge
+ * gleich; welche rechtliche Grundlage im Einzelfall trägt, prüft der
+ * Rechtsanwalt (Methodikabsatz, Abschnitt 1.4). Die Belehrungsbewertung
+ * erscheint nur in der Kanzlei-Variante (belehrungsCheck).
  */
-import type { CalcResultAlt, ContractInput, SzenarioName } from '@rueckab/calc';
+import type { CalcResult, ContractInput, Jahreszeile, JahresZins, SzenarioName } from '@rueckab/calc';
 import type { EligibilityResult } from '@rueckab/eligibility';
+import ansatzpunkteJson from '../../../config/ansatzpunkte.json';
 import { esc, formatDatum, formatEuro, formatMonat, formatProzent, formatZahl } from './format';
-import { ZITATE_REGIME_ALT, ZITAT_ANTRAGSMODELL, ZITAT_QUELLENHINWEIS } from './zitate';
+import { MANROPE_WOFF2_BASE64, NEWSREADER_WOFF2_BASE64 } from './schriften';
+import { ZITATE_METHODIK, ZITATE_REGIME_ALT, ZITAT_ANTRAGSMODELL, ZITAT_QUELLENHINWEIS } from './zitate';
 
 export interface BerichtInput {
   marke: string;
@@ -17,48 +24,71 @@ export interface BerichtInput {
   erstelltAm: string;
   versichererAnzeigename: string;
   contract: ContractInput;
-  calc: CalcResultAlt;
+  calc: CalcResult;
   eligibility: EligibilityResult;
+  /** Kanzlei-Variante (Modell C): Belehrungsbewertung anzeigen. */
+  belehrungsCheck?: boolean;
+  /** Grün-Schwelle der wirtschaftlichen Ampel (Standard wie config/ampel.ts). */
+  ampelSchwellen?: { mehrwertMinAbsolut: number };
 }
 
-// Validierte Diagrammfarben (dataviz-Referenzpalette, Light-Slots 1–4;
-// Werte < 3:1 Kontrast erhalten direkte Beschriftung in Textfarbe).
+/** Design B – Token (Prompt 12, Abschnitt 4.1/4.5). */
 const FARBEN = {
-  spar: '#2a78d6',
-  risiko: '#eb6834',
-  abschluss: '#1baf7a',
-  verwaltung: '#eda100',
-  referenzGrau: '#6b7280',
-  tinte: '#1a2530',
-  tinteSanft: '#4a5a66',
-  linie: '#d7dfe4',
+  bg: '#F5F8F7',
+  surface: '#FFFFFF',
+  ink: '#17202A',
+  muted: '#5B6772',
+  brand: '#14365D',
+  sage: '#7FAF9B',
+  sageLight: '#E4EFEA',
+  line: '#DDE4E6',
+  cta: '#C24E2B',
+  ampelGruen: '#1E8E4E',
+  ampelGelb: '#D9A400',
+  ampelRot: '#C62828',
+  ampelAus: '#B9CCC3',
 };
 
-const AMPEL_TEXT: Record<EligibilityResult['ampel'], { label: string; farbe: string; grund: string }> = {
-  gruen: {
-    label: 'Grün – Merkmale sprechen für eine vertiefte Prüfung',
-    farbe: '#008300',
-    grund: 'Nach Ihren Angaben liegen Merkmale vor, die Gerichte als wesentlichen Belehrungsfehler bewertet haben.',
-  },
-  gelb: {
-    label: 'Gelb – offene Punkte, Unterlagen erforderlich',
-    farbe: '#b97b00',
-    grund: 'Einzelne Punkte sind offen; die genannten Unterlagen ermöglichen eine belastbarere Einordnung.',
-  },
-  rot: {
-    label: 'Rot – kein geeigneter Fall erkennbar',
-    farbe: '#c22827',
-    grund: 'Nach Ihren Angaben ist ein wirtschaftlich sinnvolles Lösungsrecht nicht erkennbar.',
-  },
-};
+interface Ansatzpunkte {
+  abJahr: number | null;
+  punkte: string[];
+}
 
-function svgBeitragsaufteilung(calc: CalcResultAlt): string {
+const ANSATZPUNKTE = ansatzpunkteJson as unknown as Ansatzpunkte;
+
+type AmpelFarbe = 'gruen' | 'gelb' | 'rot';
+
+interface WirtschaftlicheAmpel {
+  farbe: AmpelFarbe;
+  label: string;
+  punktFarbe: string;
+}
+
+/** Die eine, wirtschaftliche Ampel (Prompt 12, 1.3) – Basis-Szenario gegen den Vergleichsmaßstab. */
+function wirtschaftlicheAmpel(calc: CalcResult, contract: ContractInput, schwelle: number): WirtschaftlicheAmpel {
+  const basis = calc.szenarien.basis;
+  const beendet = contract.status === 'gekuendigt' || contract.status === 'abgelaufen';
+  const mehrwert = basis.mehrwertGegenKuendigung ?? (beendet ? basis.nettoanspruch : undefined);
+  const vergleich = beendet ? 'dem bereits Erhaltenen' : 'dem Rückkaufswert';
+  if (mehrwert === undefined) {
+    return { farbe: 'gelb', label: 'Gelb – ohne Rückkaufswert kein Vergleich möglich', punktFarbe: FARBEN.ampelGelb };
+  }
+  if (mehrwert >= schwelle) {
+    return { farbe: 'gruen', label: `Grün – rechnerisch deutlich mehr drin als ${vergleich}`, punktFarbe: FARBEN.ampelGruen };
+  }
+  if (mehrwert > 0) {
+    return { farbe: 'gelb', label: `Gelb – knapp über ${vergleich}`, punktFarbe: FARBEN.ampelGelb };
+  }
+  return { farbe: 'rot', label: `Rot – rechnerisch nicht mehr drin als ${vergleich}`, punktFarbe: FARBEN.ampelRot };
+}
+
+function svgBeitragsaufteilung(calc: CalcResult): string {
   const basis = calc.szenarien.basis;
   const teile = [
-    { label: 'Sparanteil', wert: basis.summeSparanteil, farbe: FARBEN.spar },
-    { label: 'Risikoanteil (inkl. BUZ)', wert: basis.summeRisiko + basis.summeBuz, farbe: FARBEN.risiko },
-    { label: 'Abschlusskosten', wert: basis.summeAbschluss, farbe: FARBEN.abschluss },
-    { label: 'Verwaltungskosten', wert: basis.summeVerwaltung, farbe: FARBEN.verwaltung },
+    { label: 'Sparanteil', wert: basis.summeSparanteil, farbe: FARBEN.brand },
+    { label: 'Risikoanteil (inkl. BUZ)', wert: basis.summeRisiko + basis.summeBuz, farbe: FARBEN.cta },
+    { label: 'Abschlusskosten', wert: basis.summeAbschluss, farbe: FARBEN.muted },
+    { label: 'Verwaltungskosten', wert: basis.summeVerwaltung, farbe: FARBEN.sage },
   ].filter((t) => t.wert > 0);
   const gesamt = teile.reduce((a, t) => a + t.wert, 0);
   if (gesamt <= 0) {
@@ -92,18 +122,31 @@ function svgBeitragsaufteilung(calc: CalcResultAlt): string {
     </figure>`;
 }
 
-function svgSzenarioVergleich(calc: CalcResultAlt, rueckkaufswert: number | undefined): string {
+/**
+ * Szenario-Vergleich (4.5): Rückkaufswert in Grau (muted), Szenarien in
+ * Brand/Salbei, „Mehrwert gegenüber Rückkaufswert“ (Basis) in CTA-Orange.
+ */
+function svgSzenarioVergleich(calc: CalcResult, rueckkaufswert: number | undefined): string {
   const reihen: { label: string; wert: number; farbe: string }[] = [];
   if (rueckkaufswert !== undefined) {
-    reihen.push({ label: 'Aktueller Rückkaufswert', wert: rueckkaufswert, farbe: FARBEN.referenzGrau });
+    reihen.push({ label: 'Aktueller Rückkaufswert', wert: rueckkaufswert, farbe: FARBEN.muted });
   }
   for (const name of ['min', 'basis', 'max'] as SzenarioName[]) {
-    const bezeichnung = name === 'min' ? 'Szenario Min' : name === 'max' ? 'Szenario Max' : 'Szenario Basis';
-    reihen.push({ label: bezeichnung, wert: calc.szenarien[name].rueckabwicklungswert, farbe: FARBEN.spar });
+    const bezeichnung =
+      name === 'min' ? 'Szenario konservativ' : name === 'max' ? 'Szenario maximal' : 'Szenario Basis';
+    reihen.push({
+      label: bezeichnung,
+      wert: calc.szenarien[name].rueckabwicklungswert,
+      farbe: name === 'basis' ? FARBEN.brand : FARBEN.sage,
+    });
+  }
+  const mehrwert = calc.szenarien.basis.mehrwertGegenKuendigung;
+  if (mehrwert !== undefined && mehrwert > 0) {
+    reihen.push({ label: 'Mehrwert ggü. Rückkaufswert (Basis)', wert: mehrwert, farbe: FARBEN.cta });
   }
   const max = Math.max(...reihen.map((r) => r.wert), 1);
   const breite = 660;
-  const balkenMax = 420;
+  const balkenMax = 380;
   const zeilenhoehe = 34;
   const balken = reihen
     .map((r, i) => {
@@ -111,12 +154,12 @@ function svgSzenarioVergleich(calc: CalcResultAlt, rueckkaufswert: number | unde
       const y = i * zeilenhoehe;
       return `
         <text x="0" y="${y + 21}" class="svg-label">${esc(r.label)}</text>
-        <rect x="170" y="${y + 6}" width="${w.toFixed(1)}" height="20" rx="4" fill="${r.farbe}" />
-        <text x="${(176 + w).toFixed(1)}" y="${y + 21}" class="svg-wert">${formatEuro(r.wert)}</text>`;
+        <rect x="210" y="${y + 6}" width="${w.toFixed(1)}" height="20" rx="4" fill="${r.farbe}" />
+        <text x="${(216 + w).toFixed(1)}" y="${y + 21}" class="svg-wert">${formatEuro(r.wert)}</text>`;
     })
     .join('');
   return `
-    <figure class="diagramm" role="img" aria-label="Vergleich von Rückkaufswert und geschätztem Rückabwicklungswert in den Szenarien Min, Basis und Max">
+    <figure class="diagramm" role="img" aria-label="Vergleich von Rückkaufswert und geschätztem Rückabwicklungswert in den drei Szenarien">
       <svg viewBox="0 0 ${breite} ${reihen.length * zeilenhoehe}" width="100%" height="${reihen.length * zeilenhoehe}">
         ${balken}
       </svg>
@@ -163,7 +206,7 @@ function angabenTabelle(b: BerichtInput): string {
   </table>`;
 }
 
-function jahrestabelle(calc: CalcResultAlt): string {
+function jahrestabelle(calc: CalcResult): string {
   const kopf = ['Jahr', 'Beiträge', 'Risiko (inkl. BUZ)', 'Abschluss', 'Verwaltung', 'Sparanteil', 'Zinssatz', 'Quelle', 'Nutzungen', 'Stand kumuliert'];
   const herkunft: Record<string, string> = {
     insurer: 'Versicherer',
@@ -173,61 +216,61 @@ function jahrestabelle(calc: CalcResultAlt): string {
   };
   const zeilen = calc.jahrestabelle
     .map(
-      (z) => `<tr>
+      (z: Jahreszeile) => `<tr>
         <th scope="row">${z.jahr}</th>
-        <td>${formatZahl(z.beitraege)}</td>
-        <td>${formatZahl(z.risiko + z.buz)}</td>
-        <td>${formatZahl(z.abschluss)}</td>
-        <td>${formatZahl(z.verwaltung)}</td>
-        <td>${formatZahl(z.sparanteil)}</td>
-        <td>${formatZahl(z.zinssatzProzent)} %</td>
+        <td class="betrag">${formatZahl(z.beitraege)}</td>
+        <td class="betrag">${formatZahl(z.risiko + z.buz)}</td>
+        <td class="betrag">${formatZahl(z.abschluss)}</td>
+        <td class="betrag">${formatZahl(z.verwaltung)}</td>
+        <td class="betrag">${formatZahl(z.sparanteil)}</td>
+        <td class="betrag">${formatZahl(z.zinssatzProzent)} %</td>
         <td>${herkunft[z.zinsherkunft] ?? z.zinsherkunft}</td>
-        <td>${formatZahl(z.nutzungenImJahr)}</td>
-        <td>${formatZahl(z.kumulierterWert)}</td>
+        <td class="betrag">${formatZahl(z.nutzungenImJahr)}</td>
+        <td class="betrag">${formatZahl(z.kumulierterWert)}</td>
       </tr>`,
     )
     .join('');
-  return `<table class="tabelle klein">
+  return `<table class="tabelle klein zebra">
     <caption>Jahresweise Aufschlüsselung (Basis-Szenario, Beträge in Euro)</caption>
     <thead><tr>${kopf.map((k) => `<th scope="col">${k}</th>`).join('')}</tr></thead>
     <tbody>${zeilen}</tbody>
   </table>`;
 }
 
-function szenarienTabelle(calc: CalcResultAlt): string {
+function szenarienTabelle(calc: CalcResult): string {
   const namen: [SzenarioName, string][] = [
-    ['min', 'Min (vorsichtig)'],
+    ['min', 'Konservativ'],
     ['basis', 'Basis'],
-    ['max', 'Max (Obergrenze)'],
+    ['max', 'Maximal (Obergrenze)'],
   ];
   const zeilen = namen
     .map(([name, label]) => {
       const s = calc.szenarien[name];
       return `<tr>
         <th scope="row">${label}</th>
-        <td>${formatEuro(s.erstattungsfaehigeBeitraege)}</td>
-        <td>${formatEuro(s.nutzungen)}</td>
-        <td>${formatEuro(s.rueckabwicklungswert)}</td>
-        <td>${formatEuro(s.erhalteneLeistungenAufgezinst)}</td>
-        <td>${formatEuro(s.nettoanspruch)}</td>
-        <td>${s.mehrwertGegenKuendigung !== undefined ? formatEuro(s.mehrwertGegenKuendigung) : '–'}</td>
+        <td class="betrag">${formatEuro(s.erstattungsfaehigeBeitraege)}</td>
+        <td class="betrag">${formatEuro(s.nutzungen)}</td>
+        <td class="betrag">${formatEuro(s.rueckabwicklungswert)}</td>
+        <td class="betrag">${formatEuro(s.erhalteneLeistungenAufgezinst)}</td>
+        <td class="betrag">${formatEuro(s.nettoanspruch)}</td>
+        <td class="betrag">${s.mehrwertGegenKuendigung !== undefined ? formatEuro(s.mehrwertGegenKuendigung) : '–'}</td>
       </tr>`;
     })
     .join('');
-  return `<table class="tabelle">
+  return `<table class="tabelle zebra">
     <caption>Gesamtrechnung in allen drei Szenarien</caption>
     <thead><tr>
       <th scope="col">Szenario</th><th scope="col">Erstattungsfähige Beiträge</th><th scope="col">Nutzungen</th>
       <th scope="col">Rückabwicklungswert</th><th scope="col">./. erhaltene Leistungen (aufgezinst)</th>
-      <th scope="col">Nettoanspruch (geschätzt)</th><th scope="col">Mehrwert ggü. Kündigung</th>
+      <th scope="col">Netto-Wert (geschätzt)</th><th scope="col">Mehrwert ggü. Rückkaufswert</th>
     </tr></thead>
     <tbody>${zeilen}</tbody>
   </table>`;
 }
 
-function zinsreihenTabelle(calc: CalcResultAlt): string {
+function zinsreihenTabelle(calc: CalcResult): string {
   const eintraege = calc.szenarien.basis.zinsreihe
-    .map((j) => {
+    .map((j: JahresZins) => {
       const quelle =
         j.herkunft === 'insurer'
           ? 'Versicherer'
@@ -235,39 +278,59 @@ function zinsreihenTabelle(calc: CalcResultAlt): string {
             ? (j.quelle?.titel ?? 'Branchendurchschnitt')
             : j.herkunft === 'override'
               ? 'Vorgabe'
-              : 'Näherung (letzter Branchenwert)';
-      return `<tr><th scope="row">${j.jahr}</th><td>${formatZahl(j.satzProzent)} %</td><td>${esc(quelle)}</td></tr>`;
+              : 'Näherung (nächstliegender Branchenwert)';
+      const kennzeichen = j.kennzeichen === 'estimated_branch' ? ' *' : '';
+      return `<tr><th scope="row">${j.jahr}</th><td class="betrag">${formatZahl(j.satzProzent)} %</td><td>${esc(quelle)}${kennzeichen}</td></tr>`;
     })
     .join('');
-  return `<div class="spalten"><table class="tabelle klein">
+  return `<div class="spalten"><table class="tabelle klein zebra">
     <caption>Verwendete Zinsreihe (Basis-Szenario) mit Quelle je Jahr</caption>
     <thead><tr><th scope="col">Jahr</th><th scope="col">Satz</th><th scope="col">Quelle</th></tr></thead>
     <tbody>${eintraege}</tbody>
-  </table></div>`;
+  </table></div>
+  <p class="fussnote">* = Branchen- oder Näherungswert statt Unternehmenswert (Datenkennzeichen „estimated_branch“, Schätzung).</p>`;
 }
 
 function liste(punkte: string[]): string {
   return `<ul>${punkte.map((p) => `<li>${p}</li>`).join('')}</ul>`;
 }
 
-export function renderBerichtHtml(b: BerichtInput): string {
-  if (b.calc.regime !== 'alt-policenmodell') {
-    throw new Error('Der Berichtsgenerator unterstützt in dieser Version nur Altverträge (Regime § 5a/§ 8 VVG a.F.).');
+/** Methodikabsatz (Prompt 12, Abschnitt 1.4) – Wortlaut der Vorgabe. */
+const METHODIK_ABSATZ =
+  'Die Berechnung folgt der Rückabwicklungsformel: eingezahlte Beiträge abzüglich Risikoanteil, zuzüglich der Nutzungen, die der Versicherer aus den Beiträgen gezogen hat. Sie wird für alle Vertragsjahrgänge gleich angewendet. Welche rechtliche Grundlage im Einzelfall trägt (Widerspruch, Widerruf, Rücktritt, unwirksame Klauseln, Nachforderung beim Rückkaufswert oder anderes), prüft der Rechtsanwalt anhand der Vertragsunterlagen. Dieser Bericht ersetzt diese Prüfung nicht. Die meisten Verfahren enden durch Vergleich; das Ergebnis ist eine Verhandlungsbasis mit Bandbreite.';
+
+function ansatzpunkteKasten(): string {
+  if (ANSATZPUNKTE.punkte.length === 0) {
+    return '';
   }
+  const titel =
+    ANSATZPUNKTE.abJahr !== null
+      ? `Typische Ansatzpunkte für Verträge ab ${ANSATZPUNKTE.abJahr}`
+      : 'Typische Ansatzpunkte';
+  return `<div class="hinweisbox"><strong>${esc(titel)}:</strong>${liste(ANSATZPUNKTE.punkte.map((p) => esc(p)))}</div>`;
+}
+
+export function renderBerichtHtml(b: BerichtInput): string {
   const basis = b.calc.szenarien.basis;
   const min = b.calc.szenarien.min;
   const max = b.calc.szenarien.max;
   const rkw = b.contract.rueckkaufswert?.betrag;
-  const ampel = AMPEL_TEXT[b.eligibility.ampel];
+  const belehrungsCheck = b.belehrungsCheck === true;
+  const schwelle = b.ampelSchwellen?.mehrwertMinAbsolut ?? 2000;
+  const ampel = wirtschaftlicheAmpel(b.calc, b.contract, schwelle);
   const keinVorteil = basis.wirtschaftlichKeinVorteil === true;
   const regimeB = b.eligibility.regime === 'alt-antragsmodell';
-  const zitate = regimeB ? [...ZITATE_REGIME_ALT.slice(0, 2), ZITAT_ANTRAGSMODELL] : ZITATE_REGIME_ALT;
+  const zitate = belehrungsCheck
+    ? regimeB
+      ? [...ZITATE_REGIME_ALT.slice(0, 2), ZITAT_ANTRAGSMODELL]
+      : ZITATE_REGIME_ALT
+    : ZITATE_METHODIK;
 
   const mehrwertSatz =
     basis.mehrwertGegenKuendigung === undefined
-      ? 'Ein Vergleich mit dem Rückkaufswert war mangels Angabe nicht möglich.'
+      ? 'Ein Vergleich mit dem Rückkaufswert war mangels Angabe nicht möglich; bei beendeten Verträgen zählt der Netto-Wert über das bereits Erhaltene hinaus.'
       : keinVorteil
-        ? `Nach dieser Schätzung ist gegenüber dem aktuellen Rückkaufswert <strong>wirtschaftlich kein Vorteil erkennbar</strong> (Basis-Szenario: ${formatEuro(basis.mehrwertGegenKuendigung)}).`
+        ? `Nach dieser Schätzung ist gegenüber dem aktuellen Rückkaufswert <strong>rechnerisch kein Vorteil erkennbar</strong> (Basis-Szenario: ${formatEuro(basis.mehrwertGegenKuendigung)}).`
         : `Gegenüber dem aktuellen Rückkaufswert ergäbe sich im Basis-Szenario ein geschätzter Mehrwert von <strong>${formatEuro(basis.mehrwertGegenKuendigung)}</strong> – unter den auf Seite 4 genannten Annahmen.`;
 
   const dokumente = b.eligibility.benoetigteDokumente;
@@ -276,65 +339,93 @@ export function renderBerichtHtml(b: BerichtInput): string {
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Kurzprüfung ${esc(b.aktenzeichen)}</title>
+<title>Prüfbericht ${esc(b.aktenzeichen)}</title>
 <style>
+  @font-face {
+    font-family: 'Newsreader';
+    font-style: normal;
+    font-weight: 200 800;
+    src: url(data:font/woff2;base64,${NEWSREADER_WOFF2_BASE64}) format('woff2');
+  }
+  @font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 200 800;
+    src: url(data:font/woff2;base64,${MANROPE_WOFF2_BASE64}) format('woff2');
+  }
   :root { color-scheme: light; }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 9.5pt;
+    font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    font-size: 11pt;
     line-height: 1.5;
-    color: ${FARBEN.tinte};
+    color: ${FARBEN.ink};
   }
   .seite { page-break-after: always; }
   .seite:last-child { page-break-after: auto; }
-  h1 { font-size: 19pt; margin: 0 0 4mm; line-height: 1.25; }
-  h2 { font-size: 13pt; margin: 0 0 3mm; border-bottom: 1.5pt solid ${FARBEN.linie}; padding-bottom: 1.5mm; }
-  h3 { font-size: 10.5pt; margin: 4mm 0 1.5mm; }
+  h1, h2, h3 { font-family: 'Newsreader', Georgia, serif; font-weight: 600; color: ${FARBEN.brand}; }
+  h1 { font-size: 21pt; margin: 0 0 4mm; line-height: 1.2; }
+  h2 { font-size: 14pt; margin: 0 0 3mm; border-bottom: 1.5pt solid ${FARBEN.line}; padding-bottom: 1.5mm; }
+  h3 { font-size: 11.5pt; margin: 4mm 0 1.5mm; }
   p { margin: 0 0 2.5mm; }
-  .sekundaer { color: ${FARBEN.tinteSanft}; }
-  .kicker { text-transform: uppercase; letter-spacing: 0.08em; font-size: 8pt; color: ${FARBEN.tinteSanft}; margin-bottom: 2mm; }
-  .meta-box { border: 1pt solid ${FARBEN.linie}; border-radius: 3mm; padding: 3mm 4mm; margin: 4mm 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1mm 6mm; font-size: 9pt; }
-  .hero { background: #f3f6f8; border-radius: 3mm; padding: 5mm; margin: 5mm 0; }
-  .hero .zahl { font-size: 26pt; font-weight: 700; }
-  .hero .spanne { color: ${FARBEN.tinteSanft}; margin-top: 1mm; }
-  .ampel { display: inline-flex; align-items: center; gap: 2mm; border: 1pt solid ${FARBEN.linie}; border-radius: 10mm; padding: 1.5mm 4mm; font-weight: 600; margin-top: 3mm; }
-  .ampel .punkt { width: 3.5mm; height: 3.5mm; border-radius: 50%; display: inline-block; }
-  .hinweisbox { background: #fdf6ec; border: 1pt solid #e5cfa3; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0; }
-  .tabelle { width: 100%; border-collapse: collapse; margin: 3mm 0; }
+  .sekundaer { color: ${FARBEN.muted}; }
+  .kopfbalken {
+    background: ${FARBEN.brand};
+    color: #ffffff;
+    border-radius: 2mm;
+    padding: 3mm 5mm;
+    margin: 0 0 5mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .kopfbalken .marke { font-family: 'Newsreader', Georgia, serif; font-weight: 600; font-size: 14pt; }
+  .kopfbalken .zusatz { font-size: 9pt; color: #dbe4ee; }
+  .meta-box { border: 1pt solid ${FARBEN.line}; border-radius: 3mm; padding: 3mm 4mm; margin: 4mm 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1mm 6mm; font-size: 9.5pt; }
+  .hero { background: ${FARBEN.bg}; border-radius: 3mm; padding: 5mm; margin: 5mm 0; }
+  .hero .zahl { font-family: 'Newsreader', Georgia, serif; font-size: 26pt; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .hero .spanne { color: ${FARBEN.muted}; margin-top: 1mm; }
+  .ampel { display: inline-flex; align-items: center; gap: 2.5mm; background: ${FARBEN.sageLight}; border-radius: 10mm; padding: 2mm 4.5mm; font-weight: 600; margin-top: 3mm; }
+  .ampel .punkt { width: 3.5mm; height: 3.5mm; border-radius: 50%; display: inline-block; background: ${FARBEN.ampelAus}; }
+  .hinweisbox { background: ${FARBEN.sageLight}; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0; }
+  .gegenposition { background: ${FARBEN.surface}; border: 1pt solid ${FARBEN.line}; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0; }
+  .tabelle { width: 100%; border-collapse: collapse; margin: 3mm 0; font-size: 9.5pt; }
   .tabelle caption { text-align: left; font-weight: 700; margin-bottom: 1.5mm; }
-  .tabelle th, .tabelle td { border-bottom: 0.5pt solid ${FARBEN.linie}; padding: 1.2mm 2mm 1.2mm 0; text-align: left; vertical-align: top; }
-  .tabelle thead th { border-bottom: 1pt solid ${FARBEN.tinteSanft}; font-size: 8.5pt; }
-  .tabelle tbody th { font-weight: 600; color: ${FARBEN.tinteSanft}; width: 34%; }
+  .tabelle th, .tabelle td { border-bottom: 0.5pt solid ${FARBEN.line}; padding: 1.4mm 2mm; text-align: left; vertical-align: top; }
+  .tabelle thead th { background: ${FARBEN.brand}; color: #ffffff; font-size: 8.5pt; border-bottom: none; }
+  .tabelle thead th:first-child { border-radius: 1mm 0 0 0; }
+  .tabelle thead th:last-child { border-radius: 0 1mm 0 0; }
+  .tabelle.zebra tbody tr:nth-child(even) td, .tabelle.zebra tbody tr:nth-child(even) th { background: ${FARBEN.bg}; }
+  .tabelle tbody th { font-weight: 600; color: ${FARBEN.muted}; }
+  .tabelle:not(.klein) tbody th[scope='row'] { width: 34%; }
   .tabelle.klein { font-size: 8pt; }
-  .tabelle.klein td, .tabelle.klein th { padding: 0.9mm 1.5mm 0.9mm 0; }
-  .tabelle.klein tbody th { width: auto; }
-  .tabelle td:nth-child(n+2):not(:last-child) { font-variant-numeric: tabular-nums; }
+  .tabelle.klein td, .tabelle.klein th { padding: 1mm 1.5mm; }
+  .tabelle td.betrag { text-align: right; font-variant-numeric: tabular-nums; }
   .diagramm { margin: 4mm 0; }
-  .legende { display: flex; flex-wrap: wrap; gap: 2mm 6mm; font-size: 8.5pt; margin-top: 2mm; color: ${FARBEN.tinte}; }
+  .legende { display: flex; flex-wrap: wrap; gap: 2mm 6mm; font-size: 8.5pt; margin-top: 2mm; color: ${FARBEN.ink}; }
   .legende-farbe { width: 3mm; height: 3mm; display: inline-block; border-radius: 0.8mm; margin-right: 1.5mm; }
-  .svg-label { font-size: 12px; fill: ${FARBEN.tinte}; font-family: inherit; }
-  .svg-wert { font-size: 12px; font-weight: 600; fill: ${FARBEN.tinte}; font-family: inherit; }
-  .zitat { border-left: 1.5pt solid ${FARBEN.linie}; padding-left: 4mm; margin: 3mm 0; }
+  .svg-label { font-size: 12px; fill: ${FARBEN.ink}; font-family: 'Manrope', sans-serif; }
+  .svg-wert { font-size: 12px; font-weight: 600; fill: ${FARBEN.ink}; font-family: 'Manrope', sans-serif; }
+  .zitat { border-left: 1.5pt solid ${FARBEN.sage}; padding-left: 4mm; margin: 3mm 0; }
   .zitat .quelle { font-weight: 700; }
-  .formel { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; background: #f3f6f8; padding: 2mm 3mm; border-radius: 1.5mm; display: inline-block; }
+  .formel { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; background: ${FARBEN.bg}; padding: 2mm 3mm; border-radius: 1.5mm; display: inline-block; font-size: 9.5pt; }
   .spalten { column-count: 2; column-gap: 8mm; }
   .spalten .tabelle { break-inside: avoid-column; }
   ul { margin: 0 0 2.5mm; padding-left: 5mm; }
   li { margin-bottom: 1mm; }
-  .fussnote { font-size: 8pt; color: ${FARBEN.tinteSanft}; }
-  .disclaimer { border: 1pt solid ${FARBEN.linie}; border-radius: 2mm; padding: 3mm 4mm; font-size: 8.5pt; color: ${FARBEN.tinteSanft}; }
+  .fussnote { font-size: 8pt; color: ${FARBEN.muted}; }
+  .disclaimer { border: 1pt solid ${FARBEN.line}; border-radius: 2mm; padding: 3mm 4mm; font-size: 8.5pt; color: ${FARBEN.muted}; }
 </style>
 </head>
 <body>
 
 <!-- Seite 1: Deckblatt -->
 <section class="seite">
-  <p class="kicker">${esc(b.marke)} · Schriftliche Kurzprüfung</p>
-  <h1>Kurzprüfung zur Rückabwicklung Ihrer ${b.contract.vertragsart === 'private-rv' || b.contract.vertragsart === 'fonds-rv' ? 'Rentenversicherung' : 'Lebensversicherung'}</h1>
+  <div class="kopfbalken"><span class="marke">${esc(b.marke)}</span><span class="zusatz">Prüfbericht · Schätzung mit Bandbreite</span></div>
+  <h1>Prüfbericht zu Ihrer ${b.contract.vertragsart === 'private-rv' || b.contract.vertragsart === 'fonds-rv' ? 'Rentenversicherung' : 'Lebensversicherung'}</h1>
   <div class="meta-box">
-    <span><strong>Aktenzeichen:</strong> ${esc(b.aktenzeichen)}</span>
+    <span><strong>Bestellnummer:</strong> ${esc(b.aktenzeichen)}</span>
     <span><strong>Erstellt am:</strong> ${formatDatum(b.erstelltAm)}</span>
     <span><strong>Für:</strong> ${esc(b.kundenname)}</span>
     <span><strong>Versicherer:</strong> ${esc(b.versichererAnzeigename)}</span>
@@ -342,30 +433,30 @@ export function renderBerichtHtml(b: BerichtInput): string {
   <div class="hero">
     <p class="sekundaer" style="margin:0">Geschätzter Rückabwicklungswert (Basis-Szenario)</p>
     <p class="zahl">${formatEuro(basis.rueckabwicklungswert)}</p>
-    <p class="spanne">Spanne der Szenarien Min–Max: ${formatEuro(min.rueckabwicklungswert)} bis ${formatEuro(max.rueckabwicklungswert)}</p>
+    <p class="spanne">Spanne der Szenarien konservativ–maximal: ${formatEuro(min.rueckabwicklungswert)} bis ${formatEuro(max.rueckabwicklungswert)}</p>
     ${rkw !== undefined ? `<p class="spanne">Zum Vergleich – aktueller Rückkaufswert: <strong>${formatEuro(rkw)}</strong></p>` : ''}
   </div>
   <p>${mehrwertSatz}</p>
-  <p class="ampel"><span class="punkt" style="background:${ampel.farbe}"></span> Eignungs-Check: ${ampel.label}</p>
-  <p style="margin-top:2mm" class="sekundaer">${esc(ampel.grund)} Die Begründung im Einzelnen finden Sie auf Seite 2 und 7.</p>
+  <p class="ampel"><span class="punkt" style="background:${ampel.punktFarbe}"></span> ${esc(ampel.label)}</p>
   <div class="hinweisbox">
     <strong>Wichtig:</strong> Alle Werte sind Schätzungen unter offengelegten Annahmen (Seite 4) auf Basis öffentlich
-    verfügbarer Kennzahlen – kein Anspruch in bestimmter Höhe und keine Rechtsberatung im Einzelfall. Ob ein
-    Widerspruch bzw. Rücktritt wirksam erklärt werden kann, beurteilt ausschließlich ein Rechtsanwalt.
+    verfügbarer Kennzahlen – es wird kein Betrag zugesagt und keine Rechtsberatung im Einzelfall erteilt. Ob und auf
+    welchem Weg sich das durchsetzen lässt, prüft Ihr Anwalt mit diesem Bericht in der Hand.
   </div>
 </section>
 
-<!-- Seite 2: Grundlage und Einordnung -->
+<!-- Seite 2: Grundlage und Methodik -->
 <section class="seite">
-  <h2>1. Grundlage und rechtliche Einordnung</h2>
-  <p>
-    Diese Kurzprüfung schätzt, welchen Wert die bereicherungsrechtliche Rückabwicklung Ihres Vertrags hätte,
-    wenn ein Widerspruch (§ 5a VVG a.F.) bzw. Rücktritt (§ 8 VVG a.F.) wirksam wäre – und vergleicht ihn mit dem
-    aktuellen Rückkaufswert. Sie ersetzt keine anwaltliche Prüfung, sondern bereitet sie vor.
-  </p>
-  <h3>Einordnung Ihres Vertrags</h3>
-  ${liste(b.eligibility.begruendungen.map((x) => `${esc(x.text)} <span class="fussnote">[${x.regelIds.join(', ')}]</span>`))}
-  <h3>Maßgebliche Rechtsprechung</h3>
+  <h2>1. Grundlage und Methodik</h2>
+  <p>${METHODIK_ABSATZ}</p>
+  ${ansatzpunkteKasten()}
+  ${
+    belehrungsCheck
+      ? `<h3>Einordnung Ihres Vertrags (Eignungs-Check)</h3>
+  ${liste(b.eligibility.begruendungen.map((x) => `${esc(x.text)} <span class="fussnote">[${x.regelIds.join(', ')}]</span>`))}`
+      : ''
+  }
+  <h3>Rechtsprechung zur Rechenformel</h3>
   ${zitate
     .map(
       (z) => `<div class="zitat">
@@ -381,12 +472,12 @@ export function renderBerichtHtml(b: BerichtInput): string {
     <div>${liste([
       'eine strukturierte, nachvollziehbare Schätzung in drei Szenarien',
       'jede Kennzahl mit Quelle und Herkunft (Seite 4–5)',
-      'eine Vorprüfung der Belehrung als Hinweis für die Kanzlei',
+      'eine Rechen- und Verhandlungsgrundlage für Anwalt und Rechtsschutzversicherung',
     ])}</div>
     <div>${liste([
       'keine Rechtsberatung im Einzelfall und keine Vertretung',
-      'keine Zusage eines Anspruchs oder Erfolgs',
-      'keine steuerliche Beratung; keine Empfehlung, den Vertrag zu kündigen oder zu behalten',
+      'keine Zusage eines Betrags oder Erfolgs',
+      'keine steuerliche Beratung; keine Empfehlung, zu kündigen, zu verkaufen oder zu behalten',
     ])}</div>
   </div>
 </section>
@@ -403,22 +494,22 @@ export function renderBerichtHtml(b: BerichtInput): string {
   </div>
 </section>
 
-<!-- Seite 4: Methodik -->
+<!-- Seite 4: Methodik im Detail -->
 <section class="seite">
-  <h2>3. Methodik und Annahmen</h2>
+  <h2>3. Rechenweg und Annahmen</h2>
   <h3>Aufteilung Ihrer Beiträge (Basis-Szenario, Summe über die Laufzeit)</h3>
   ${svgBeitragsaufteilung(b.calc)}
   <p>
     Nutzungen werden – der Rechtsprechung folgend – nur auf den <strong>Sparanteil</strong> gerechnet
-    (im Max-Szenario zusätzlich auf den Verwaltungskostenanteil als begründungsbedürftige Obergrenze).
+    (im Maximal-Szenario zusätzlich auf den Verwaltungskostenanteil als begründungsbedürftige Obergrenze).
     Jeder Monatsbeitrag wächst vom Zahlungsmonat bis zum Stichtag mit einem Zwölftel des Jahressatzes:
   </p>
   <p class="formel">Wert = Sparanteil × ∏ (1 + Jahreszins ÷ 12)</p>
   <h3>Die drei Szenarien</h3>
   ${liste([
-    '<strong>Min:</strong> je Jahr der niedrigere Wert aus Nettoverzinsung und laufender Durchschnittsverzinsung; Risikoanteil am oberen Rand; keine Nutzungen auf Kostenanteile.',
+    '<strong>Konservativ:</strong> je Jahr der niedrigere Wert aus Nettoverzinsung und laufender Durchschnittsverzinsung; Risikoanteil am oberen Rand; keine Nutzungen auf Kostenanteile.',
     '<strong>Basis:</strong> Nettoverzinsung der Kapitalanlagen; Risikoanteil im Mittel; keine Nutzungen auf Kostenanteile.',
-    '<strong>Max:</strong> Nettoverzinsung; Risikoanteil am unteren Rand; zusätzlich Nutzungen auf den Verwaltungskostenanteil – von Gerichten nur bei konkretem Nachweis zuerkannt, daher ausdrücklich Obergrenze.',
+    '<strong>Maximal:</strong> Nettoverzinsung; Risikoanteil am unteren Rand; zusätzlich Nutzungen auf den Verwaltungskostenanteil – von Gerichten nur bei konkretem Nachweis zuerkannt, daher ausdrücklich Obergrenze.',
   ])}
   <h3>Annahmen und Vereinfachungen dieser Berechnung</h3>
   ${liste(b.calc.annahmen.map((a) => esc(a.text)))}
@@ -429,7 +520,7 @@ export function renderBerichtHtml(b: BerichtInput): string {
 <section class="seite">
   <h2>4. Jahresweise Aufschlüsselung</h2>
   ${jahrestabelle(b.calc)}
-  <p class="fussnote">Herkunft „Branche" = Branchendurchschnitt (als Schätzung markiert); „Näherung" = letzter verfügbarer Branchenwert bei Datenlücke.</p>
+  <p class="fussnote">Herkunft „Branche“ = Branchendurchschnitt (Datenkennzeichen „estimated_branch“, Schätzung); „Näherung“ = nächstliegender Branchenwert bei Datenlücke.</p>
 </section>
 
 <!-- Seite 6: Gesamtrechnung -->
@@ -437,7 +528,7 @@ export function renderBerichtHtml(b: BerichtInput): string {
   <h2>5. Gesamtrechnung</h2>
   <p>
     Rechenweg: <strong>Beiträge − Risikoanteil (inkl. BUZ) + Nutzungen = Rückabwicklungswert</strong>;
-    abzüglich bereits erhaltener Leistungen samt Gegenverzinsung ergibt sich der geschätzte Nettoanspruch.
+    abzüglich bereits erhaltener Leistungen samt Gegenverzinsung ergibt sich der geschätzte Netto-Wert.
   </p>
   ${szenarienTabelle(b.calc)}
   <p class="sekundaer">
@@ -454,12 +545,12 @@ export function renderBerichtHtml(b: BerichtInput): string {
     Je höher der Unternehmensanteil, desto belastbarer ist die Schätzung gegenüber dem Versicherer.
   </p>
   ${zinsreihenTabelle(b.calc)}
-  <div class="hinweisbox">
+  <div class="gegenposition">
     <strong>Gegenposition des Versicherers (typische Einwände):</strong> Nutzungen seien nur aus den konkreten
     Zahlen des jeweiligen Unternehmens herzuleiten – ein Branchendurchschnitt genüge der Darlegungslast nicht;
     die Nettoverzinsung enthalte Einmaleffekte (z. B. realisierte Bewertungsreserven ab 2012) und überzeichne
     die laufenden Erträge; Risiko- und Kostenanteile seien höher als pauschal angesetzt. Diese Einwände
-    betreffen die Höhe, nicht das Ob der Methodik; sie sind der Grund, warum diese Kurzprüfung eine Schätzung
+    betreffen die Höhe, nicht das Ob der Methodik; sie sind der Grund, warum dieser Prüfbericht eine Schätzung
     mit Bandbreite ist und die anwaltliche Prüfung mit Unternehmenszahlen der nächste Schritt bleibt.
   </div>
 </section>
@@ -470,7 +561,7 @@ export function renderBerichtHtml(b: BerichtInput): string {
   ${svgSzenarioVergleich(b.calc, rkw)}
   ${
     keinVorteil
-      ? '<div class="hinweisbox"><strong>Ergebnis:</strong> Nach dieser Schätzung ist wirtschaftlich kein Vorteil gegenüber dem aktuellen Rückkaufswert erkennbar. Ein Vorgehen „um jeden Preis" wäre nicht sachgerecht; besprechen Sie Alternativen mit Ihrer Beratung.</div>'
+      ? '<div class="hinweisbox"><strong>Ergebnis:</strong> Nach dieser Schätzung ist rechnerisch kein Vorteil gegenüber dem aktuellen Rückkaufswert erkennbar. Ein Vorgehen „um jeden Preis“ wäre nicht sachgerecht; besprechen Sie Alternativen mit Ihrer Beratung.</div>'
       : ''
   }
   <h3>Was bei einer Rückabwicklung aufgegeben würde</h3>
@@ -489,14 +580,14 @@ export function renderBerichtHtml(b: BerichtInput): string {
     dokumente.length > 0
       ? `Unterlagen vervollständigen: ${dokumente.map((d) => esc(d)).join('; ')}.`
       : 'Police, Begleitschreiben, Verbraucherinformationen und aktuelle Standmitteilung bereitlegen.',
-    'Diesen Bericht einer auf Versicherungsrecht spezialisierten Kanzlei vorlegen; erst dort wird geklärt, ob ein Lösungsrecht besteht und durchsetzbar ist.',
+    'Diesen Bericht einer auf Versicherungsrecht spezialisierten Kanzlei vorlegen; erst dort wird geklärt, ob und auf welchem Weg sich der Wert durchsetzen lässt.',
     'Keine Kündigung und keine Erklärung gegenüber dem Versicherer ohne anwaltlichen Rat.',
   ])}
   <div class="disclaimer">
-    <strong>Rechtlicher Hinweis:</strong> Diese Kurzprüfung ist eine strukturierte Berechnung und keine
+    <strong>Rechtlicher Hinweis:</strong> Dieser Prüfbericht ist eine strukturierte Berechnung und keine
     Rechtsdienstleistung im Sinne des RDG; die rechtliche Prüfung des Einzelfalls obliegt einem Rechtsanwalt.
-    Alle Werte sind Schätzungen mit Bandbreite auf Basis der genannten Quellen und Annahmen; es wird kein Anspruch in
-    bestimmter Höhe zugesagt. ${esc(ZITAT_QUELLENHINWEIS)}<br>
+    Alle Werte sind Schätzungen mit Bandbreite auf Basis der genannten Quellen und Annahmen; es wird kein Betrag
+    zugesagt. ${esc(ZITAT_QUELLENHINWEIS)}<br>
     Datenstand: insurers-Datenbank ${esc(b.calc.meta.dataVersion)} · Rechenkern ${esc(b.calc.meta.calcVersion)} ·
     Regelwerk ${esc(b.eligibility.meta.rulesVersion)} (${esc(b.eligibility.meta.rulesStand)}) ·
     Eignungs-Check ${esc(b.eligibility.meta.eligibilityVersion)} · Stichtag ${formatMonat(b.calc.meta.stichtag)}.

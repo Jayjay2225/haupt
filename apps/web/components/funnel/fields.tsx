@@ -80,6 +80,7 @@ interface MonatsFeldProps extends BasisProps {
   onChange: (isoMonat: string) => void;
   /** Jahr, mit dem die Monatsauswahl startet, solange nichts eingegeben ist. */
   startJahr?: number | undefined;
+  platzhalter?: string | undefined;
 }
 
 const MONATSNAMEN_KURZ = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
@@ -152,7 +153,7 @@ export function MonatsFeld(props: MonatsFeldProps) {
         }}
         onFocus={() => setOffen(true)}
         inputMode="numeric"
-        platzhalter="MM/JJJJ – tippen oder unten wählen"
+        platzhalter={props.platzhalter ?? 'MM/JJJJ – tippen oder unten wählen'}
         autoComplete="off"
         echo={erkannt !== '' ? erkannt : undefined}
       />

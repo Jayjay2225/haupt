@@ -1,21 +1,20 @@
 /**
- * Datenmodell und Validierung des mehrstufigen Rechner-Formulars.
+ * Datenmodell und Validierung des Rechner-Assistenten (Prompt 12, 3.2):
+ * eine Frage je Bildschirm, zehn Schritte, Fortschrittsbalken.
  *
  * `CaseDraft` ist ein reines UI-Modell (alle Felder mit Leerwert-Default): Es
- * sammelt die Angaben, die Rechenkern (`ContractInput`) und Eignungs-Check
- * (`EligibilityInput`) auswerten; die Abbildung steht in lib/berechnung.ts.
- *
- * Produktvarianten (config/variante.ts): Im Verbraucherprodukt ist die
- * Belehrungsbewertung abgeschaltet – Schritt 5 ist dann eine neutrale
- * Unterlagen-Checkliste; in der Kanzlei-Variante bleibt der Eignungs-Check.
+ * sammelt die Angaben, die der Rechenkern (`ContractInput`) auswertet; die
+ * Abbildung steht in lib/berechnung.ts. In der Kanzlei-Variante (Modell C)
+ * kommt vor dem Kontakt-Schritt der Eignungs-Check (Belehrungsfragen) dazu.
  *
  * Zwischenspeicherung: localStorage im Browser; an den Server geht nur die
  * zustandslose Vorschau-Anfrage (nichts wird gespeichert).
  */
+import { BRAND } from '@/config/brand';
 import { VARIANTE } from '@/config/variante';
 import { parseDecimalDe } from './format';
 
-export const DRAFT_STORAGE_KEY = 'rueckab.rechner.entwurf.v1';
+export const DRAFT_STORAGE_KEY = 'rueckab.rechner.entwurf.v2';
 
 export type Vertragsart =
   | ''
@@ -47,49 +46,58 @@ export type BelehrungForm = '' | 'schriftform' | 'textform' | 'andere' | 'unbeka
 
 export type Waehrung = 'EUR' | 'DM';
 
+export interface AuszahlungsEintrag {
+  /** ISO YYYY-MM. */
+  monat: string;
+  /** Betrag als Eingabetext (de-DE). */
+  betrag: string;
+}
+
 export interface CaseDraft {
-  version: 1;
-  // Schritt 1 – Kontakt
-  name: string;
-  email: string;
-  telefon: string;
-  // Schritt 2 – Vertrag
-  versicherer: string;
+  version: 2;
+  // 1 – „Um welchen Vertrag geht es?“
   vertragsart: Vertragsart;
-  beginn: string; // ISO YYYY-MM
-  ende: string; // ISO YYYY-MM, optional
+  // 2 – „Läuft der Vertrag noch?“ (+ seit wann, falls beendet – für die Gegenrechnung)
   status: Vertragsstatus;
-  statusDatum: string; // ISO YYYY-MM, bei beitragsfrei/gekündigt/abgelaufen
-  // Schritt 3 – Beiträge
-  zahlweise: Zahlweise;
+  statusDatum: string; // ISO YYYY-MM, optional
+  // 3 – „Wer ist der Versicherer?“
+  versicherer: string;
+  // 4 – „Wann hat der Vertrag begonnen?“ (BRAND.range)
+  beginn: string; // ISO YYYY-MM
+  // 5 – „Wie hoch war der erste Monatsbeitrag?“ (DM/€-Schalter vor 2002)
   erstbeitrag: string;
   erstbeitragWaehrung: Waehrung;
-  aktuellerBeitrag: string;
+  zahlweise: Zahlweise;
+  // 6 – „Gab es eine Dynamik?“
   dynamik: JaNeinUnbekannt;
+  dynamikSatz: string; // Prozent, z. B. „5“
+  // 7 – „Was steht als eingezahlte Beiträge in der Standmitteilung?“ (überspringbar)
   gesamtsummeLautMitteilung: string;
-  beitragszahlungBis: string; // ISO YYYY-MM, optional
-  // Schritt 4 – Werte
+  // 8 – „Wie hoch ist der Rückkaufswert?“
   rueckkaufswert: string;
+  // 9 – „Gab es Auszahlungen?“
   auszahlungenErhalten: JaNeinUnbekannt;
-  auszahlungenSumme: string;
+  auszahlungenListe: AuszahlungsEintrag[];
+  // 10 – „Wohin sollen wir das Ergebnis schicken?“
+  email: string;
+  telefon: string;
+  einwilligungDatenschutz: boolean;
+  rechtsschutz: boolean;
+  // Bestellung (Rechnung) – wird erst im Bestellformular erfragt.
+  name: string;
+  // Weitere Angaben ohne eigenen Bildschirm (Kanzlei-Variante, Bericht).
+  ende: string;
+  beitragszahlungBis: string;
+  aktuellerBeitrag: string;
   policendarlehen: JaNeinUnbekannt;
   buzEnthalten: JaNeinUnbekannt;
-  // Schritt 5a – Eignungs-Check (nur Kanzlei-Variante)
+  // Eignungs-Check (nur Kanzlei-Variante, eigener Schritt)
   zustandekommen: Zustandekommen;
   belehrungVorhanden: JaNeinUnbekannt;
   belehrungFrist: BelehrungFrist;
   belehrungForm: BelehrungForm;
   hervorhebung: JaNeinUnbekannt;
   abgetretenOderBeliehen: JaNeinUnbekannt;
-  // Schritt 5b – Unterlagen-Checkliste (Verbraucherprodukt)
-  unterlagePolice: boolean;
-  unterlageBegleitschreiben: boolean;
-  unterlageBedingungen: boolean;
-  unterlageStandmitteilung: boolean;
-  unterlageAbrechnung: boolean;
-  // Schritt 6 – Zusammenfassung & Einwilligungen
-  einwilligungDatenschutz: boolean;
-  einwilligungKontakt: boolean;
   /** Eigener, nie vorangekreuzter Block auf der Ergebnis-Seite (Ankauf). */
   einwilligungAnkaufKontakt: boolean;
   /** ISO-Zeitpunkt des Absendens; leer = noch nicht abgesendet. */
@@ -98,26 +106,29 @@ export interface CaseDraft {
 
 export function leererDraft(): CaseDraft {
   return {
-    version: 1,
-    name: '',
-    email: '',
-    telefon: '',
-    versicherer: '',
+    version: 2,
     vertragsart: '',
-    beginn: '',
-    ende: '',
     status: '',
     statusDatum: '',
-    zahlweise: '',
+    versicherer: '',
+    beginn: '',
     erstbeitrag: '',
     erstbeitragWaehrung: 'EUR',
-    aktuellerBeitrag: '',
+    zahlweise: 'monatlich',
     dynamik: '',
+    dynamikSatz: '',
     gesamtsummeLautMitteilung: '',
-    beitragszahlungBis: '',
     rueckkaufswert: '',
     auszahlungenErhalten: '',
-    auszahlungenSumme: '',
+    auszahlungenListe: [],
+    email: '',
+    telefon: '',
+    einwilligungDatenschutz: false,
+    rechtsschutz: false,
+    name: '',
+    ende: '',
+    beitragszahlungBis: '',
+    aktuellerBeitrag: '',
     policendarlehen: '',
     buzEnthalten: '',
     zustandekommen: '',
@@ -126,42 +137,66 @@ export function leererDraft(): CaseDraft {
     belehrungForm: '',
     hervorhebung: '',
     abgetretenOderBeliehen: '',
-    unterlagePolice: false,
-    unterlageBegleitschreiben: false,
-    unterlageBedingungen: false,
-    unterlageStandmitteilung: false,
-    unterlageAbrechnung: false,
-    einwilligungDatenschutz: false,
-    einwilligungKontakt: false,
     einwilligungAnkaufKontakt: false,
     eingereichtAm: '',
   };
 }
 
-export const SCHRITTE = [
+const SCHRITTE_PRIVAT = [
+  'typ',
+  'status',
+  'versicherer',
+  'beginn',
+  'beitrag',
+  'dynamik',
+  'beitragssumme',
+  'rueckkaufswert',
+  'auszahlungen',
   'kontakt',
-  'vertrag',
-  'beitraege',
-  'werte',
-  'eignung',
-  'zusammenfassung',
 ] as const;
 
-export type Schritt = (typeof SCHRITTE)[number];
+const SCHRITTE_KANZLEI = [
+  'typ',
+  'status',
+  'versicherer',
+  'beginn',
+  'beitrag',
+  'dynamik',
+  'beitragssumme',
+  'rueckkaufswert',
+  'auszahlungen',
+  'eignung',
+  'kontakt',
+] as const;
 
-export const SCHRITT_TITEL: Record<Schritt, string> = {
-  kontakt: 'Kontakt',
-  vertrag: 'Police',
-  beitraege: 'Beiträge',
-  werte: 'Werte',
-  eignung: VARIANTE.belehrungsCheck ? 'Eignungs-Check' : 'Unterlagen',
-  zusammenfassung: 'Prüfen',
+export type Schritt = (typeof SCHRITTE_KANZLEI)[number];
+
+export const SCHRITTE: readonly Schritt[] = VARIANTE.belehrungsCheck
+  ? SCHRITTE_KANZLEI
+  : SCHRITTE_PRIVAT;
+
+/** Die Frage je Bildschirm (Prompt 12, Abschnitt 3.2). */
+export const SCHRITT_FRAGE: Record<Schritt, string> = {
+  typ: 'Um welchen Vertrag geht es?',
+  status: 'Läuft der Vertrag noch?',
+  versicherer: 'Wer ist der Versicherer?',
+  beginn: 'Wann hat der Vertrag begonnen?',
+  beitrag: 'Wie hoch war der erste Monatsbeitrag?',
+  dynamik: 'Gab es eine Dynamik?',
+  beitragssumme: 'Was steht als eingezahlte Beiträge in der Standmitteilung?',
+  rueckkaufswert: 'Wie hoch ist der Rückkaufswert?',
+  auszahlungen: 'Gab es Auszahlungen?',
+  eignung: 'Fragen zur Belehrung (Kanzlei-Check)',
+  kontakt: 'Wohin sollen wir das Ergebnis schicken?',
 };
 
 export type Fehlerliste = Partial<Record<string, string>>;
 
 const EMAIL_MUSTER = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MONAT_MUSTER = /^\d{4}-\d{2}$/;
+
+export const BEGINN_MIN = `${BRAND.range.from}-01`;
+export const BEGINN_MAX = `${BRAND.range.to}-12`;
 
 function pruefeBetragsfeld(
   fehler: Fehlerliste,
@@ -184,11 +219,7 @@ function pruefeBetragsfeld(
   }
 }
 
-/**
- * Validiert einen einzelnen Schritt und liefert Fehlermeldungen je Feld.
- * `belehrungsCheck` steuert, ob Schritt 5 die Eignungs-Fragen (Kanzlei) oder
- * die Unterlagen-Checkliste (Verbraucher, keine Pflichtfelder) enthält.
- */
+/** Validiert einen einzelnen Schritt und liefert Fehlermeldungen je Feld. */
 export function validiereSchritt(
   schritt: Schritt,
   draft: CaseDraft,
@@ -197,98 +228,106 @@ export function validiereSchritt(
   const fehler: Fehlerliste = {};
 
   switch (schritt) {
-    case 'kontakt': {
-      if (draft.name.trim() === '') {
-        fehler['name'] = 'Bitte Ihren Namen eintragen.';
-      }
-      if (draft.email.trim() === '') {
-        fehler['email'] = 'Bitte Ihre E-Mail-Adresse eintragen.';
-      } else if (!EMAIL_MUSTER.test(draft.email.trim())) {
-        fehler['email'] = 'Diese E-Mail-Adresse sieht nicht vollständig aus.';
+    case 'typ': {
+      if (draft.vertragsart === '') {
+        fehler['vertragsart'] = 'Bitte auswählen – „Weiß ich nicht“ ist eine gültige Antwort.';
       }
       break;
     }
-    case 'vertrag': {
-      if (draft.versicherer.trim() === '') {
-        fehler['versicherer'] = 'Bitte den Versicherer eintragen – der Name auf der Police reicht.';
-      }
-      if (draft.vertragsart === '') {
-        fehler['vertragsart'] = 'Bitte die Vertragsart auswählen.';
-      }
-      if (!MONAT_MUSTER.test(draft.beginn)) {
-        fehler['beginn'] = 'Bitte Monat und Jahr des Beginns angeben, zum Beispiel 03/2000.';
-      }
-      if (draft.ende !== '' && !MONAT_MUSTER.test(draft.ende)) {
-        fehler['ende'] = 'Bitte Monat und Jahr angeben (zum Beispiel 03/2030) oder das Feld leer lassen.';
-      } else if (draft.ende !== '' && MONAT_MUSTER.test(draft.beginn) && draft.ende < draft.beginn) {
-        fehler['ende'] =
-          'Das geplante Ende liegt vor dem Beginn. Zweistellige Jahre wie „35“ lesen wir als 1935 – bitte das Jahr vierstellig angeben.';
-      }
+    case 'status': {
       if (draft.status === '') {
         fehler['status'] = 'Bitte auswählen, wie es um den Vertrag steht.';
-      } else if (draft.status !== 'laufend' && !MONAT_MUSTER.test(draft.statusDatum)) {
-        fehler['statusDatum'] = 'Bitte angeben, seit wann bzw. zu wann das gilt – Monat und Jahr, zum Beispiel 03/2015.';
       } else if (
-        draft.status !== 'laufend' &&
+        draft.statusDatum !== '' &&
         MONAT_MUSTER.test(draft.beginn) &&
+        MONAT_MUSTER.test(draft.statusDatum) &&
         draft.statusDatum < draft.beginn
       ) {
         fehler['statusDatum'] = 'Dieses Datum liegt vor dem Vertragsbeginn – bitte prüfen (Jahr vierstellig?).';
       }
       break;
     }
-    case 'beitraege': {
-      if (draft.zahlweise === '') {
-        fehler['zahlweise'] = 'Bitte die Zahlweise auswählen.';
+    case 'versicherer': {
+      if (draft.versicherer.trim() === '') {
+        fehler['versicherer'] = 'Bitte den Versicherer eintragen – der Name auf der Police reicht.';
       }
-      const erstbeitragPflicht = draft.aktuellerBeitrag.trim() === '';
+      break;
+    }
+    case 'beginn': {
+      if (!MONAT_MUSTER.test(draft.beginn)) {
+        fehler['beginn'] = 'Bitte Monat und Jahr angeben, zum Beispiel 03/2000.';
+      } else if (draft.beginn < BEGINN_MIN || draft.beginn > BEGINN_MAX) {
+        fehler['beginn'] =
+          `Wir rechnen Verträge mit Beginn ${BRAND.range.from} bis ${BRAND.range.to}. Für andere Jahrgänge nutzen Sie bitte die individuelle Anfrage.`;
+      }
+      break;
+    }
+    case 'beitrag': {
       pruefeBetragsfeld(
         fehler,
         'erstbeitrag',
         draft.erstbeitrag,
-        erstbeitragPflicht,
-        'Bitte den ersten oder den heutigen Beitrag eintragen – einer reicht.',
+        true,
+        'Bitte den ersten Beitrag eintragen – er steht in der Police.',
       );
-      pruefeBetragsfeld(fehler, 'aktuellerBeitrag', draft.aktuellerBeitrag, false, '');
-      if (draft.dynamik === '') {
-        fehler['dynamik'] = 'Bitte angeben, ob der Beitrag jedes Jahr steigt.';
-      }
-      pruefeBetragsfeld(fehler, 'gesamtsummeLautMitteilung', draft.gesamtsummeLautMitteilung, false, '');
-      if (draft.beitragszahlungBis !== '' && !MONAT_MUSTER.test(draft.beitragszahlungBis)) {
-        fehler['beitragszahlungBis'] = 'Bitte Monat und Jahr angeben (zum Beispiel 03/2015) oder das Feld leer lassen.';
-      } else if (
-        draft.beitragszahlungBis !== '' &&
-        MONAT_MUSTER.test(draft.beginn) &&
-        draft.beitragszahlungBis < draft.beginn
-      ) {
-        fehler['beitragszahlungBis'] = 'Dieses Datum liegt vor dem Vertragsbeginn – bitte prüfen (Jahr vierstellig?).';
+      const wert = parseDecimalDe(draft.erstbeitrag);
+      if (fehler['erstbeitrag'] === undefined && wert !== null && wert <= 0) {
+        fehler['erstbeitrag'] = 'Der Beitrag muss größer als null sein.';
       }
       break;
     }
-    case 'werte': {
-      pruefeBetragsfeld(fehler, 'rueckkaufswert', draft.rueckkaufswert, false, '');
+    case 'dynamik': {
+      if (draft.dynamik === '') {
+        fehler['dynamik'] = 'Bitte angeben, ob der Beitrag jedes Jahr gestiegen ist.';
+      } else if (draft.dynamik === 'ja') {
+        const satz = parseDecimalDe(draft.dynamikSatz);
+        if (draft.dynamikSatz.trim() === '' || satz === null || satz <= 0 || satz > 15) {
+          fehler['dynamikSatz'] = 'Bitte den Satz in Prozent angeben – meist 3, 5 oder 10.';
+        }
+      }
+      break;
+    }
+    case 'beitragssumme': {
+      pruefeBetragsfeld(fehler, 'gesamtsummeLautMitteilung', draft.gesamtsummeLautMitteilung, false, '');
+      break;
+    }
+    case 'rueckkaufswert': {
+      pruefeBetragsfeld(
+        fehler,
+        'rueckkaufswert',
+        draft.rueckkaufswert,
+        true,
+        'Bitte den Betrag eintragen – er steht in der letzten Standmitteilung bzw. Abrechnung.',
+      );
+      break;
+    }
+    case 'auszahlungen': {
       if (draft.auszahlungenErhalten === '') {
         fehler['auszahlungenErhalten'] = 'Bitte auswählen, ob Sie schon Geld ausgezahlt bekommen haben.';
       } else if (draft.auszahlungenErhalten === 'ja') {
-        pruefeBetragsfeld(
-          fehler,
-          'auszahlungenSumme',
-          draft.auszahlungenSumme,
-          true,
-          'Bitte die Summe der Auszahlungen eintragen – geschätzt reicht.',
-        );
-      }
-      if (draft.policendarlehen === '') {
-        fehler['policendarlehen'] = 'Bitte auswählen, ob ein Policendarlehen besteht oder bestand.';
-      }
-      if (draft.buzEnthalten === '') {
-        fehler['buzEnthalten'] = 'Bitte auswählen, ob ein Berufsunfähigkeitsschutz enthalten ist.';
+        if (draft.auszahlungenListe.length === 0) {
+          fehler['auszahlungenListe'] = 'Bitte mindestens eine Auszahlung mit Datum und Betrag eintragen.';
+        }
+        draft.auszahlungenListe.forEach((eintrag, index) => {
+          if (!MONAT_MUSTER.test(eintrag.monat)) {
+            fehler[`auszahlung-${index}-monat`] = 'Bitte Monat und Jahr angeben, zum Beispiel 03/2015.';
+          } else if (MONAT_MUSTER.test(draft.beginn) && eintrag.monat < draft.beginn) {
+            fehler[`auszahlung-${index}-monat`] = 'Dieses Datum liegt vor dem Vertragsbeginn – bitte prüfen.';
+          }
+          pruefeBetragsfeld(
+            fehler,
+            `auszahlung-${index}-betrag`,
+            eintrag.betrag,
+            true,
+            'Bitte den Betrag eintragen.',
+          );
+        });
       }
       break;
     }
     case 'eignung': {
       if (!belehrungsCheck) {
-        break; // Unterlagen-Checkliste: keine Pflichtfelder.
+        break;
       }
       if (draft.zustandekommen === '') {
         fehler['zustandekommen'] = 'Bitte auswählen – „weiß ich nicht“ ist eine gültige Antwort.';
@@ -312,7 +351,12 @@ export function validiereSchritt(
       }
       break;
     }
-    case 'zusammenfassung': {
+    case 'kontakt': {
+      if (draft.email.trim() === '') {
+        fehler['email'] = 'Bitte Ihre E-Mail-Adresse eintragen – dorthin geht der Ergebnis-Link.';
+      } else if (!EMAIL_MUSTER.test(draft.email.trim())) {
+        fehler['email'] = 'Diese E-Mail-Adresse sieht nicht vollständig aus.';
+      }
       if (!draft.einwilligungDatenschutz) {
         fehler['einwilligungDatenschutz'] = 'Ohne dieses Ja dürfen wir nicht rechnen.';
       }
@@ -363,12 +407,27 @@ export function ladeDraft(): CaseDraft {
 export function uebernehmeBekannteFelder(quelle: Record<string, unknown>): CaseDraft {
   const basis = leererDraft();
   for (const schluessel of Object.keys(basis) as (keyof CaseDraft)[]) {
+    if (schluessel === 'auszahlungenListe') {
+      continue; // eigene Prüfung unten
+    }
     const wert = quelle[schluessel];
     if (typeof wert === typeof basis[schluessel]) {
       (basis as unknown as Record<string, unknown>)[schluessel] = wert;
     }
   }
-  basis.version = 1;
+  const liste = quelle['auszahlungenListe'];
+  if (Array.isArray(liste)) {
+    basis.auszahlungenListe = liste
+      .filter(
+        (e): e is { monat: unknown; betrag: unknown } => typeof e === 'object' && e !== null,
+      )
+      .map((e) => ({
+        monat: typeof e.monat === 'string' ? e.monat : '',
+        betrag: typeof e.betrag === 'string' ? e.betrag : '',
+      }))
+      .slice(0, 20);
+  }
+  basis.version = 2;
   return basis;
 }
 

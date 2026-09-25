@@ -48,9 +48,14 @@ export function neueBestellnummer(jetzt: Date = new Date()): string {
   return `RR-${jetzt.getFullYear()}-${kennung}`;
 }
 
-/** Stripe-Kennungen der Zahlungsarten; Standard Karte, PayPal, Klarna. */
+/**
+ * Stripe-Kennungen der Zahlungsarten (Prompt 12, Abschnitt 2: Karte, SEPA,
+ * PayPal, Klarna – soweit im Stripe-Dashboard aktiviert). SEPA ist eine
+ * asynchrone Zahlungsart; die Auslieferung läuft über die bereits
+ * abonnierten Ereignisse checkout.session.async_payment_succeeded/failed.
+ */
 export function zahlungsarten(): Stripe.Checkout.SessionCreateParams.PaymentMethodType[] {
-  const roh = process.env['STRIPE_ZAHLUNGSARTEN'] ?? 'card,paypal,klarna';
+  const roh = process.env['STRIPE_ZAHLUNGSARTEN'] ?? 'card,sepa_debit,paypal,klarna';
   return roh
     .split(',')
     .map((s) => s.trim())
@@ -94,7 +99,7 @@ export async function erstelleCheckoutSitzung(anfrage: CheckoutAnfrage, stripe: 
           tax_behavior: 'inclusive',
           product_data: {
             name: `${BRAND.produktname} – schriftlicher Bericht`,
-            description: 'Kurzprüfung zur Rückabwicklung einer Lebens- oder Rentenversicherung (PDF, Schätzung mit Bandbreite)',
+            description: 'Prüfbericht zu einer Lebens- oder Rentenversicherung (PDF, Schätzung mit Bandbreite)',
           },
         },
       },

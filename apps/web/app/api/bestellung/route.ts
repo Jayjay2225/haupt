@@ -7,14 +7,15 @@ import { NextResponse } from 'next/server';
 import { berechneRueckabwicklung } from '@rueckab/calc';
 import type { RiskDefaults } from '@rueckab/calc';
 import riskJson from '../../../../../data/risk-defaults.json';
+import { BRAND } from '@/config/brand';
 import { draftZuEingaben } from '@/lib/berechnung';
 import { pruefeBestellformular } from '@/lib/bestellung';
 import type { Bestellformular } from '@/lib/bestellung';
-import { uebernehmeBekannteFelder } from '@/lib/draft';
+import { BEGINN_MAX, BEGINN_MIN, uebernehmeBekannteFelder } from '@/lib/draft';
 import { findeVersichererId, insurersDaten } from '@/lib/insurers-data';
 import { begrenzt, clientSchluessel } from '@/lib/ratenlimit';
 import { erfuelleBestellung, erzeugeBericht } from '@/lib/erfuellung';
-import { entferneCodeVerwendet, markiereCodeVerwendet, pruefeFreischaltcode } from '@/lib/erstkunden';
+import { codeInfo, entferneCodeVerwendet, markiereCodeVerwendet, pruefeFreischaltcode } from '@/lib/erstkunden';
 import { fallAlsMetadaten } from '@/lib/fall-kodierung';
 import { sendeMail } from '@/lib/versand';
 import { bestellungAktiv, erstelleCheckoutSitzung } from '@/lib/zahlung';
@@ -67,27 +68,38 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ fehler }, { status: 422 });
   }
 
-  // Gibt es für diesen Vertrag schon eine Berichtsvorlage? Sonst nichts verkaufen.
-  let regime: string;
+  // Rechnet der Fall überhaupt durch? Sonst nichts verkaufen. Fondsgebundene
+  // Verträge laufen im Anfrage-Modus (config/ampel.ts) über die individuelle
+  // Prüfung, nicht über den Bericht; der Zeitraum ist auf BRAND.range begrenzt.
   try {
     const abbildung = draftZuEingaben(draft, findeVersichererId, new Date().toISOString().slice(0, 7));
     if (abbildung.fehler.length > 0) {
       return NextResponse.json({ fehler: { fall: abbildung.fehler.join(' ') } }, { status: 422 });
     }
-    regime = berechneRueckabwicklung(abbildung.contract, insurersDaten, riskDefaults).regime;
+    if (abbildung.fondsAnfrage) {
+      return NextResponse.json(
+        {
+          fehler: {
+            fall: 'Fondsgebundene Verträge rechnen wir nicht mit der Standardformel. Nutzen Sie bitte die individuelle Anfrage – wir berechnen hier nichts.',
+          },
+        },
+        { status: 422 },
+      );
+    }
+    if (draft.beginn < BEGINN_MIN || draft.beginn > BEGINN_MAX) {
+      return NextResponse.json(
+        {
+          fehler: {
+            fall: `Der Bericht deckt Verträge mit Beginn ${BRAND.range.from} bis ${BRAND.range.to} ab. Für andere Jahrgänge nutzen Sie bitte die individuelle Anfrage.`,
+          },
+        },
+        { status: 422 },
+      );
+    }
+    berechneRueckabwicklung(abbildung.contract, insurersDaten, riskDefaults);
   } catch {
     return NextResponse.json(
       { fehler: { fall: 'Die Angaben zur Police lassen sich so nicht durchrechnen. Bitte prüfen Sie Beginn, Beitrag und Daten im Rechner.' } },
-      { status: 422 },
-    );
-  }
-  if (regime !== 'alt-policenmodell') {
-    return NextResponse.json(
-      {
-        fehler: {
-          fall: 'Für diesen Vertrag gibt es den schriftlichen Bericht noch nicht. Ihre kostenlose Ampel bleibt gültig; wir berechnen nichts.',
-        },
-      },
       { status: 422 },
     );
   }
@@ -100,15 +112,23 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
     const stand = pruefeFreischaltcode(freischaltcode);
     if (stand !== 'gueltig') {
-      return NextResponse.json(
-        { fehler: { fall: stand === 'verbraucht' ? 'Dieser Freischaltcode wurde bereits verwendet.' : 'Dieser Freischaltcode ist nicht gültig.' } },
-        { status: 422 },
-      );
+      const text =
+        stand === 'verbraucht'
+          ? 'Dieser Freischaltcode wurde bereits verwendet.'
+          : stand === 'abgelaufen'
+            ? 'Dieser Freischaltcode ist abgelaufen.'
+            : 'Dieser Freischaltcode ist nicht gültig.';
+      return NextResponse.json({ fehler: { fall: text } }, { status: 422 });
     }
     const code = freischaltcode.toUpperCase();
-    // Code SOFORT reservieren (Check-then-act-Fenster schließen); bei Fehlschlag wieder freigeben.
-    markiereCodeVerwendet(code);
-    const bestellnummer = `EK-${code}`;
+    const info = codeInfo(code);
+    const einmalig = info?.art !== 'mehrfach';
+    // Einmal-Code SOFORT reservieren (Check-then-act-Fenster schließen); bei Fehlschlag wieder freigeben.
+    if (einmalig) {
+      markiereCodeVerwendet(code);
+    }
+    // Mehrfach-Codes brauchen eine eindeutige Bestellnummer je Einlösung.
+    const bestellnummer = einmalig ? `EK-${code}` : `EK-${code}-${Date.now().toString(36).toUpperCase()}`;
     const status = await erfuelleBestellung(
       {
         id: `ek_${code}`,
@@ -129,7 +149,9 @@ export async function POST(request: Request): Promise<NextResponse> {
     if (status.mailVersendetAm !== undefined) {
       return NextResponse.json({ erstkunde: true, bestellnummer });
     }
-    entferneCodeVerwendet(code);
+    if (einmalig) {
+      entferneCodeVerwendet(code);
+    }
     return NextResponse.json(
       { fehler: { fall: 'Der Prüfbericht ließ sich gerade nicht erstellen. Ihr Code bleibt gültig; wir haben eine Meldung erhalten und melden uns.' } },
       { status: 502 },

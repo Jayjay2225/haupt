@@ -1,15 +1,15 @@
 # Sensitivität der Altjahre (vor 2004)
 
-Automatisch erzeugt von `scripts/sensitivitaet-altjahre.ts` am 2026-09-22 aus `data/insurers.json` (data.version 0.4.0). Frage: Wie stark ändern sich die Nutzungen des **Basis-Szenarios**, wenn alle Zinswerte der Jahre vor 2004 um ±1 Prozentpunkt verschoben werden? Das misst, wie viel an der Beschaffung unternehmensindividueller Altjahres-Werte hängt.
+Automatisch erzeugt von `scripts/sensitivitaet-altjahre.ts` am 2026-09-25 aus `data/insurers.json` (data.version 0.5.0). Frage: Wie stark ändern sich die Nutzungen des **Basis-Szenarios**, wenn alle Zinswerte der Jahre vor 2004 um ±1 Prozentpunkt verschoben werden? Das misst, wie viel an der Beschaffung unternehmensindividueller Altjahres-Werte hängt.
 
 | Vertrag | Nutzungen Basis | −1 Pp vor 2004 | +1 Pp vor 2004 | Änderung | Anteil Nutzungen aus Jahren vor 2004* |
 |---|---|---|---|---|---|
 | Golden (a): private RV 12/2004, 1.200 €/Jahr, laufend | 11.474 € | 11.474 € | 11.474 € | ±0,0 % | 0,0 % |
-| Golden (b): Kapital-LV 10/1995, Dynamik, laufend (Allianz) | 226.508 € | 223.532 € | 229.590 € | ±1,4 % | 2,7 % |
-| Laufend mit Dynamik: Kapital-LV 03/1996, 200 DM/Monat, 3 % Dynamik | 35.059 € | 34.431 € | 35.712 € | ±1,9 % | 3,9 % |
+| Golden (b): Kapital-LV 10/1995, Dynamik, laufend (Allianz) | 226.510 € | 223.534 € | 229.592 € | ±1,4 % | 2,7 % |
+| Laufend mit Dynamik: Kapital-LV 03/1996, 200 DM/Monat, 3 % Dynamik | 35.062 € | 34.433 € | 35.715 € | ±1,9 % | 3,9 % |
 | Laufend ohne Dynamik: Kapital-LV 09/1999, 150 €/Monat | 28.307 € | 28.092 € | 28.525 € | ±0,8 % | 1,5 % |
-| Beitragsfrei seit 2006: Kapital-LV 01/1997, 300 DM/Monat | 26.095 € | 24.975 € | 27.266 € | ±4,5 % | 9,4 % |
-| Einmalbeitrag 1995: Kapital-LV 06/1995, 50.000 DM | 72.717 € | 65.017 € | 81.089 € | ±11,5 % | 23,3 % |
+| Beitragsfrei seit 2006: Kapital-LV 01/1997, 300 DM/Monat | 26.109 € | 24.988 € | 27.280 € | ±4,5 % | 9,4 % |
+| Einmalbeitrag 1995: Kapital-LV 06/1995, 50.000 DM | 72.991 € | 65.269 € | 81.387 € | ±11,5 % | 23,3 % |
 
 \* Zinsertrag, der in den Kalenderjahren vor 2004 gutgeschrieben wurde, in % der gesamten Nutzungen. Die Verschiebung wirkt darüber hinaus, weil früher gutgeschriebene Zinsen bis zum Stichtag weiterverzinst werden.
 

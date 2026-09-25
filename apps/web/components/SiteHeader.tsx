@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { BRAND } from '@/config/brand';
 import { VARIANTE } from '@/config/variante';
 
+/** Kopfzeile (Prompt 12, Abschnitt 3.1): Marke · Navigation · „Jetzt prüfen“. */
 export function SiteHeader() {
   const beta = (process.env['BETA_PASSWORT'] ?? '') !== '';
   return (
@@ -17,7 +18,9 @@ export function SiteHeader() {
             {VARIANTE.ankaufHinweis && <Link href="/verkaufen">Verkaufen</Link>}
             {VARIANTE.transparenzKasten && <Link href="/so-verdienen-wir">So verdienen wir</Link>}
             <Link href="/#fragen">Fragen</Link>
-            {BRAND.b2bDomain !== '' && <Link href="/unternehmer">Für Unternehmer</Link>}
+            <Link href="/rechner" className="knopf haupt kopf-knopf">
+              Jetzt prüfen
+            </Link>
           </nav>
         </div>
       </header>

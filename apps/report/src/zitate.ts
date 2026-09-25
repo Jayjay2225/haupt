@@ -44,6 +44,25 @@ export const ZITATE_REGIME_ALT: Zitat[] = [
   },
 ];
 
+/**
+ * Rechtsprechung zur RECHENFORMEL (Prompt 12, Abschnitt 1.4): Der
+ * Verbraucherbericht nennt nur die Methodik-Quellen (Risikoanteil-Anrechnung,
+ * Ertragslage des Versicherers als Maßstab der Nutzungen) – mit neutraler
+ * Einordnung, ohne Belehrungs-Bewertung. Die belehrungsspezifischen Zitate
+ * bleiben der Kanzlei-Variante vorbehalten.
+ */
+export const ZITATE_METHODIK: Zitat[] = [
+  {
+    ...ZITATE_REGIME_ALT[1]!,
+    einordnung:
+      'Bei einer Rückabwicklung ist der genossene Versicherungsschutz anzurechnen – deshalb zieht die Formel den Risikoanteil ab:',
+  },
+  {
+    ...ZITATE_REGIME_ALT[2]!,
+    einordnung: 'Maßstab des Nutzungsersatzes ist die Ertragslage des jeweiligen Versicherers:',
+  },
+];
+
 export const ZITAT_ANTRAGSMODELL: Zitat = {
   gericht: 'BGH',
   az: 'IV ZR 260/11',

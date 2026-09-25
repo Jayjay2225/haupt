@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { berechneRueckabwicklung } from '../packages/calc/src/index.ts';
-import type { CalcResultAlt, ContractInput, InsurersDaten, Kennzahl, RiskDefaults } from '../packages/calc/src/index.ts';
+import type { CalcResult, ContractInput, InsurersDaten, Kennzahl, RiskDefaults } from '../packages/calc/src/index.ts';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const daten = JSON.parse(readFileSync(resolve(REPO, 'data/insurers.json'), 'utf8')) as InsurersDaten;
@@ -81,12 +81,8 @@ function verschoben(delta: number): InsurersDaten {
   return kopie;
 }
 
-function alt(contract: ContractInput, basis: InsurersDaten): CalcResultAlt {
-  const e = berechneRueckabwicklung(contract, basis, defaults);
-  if (e.regime !== 'alt-policenmodell') {
-    throw new Error(`unerwartetes Regime ${e.regime}`);
-  }
-  return e;
+function alt(input: ContractInput, d: InsurersDaten): CalcResult {
+  return berechneRueckabwicklung(input, d, defaults);
 }
 
 const plus = verschoben(1);

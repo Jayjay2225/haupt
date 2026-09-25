@@ -1,7 +1,7 @@
 {
   "data": {
-    "version": "0.4.0",
-    "stand": "2026-09-18",
+    "version": "0.5.0",
+    "stand": "2026-09-25",
     "beschreibung": "Versicherer-Datenbank (Prompt 2). Regeln: Jede Zahl trägt Quelle mit URL/Dokument, Fundstelle und Abrufdatum sowie source_type (typ) und confidence. Unternehmensindividuelle Kennzahlen sind noch zu beschaffen (data/COVERAGE.md); bis dahin dient der Branchendurchschnitt als markierter Fallback. Szenario-Zuordnung je Gesellschaft: Basis = Nettoverzinsung, Min = je Jahr der niedrigere Wert aus Nettoverzinsung und laufender Durchschnittsverzinsung (solange laufende Reihe fehlt, fällt Min auf die Nettoverzinsung zurück).",
     "changelog": [
       {
@@ -29,6 +29,97 @@
   "branchendurchschnitt": {
     "beschreibung": "Branchendurchschnitt der deutschen Lebensversicherer; dient als Fallback, wenn unternehmensindividuelle Werte fehlen (im Ergebnis als Schätzung markiert).",
     "nettoverzinsung": {
+      "1980": {
+        "wert": 6.71,
+        "einheit": "%",
+        "quelle": {
+          "typ": "primary",
+          "titel": "GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001)",
+          "url": "http://d-nb.info/1213842107/34",
+          "dokument": "DNB-Archivexemplar (PDF)",
+          "fundstelle": "Tabelle „Nettoverzinsung der Kapitalanlagen 1980 bis 2000“, Druckseite 25 (PDF-S. 20), Zeile „1980 | 6,71“; kreuzgeprüft mit den Ausgaben 2002–2004 (http://d-nb.info/1213842034/34 u. a.) und „LV in Zahlen 2021“ (gdv.de), identische Werte.",
+          "abrufdatum": "2026-09-25"
+        },
+        "confidence": "high"
+      },
+      "1985": {
+        "wert": 8.12,
+        "einheit": "%",
+        "quelle": {
+          "typ": "primary",
+          "titel": "GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001)",
+          "url": "http://d-nb.info/1213842107/34",
+          "dokument": "DNB-Archivexemplar (PDF)",
+          "fundstelle": "Tabelle „Nettoverzinsung der Kapitalanlagen 1980 bis 2000“, Druckseite 25 (PDF-S. 20), Zeile „1985 | 8,12“; kreuzgeprüft mit den Ausgaben 2002–2004 (http://d-nb.info/1213842034/34 u. a.) und „LV in Zahlen 2021“ (gdv.de), identische Werte.",
+          "abrufdatum": "2026-09-25"
+        },
+        "confidence": "high"
+      },
+      "1990": {
+        "wert": 6.78,
+        "einheit": "%",
+        "quelle": {
+          "typ": "primary",
+          "titel": "GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001)",
+          "url": "http://d-nb.info/1213842107/34",
+          "dokument": "DNB-Archivexemplar (PDF)",
+          "fundstelle": "Tabelle „Nettoverzinsung der Kapitalanlagen 1980 bis 2000“, Druckseite 25 (PDF-S. 20), Zeile „1990 | 6,78“; kreuzgeprüft mit den Ausgaben 2002–2004 (http://d-nb.info/1213842034/34 u. a.) und „LV in Zahlen 2021“ (gdv.de), identische Werte.",
+          "abrufdatum": "2026-09-25"
+        },
+        "confidence": "high"
+      },
+      "1991": {
+        "wert": 7.44,
+        "einheit": "%",
+        "quelle": {
+          "typ": "primary",
+          "titel": "GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001)",
+          "url": "http://d-nb.info/1213842107/34",
+          "dokument": "DNB-Archivexemplar (PDF)",
+          "fundstelle": "Tabelle „Nettoverzinsung der Kapitalanlagen 1980 bis 2000“, Druckseite 25 (PDF-S. 20), Zeile „1991 | 7,44“; kreuzgeprüft mit den Ausgaben 2002–2004 (http://d-nb.info/1213842034/34 u. a.) und „LV in Zahlen 2021“ (gdv.de), identische Werte.",
+          "abrufdatum": "2026-09-25"
+        },
+        "confidence": "high"
+      },
+      "1992": {
+        "wert": 7.39,
+        "einheit": "%",
+        "quelle": {
+          "typ": "primary",
+          "titel": "GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001)",
+          "url": "http://d-nb.info/1213842107/34",
+          "dokument": "DNB-Archivexemplar (PDF)",
+          "fundstelle": "Tabelle „Nettoverzinsung der Kapitalanlagen 1980 bis 2000“, Druckseite 25 (PDF-S. 20), Zeile „1992 | 7,39“; kreuzgeprüft mit den Ausgaben 2002–2004 (http://d-nb.info/1213842034/34 u. a.) und „LV in Zahlen 2021“ (gdv.de), identische Werte.",
+          "abrufdatum": "2026-09-25"
+        },
+        "confidence": "high"
+      },
+      "1993": {
+        "wert": 7.59,
+        "einheit": "%",
+        "quelle": {
+          "typ": "primary",
+          "titel": "GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001)",
+          "url": "http://d-nb.info/1213842107/34",
+          "dokument": "DNB-Archivexemplar (PDF)",
+          "fundstelle": "Tabelle „Nettoverzinsung der Kapitalanlagen 1980 bis 2000“, Druckseite 25 (PDF-S. 20), Zeile „1993 | 7,59“; kreuzgeprüft mit den Ausgaben 2002–2004 (http://d-nb.info/1213842034/34 u. a.) und „LV in Zahlen 2021“ (gdv.de), identische Werte.",
+          "abrufdatum": "2026-09-25"
+        },
+        "confidence": "high"
+      },
+      "1994": {
+        "wert": 7.15,
+        "einheit": "%",
+        "quelle": {
+          "typ": "primary",
+          "titel": "GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001)",
+          "url": "http://d-nb.info/1213842107/34",
+          "dokument": "DNB-Archivexemplar (PDF)",
+          "fundstelle": "Tabelle „Nettoverzinsung der Kapitalanlagen 1980 bis 2000“, Druckseite 25 (PDF-S. 20), Zeile „1994 | 7,15“; kreuzgeprüft mit den Ausgaben 2002–2004 (http://d-nb.info/1213842034/34 u. a.) und „LV in Zahlen 2021“ (gdv.de), identische Werte.",
+          "abrufdatum": "2026-09-25"
+        },
+        "confidence": "high"
+      },
       "1995": {
         "wert": 7.37,
         "einheit": "%",
@@ -39,6 +130,45 @@
           "fundstelle": "S. 28",
           "abrufdatum": "2026-09-18",
           "hinweis": "Branchendurchschnitt; ab 2012 Sondereffekte durch verstärkte Realisierung von Bewertungsreserven (Fußnote der Tabelle)."
+        },
+        "confidence": "high"
+      },
+      "1996": {
+        "wert": 7.37,
+        "einheit": "%",
+        "quelle": {
+          "typ": "primary",
+          "titel": "GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001)",
+          "url": "http://d-nb.info/1213842107/34",
+          "dokument": "DNB-Archivexemplar (PDF)",
+          "fundstelle": "Tabelle „Nettoverzinsung der Kapitalanlagen 1980 bis 2000“, Druckseite 25 (PDF-S. 20), Zeile „1996 | 7,37“; kreuzgeprüft mit den Ausgaben 2002–2004 (http://d-nb.info/1213842034/34 u. a.) und „LV in Zahlen 2021“ (gdv.de), identische Werte.",
+          "abrufdatum": "2026-09-25"
+        },
+        "confidence": "high"
+      },
+      "1997": {
+        "wert": 7.46,
+        "einheit": "%",
+        "quelle": {
+          "typ": "primary",
+          "titel": "GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001)",
+          "url": "http://d-nb.info/1213842107/34",
+          "dokument": "DNB-Archivexemplar (PDF)",
+          "fundstelle": "Tabelle „Nettoverzinsung der Kapitalanlagen 1980 bis 2000“, Druckseite 25 (PDF-S. 20), Zeile „1997 | 7,46“; kreuzgeprüft mit den Ausgaben 2002–2004 (http://d-nb.info/1213842034/34 u. a.) und „LV in Zahlen 2021“ (gdv.de), identische Werte. Fußnote 1 im Original: Bestandsübertragung zum 01.01.1998, 1997er Vergleichswerte angepasst.",
+          "abrufdatum": "2026-09-25"
+        },
+        "confidence": "high"
+      },
+      "1998": {
+        "wert": 7.57,
+        "einheit": "%",
+        "quelle": {
+          "typ": "primary",
+          "titel": "GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001)",
+          "url": "http://d-nb.info/1213842107/34",
+          "dokument": "DNB-Archivexemplar (PDF)",
+          "fundstelle": "Tabelle „Nettoverzinsung der Kapitalanlagen 1980 bis 2000“, Druckseite 25 (PDF-S. 20), Zeile „1998 | 7,57“; kreuzgeprüft mit den Ausgaben 2002–2004 (http://d-nb.info/1213842034/34 u. a.) und „LV in Zahlen 2021“ (gdv.de), identische Werte. Fußnote 1 im Original: Bestandsübertragung zum 01.01.1998.",
+          "abrufdatum": "2026-09-25"
         },
         "confidence": "high"
       },
@@ -1075,6 +1205,305 @@
     "einlagenzins": {
       "beschreibung": "Referenzzins für die Gegenverzinsung erhaltener Auszahlungen: Effektivzins Einlagen privater Haushalte, täglich fällig (Bundesbank MFI-Zinsstatistik, SUD101), als Jahresmittel. Vor 2003 existiert nur die alte Bundesbank-Zinsstatistik (COVERAGE).",
       "werte": [
+        {
+          "gueltigAb": "1980-01-01",
+          "wert": 4.64,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1981-01-01",
+          "wert": 4.92,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1982-01-01",
+          "wert": 4.85,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1983-01-01",
+          "wert": 3.26,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1984-01-01",
+          "wert": 3.01,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1985-01-01",
+          "wert": 2.88,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1986-01-01",
+          "wert": 2.5,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1987-01-01",
+          "wert": 2.11,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1988-01-01",
+          "wert": 2.01,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1989-01-01",
+          "wert": 2.43,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1990-01-01",
+          "wert": 2.81,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1991-01-01",
+          "wert": 2.82,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1992-01-01",
+          "wert": 2.81,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1993-01-01",
+          "wert": 2.54,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1994-01-01",
+          "wert": 2.1,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1995-01-01",
+          "wert": 2.04,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1996-01-01",
+          "wert": 1.99,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1997-01-01",
+          "wert": 1.71,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1998-01-01",
+          "wert": 1.56,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "1999-01-01",
+          "wert": 1.31,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "2000-01-01",
+          "wert": 1.25,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "2001-01-01",
+          "wert": 1.19,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
+        {
+          "gueltigAb": "2002-01-01",
+          "wert": 1.02,
+          "quelle": {
+            "typ": "primary",
+            "titel": "Deutsche Bundesbank, Habenzinsen Banken: Spareinlagen mit dreimonatiger Kündigungsfrist, Durchschnittssatz („Spareckzins“, SU0022; bis 06/1993 Spareinlagen mit gesetzlicher Kündigungsfrist)",
+            "url": "https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de",
+            "dokument": "Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)",
+            "fundstelle": "Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet",
+            "abrufdatum": "2026-09-25",
+            "hinweis": "Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert)."
+          }
+        },
         {
           "gueltigAb": "2003-01-01",
           "wert": 1.14,

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { RANGE_TEXT } from '@/config/brand';
 import {
   alleVersicherer,
   branchenNettoReihe,
@@ -251,12 +252,12 @@ export default async function VersichererSeite({ params }: { params: Promise<Par
 
       <h2>Police von dieser Gesellschaft?</h2>
       <p>
-        Vertrag zwischen 1990 und 2016? Dann lohnt der Blick. Fünf Minuten, eine klare Ampel –
-        kostenlos. Rot heißt Finger weg, das sagen wir Ihnen auch.
+        Vertrag von {RANGE_TEXT}? Dann lohnt der Blick. Fünf Minuten, eine klare Ampel –
+        kostenlos. Rot heißt: lohnt nicht. Das sagen wir Ihnen auch.
       </p>
       <p>
         <Link href="/rechner" className="knopf haupt">
-          Jetzt rechnen – kostenlos
+          Jetzt prüfen
         </Link>
       </p>
     </div>

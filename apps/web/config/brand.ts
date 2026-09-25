@@ -1,14 +1,15 @@
 /**
- * Marken-Konfiguration (Prompt 8, Entscheidung 1, 4, 5).
+ * Marken-Konfiguration (Prompt 12, Abschnitt 4: Design B „Nachtblau & Salbei“).
  *
- * Renten-Rettung ist die Privatkunden-Marke mit dem Policen-Check als Kern.
+ * Renten-Rettung ist die Privatkunden-Marke; das Produkt heißt „Prüfbericht“
+ * (nie „Gutachten“). Zeitraum: Verträge mit Beginn 1980 bis 2020 (BRAND.range),
+ * überall aus dieser Datei referenziert.
+ *
  * Anbieter ist die Kaufmannsladen Gebhard GmbH (Entscheidung 20.09.2026);
  * die Registerdaten stammen aus dem Handelsregister (Abruf 20.09.2026 über
  * online-handelsregister.de, Spiegel des Registerportals – vor Go-live gegen
  * handelsregister.de zu verifizieren). Umsatzsteuer-ID und Telefon hat der
  * Anbieter am 21.09.2026 geliefert.
- * Der Geschäftsführer-Bereich (B2B) ist geparkt: renten-rettung.de wird die
- * Privatkunden-Seite; eine B2B-Domain gibt es vorerst nicht (b2bDomain leer).
  *
  * Für die markenneutrale Kanzlei-Lizenz (Modell C) liefert die Umgebung der
  * Kanzlei eine neutrale Konfiguration ohne Renten-Rettung-Optik.
@@ -24,8 +25,13 @@ export interface Anschrift {
 export interface Marke {
   name: string;
   domain: string;
+  /** Produktname des kostenpflichtigen Berichts („Prüfbericht“, nie „Gutachten“). */
   produktname: string;
   claim: string;
+  /** Vertragsbeginn-Zeitraum, der auf der Website genannt wird. */
+  range: { from: number; to: number };
+  /** Standort für die Vertrauenszeile („Versicherungsanalyse aus …“). */
+  stadt: string;
   /** Firma des Anbieters (Anbieterkennzeichnung, Rechnungen, E-Mails). */
   anbieter: string;
   anbieterAnschrift: Anschrift;
@@ -43,29 +49,45 @@ export interface Marke {
   optik: 'renten-rettung' | 'neutral';
 }
 
-export const FARBEN = {
-  marine: '#0A1F33',
-  weiss: '#FFFFFF',
-  blaugrau: '#F1F4F8',
-  orange: '#F2541B',
-  orangeDunkel: '#B34011',
-  sekundaer: '#4A5A66',
-  linie: '#D7DFE4',
+/**
+ * Design B – Farb-Token (Prompt 12, Abschnitt 4.1). Ampelfarben werden
+ * ausschließlich im Ampel-Element verwendet; auf `cta` und `brand` steht
+ * immer weiße Schrift, auf `ampelGelb` immer dunkle (`ink`).
+ * Kontrastmessung: docs/DESIGN.md.
+ */
+export const COLORS = {
+  bg: '#F5F8F7',
+  surface: '#FFFFFF',
+  ink: '#17202A',
+  inkSoft: '#3A4652',
+  muted: '#5B6772',
+  brand: '#14365D',
+  brandDeep: '#0C2440',
+  sage: '#7FAF9B',
+  sageLight: '#E4EFEA',
+  line: '#DDE4E6',
+  cta: '#C24E2B',
+  ctaHover: '#A9411F',
   ampelGruen: '#1E8E4E',
-  ampelGelb: '#F2B705',
+  ampelGelb: '#D9A400',
   ampelRot: '#C62828',
+  ampelAus: '#B9CCC3',
+  focus: '#14365D',
 } as const;
 
+/** Schriften (Prompt 12, Abschnitt 4.2): Dateien unter brand/fonts/, OFL. */
 export const SCHRIFTEN = {
-  titel: 'Archivo',
-  text: 'Source Sans 3',
+  titel: 'Newsreader',
+  text: 'Manrope',
 } as const;
 
 const RENTEN_RETTUNG: Marke = {
   name: 'Renten-Rettung',
   domain: 'renten-rettung.de',
-  produktname: 'Policen-Check',
-  claim: 'Alte Lebensversicherung? Erst rechnen. Dann handeln.',
+  produktname: 'Prüfbericht',
+  claim: 'Der Rückkaufswert ist nicht das letzte Wort.',
+  range: { from: 1980, to: 2020 },
+  stadt: 'Berlin',
   anbieter: 'Kaufmannsladen Gebhard GmbH',
   anbieterAnschrift: { strasse: 'Helmkrautstraße 35 A', plz: '13503', ort: 'Berlin' },
   anbieterVertretung: 'Geschäftsführer Jerome Gebhard',
@@ -83,8 +105,10 @@ const RENTEN_RETTUNG: Marke = {
 const KANZLEI_NEUTRAL: Marke = {
   name: process.env['NEXT_PUBLIC_KANZLEI_NAME'] ?? 'Policen-Check Kanzleiversion',
   domain: process.env['NEXT_PUBLIC_KANZLEI_DOMAIN'] ?? '[[KANZLEI-DOMAIN]]',
-  produktname: 'Policen-Check',
+  produktname: 'Prüfbericht',
   claim: 'Rückabwicklung von Lebens- und Rentenversicherungen – Kurzprüfung',
+  range: { from: 1980, to: 2020 },
+  stadt: '',
   anbieter: process.env['NEXT_PUBLIC_KANZLEI_ANBIETER'] ?? '[[KANZLEI]]',
   anbieterAnschrift: {
     strasse: process.env['NEXT_PUBLIC_KANZLEI_STRASSE'] ?? '',
@@ -101,3 +125,6 @@ const KANZLEI_NEUTRAL: Marke = {
 };
 
 export const BRAND: Marke = PRODUKT_VARIANTE === 'kanzlei' ? KANZLEI_NEUTRAL : RENTEN_RETTUNG;
+
+/** „Vertrag von 1980 bis 2020“ – ein Ort für die Formulierung. */
+export const RANGE_TEXT = `${BRAND.range.from} bis ${BRAND.range.to}`;

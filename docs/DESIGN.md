@@ -1,97 +1,94 @@
-# Gestaltungsplan Renten-Rettung (Prompt 8, Aufgabe 6)
+# Gestaltung: Design B „Nachtblau & Salbei“ (Prompt 12, Abschnitt 4)
 
-Stand: 18.09.2026 · **Freigegeben am 20.09.2026 durch den Auftraggeber („so übernehmen“)** – Grundlage für die Umsetzung in `apps/web`. Alle Werte liegen in `apps/web/config/brand.ts`; Änderungen nach der Freigabe sind Konfigurationsänderungen, kein Umbau.
+Stand 25.09.2026. Ersetzt den Gestaltungsplan aus Prompt 8 (Marine/Orange,
+Archivo/Source Sans – freigegeben 20.09.2026, durch Prompt 12 abgelöst).
+Umsetzung: `apps/web/config/brand.ts` (COLORS), `apps/web/app/globals.css`,
+Bericht in `apps/report/src/template.ts`.
 
-## 1. Farben
+## 1. Farb-Token (4.1)
 
-| Rolle | Wert | Einsatz |
+| Token | Wert | Verwendung |
 |---|---|---|
-| Marineblau (Grundton) | `#0A1F33` | Fließtext, Überschriften, Kopf-/Fußzeile, Knopf-Text auf Orange |
-| Weiß | `#FFFFFF` | Seitengrund |
-| Helles Blaugrau | `#F1F4F8` | Abschnittsflächen, Kästen, Formularfelder |
-| Rettungsorange (Signal) | `#F2541B` | **nur** Hauptknopf (Fläche) und einzelne Wörter in großen Überschriften |
-| Orange dunkel | `#B34011` | Orange-Betonung in kleiner Schrift (Ersatz, wenn 3:1 nicht reicht) |
-| Sekundärtext | `#4A5A66` | Erklärtexte, Fußnoten |
-| Linien | `#D7DFE4` | Rahmen, Tabellenlinien |
-| Ampel Grün | `#1E8E4E` | **ausschließlich** Ampel |
-| Ampel Gelb | `#F2B705` | **ausschließlich** Ampel |
-| Ampel Rot | `#C62828` | **ausschließlich** Ampel |
+| bg | `#F5F8F7` | Seitengrund |
+| surface | `#FFFFFF` | Karten, Tabellen |
+| ink / inkSoft / muted | `#17202A` / `#3A4652` / `#5B6772` | Text / Nebentext / Erklärungen |
+| brand / brandDeep | `#14365D` / `#0C2440` | Kopfzeile, Überschriften, Sekundärknöpfe |
+| sage / sageLight | `#7FAF9B` / `#E4EFEA` | Akzente, getönte Abschnitte, Ampel-Pille |
+| line | `#DDE4E6` | Ränder, Trennlinien |
+| cta / ctaHover | `#C24E2B` / `#A9411F` | Hauptknopf (immer weiße Schrift) |
+| ampelGruen / ampelGelb / ampelRot / ampelAus | `#1E8E4E` / `#D9A400` / `#C62828` / `#B9CCC3` | ausschließlich im Ampel-Element |
+| focus | `#14365D` | Fokusring 3 px, 2 px Abstand |
 
-Kontraste (WCAG 2.1, gemessen): Marineblau auf Weiß 16,7:1 · Marineblau auf Blaugrau 15,2:1 · **Marineblau auf Orange 4,8:1 (Hauptknopf, AA für Normaltext)** · Weiß auf Orange nur 3,5:1 (deshalb kein weißer Knopftext) · Orange auf Weiß 3,5:1 (nur große Überschriften ≥ 24 px, AA-Großtext) · Sekundärtext auf Weiß 7,1:1 · Ampel: Navy auf Gelb 9,2:1, Weiß auf Rot 5,6:1, Weiß auf Grün 4,2:1 (Ampel-Beschriftung steht daher immer in Marineblau **neben** dem Licht, nie weiß im Licht).
+Regeln: Ampelfarben nur im Ampel-Element; auf `cta` und `brand` immer weiße
+Schrift; auf `ampelGelb` immer dunkle (`ink`). Keine Verläufe, keine
+Archivfotos, keine Emojis, keine Straßenampel-Grafik.
 
-Diagramme: Die Website-Kurve (Nettoverzinsung) läuft einfarbig in Marineblau, Branchenreferenz in Sekundärgrau gestrichelt – eine Reihe braucht keine kategoriale Palette. Der PDF-Bericht behält seine validierte Palette (sachliche Optik).
+## 2. Schrift (4.2)
 
-## 2. Schrift
+- Überschriften **Newsreader 600** (variable, opsz/wght), H1 58/1.06 Desktop
+  → 34/1.15 mobil (clamp), H2 bis 36, Kartentitel 25.
+- Text **Manrope** 400/600/700; Fließtext 18/1.5, klein 16, Mikro 15, Knöpfe
+  19/700, Formularfelder 17. Beträge mit Tabellenziffern, in Tabellen
+  rechtsbündig (`td.betrag`). Zeilenlänge < 70 Zeichen (`p { max-width: 46rem }`).
+- Dateien vendored unter `brand/fonts/` (OFL, Provenienz in
+  `brand/fonts/README.md`); Website über `next/font/local` (self-hosted),
+  Bericht Base64-eingebettet (`apps/report/src/schriften.ts`, Generator
+  `apps/report/scripts/erzeuge-schriften.mjs`) – keine Netzabfrage.
 
-- Überschriften: **Archivo ExtraBold (800)**, eng gesetzt, Zeilenhöhe 1,1. Startseiten-H1 mobil 34 px, Desktop 48 px.
-- Fließtext: **Source Sans 3**, Regular 400 / Semibold 600, **mindestens 18 px**, Zeilenhöhe 1,55.
-- Beträge und Jahreszahlen mit Tabellenziffern (`font-variant-numeric: tabular-nums`).
-- Beide Schriften sind Open-Font-License; Next lädt sie beim Build und liefert sie von der eigenen Domain (kein Google-Request zur Laufzeit).
+## 3. Form und Komponenten (4.3/4.4)
 
-## 3. Das Erkennungszeichen: die Ampel
+- Radien: Knöpfe 999 px (Pille), Karten 24 px, Felder/kleine Karten 14 px.
+- Schatten nur auf der Einstiegskarte (`.karte.einstieg`):
+  `0 16px 48px rgba(20,54,93,.10)`.
+- Abstände im 8-px-Raster; Container 1280 px, Rand 72 px (mobil 20 px).
+- Knopf primär `cta`, min. 56 px; sekundär 2 px Rand `brand`, transparent.
+- Eingabefeld min. 52 px, Rand 1 px `line`, Fokus `brand` + Ring, Label 16/600,
+  Fehlertext in `ampelRot` nur als Text.
+- **Ampel-Element:** Pille `sageLight` mit drei Punkten 14 px (`ampelAus`),
+  aktiver Punkt in Ergebnisfarbe mit Glow `0 0 0 6px` bei 18 % Alpha;
+  Ergebnis-Seite 40-px-Punkte. Feine Kontur (1 px, ink 35 %) für den
+  Nicht-Text-Kontrast (s. u.). Kein Dauerblinken; `prefers-reduced-motion`
+  schaltet Übergänge ab.
+- Accordion min. 54 px, Chevron `brand`, Trennlinie `#EDF1F0`; Badge
+  `sageLight`/`brand` 15/700; Kopfzeile `brand` mit Marke Newsreader 27/600.
+- Mobil: Hauptknopf unten fixiert (`.fix-unten`, safe-area), Tippflächen
+  ≥ 48 px (Monatsauswahl 48 px, Optionen min. 48 px Zeilenhöhe).
 
-Eine große, senkrechte Ampel (drei Lichter, Marineblau-Gehäuse) steht neben dem Schnellcheck. Sie „springt an“, während die vier Felder ausgefüllt werden: pro ausgefülltem Feld wird ein Segment des Gehäuses hell; sind alle vier Felder gefüllt, pulsiert das oberste Licht kurz als „bereit“-Signal (bei `prefers-reduced-motion` kein Pulsieren, nur Zustandswechsel). Farben in der Ampel sind ausschließlich die drei Ampelfarben; vor dem Ergebnis sind alle Lichter grau.
+## 4. Bericht (4.5)
 
-Auf der Ergebnis-Seite zeigt dieselbe Ampel genau ein Licht: Grün, Gelb oder Rot – mit Text in Marineblau daneben („Grün: Rechnen lohnt sich voraussichtlich“, „Rot: Finger weg – kündigen bringt hier nicht weniger“).
+Kopfbalken `brand` mit weißer Marke (Newsreader); Überschriften Newsreader in
+`brand`; Text Manrope 11 pt `ink`; Tabellenkopf `brand`/weiß, Zebra `bg`,
+Beträge rechtsbündig; Diagramm „Mehrwert gegenüber Rückkaufswert“ in `cta`,
+Rückkaufswert `muted`, Szenarien `brand`/`sage`; Ampel-Pille in Ampelfarben;
+Hinweisflächen `sageLight`; Gegenposition mit Rand `line`.
+PDF-Kopf-/Fußzeile: Chromium rendert sie ohne eingebettete Schriften →
+Systemschrift, Marke fett in `brand`.
 
-## 4. Startseiten-Skizze (mobil zuerst)
+## 5. Gemessene Kontraste (WCAG 2.1, 25.09.2026)
 
-```
-┌──────────────────────────────────────┐
-│ Renten-Rettung        Für Unternehmer│  Kopfzeile (Navy, weiß)
-├──────────────────────────────────────┤
-│ Beta – nur mit Passwort              │  schmaler Hinweisstreifen
-├──────────────────────────────────────┤
-│                                      │
-│  ALTE LEBENSVERSICHERUNG?            │  H1 Archivo 800, „rechnen“
-│  ERST RECHNEN. DANN KÜNDIGEN.        │  in Rettungsorange
-│                                      │
-│  Kündigen bringt den Rückkaufswert.  │  Source Sans 18 px
-│  Ein Widerspruch kann mehr bringen.  │
-│                                      │
-│  ┌──────┐  Versicherer  [_________]  │  Schnellcheck: 4 Felder
-│  │ ○    │  Beginn       [MM/JJJJ  ]  │  Ampel-Gehäuse links,
-│  │ ○    │  Monatsbeitrag[______ € ]  │  Segmente füllen sich
-│  │ ○    │  Rückkaufswert[______ € ]  │  mit jedem Feld
-│  └──────┘                            │
-│  [  Jetzt rechnen – kostenlos      ] │  Hauptknopf Orange/Navy,
-│  5 Minuten. Ihre Police. Eine Ampel. │  mobil unten fixiert
-├──────────────────────────────────────┤
-│ SO LÄUFT ES        1 → 2 → 3         │  drei kurze Schritte
-├──────────────────────────────────────┤
-│ MUSTERFALL                           │  gerundete Werte aus dem
-│ Rückkaufswert rund 310.000 €         │  eigenen Rechenkern,
-│ Rückabwicklung rund 620.000 €        │  Zusatz „Musterfall,
-│ (590.000 bis 650.000 €)              │  Schätzung mit Bandbreite“
-├──────────────────────────────────────┤
-│ WAS KOSTET ES?     Ampel: 0 €        │
-│                    Bericht: 89 €     │  Preis aus Konfiguration
-├──────────────────────────────────────┤
-│ ▌SO VERDIENEN WIR                    │  Pflicht-Kasten (Kurzfassung)
-│ ▌Am Bericht. Wenn Sie über uns       │
-│ ▌verkaufen. Nicht daran, ob Sie      │
-│ ▌klagen.                             │
-├──────────────────────────────────────┤
-│ FRAGEN  ▸ ▸ ▸                        │  aufklappbar
-├──────────────────────────────────────┤
-│ Fußzeile: Verkaufen · So verdienen   │
-│ wir · Für Unternehmer · Impressum …  │
-└──────────────────────────────────────┘
-```
+Text (AA: ≥ 4,5:1 normal, ≥ 3:1 groß/fett ab 18,66 px fett bzw. 24 px):
 
-Ruhe: keine Archivfotos, keine Verläufe, keine Kartenraster; Abschnitte wechseln nur zwischen Weiß und Blaugrau.
+| Paar | Kontrast | Bewertung |
+|---|---|---|
+| ink auf bg / surface / sageLight | 15,40 / 16,45 / 13,97 | AAA |
+| inkSoft auf bg | 9,02 | AAA |
+| muted auf bg / surface | 5,42 / 5,79 | AA (auch für 16-px-Erklärtexte) |
+| weiß auf brand / brandDeep | 12,24 / 15,65 | AAA |
+| **weiß auf cta (Hauptknopf)** | **4,75** | AA normal; Knöpfe sind zudem 19 px/700 (groß: 3:1) |
+| weiß auf ctaHover | 6,06 | AA |
+| brand auf bg / surface / sageLight | 11,46 / 12,24 / 10,40 | AAA |
+| ink auf ampelGelb | 7,25 | AA (Regel „auf Gelb dunkle Schrift“) |
+| ampelRot als Fehlertext auf surface / bg | 5,62 / 5,26 | AA |
 
-## 5. Tonalität (Aufgabe 1) – Prüfregeln
+Nicht-Text (1.4.11, ≥ 3:1): Grün-Punkt auf sageLight 3,54 ✓, Rot-Punkt 4,77 ✓;
+**Gelb-Punkt 1,93 und Aus-Punkt 1,43 liegen darunter** → deshalb tragen alle
+Punkte eine 1-px-Kontur in ink/35 % und der Zustand steht zusätzlich als Wort
+neben der Ampel („Gelb“) bzw. im `aria-label` – Information hängt nie an der
+Farbe allein.
 
-- Überschriften und Knöpfe: höchstens acht Wörter, aktive Verben, ein Gedanke.
-- Alltagswörter zuerst („Police“, „kündigen“, „mehr drin“, „rechnen“); Fachbegriffe im Fließtext erklärt.
-- Zahlen nur aus dem Rechenkern oder mit Quelle; der Musterfall gerundet und beschriftet.
-- Negativ-Ergebnis laut: „Rot heißt: Finger weg. Das sagen wir Ihnen auch.“
-- Verbotsliste (automatisch getestet in `apps/web/test/wording.test.ts`): „bis zu … %“, „garantiert“, „sichern Sie sich“, „steht Ihnen zu“, „Anspruch“ als Zusage, „nur heute“, künstliche Verknappung, Vorher-Nachher-Versprechen, Emojis, Großbuchstaben-Geschrei im Fließtext; für den Ankauf zusätzlich: BaFin/Erlaubnis/Zulassung, Name des Aufkäufers, Prozentangaben zu Auszahlungen, „Wirtschaftsprüfer“.
+## 6. Bewusst offen
 
-## 6. Bewegung und Barrierefreiheit
-
-- `prefers-reduced-motion: reduce` schaltet Pulsieren und weiche Übergänge ab.
-- Fokusringe in Orange dunkel (`#B34011`) auf Weiß, in Weiß auf Navy.
-- Hauptknopf mobil unten fixiert (`position: sticky`), Mindesthöhe 56 px.
-- Alle Formularfelder mit sichtbarem Label, Fehlertexte per `aria-describedby`.
+- Logo: Wortmarke „Renten-Rettung“ in Newsreader; ein Bildzeichen ist nicht
+  definiert (bewusst, bis Jack eines liefert).
+- Kanzlei-Variante (`data-optik="neutral"`): CTA wechselt auf `brand`,
+  Salbei wird blaugrau – Feinschliff erst mit erster Kanzlei.

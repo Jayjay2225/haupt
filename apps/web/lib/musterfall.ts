@@ -1,20 +1,17 @@
 /**
- * Musterfälle für die Startseite (Prompt 8, Aufgabe 1): Zahlen kommen aus
- * dem eigenen Rechenkern mit der echten Datenbasis, werden GERUNDET
- * ausgegeben und tragen den Zusatz „Musterfall, Schätzung mit Bandbreite“.
+ * Musterfälle: Zahlen kommen aus dem eigenen Rechenkern mit der echten
+ * Datenbasis, werden GERUNDET ausgegeben und tragen den Zusatz „Musterfall,
+ * Schätzung mit Bandbreite“. Seit Prompt 12 dient der erste Fall vor allem
+ * der Berichtsvorschau (scripts/bericht-vorschau.ts) und den Tests.
  * Serverseitig verwenden (importiert die Datenbank).
  */
 import { berechneRueckabwicklung } from '@rueckab/calc';
 import type { ContractInput, RiskDefaults } from '@rueckab/calc';
-import { pruefeEignung } from '@rueckab/eligibility';
-import type { Regelwerk } from '@rueckab/eligibility';
 import riskJson from '../../../data/risk-defaults.json';
-import rulesJson from '../../../data/legal-rules.json';
 import { insurersDaten } from './insurers-data';
 import { bestimmeWirtschaftlicheAmpel, type WirtschaftlicheAmpel } from './ampel';
 
 const riskDefaults = riskJson as unknown as RiskDefaults;
-const regelwerk = rulesJson as unknown as Regelwerk;
 
 export interface Musterfall {
   id: string;
@@ -27,6 +24,7 @@ export interface Musterfall {
   min: number;
   max: number;
   ampel: WirtschaftlicheAmpel;
+  contract: ContractInput;
 }
 
 /** Rundet auf 10.000 € (ab 100.000 €) bzw. 1.000 €. */
@@ -77,24 +75,6 @@ const VERTRAEGE: { id: string; titel: string; beschreibung: string; contract: Co
 export function musterfaelle(): Musterfall[] {
   return VERTRAEGE.map(({ id, titel, beschreibung, contract }) => {
     const calc = berechneRueckabwicklung(contract, insurersDaten, riskDefaults);
-    if (calc.regime !== 'alt-policenmodell') {
-      throw new Error(`Musterfall ${id}: unerwartetes Regime ${calc.regime}`);
-    }
-    const eligibility = pruefeEignung(
-      {
-        vertragsschluss: contract.beginn,
-        vertragsart: contract.vertragsart,
-        zustandekommen: 'policenmodell',
-        belehrungVorhanden: 'unbekannt',
-        belehrungFrist: 'unbekannt',
-        belehrungForm: 'unbekannt',
-        hervorhebung: 'unbekannt',
-        status: 'laufend',
-        abgetretenOderBeliehen: 'nein',
-        auszahlungenErhalten: 'nein',
-      },
-      regelwerk,
-    );
     return {
       id,
       titel,
@@ -104,7 +84,8 @@ export function musterfaelle(): Musterfall[] {
       basis: rundeMusterwert(calc.szenarien.basis.rueckabwicklungswert),
       min: rundeMusterwert(calc.szenarien.min.rueckabwicklungswert),
       max: rundeMusterwert(calc.szenarien.max.rueckabwicklungswert),
-      ampel: bestimmeWirtschaftlicheAmpel(calc, eligibility),
+      ampel: bestimmeWirtschaftlicheAmpel(calc, contract.status),
+      contract,
     };
   });
 }

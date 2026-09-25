@@ -3,7 +3,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { berechneRueckabwicklung } from '@rueckab/calc';
-import type { CalcResultAlt, ContractInput, InsurersDaten, RiskDefaults } from '@rueckab/calc';
+import type { ContractInput, InsurersDaten, RiskDefaults } from '@rueckab/calc';
 import { pruefeEignung } from '@rueckab/eligibility';
 import type { Regelwerk } from '@rueckab/eligibility';
 import { renderBerichtHtml, type BerichtInput } from '../src/template';
@@ -13,24 +13,10 @@ const daten = JSON.parse(readFileSync(resolve(REPO, 'data/insurers.json'), 'utf8
 const defaults = JSON.parse(readFileSync(resolve(REPO, 'data/risk-defaults.json'), 'utf8')) as RiskDefaults;
 const regelwerk = JSON.parse(readFileSync(resolve(REPO, 'data/legal-rules.json'), 'utf8')) as Regelwerk;
 
-function beispielBericht(kundenname = 'Erika Beispiel'): BerichtInput {
-  const contract: ContractInput = {
-    versichererId: 'unbekannt',
-    vertragsart: 'private-rv',
-    beginn: '2004-12',
-    zahlweise: 'jaehrlich',
-    erstbeitrag: { betrag: 1200, waehrung: 'EUR' },
-    dynamik: { aktiv: false },
-    gesamtsummeLautMitteilung: 25600,
-    status: 'laufend',
-    rueckkaufswert: { betrag: 39857 },
-    eintrittsalter: 40,
-    stichtag: '2026-09',
-  };
-  const calc = berechneRueckabwicklung(contract, daten, defaults) as CalcResultAlt;
-  const eligibility = pruefeEignung(
+function eligibilityFuer(beginn: string) {
+  return pruefeEignung(
     {
-      vertragsschluss: '2004-12',
+      vertragsschluss: beginn,
       vertragsart: 'private-rv',
       zustandekommen: 'policenmodell',
       belehrungVorhanden: 'unbekannt',
@@ -43,19 +29,36 @@ function beispielBericht(kundenname = 'Erika Beispiel'): BerichtInput {
     },
     regelwerk,
   );
+}
+
+function beispielBericht(kundenname = 'Erika Beispiel', beginn = '2004-12'): BerichtInput {
+  const contract: ContractInput = {
+    versichererId: 'unbekannt',
+    vertragsart: 'private-rv',
+    beginn,
+    zahlweise: 'jaehrlich',
+    erstbeitrag: { betrag: 1200, waehrung: 'EUR' },
+    dynamik: { aktiv: false },
+    gesamtsummeLautMitteilung: 25600,
+    status: 'laufend',
+    rueckkaufswert: { betrag: 39857 },
+    eintrittsalter: 40,
+    stichtag: '2026-09',
+  };
+  const calc = berechneRueckabwicklung(contract, daten, defaults);
   return {
-    marke: '[MARKE]',
+    marke: 'Testmarke',
     aktenzeichen: 'TEST-1',
     kundenname,
-    erstelltAm: '2026-09-18',
+    erstelltAm: '2026-09-25',
     versichererAnzeigename: 'nicht benannt',
     contract,
     calc,
-    eligibility,
+    eligibility: eligibilityFuer(beginn),
   };
 }
 
-describe('Berichts-Template', () => {
+describe('Berichts-Template (Prompt 12)', () => {
   const html = renderBerichtHtml(beispielBericht());
 
   it('enthält genau sieben Seiten-Abschnitte', () => {
@@ -64,9 +67,15 @@ describe('Berichts-Template', () => {
 
   it('zeigt Hauptzahl, Spanne, Rückkaufswert-Vergleich und Kein-Vorteil-Aussage', () => {
     expect(html).toContain('Geschätzter Rückabwicklungswert (Basis-Szenario)');
-    expect(html).toContain('Spanne der Szenarien Min–Max');
+    expect(html).toContain('Spanne der Szenarien konservativ–maximal');
     expect(html).toContain('aktueller Rückkaufswert');
-    expect(html).toContain('wirtschaftlich kein Vorteil erkennbar');
+    expect(html).toContain('rechnerisch kein Vorteil erkennbar');
+  });
+
+  it('enthält den Methodikabsatz (Prompt 12, 1.4) wörtlich', () => {
+    expect(html).toContain('Die Berechnung folgt der Rückabwicklungsformel');
+    expect(html).toContain('prüft der Rechtsanwalt anhand der Vertragsunterlagen');
+    expect(html).toContain('Verhandlungsbasis mit Bandbreite');
   });
 
   it('weist Versionen und Datenstand aus', () => {
@@ -75,10 +84,18 @@ describe('Berichts-Template', () => {
     expect(html).toContain('Regelwerk');
   });
 
-  it('nennt Aktenzeichen der Rechtsprechung samt Quellen-Vorbehalt', () => {
+  it('nennt die Methodik-Rechtsprechung, aber ohne Belehrungs-Bewertung (Verbraucherprodukt)', () => {
     expect(html).toContain('IV ZR 76/11');
-    expect(html).toContain('C-209/12');
+    expect(html).toContain('IV ZR 513/14');
     expect(html).toContain('Volltext-Spiegeln');
+    expect(html).not.toContain('Einordnung Ihres Vertrags (Eignungs-Check)');
+    expect(html).not.toContain('C-209/12');
+  });
+
+  it('bettet die Schriften ein (kein Netzzugriff bei der Erzeugung)', () => {
+    expect(html).toContain("font-family: 'Newsreader'");
+    expect(html).toContain('data:font/woff2;base64,');
+    expect(html).not.toMatch(/https?:\/\/fonts\./);
   });
 
   it('verwendet vorsichtiges Wording ohne Anspruchszusagen', () => {
@@ -97,9 +114,14 @@ describe('Berichts-Template', () => {
     expect(boese).toContain('&lt;script&gt;');
   });
 
-  it('lehnt Verträge außerhalb des Alt-Regimes ab', () => {
-    const b = beispielBericht();
-    const neu = { ...b, calc: { ...b.calc, regime: 'neu-2008' } as unknown as CalcResultAlt };
-    expect(() => renderBerichtHtml(neu)).toThrow(/Altverträge/);
+  it('rechnet einen 1986er-Vertrag durch und kennzeichnet Branchenjahre (estimated_branch)', () => {
+    const b = beispielBericht('Erika Beispiel', '1986-05');
+    expect(b.calc.szenarien.basis.zinsreihe.filter((j) => j.kennzeichen === 'estimated_branch').length).toBeGreaterThan(0);
+    const alt = renderBerichtHtml(b);
+    expect(alt).toContain('estimated_branch');
+  });
+
+  it('zeigt den Ansatzpunkte-Kasten nicht, solange config/ansatzpunkte.json leer ist', () => {
+    expect(html).not.toContain('Typische Ansatzpunkte');
   });
 });

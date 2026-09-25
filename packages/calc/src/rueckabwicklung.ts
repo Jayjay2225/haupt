@@ -1,7 +1,11 @@
 /**
  * Orchestrierung des Rechenkerns (CALC-SPEC Abschnitte 1–8):
- * Regime bestimmen → Beitragsreihe → Aufteilung → Nutzungen →
- * Gegenrechnung → Szenario-Ergebnisse und Jahrestabelle.
+ * Beitragsreihe → Aufteilung → Nutzungen → Gegenrechnung →
+ * Szenario-Ergebnisse und Jahrestabelle.
+ *
+ * Seit Prompt 12 ohne Regime-Sonderpfade: Die Rückabwicklungsformel wird
+ * für alle Vertragsjahrgänge (1980–2020) gleich angewendet; die rechtliche
+ * Einordnung des Einzelfalls ist Sache des Rechtsanwalts.
  */
 import { baueBeitragsreihe } from './beitragsreihe';
 import { teileBeitraegeAuf, type MonatsAufteilung } from './aufteilung';
@@ -12,12 +16,10 @@ import { CALC_VERSION } from './version';
 import type {
   Annahme,
   CalcResult,
-  CalcResultAlt,
   ContractInput,
   Geldleistung,
   InsurersDaten,
   Jahreszeile,
-  Regime,
   RiskDefaults,
   SzenarioErgebnis,
   SzenarioName,
@@ -25,21 +27,8 @@ import type {
   Zinsherkunft,
 } from './types';
 
-const GRENZE_ALT_BEGINN = monatsIndex('1994-07'); // Juli 1994: Tag entscheidet (29.07.1994)
-const GRENZE_NEU = monatsIndex('2008-01');
-
 function rund(x: number): number {
   return Math.round(x * 100) / 100;
-}
-
-function bestimmeRegime(beginnIndex: number): Regime {
-  if (beginnIndex < GRENZE_ALT_BEGINN) {
-    return 'vor-1994';
-  }
-  if (beginnIndex >= GRENZE_NEU) {
-    return 'neu-2008';
-  }
-  return 'alt-policenmodell';
 }
 
 interface Sammler {
@@ -63,60 +52,19 @@ export function berechneRueckabwicklung(
 ): CalcResult {
   const beginnIndex = monatsIndex(input.beginn);
   const stichtagIndex = monatsIndex(input.stichtag);
-  const regime = bestimmeRegime(beginnIndex);
   const s: Sammler = { annahmen: new Map(), warnungen: new Map() };
 
   const meta = {
     calcVersion: CALC_VERSION,
     dataVersion: daten.data.version,
     stichtag: input.stichtag,
-    regime,
   };
 
-  if (regime === 'vor-1994') {
-    return {
-      regime,
-      hinweis:
-        'Vertragsschluss vor dem 29.07.1994: § 5a VVG a.F. galt noch nicht – die Rückabwicklung nach dem Policenmodell kommt nicht in Betracht (docs/LEGAL.md Abschnitt 6).',
-      annahmen: [],
-      warnungen: [],
-      meta,
-    };
-  }
-
-  if (beginnIndex === GRENZE_ALT_BEGINN) {
-    s.warnungen.set('GRENZMONAT', {
-      code: 'GRENZMONAT',
-      text: 'Vertragsbeginn im Juli 1994: Maßgeblich ist der genaue Tag des Vertragsschlusses (Stichtag 29.07.1994) – bitte anhand der Police prüfen.',
-    });
-  }
-
-  // Beitragsreihe (für alle Regime/ Szenarien identisch).
+  // Beitragsreihe (für alle Szenarien identisch).
   const reihe = baueBeitragsreihe(input);
   sammle(s, reihe.annahmen, reihe.warnungen);
 
-  if (regime === 'neu-2008') {
-    const erstesJahr = reihe.reihe
-      .filter((b) => b.index - beginnIndex < 12)
-      .reduce((acc, b) => acc + b.betrag, 0);
-    const vergleich: { rueckkaufswert?: number; praemienErstesJahr: number } = {
-      praemienErstesJahr: rund(erstesJahr),
-    };
-    if (input.rueckkaufswert !== undefined) {
-      vergleich.rueckkaufswert = rund(input.rueckkaufswert.betrag);
-    }
-    return {
-      regime,
-      hinweis:
-        'Vertragsschluss ab 2008: Es gilt das Widerrufsrecht nach § 8/§ 152 VVG n.F. Wirtschaftlich führt der Widerruf im Regelfall etwa zum Rückkaufswert nach § 169 VVG, bei fehlender Belehrung zuzüglich der Prämien des ersten Jahres (§ 9 VVG) – deutlich weniger als die Rückabwicklung nach altem Recht. Eine Szenariorechnung nach der § 5a-Methodik findet deshalb nicht statt (docs/LEGAL.md Abschnitt 1, Regime C).',
-      vergleich,
-      annahmen: [...s.annahmen.values()],
-      warnungen: [...s.warnungen.values()],
-      meta,
-    };
-  }
-
-  // --- Regime alt: drei Szenarien -----------------------------------------
+  // --- Drei Szenarien ------------------------------------------------------
 
   const jahrVon = jahrVonIndex(beginnIndex);
   const jahrBis = jahrVonIndex(stichtagIndex);
@@ -152,7 +100,7 @@ export function berechneRueckabwicklung(
   if (monateOhneReferenz > 0) {
     s.annahmen.set('REFERENZZINS_LUECKE', {
       code: 'REFERENZZINS_LUECKE',
-      text: `Für ${monateOhneReferenz} Monat(e) lag kein Referenz-Einlagenzins vor (Reihe beginnt 2003); dort wurde mit 0 % gegenverzinst (anspruchsschonend).`,
+      text: `Für ${monateOhneReferenz} Monat(e) lag kein Referenz-Einlagenzins vor (Reihe beginnt 1980); dort wurde mit 0 % gegenverzinst (anspruchsschonend).`,
     });
   }
 
@@ -304,8 +252,7 @@ export function berechneRueckabwicklung(
     });
   }
 
-  const result: CalcResultAlt = {
-    regime: 'alt-policenmodell',
+  const result: CalcResult = {
     szenarien,
     jahrestabelle,
     annahmen: [...s.annahmen.values()],

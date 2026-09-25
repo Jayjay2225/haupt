@@ -1,12 +1,12 @@
 /**
- * Abbildung des Formular-Entwurfs (CaseDraft) auf die Eingaben von
- * Rechenkern (ContractInput) und Eignungs-Check (EligibilityInput).
- * Reine Funktionen; jede getroffene Zusatzannahme wird als Text zurückgegeben
- * und in der Vorschau ausgewiesen.
+ * Abbildung des Formular-Entwurfs (CaseDraft) auf die Eingaben des
+ * Rechenkerns (ContractInput) und – für die Kanzlei-Variante – des
+ * Eignungs-Checks (EligibilityInput). Reine Funktionen; jede getroffene
+ * Zusatzannahme wird als Text zurückgegeben und in der Vorschau ausgewiesen.
  */
 import type { ContractInput, Vertragsart } from '@rueckab/calc';
-import { monatsIndex, indexZuIso } from '@rueckab/calc';
 import type { EligibilityInput } from '@rueckab/eligibility';
+import { FONDS_MODE } from '@/config/ampel';
 import type { CaseDraft } from './draft';
 import { parseDecimalDe } from './format';
 
@@ -16,6 +16,8 @@ export interface MappingErgebnis {
   zusatzAnnahmen: string[];
   /** Fehler, die eine Berechnung verhindern (leer = ok). */
   fehler: string[];
+  /** Fondsgebundener Vertrag im Anfrage-Modus: nicht rechnen, individuell prüfen. */
+  fondsAnfrage: boolean;
 }
 
 const VERTRAGSART_MAP: Record<CaseDraft['vertragsart'], Vertragsart | 'risiko-lv' | 'unbekannt'> = {
@@ -49,10 +51,13 @@ export function draftZuEingaben(
       'Die Vertragsart ist nicht eindeutig angegeben; gerechnet wurde wie für eine Kapitallebensversicherung.',
     );
   } else if (artRoh === 'risiko-lv') {
-    vertragsart = 'kapital-lv'; // Der Eignungs-Check schließt Risiko-LV aus; Wert dient nur der Typsicherheit.
+    vertragsart = 'kapital-lv'; // Reine Risikopolicen haben keinen Sparanteil; Wert dient nur der Typsicherheit.
   } else {
     vertragsart = artRoh;
   }
+
+  const fondsAnfrage =
+    FONDS_MODE === 'anfrage' && (vertragsart === 'fonds-lv' || vertragsart === 'fonds-rv');
 
   const erst = parseDecimalDe(draft.erstbeitrag);
   const aktuell = parseDecimalDe(draft.aktuellerBeitrag);
@@ -65,12 +70,25 @@ export function draftZuEingaben(
       'Ohne Erstbeitrag wurde der aktuelle Beitrag als von Beginn an konstant unterstellt.',
     );
   } else {
-    fehler.push('Es fehlt ein verwertbarer Beitrag (Erstbeitrag oder aktueller Beitrag).');
+    fehler.push('Es fehlt ein verwertbarer Beitrag (erster Monatsbeitrag).');
     erstbeitrag = { betrag: 0, waehrung: 'EUR' };
   }
 
   if (draft.beginn === '') {
     fehler.push('Der Vertragsbeginn fehlt.');
+  }
+
+  const dynamikSatz = parseDecimalDe(draft.dynamikSatz);
+  const dynamik: ContractInput['dynamik'] =
+    draft.dynamik === 'ja'
+      ? dynamikSatz !== null && dynamikSatz > 0
+        ? { aktiv: true, satzProzent: dynamikSatz }
+        : { aktiv: true }
+      : { aktiv: false };
+  if (draft.dynamik === 'ja' && (dynamikSatz === null || dynamikSatz <= 0)) {
+    zusatzAnnahmen.push(
+      'Eine Dynamik wurde angegeben, aber ohne Satz; gerechnet wurde mit dem üblichen Näherungswert des Rechenkerns.',
+    );
   }
 
   const contract: ContractInput = {
@@ -79,13 +97,10 @@ export function draftZuEingaben(
     beginn: draft.beginn || '2000-01',
     zahlweise: draft.zahlweise === '' ? 'monatlich' : draft.zahlweise,
     erstbeitrag,
-    dynamik: { aktiv: draft.dynamik === 'ja' },
+    dynamik,
     status: draft.status === '' ? 'laufend' : draft.status,
     stichtag,
   };
-  if (draft.zahlweise === '') {
-    zusatzAnnahmen.push('Ohne Angabe der Zahlweise wurde monatliche Zahlung unterstellt.');
-  }
   if (aktuell !== null && aktuell > 0 && erst !== null && erst > 0) {
     contract.aktuellerBeitrag = aktuell;
   }
@@ -106,17 +121,26 @@ export function draftZuEingaben(
   if (rkw !== null && rkw > 0) {
     contract.rueckkaufswert = { betrag: rkw };
   }
-
-  const auszahlungen = parseDecimalDe(draft.auszahlungenSumme);
-  if (draft.auszahlungenErhalten === 'ja' && auszahlungen !== null && auszahlungen > 0) {
-    // Ohne Einzeldaten: Auszahlung zur Laufzeitmitte unterstellt (neutrale Annahme).
-    const beginnIdx = monatsIndex(contract.beginn);
-    const stichtagIdx = monatsIndex(stichtag);
-    const mitte = indexZuIso(Math.floor((beginnIdx + stichtagIdx) / 2));
-    contract.auszahlungen = [{ monat: mitte, betrag: auszahlungen }];
+  if (
+    (draft.status === 'gekuendigt' || draft.status === 'abgelaufen') &&
+    draft.statusDatum === ''
+  ) {
     zusatzAnnahmen.push(
-      `Erhaltene Auszahlungen (${draft.auszahlungenSumme} €) wurden mangels Datumsangaben zur Laufzeitmitte (${mitte}) angesetzt; genaue Daten verbessern die Schätzung.`,
+      'Der Vertrag ist beendet, aber ohne Datum; erhaltene Beträge wurden ohne Gegenverzinsung angesetzt – mit Datum wird die Schätzung genauer.',
     );
+  }
+
+  if (draft.auszahlungenErhalten === 'ja' && draft.auszahlungenListe.length > 0) {
+    const auszahlungen: NonNullable<ContractInput['auszahlungen']> = [];
+    for (const eintrag of draft.auszahlungenListe) {
+      const betrag = parseDecimalDe(eintrag.betrag);
+      if (betrag !== null && betrag > 0 && /^\d{4}-\d{2}$/.test(eintrag.monat)) {
+        auszahlungen.push({ monat: eintrag.monat, betrag });
+      }
+    }
+    if (auszahlungen.length > 0) {
+      contract.auszahlungen = auszahlungen;
+    }
   }
   if (draft.policendarlehen === 'ja') {
     zusatzAnnahmen.push(
@@ -125,7 +149,7 @@ export function draftZuEingaben(
   }
   if (draft.buzEnthalten === 'ja') {
     zusatzAnnahmen.push(
-      'Eine BUZ ist enthalten; ihr Beitragsanteil ist nicht angegeben und wurde nicht herausgerechnet – der tatsächliche Anspruch liegt eher niedriger. Anteil laut Police nachtragen.',
+      'Eine BUZ ist enthalten; ihr Beitragsanteil ist nicht angegeben und wurde nicht herausgerechnet – der tatsächliche Wert liegt eher niedriger. Anteil laut Police nachtragen.',
     );
   }
 
@@ -142,5 +166,5 @@ export function draftZuEingaben(
     auszahlungenErhalten: jnu(draft.auszahlungenErhalten),
   };
 
-  return { contract, eligibility, zusatzAnnahmen, fehler };
+  return { contract, eligibility, zusatzAnnahmen, fehler, fondsAnfrage };
 }

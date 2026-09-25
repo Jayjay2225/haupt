@@ -1,17 +1,27 @@
 /**
- * Wording-Test (Prompt 10, Abschnitt 1 und 8): Für Website, Funnel, E-Mails
- * und Anzeigen gelten die fünf harten Linien plus Wortwahl-Regeln; die alte,
- * breitere Liste gilt nur noch für den PDF-Bericht
+ * Wording-Test (Prompt 12, Abschnitt 3 – die fünf harten Linien aus
+ * Prompt 10 gelten weiter): Für Website, Funnel, E-Mails und Anzeigen.
+ * Neu seit Prompt 12: keine Nennung von „§ 5a VVG“ oder „1994 bis 2007“
+ * auf den Web-Flächen; der Zeitraum heißt einheitlich 1980 bis 2020.
+ * Die alte, breitere Liste gilt für den PDF-Bericht
  * (apps/report/test/wording-bericht.test.ts). Der Test liest die Quelltexte.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { GOOGLE_BESCHREIBUNGEN, GOOGLE_UEBERSCHRIFTEN, META_HAUPTTEXT } from '../content/anzeigen';
+import { BRAND, RANGE_TEXT } from '../config/brand';
 import { nurVerifizierte } from '../components/Testimonials';
 import { TESTIMONIALS } from '../content/testimonials';
-import { ampelFertig, berichtVersand, bestaetigungAdresse, erinnerung, spaeterWeitermachen, vertragsbestaetigung } from '../lib/emails';
+import {
+  anfrageEingegangen,
+  berichtVerzoegert,
+  berichtVersand,
+  ergebnisLink,
+  spaeterWeitermachen,
+  vertragsbestaetigung,
+} from '../lib/emails';
 
 const WEB = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -38,16 +48,19 @@ const OBERFLAECHE = [
   join(WEB, 'lib', 'labels.ts'),
   join(WEB, 'lib', 'bestellung.ts'),
   join(WEB, 'lib', 'erstkunden.ts'),
+  join(WEB, 'config', 'ampel.ts'),
   join(WEB, 'config', 'brand.ts'),
   join(WEB, 'config', 'business.ts'),
-  join(WEB, 'config', 'marketing.ts'),
 ];
+
+/** Rechtstexte: Fachbegriffe wie „Widerspruch“ (DSGVO) bleiben dort zulässig. */
+const RECHTSSEITEN = [sep + 'impressum' + sep, sep + 'datenschutz' + sep, sep + 'agb' + sep, sep + 'widerrufsbelehrung' + sep];
 
 /**
  * Fünf harte Linien (Prompt 10, Abschnitt 1) plus Wortwahl. Linie 1 (keine
  * erfundenen Kunden) sichert der Testimonials-Test unten ab.
  */
-const VERBOTEN: { muster: RegExp; grund: string }[] = [
+const VERBOTEN: { muster: RegExp; grund: string; nurWerbeflaechen?: boolean }[] = [
   // Linie 2: keine Betrugs-Vorwürfe gegen Versicherer, auch nicht als Frage oder Zitat.
   { muster: /betrug|betrogen|abgezockt|abzocke|täuschung|getäuscht/i, grund: 'Betrugs-Vorwurf (Linie 2)' },
   // Linie 3: kein Ergebnisversprechen.
@@ -62,13 +75,17 @@ const VERBOTEN: { muster: RegExp; grund: string }[] = [
   { muster: /\d+\s*%[^.\n]{0,40}Mehrerlös|Mehrerlös[^.\n]{0,40}\d+\s*%/i, grund: 'Prozent-Mehrerlös (Linie 4)' },
   // Linie 5: keine künstliche Verknappung.
   { muster: /countdown|nur heute|nur noch heute|nur für kurze Zeit|letzte Chance|Warteliste/i, grund: 'Verknappung (Linie 5)' },
-  // Wortwahl und Ankauf-Regeln (Prompt 8, weiter gültig).
+  // Wortwahl und Ankauf-Regeln (Prompt 10/12, weiter gültig).
   { muster: /Gutachten/i, grund: '„Gutachten“ ist Sachverständigenbegriff – „Prüfbericht“/„Auswertung“' },
-  { muster: /BaFin|Bundesanstalt für Finanzdienstleistungsaufsicht/i, grund: 'Aufsichtsbezug im Ankauf-Kontext' },
+  { muster: /BaFin|Bundesanstalt für Finanzdienstleistungsaufsicht/i, grund: 'Keine Behördennennung' },
   { muster: /\bErlaubnis\b|\bZulassung\b|\bzugelassen\b/i, grund: 'Erlaubnis-/Zulassungsangabe' },
   { muster: /Wirtschaftsprüfer/i, grund: 'Abwicklungspartner sind Organisationspartner' },
   { muster: /\[MARKE\]/, grund: 'Platzhalter „[MARKE]“' },
   { muster: /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, grund: 'Emoji als Symbol' },
+  // Prompt 12, Abschnitt 0: Rechtsgrundlage ist auf der Website kein Thema mehr.
+  { muster: /§ ?5a|5a VVG/i, grund: '§ 5a auf Web-Flächen (Prompt 12: entfällt)', nurWerbeflaechen: true },
+  { muster: /1994\s*(bis|–|-|und)\s*2007/i, grund: '„1994 bis 2007“ (Prompt 12: Zeitraum ist 1980–2020)', nurWerbeflaechen: true },
+  { muster: /Widerspruchsweg nicht eröffnet/i, grund: 'alter Zonen-Hinweis (Prompt 12: entfällt)' },
 ];
 
 /** Quelltext ohne Kommentare – geprüft wird nur, was Nutzer sehen können. */
@@ -82,8 +99,12 @@ describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
   it('kein verbotenes Muster in den Oberflächentexten', () => {
     const treffer: string[] = [];
     for (const datei of OBERFLAECHE) {
+      const istRechtsseite = RECHTSSEITEN.some((r) => datei.includes(r));
       const inhalt = textInhalt(datei);
       for (const regel of VERBOTEN) {
+        if (regel.nurWerbeflaechen === true && istRechtsseite) {
+          continue;
+        }
         const m = regel.muster.exec(inhalt);
         if (m !== null) {
           treffer.push(`${datei.replace(WEB, 'apps/web')}: ${regel.grund} („${m[0]}“)`);
@@ -95,19 +116,25 @@ describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
 
   it('E-Mail-Vorlagen halten die Linien ein', () => {
     const texte = [
-      bestaetigungAdresse('Muster', 'https://x.example/b'),
-      ampelFertig('Muster', 'Grün. Rechnerisch ist deutlich mehr drin.', 'https://x.example/e'),
+      ergebnisLink('https://x.example/e'),
+      spaeterWeitermachen('Muster', 'https://x.example/f'),
       berichtVersand('Muster', 'RR-2026-ABCDEF', 'https://x.example/r'),
       berichtVersand('Muster', 'EK-CODE1', undefined, true),
       vertragsbestaetigung('Muster', 'RR-2026-ABCDEF', { agb: 'https://x.example/agb', widerruf: 'https://x.example/w' }),
-      erinnerung('Muster', 'https://x.example/re'),
-      spaeterWeitermachen('Muster', 'https://x.example/f'),
+      berichtVerzoegert('Muster', 'RR-2026-ABCDEF'),
+      anfrageEingegangen('Muster'),
     ]
       .map((v) => `${v.betreff}\n${v.text}`)
       .join('\n---\n');
     for (const regel of VERBOTEN) {
       expect(regel.muster.test(texte), regel.grund).toBe(false);
     }
+  });
+
+  it('die Deck-Betreffzeilen stimmen (Prompt 12, 3.4)', () => {
+    expect(ergebnisLink('x').betreff).toBe('Ihre Ampel steht');
+    expect(berichtVersand('M', 'A-1').betreff).toBe('Ihr Prüfbericht ist fertig');
+    expect(spaeterWeitermachen('M', 'x').betreff).toBe('Weitermachen, wo Sie aufgehört haben');
   });
 
   it('statische Überschriften bleiben kurz (höchstens acht Wörter)', () => {
@@ -129,16 +156,23 @@ describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
     expect(inhalt).not.toMatch(/%|Prozent/);
     expect(inhalt).not.toMatch(/\bGmbH\b|\bAG\b|\bSE\b/);
     expect(inhalt).not.toMatch(/Policen Direkt|Partner in Life|cash\.life/i);
+    expect(inhalt).not.toMatch(/Aufsicht/);
   });
 
-  it('Startseite enthält keine fest verdrahteten Musterfall-Beträge', () => {
-    // Alle Euro-Beträge der Beweis- und Musterfall-Kacheln kommen aus dem Rechenkern.
+  it('Startseite enthält keine fest verdrahteten Beträge', () => {
     const roh = readFileSync(join(WEB, 'app', 'page.tsx'), 'utf8');
     expect(roh).not.toMatch(/\d{1,3}\.\d{3}\s*€/);
   });
+
+  it('Zeitraum: einheitlich 1980 bis 2020 aus config/brand.ts (Prompt 12, 0.1)', () => {
+    expect(BRAND.range).toEqual({ from: 1980, to: 2020 });
+    expect(RANGE_TEXT).toBe('1980 bis 2020');
+    const startseite = readFileSync(join(WEB, 'app', 'page.tsx'), 'utf8');
+    expect(startseite).toContain('RANGE_TEXT');
+  });
 });
 
-describe('Anzeigentexte (Prompt 10, Abschnitt 7)', () => {
+describe('Anzeigentexte (Prompt 12, Abschnitt 6)', () => {
   it('halten die Google-Längen ein (Überschrift ≤ 30, Beschreibung ≤ 90 Zeichen)', () => {
     for (const u of GOOGLE_UEBERSCHRIFTEN) {
       expect(u.length, u).toBeLessThanOrEqual(30);
@@ -148,17 +182,55 @@ describe('Anzeigentexte (Prompt 10, Abschnitt 7)', () => {
     }
     expect(META_HAUPTTEXT.length).toBeGreaterThan(0);
   });
+
+  it('nennen den Zeitraum 1980 bis 2020', () => {
+    const alles = [...GOOGLE_UEBERSCHRIFTEN, ...GOOGLE_BESCHREIBUNGEN, META_HAUPTTEXT].join('\n');
+    expect(alles).toContain('1980');
+    expect(alles).toContain('2020');
+    expect(alles).not.toMatch(/1994|2007/);
+  });
 });
 
-describe('Kundenstimmen (Prompt 10, Abschnitt 5)', () => {
-  it('rendert nichts ohne Prüfvermerk und Einwilligungs-Kennung', () => {
+describe('Kundenstimmen (Prompt 12, Abschnitt 5)', () => {
+  it('rendert nichts ohne Prüfvermerk und dokumentierte Einwilligung', () => {
     expect(
       nurVerifizierte([
-        { consent_id: '', verified: true, zitat: 'x', vorname: 'A', alter: 60, bundesland: 'BE' },
-        { consent_id: 'c-1', verified: false, zitat: 'x', vorname: 'B', alter: 61, bundesland: 'BY' },
+        {
+          quote_display: 'x',
+          quote_original: 'x',
+          name_display: 'A',
+          age: 60,
+          contract_type: 'Kapitallebensversicherung',
+          consent_text: '',
+          consent_at: '',
+          consent_channel: '',
+          customer_ref: 'k-1',
+          verified: true,
+        },
+        {
+          quote_display: 'x',
+          quote_original: 'x',
+          name_display: 'B',
+          age: 61,
+          contract_type: 'private Rentenversicherung',
+          consent_text: 'ok',
+          consent_at: '2026-09-20T10:00:00Z',
+          consent_channel: 'E-Mail',
+          customer_ref: 'k-2',
+          verified: false,
+        },
       ]),
     ).toEqual([]);
-    // Solange es keine dokumentierten Stimmen gibt, bleibt die Liste leer.
+    // Die beiden Entwürfe (Manfred, Ulla) erscheinen erst, wenn die
+    // Freigabe-Dateien unter docs/freigaben/ liegen und verified gesetzt ist.
     expect(nurVerifizierte(TESTIMONIALS)).toEqual([]);
+  });
+
+  it('gerenderte Stimmen brauchen alle Pflichtfelder', () => {
+    for (const t of TESTIMONIALS) {
+      expect(Object.keys(t).sort()).toEqual(
+        ['age', 'consent_at', 'consent_channel', 'consent_text', 'contract_type', 'customer_ref', 'name_display', 'quote_display', 'quote_original', 'verified'].sort(),
+      );
+    }
   });
 });

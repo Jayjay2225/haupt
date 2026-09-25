@@ -1,0 +1,29 @@
+{
+  "_hinweis": "Kundenstimmen (Prompt 12, Abschnitt 5). Gerendert werden AUSSCHLIESSLICH Einträge mit verified=true UND gefülltem consent_at. Wortlaut exakt aus der Freigabe (docs/freigaben/); weicht die Freigabe von den Entwürfen ab, gilt die Freigabe. Die beiden Einträge unten sind die zur Freigabe vorgelegten ENTWÜRFE – die Freigabe-Dateien liegen noch nicht unter docs/freigaben/, deshalb verified=false und consent_at leer (Prinzip 1: keine erfundenen Einwilligungsdaten). Sobald Jack die Freigaben ablegt: Felder aus der Freigabe füllen und verified=true setzen.",
+  "stimmen": [
+    {
+      "quote_display": "Ich hätte fast gekündigt. Erst die Rechnung hat gezeigt, was ich damit verschenkt hätte.",
+      "quote_original": "Ich hätte fast gekündigt. Erst die Rechnung hat gezeigt, was ich damit verschenkt hätte.",
+      "name_display": "Manfred",
+      "age": 65,
+      "contract_type": "Kapitallebensversicherung",
+      "consent_text": "",
+      "consent_at": "",
+      "consent_channel": "",
+      "customer_ref": "",
+      "verified": false
+    },
+    {
+      "quote_display": "Mit so einem Wert hatte ich nicht gerechnet. Die Aufschlüsselung Jahr für Jahr konnte mein Anwalt sofort nutzen.",
+      "quote_original": "Mit so einem Wert hatte ich nicht gerechnet. Die Aufschlüsselung Jahr für Jahr konnte mein Anwalt sofort nutzen.",
+      "name_display": "Ulla",
+      "age": 59,
+      "contract_type": "private Rentenversicherung",
+      "consent_text": "",
+      "consent_at": "",
+      "consent_channel": "",
+      "customer_ref": "",
+      "verified": false
+    }
+  ]
+}

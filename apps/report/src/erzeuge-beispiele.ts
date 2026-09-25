@@ -9,7 +9,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { berechneRueckabwicklung } from '@rueckab/calc';
-import type { CalcResultAlt, ContractInput, InsurersDaten, RiskDefaults } from '@rueckab/calc';
+import type { ContractInput, InsurersDaten, RiskDefaults } from '@rueckab/calc';
 import { pruefeEignung } from '@rueckab/eligibility';
 import type { EligibilityInput, Regelwerk } from '@rueckab/eligibility';
 import { renderBerichtHtml, type BerichtInput } from './template';
@@ -17,7 +17,7 @@ import { htmlZuPdf } from './pdf';
 import { formatDatum } from './format';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-const HEUTE = '2026-09-18';
+const HEUTE = '2026-09-25';
 
 const daten = JSON.parse(readFileSync(resolve(REPO, 'data/insurers.json'), 'utf8')) as InsurersDaten;
 const defaults = JSON.parse(readFileSync(resolve(REPO, 'data/risk-defaults.json'), 'utf8')) as RiskDefaults;
@@ -92,6 +92,38 @@ const beispiele: Beispiel[] = [
       auszahlungenErhalten: 'nein',
     },
   },
+  // Prompt 12, Abschnitt 1.6: Vertrag von 1986 (150 DM monatlich, ohne
+  // Dynamik) läuft mit derselben Formel durch; Branchenjahre bis 2003 sind
+  // als estimated_branch gekennzeichnet.
+  {
+    aktenzeichen: 'BSP-2026-C',
+    kundenname: 'Musterfall C (anonymisiert)',
+    versichererAnzeigename: 'nicht benannt (Branchendurchschnitt)',
+    contract: {
+      versichererId: 'unbekannt',
+      vertragsart: 'kapital-lv',
+      beginn: '1986-05',
+      zahlweise: 'monatlich',
+      erstbeitrag: { betrag: 150, waehrung: 'DM' },
+      dynamik: { aktiv: false },
+      status: 'laufend',
+      rueckkaufswert: { betrag: 32000 },
+      eintrittsalter: 30,
+      stichtag: '2026-09',
+    },
+    eligibility: {
+      vertragsschluss: '1986-05',
+      vertragsart: 'kapital-lv',
+      zustandekommen: 'unbekannt',
+      belehrungVorhanden: 'unbekannt',
+      belehrungFrist: 'unbekannt',
+      belehrungForm: 'unbekannt',
+      hervorhebung: 'unbekannt',
+      status: 'laufend',
+      abgetretenOderBeliehen: 'nein',
+      auszahlungenErhalten: 'nein',
+    },
+  },
 ];
 
 const ausgabe = resolve(REPO, 'examples');
@@ -99,9 +131,6 @@ mkdirSync(ausgabe, { recursive: true });
 
 for (const beispiel of beispiele) {
   const calc = berechneRueckabwicklung(beispiel.contract, daten, defaults);
-  if (calc.regime !== 'alt-policenmodell') {
-    throw new Error(`${beispiel.aktenzeichen}: unerwartetes Regime ${calc.regime}`);
-  }
   const eligibility = pruefeEignung(beispiel.eligibility, regelwerk);
   const bericht: BerichtInput = {
     marke: 'Renten-Rettung',
@@ -110,11 +139,11 @@ for (const beispiel of beispiele) {
     erstelltAm: HEUTE,
     versichererAnzeigename: beispiel.versichererAnzeigename,
     contract: beispiel.contract,
-    calc: calc as CalcResultAlt,
+    calc,
     eligibility,
   };
   const html = renderBerichtHtml(bericht);
-  const basisname = `Kurzpruefung_${beispiel.aktenzeichen}_${HEUTE}`;
+  const basisname = `Pruefbericht_${beispiel.aktenzeichen}_${HEUTE}`;
   writeFileSync(resolve(ausgabe, `${basisname}.html`), html);
   await htmlZuPdf(html, resolve(ausgabe, `${basisname}.pdf`), {
     marke: 'Renten-Rettung',
@@ -122,5 +151,8 @@ for (const beispiel of beispiele) {
     kundenname: beispiel.kundenname,
     datum: formatDatum(HEUTE),
   });
-  console.log(`erzeugt: examples/${basisname}.pdf (Ampel ${eligibility.ampel}, Basis ${calc.szenarien.basis.rueckabwicklungswert.toFixed(2)} €)`);
+  const mehrwert = calc.szenarien.basis.mehrwertGegenKuendigung;
+  console.log(
+    `erzeugt: examples/${basisname}.pdf (Basis ${calc.szenarien.basis.rueckabwicklungswert.toFixed(2)} €, Mehrwert ${mehrwert === undefined ? '–' : mehrwert.toFixed(2)} €)`,
+  );
 }

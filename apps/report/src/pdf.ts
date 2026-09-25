@@ -67,17 +67,21 @@ export async function htmlZuPdf(html: string, pfad: string, kopf: KopfzeilenDate
   try {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'load' });
-    const stil = 'font-size:8px;color:#4a5a66;width:100%;padding:0 14mm;font-family:system-ui,Arial,sans-serif;';
+    // Design B (Prompt 12, 4.5): Kopf- und Fußzeile in gedeckten Token-Farben.
+    // Chromium rendert Header/Footer in eigenem Kontext ohne die eingebetteten
+    // Schriften; deshalb Systemschrift, Marke fett.
+    const stil = 'font-size:8px;color:#5B6772;width:100%;padding:0 14mm;font-family:system-ui,Arial,sans-serif;';
     await page.pdf({
       path: pfad,
       format: 'A4',
       printBackground: true,
       displayHeaderFooter: true,
-      headerTemplate: `<div style="${stil}display:flex;justify-content:space-between;">
-          <span>${esc(kopf.aktenzeichen)} · ${esc(kopf.kundenname)}</span><span>${esc(kopf.datum)}</span>
+      headerTemplate: `<div style="${stil}display:flex;justify-content:space-between;border-bottom:1px solid #DDE4E6;padding-bottom:2px;">
+          <span style="color:#14365D;font-weight:700;">${esc(kopf.marke)}</span>
+          <span>${esc(kopf.aktenzeichen)} · ${esc(kopf.kundenname)} · ${esc(kopf.datum)}</span>
         </div>`,
       footerTemplate: `<div style="${stil}display:flex;justify-content:space-between;">
-          <span>${esc(kopf.marke)} – Kurzprüfung (Schätzung, keine Rechtsberatung)</span>
+          <span>${esc(kopf.marke)} – Prüfbericht (Schätzung mit Bandbreite, keine Rechtsberatung)</span>
           <span>Seite <span class="pageNumber"></span> von <span class="totalPages"></span></span>
         </div>`,
       margin: { top: '18mm', bottom: '16mm', left: '14mm', right: '14mm' },
