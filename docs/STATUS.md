@@ -232,4 +232,10 @@ Prompt 13 (Upload 25.09.2026) ändert Prompt 12, wo beide sich widersprechen; so
 - [ ] Partnerkanzlei benennen (`NEXT_PUBLIC_PARTNERKANZLEI`), belegbare Policen-Zahl (`NEXT_PUBLIC_GEPRUEFTE_POLICEN`), Konditionen der Übernahme (`config/durchsetzung.ts`), Entscheidung Preis-Anrechnung (`NEXT_PUBLIC_PREIS_ANRECHNUNG`).
 - [ ] Original-Kundeneinwilligungen (Manfred, Ulla) in `docs/freigaben/` ablegen (LEGAL-OPEN Nr. 22e).
 - [ ] 12-h-Betrieb absichern: Vercel Pro (stündlicher Cron) oder externer Zeitplaner; `ADMIN_PASSWORT`/`CRON_SECRET` setzen (docs/DEPLOY-VERCEL.md, Abschnitt 4).
+
+## Stand 25.09.2026 (3) – Bereitstellung auf Vercel-Hobby lauffähig gemacht
+
+Der erste Bereitstellungsversuch von Prompt 13 ist bei Vercel mit „Deployment failed“ gescheitert (GitHub-Status des Commits `3fbcc4f`). Ursache zweifach in `apps/web/vercel.json`: der neu eingeführte stündliche Cron-Zeitplan (`0 * * * *`) und die Regionsvorgabe `"regions": ["fra1"]` sind beides Pro-Funktionen, die im Hobby-Tarif die gesamte Bereitstellung scheitern lassen (nicht nur den einzelnen Punkt).
+
+**Auf Wunsch des Auftraggebers testweise auf Hobby angepasst:** Cron auf **einmal täglich, 06:00 UTC** (`"0 6 * * *"`) gestellt, Regionsvorgabe entfernt. Das unterschreitet die 12-Stunden-Versandzusage (im ungünstigsten Fall fast 24 Stunden Verzug) und ist ausdrücklich eine **Testkonfiguration zum Prüfen der Bereitstellung** – **für die Live-Version muss dies neu angepasst werden** (Vercel Pro mit stündlichem Cron, oder externer Zeitplaner plus Entfernen des `crons`-Blocks; beide Wege in docs/DEPLOY-VERCEL.md Abschnitt 4 beschrieben). Bis dahin bezahlte Bestellungen zeitnah unter `/admin` von Hand freigeben, damit die 12-Stunden-Zusage trotzdem eingehalten wird.
 - [ ] Anwaltliche Abnahme des Prompt-13-Pakets (LEGAL-OPEN **Nr. 22**: Durchsetzungsstruktur/RDG, 30.000-€-Schwelle, 12-h-Zusage, Entfall der Rechtsberatungs-FAQ, Kundenstimmen-Originale, Konditionen, Datenschutz-Ergänzungen).

@@ -45,7 +45,8 @@ Die häufigsten Ursachen und ihre Behebung:
 | `No Output Directory named "public" found` oder `No Next.js version detected` | **Root Directory nicht gesetzt** – Vercel baut im Repo-Stamm | Settings → Build and Deployment → **Root Directory = `apps/web`** → Save → neu bereitstellen |
 | `Module not found: Can't resolve '../../../../../data/risk-defaults.json'` | Dateien außerhalb des Root Directory fehlen im Build | Settings → Build and Deployment → Häkchen **„Include source files outside of the Root Directory in the Build Step“** setzen |
 | `ERR_PNPM_OUTDATED_LOCKFILE` | `pnpm-lock.yaml` passt nicht zu den `package.json` | im Repo `pnpm install` ausführen und die geänderte `pnpm-lock.yaml` committen |
-| `Serverless Functions in multiple regions …Pro` | Regionsangabe im Hobby-Tarif | `"regions": ["fra1"]` aus `apps/web/vercel.json` entfernen und die Region stattdessen unter Settings → Functions wählen |
+| `Serverless Functions in multiple regions …Pro` | Regionsangabe im Hobby-Tarif | erledigt – `"regions": ["fra1"]` ist aus `apps/web/vercel.json` entfernt; Region stattdessen unter Settings → Functions wählen |
+| `Cron Jobs … Hobby plan` / Bereitstellung scheitert nach Hinzufügen des `crons`-Blocks | Cron-Zeitplan häufiger als einmal täglich im Hobby-Tarif | erledigt – `apps/web/vercel.json` steht auf `"0 6 * * *"` (einmal täglich); für Live siehe Abschnitt 4 |
 | `A Serverless Function has exceeded the unzipped maximum size of 250 MB` | Chromium-Paket zu groß | tritt bei diesem Projekt nicht auf (81 MB); sonst PDF-Erzeugung in einen eigenen Dienst auslagern |
 
 **Nur ein Projekt behalten:** Wird dasselbe Repository in zwei Vercel-Projekten importiert, baut jeder Push doppelt und beide melden denselben Fehler. Überflüssiges Projekt entfernen: Projekt öffnen → Settings → ganz unten **Delete Project**.
@@ -56,7 +57,7 @@ Der Build ist am 21.09.2026 aus einem frischen Klon mit `pnpm install --frozen-l
 
 ## 2. Was auf Vercel anders läuft (bereits im Code berücksichtigt)
 
-- **Chromium:** kein installierter Browser; `@sparticuz/chromium` wird beim ersten Aufruf nach `/tmp` entpackt (Kaltstart einige Sekunden). Der Webhook hat dafür `maxDuration = 60`. Regionsvorgabe `fra1` (Frankfurt) in `apps/web/vercel.json`.
+- **Chromium:** kein installierter Browser; `@sparticuz/chromium` wird beim ersten Aufruf nach `/tmp` entpackt (Kaltstart einige Sekunden). Der Webhook hat dafür `maxDuration = 60`. Keine feste Regionsvorgabe mehr in `apps/web/vercel.json` (Hobby-Tarif erlaubt das nicht) – Region bei Bedarf unter Settings → Functions wählen.
 - **Dateisystem:** nur `/tmp`, nur für die Dauer eines Aufrufs. Der Bestellstatus liegt deshalb vollständig in den Metadaten der Stripe-Zahlung (Markierungen `erzeugt_am`, `freigegeben_am`, `ausgeliefert_am`, dazu Auffälligkeits-Kennzeichen und Lead-Status); wiederholte Webhook-Zustellungen oder Cron-Läufe erzeugen so keinen zweiten Versand. Berichte werden nicht dauerhaft abgelegt – bei Bedarf werden sie aus den Falldaten der Zahlungssitzung neu gerechnet (deterministisch, gleiche Versionen).
 - **Ratenbegrenzung** gilt je Funktionsinstanz (weich). Für eine harte Grenze später ein gemeinsamer Speicher.
 - **Basic-Auth-Middleware** läuft am Vercel-Edge.
@@ -76,11 +77,11 @@ Testlauf: Bestellung mit Stripe-Testkarte `4242 4242 4242 4242` – die Vertrags
 Seit Prompt 13 wird der Bericht **nicht mehr sofort** versendet. Der Webhook prüft die Zahlung, erzeugt den Bericht probeweise (Plausibilisierung) und setzt die Markierung `erzeugt_am` samt Auffälligkeits-Kennzeichen; versendet wird in einem zweiten Schritt – **spätestens 12 Stunden nach Zahlungseingang** (Zusage auf Website, Danke-Seite und in der Bestätigungs-Mail):
 
 - **Freigabe von Hand:** `/admin?schluessel=<ADMIN_PASSWORT>` zeigt die bezahlten Bestellungen der letzten 30 Tage mit Kennzeichen (z. B. Fondsvertrag, Beginn vor 1994, hoher Branchenwert-Anteil). „Freigeben & senden“ verschickt den Bericht sofort. Dort auch: Lead-Status je Bestellung und CSV-Export.
-- **Automatisch:** ohne Freigabe versendet `GET /api/auslieferung/cron` jede Bestellung, deren Erzeugung mindestens 10 Stunden zurückliegt (2 Stunden Puffer zur 12-Stunden-Zusage). Der Cron ist in `apps/web/vercel.json` **stündlich** eingeplant (`0 * * * *`) und akzeptiert zwei Berechtigungen: `Authorization: Bearer <CRON_SECRET>` (sendet Vercel bei eigenen Cron-Aufrufen automatisch mit, sobald die Variable gesetzt ist) oder `?schluessel=<ADMIN_PASSWORT>` für manuelle Aufrufe.
+- **Automatisch:** ohne Freigabe versendet `GET /api/auslieferung/cron` jede Bestellung, deren Erzeugung mindestens 10 Stunden zurückliegt (2 Stunden Puffer zur 12-Stunden-Zusage). Akzeptiert zwei Berechtigungen: `Authorization: Bearer <CRON_SECRET>` (sendet Vercel bei eigenen Cron-Aufrufen automatisch mit, sobald die Variable gesetzt ist) oder `?schluessel=<ADMIN_PASSWORT>` für manuelle Aufrufe.
 
-**Achtung, Vercel-Hobby-Tarif:** Cron-Jobs dürfen dort nur **einmal täglich** laufen – das reicht für die 12-Stunden-Zusage **nicht**. Zwei Auswege:
+**Vercel-Hobby-Tarif (aktueller Stand des Repos):** Cron-Jobs dürfen dort nur **einmal täglich** laufen, sonst schlägt die gesamte Bereitstellung fehl (nicht nur der Cron). `apps/web/vercel.json` ist deshalb bewusst auf **einmal täglich, 06:00 UTC** gestellt (`"schedule": "0 6 * * *"`), dazu wurde die Pro-Funktion `"regions": ["fra1"]` entfernt – beides ausschließlich, damit die Bereitstellung auf Hobby zum Testen durchläuft. Das reicht für die 12-Stunden-Zusage **nicht** (im schlechtesten Fall fast 24 Stunden Verzug) und ist als Testkonfiguration gedacht. Zwei Auswege für den Live-Betrieb:
 
-1. **Pro-Tarif**: stündliche Crons sind erlaubt, die vorhandene `vercel.json` genügt.
+1. **Pro-Tarif**: stündliche Crons sind erlaubt – `"schedule"` zurück auf `"0 * * * *"` stellen.
 2. **Externer Zeitplaner** (z. B. cron-job.org oder ein beliebiger Uptime-Dienst): stündlich `https://renten-rettung.de/api/auslieferung/cron?schluessel=<ADMIN_PASSWORT>` aufrufen (GET). Dann den `crons`-Block aus `apps/web/vercel.json` entfernen oder den täglichen Vercel-Lauf als zusätzliche Absicherung stehen lassen.
 
 Bis eine der beiden Lösungen steht, gilt: Bestellungen zeitnah unter `/admin` von Hand freigeben. Erstkunden-Codes (`EK-…`) sind vom 12-Stunden-Fenster ausgenommen und liefern weiterhin sofort aus.
