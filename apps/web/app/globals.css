@@ -349,6 +349,15 @@ th.betrag {
   .schrittliste {
     grid-template-columns: repeat(3, 1fr);
   }
+  .schrittliste.schritte-vier {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 64rem) {
+  .schrittliste.schritte-vier {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .schrittliste li {

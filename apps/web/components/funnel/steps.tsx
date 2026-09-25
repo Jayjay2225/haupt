@@ -417,14 +417,27 @@ export function SchrittKontakt({ draft, fehler, aendere }: SchrittProps) {
         onChange={(wert) => aendere('email', wert)}
         fehler={fehler['email']}
       />
+      <RadioGruppe
+        id="kontaktWunsch"
+        label="Wie möchten Sie kontaktiert werden?"
+        nebeneinander
+        optionen={[
+          { wert: 'email', label: 'E-Mail' },
+          { wert: 'telefon', label: 'Telefon' },
+        ]}
+        wert={draft.kontaktWunsch}
+        onChange={(wert) => aendere('kontaktWunsch', wert as CaseDraft['kontaktWunsch'])}
+        fehler={fehler['kontaktWunsch']}
+      />
       <TextFeld
         id="telefon"
-        label="Telefon (freiwillig)"
+        label={draft.kontaktWunsch === 'telefon' ? 'Telefon' : 'Telefon (freiwillig)'}
         typ="tel"
         inputMode="tel"
         autoComplete="tel"
         wert={draft.telefon}
         onChange={(wert) => aendere('telefon', wert)}
+        fehler={fehler['telefon']}
       />
       <Kontrollkaestchen
         id="einwilligungDatenschutz"

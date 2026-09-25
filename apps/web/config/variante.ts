@@ -3,10 +3,9 @@
  *
  * privat  = renten-rettung.de: kostenlose wirtschaftliche Ampel ohne Euro-
  *           Beträge, kostenpflichtiger Bericht, KEINE Belehrungsbewertung
- *           (stattdessen neutrale Unterlagen-Checkliste), Ankauf-Hinweis und
- *           Transparenz-Kasten.
+ *           (stattdessen neutrale Unterlagen-Checkliste), Ankauf-Hinweis.
  * kanzlei = Modell C (Kanzlei-Lizenz): markenneutral, Belehrungs-Check an,
- *           Beträge sichtbar, kein Ankauf, kein Transparenz-Kasten.
+ *           Beträge sichtbar, kein Ankauf.
  *
  * Umschalten per Umgebungsvariable NEXT_PUBLIC_PRODUKT_VARIANTE=kanzlei.
  */
@@ -22,8 +21,6 @@ export interface VariantenFlags {
   euroInVorschau: boolean;
   /** Hinweisblock „Verkaufen statt kündigen“ mit eigener Einwilligung. */
   ankaufHinweis: boolean;
-  /** Pflicht-Kasten „So verdienen wir“. */
-  transparenzKasten: boolean;
   /** Kostenpflichtiger Bericht wird angeboten. */
   berichtKostenpflichtig: boolean;
 }
@@ -33,14 +30,12 @@ const FLAGS: Record<ProduktVariante, VariantenFlags> = {
     belehrungsCheck: false,
     euroInVorschau: false,
     ankaufHinweis: true,
-    transparenzKasten: true,
     berichtKostenpflichtig: true,
   },
   kanzlei: {
     belehrungsCheck: true,
     euroInVorschau: true,
     ankaufHinweis: false,
-    transparenzKasten: false,
     berichtKostenpflichtig: false,
   },
 };

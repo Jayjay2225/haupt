@@ -11,8 +11,9 @@ export const GOOGLE_UEBERSCHRIFTEN: string[] = [
   'Ampel in 5 Minuten',
   'Vertrag von 1980 bis 2020?',
   'Mit echten Versichererzahlen',
-  // Deck: „Ergebnis sofort, nicht in Tagen“ (31 Zeichen) – gekürzt auf 30:
-  'Ergebnis sofort statt in Tagen',
+  // Prompt 13, §5: ersetzt „Ergebnis sofort …“; neue Übernahme-Überschrift.
+  'Bericht in 12 Stunden',
+  'Wir übernehmen Ihren Fall',
 ];
 
 export const GOOGLE_BESCHREIBUNGEN: string[] = [

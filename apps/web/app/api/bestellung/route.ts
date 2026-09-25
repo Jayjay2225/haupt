@@ -8,6 +8,7 @@ import { berechneRueckabwicklung } from '@rueckab/calc';
 import type { RiskDefaults } from '@rueckab/calc';
 import riskJson from '../../../../../data/risk-defaults.json';
 import { BRAND } from '@/config/brand';
+import { berichtKaufbar, bestimmeUebernahmeAmpel } from '@/lib/ampel';
 import { draftZuEingaben } from '@/lib/berechnung';
 import { pruefeBestellformular } from '@/lib/bestellung';
 import type { Bestellformular } from '@/lib/bestellung';
@@ -96,7 +97,23 @@ export async function POST(request: Request): Promise<NextResponse> {
         { status: 422 },
       );
     }
-    berechneRueckabwicklung(abbildung.contract, insurersDaten, riskDefaults);
+    // Übernahme-Ampel (Prompt 13): Verkauft wird der Bericht nur bei Grün/Gelb
+    // (Grau nur, wenn berichtUnterSchwelle das freischaltet).
+    const calc = berechneRueckabwicklung(abbildung.contract, insurersDaten, riskDefaults);
+    const ampel = bestimmeUebernahmeAmpel(
+      calc,
+      abbildung.contract.status,
+      abbildung.contract.rueckkaufswert?.betrag,
+    );
+    if (!berichtKaufbar(ampel)) {
+      const text =
+        ampel.grund === 'status'
+          ? 'Gekündigte oder ausgezahlte Verträge übernehmen wir nicht – deshalb verkaufen wir Ihnen dafür auch keinen Bericht.'
+          : ampel.grund === 'zu-klein'
+            ? 'Ihr Vertrag liegt unter unserer Mindestgrenze – für unser Verfahren zu klein; wir berechnen hier nichts.'
+            : 'Für diesen Vertrag kommt unser Verfahren rechnerisch nicht in Frage – wir verkaufen Ihnen dafür keinen Bericht.';
+      return NextResponse.json({ fehler: { fall: text } }, { status: 422 });
+    }
   } catch {
     return NextResponse.json(
       { fehler: { fall: 'Die Angaben zur Police lassen sich so nicht durchrechnen. Bitte prüfen Sie Beginn, Beitrag und Daten im Rechner.' } },

@@ -51,22 +51,45 @@ ${abschluss()}`,
   };
 }
 
-/** Versand des kostenpflichtigen Berichts (Deck 3.4: „Ihr Prüfbericht ist fertig“). */
-export function berichtVersand(name: string, aktenzeichen: string, rechnungLink?: string, erstkunde: boolean = false): EmailVorlage {
+/** Versand des kostenpflichtigen Berichts (Prompt 13, 2.3: „Ihr Prüfbericht ist da“ + Übernahme). */
+export function berichtVersand(
+  name: string,
+  aktenzeichen: string,
+  rechnungLink?: string,
+  erstkunde: boolean = false,
+  durchsetzungLink?: string,
+): EmailVorlage {
   const rechnung = erstkunde
     ? 'Als Erstkunde zahlen Sie nichts. Im Gegenzug bitten wir Sie: Antworten Sie kurz auf diese E-Mail – war der Prüfbericht verständlich, hat er Ihnen weitergeholfen? Wenn Sie mögen, geben Sie uns ein Zitat mit Vorname, Alter und Vertragsart frei; erst mit Ihrer dokumentierten Einwilligung zeigen wir es.'
     : rechnungLink === undefined
       ? `Der Prüfbericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}; die Rechnung liegt bei bzw. folgt in einer eigenen E-Mail.`
       : `Der Prüfbericht kostet ${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}. Ihre Rechnung zum Herunterladen:\n${rechnungLink}`;
   return {
-    betreff: 'Ihr Prüfbericht ist fertig',
+    betreff: 'Ihr Prüfbericht ist da',
     text: `${gruss(name)}
 
-anbei Ihr Prüfbericht (Bestellnummer ${aktenzeichen}) als PDF.
+Ihre Zahl steht im Anhang (Bestellnummer ${aktenzeichen}): Jahr für Jahr aufgeschlüsselt, jede Rendite mit Quelle – und die Gegenposition des Versicherers.
 
-Darin: Ihre Zahl, Jahr für Jahr aufgeschlüsselt, jede Rendite mit Quelle – und die Gegenposition des Versicherers. Drucken Sie ihn aus und nehmen Sie ihn mit zum Anwalt oder zu Ihrer Rechtsschutzversicherung.
+Nächster Schritt: Wir übernehmen. Spezialisierte Anwälte setzen sich für Sie mit dem Versicherer auseinander – Sie müssen nichts selbst verhandeln. Antworten Sie auf diese E-Mail oder klicken Sie hier:
+
+Durchsetzung beauftragen:
+${durchsetzungLink ?? '/durchsetzung'}
 
 ${rechnung}
+
+${abschluss()}`,
+  };
+}
+
+/** Eingangsbestätigung nach dem Auftragsformular /durchsetzung. */
+export function uebernahmeAngefragt(name: string): EmailVorlage {
+  return {
+    betreff: 'Ihre Beauftragung ist da – wir übernehmen',
+    text: `${gruss(name)}
+
+Ihre Beauftragungsanfrage ist angekommen. Die spezialisierten Anwälte, mit denen wir arbeiten, sichten Ihren Fall und melden sich mit dem weiteren Vorgehen – Sie haben einen Ansprechpartner und müssen nichts selbst verhandeln.
+
+Fehlende Unterlagen können Sie einfach als Antwort auf diese E-Mail nachreichen.
 
 ${abschluss()}`,
   };
@@ -95,7 +118,7 @@ Ihre Erklärung bei der Bestellung: Sie haben ausdrücklich verlangt, dass wir d
 Widerrufsbelehrung: ${links.widerruf}
 AGB: ${links.agb}
 
-Der Prüfbericht folgt in einer eigenen E-Mail, in der Regel innerhalb weniger Minuten.
+Der Prüfbericht folgt in einer eigenen E-Mail – innerhalb von 12 Stunden; er wird vor dem Versand plausibilisiert.
 
 ${abschluss()}`,
   };

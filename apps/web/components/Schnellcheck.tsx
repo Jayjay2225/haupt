@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { Ampel, type AmpelZustand } from './Ampel';
 import { MonatsFeld, TextFeld } from './funnel/fields';
 import { BEGINN_MAX, BEGINN_MIN, ladeDraft, speichereDraft } from '@/lib/draft';
-import type { WirtschaftlicheAmpel } from '@/lib/ampel';
+import type { UebernahmeAmpel } from '@/lib/ampel';
 import { formatEuro, parseDecimalDe } from '@/lib/format';
 
 function betragEcho(eingabe: string): string | undefined {
@@ -25,7 +25,7 @@ function betragEcho(eingabe: string): string | undefined {
 
 interface VorschauAntwort {
   variante?: string;
-  ampel?: WirtschaftlicheAmpel;
+  ampel?: UebernahmeAmpel;
   fehler?: string;
 }
 
@@ -35,7 +35,7 @@ export function Schnellcheck({ versichererNamen }: { versichererNamen: string[] 
   const [beginn, setBeginn] = useState('');
   const [monatsbeitrag, setMonatsbeitrag] = useState('');
   const [rueckkaufswert, setRueckkaufswert] = useState('');
-  const [ergebnis, setErgebnis] = useState<WirtschaftlicheAmpel | null>(null);
+  const [ergebnis, setErgebnis] = useState<UebernahmeAmpel | null>(null);
   const [rechnet, setRechnet] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 

@@ -194,7 +194,42 @@ Prompt 12 (Upload 25.09.2026) ersetzt die Prompts 8–11, wo sie widersprechen. 
 **Abnahme (Abschnitt 8):** 1986er- und 2015er-Vertrag laufen ohne Sonderpfad durch (Tests); Ampel aus `config/ampel.ts`; Rot ohne Kaufknopf (Test); Startseite zeigt „1980 bis 2020“, nirgends § 5a/„1994 bis 2007“ (Test); Textbudgets ≤ 8/25/40/40 (Test, Auslegung ASSUMPTIONS Nr. 53); Bericht mit Methodikabsatz, Anteils-Ausweis, Design B, eingebetteten Schriften (Tests); Kundenstimmen nur mit Freigabe-Feldern (Test); Kontraste dokumentiert; mobil 360 px geprüft (Screenshots); **Typecheck, 135 Tests, Build (48 Seiten) grün**.
 
 **Offen aus Prompt 12:**
-- [ ] Freigabe-Dateien für Manfred/Ulla nach `docs/freigaben/` → `verified: true` (docs/freigaben/README.md).
+- [x] Freigabe-Dateien für Manfred/Ulla nach `docs/freigaben/` → `verified: true` – erledigt mit Prompt 13 (0.7); Original-Kundeneinwilligungen nachzureichen, s. u.
 - [ ] `[[ANSATZPUNKTE: von Jack/Kanzlei]]` in `config/ansatzpunkte.json` füllen (sonst bleibt der Kasten ungedruckt).
 - [ ] Anwaltliche Abnahme des Prompt-12-Pakets (LEGAL-OPEN-QUESTIONS **Nr. 21**: Ampeldefinition/Schwellen, Rechtsweg-Satz, Methodikabsatz, Zeitraum 1980–2020 in der Werbung, Kundenstimmen, Website-Texte, SEPA, Anfrage-Formulare); Banner/Beta bleiben bis dahin.
 - [ ] Branchen-Lücken 1981–84/1986–89 (Spuren in `data/DATA_REPORT.md`); `[[ANKAUF-PRIVAT]]`-Konditionen; Vercel-/Stripe-Einrichtung wie gehabt (docs/DEPLOY-VERCEL.md).
+
+## Stand 25.09.2026 (2) – Prompt 13: Übernahme-Positionierung, Übernahme-Ampel, Bericht in 12 Stunden
+
+Prompt 13 (Upload 25.09.2026) ändert Prompt 12, wo beide sich widersprechen; sonst gilt Prompt 12 weiter. Vollständig umgesetzt:
+
+**Positionierung und Ampel:**
+- Neues Selbstverständnis: Renten-Rettung **organisiert die Durchsetzung** mit spezialisierten Anwälten (Partnerkanzlei). Die rechtliche Struktur ist bewusst offen (`[[DURCHSETZUNGSSTRUKTUR]]`, LEGAL-OPEN Nr. 22a); bis zur Entscheidung überall die neutrale Fassung „Wir organisieren die Durchsetzung mit spezialisierten Anwälten, mit denen wir zusammenarbeiten“.
+- **Übernahme-Ampel** statt Wirtschaftlichkeits-Ampel (`config/ampel.ts`, `lib/ampel.ts`): Grün (Mehrwert ≥ 5.000 €), Gelb (0 < Mehrwert < 5.000 €), Rot (kein rechnerischer Vorteil ODER Vertrag gekündigt/ausgezahlt), **Grau** (Rechnung positiv, aber Rückkaufswert unter 30.000 €). Reihenfolge: Status → Schwelle → Rechnung. Übernahme-Kriterien: Vertrag läuft oder beitragsfrei UND Rückkaufswert ≥ 30.000 €.
+- **Gratis-Ansicht zeigt nur noch die Ampel** – keine Größenordnung, keine Wortbänder, keine Spanne (Tests). Kaufknopf („Prüfbericht bestellen · 89 €“) nur bei Grün/Gelb; die Bestell-API lehnt Rot/Grau serverseitig ab (422). Grau nennt die feste 30.000-€-Grenze, Rot-Status verweist auf anwaltliche Beratung, Rot-Rechnung auf die Verkaufen-Karte.
+
+**Bericht in 12 Stunden (zweiphasige Auslieferung, `lib/erfuellung.ts`):**
+- Phase A im Stripe-Webhook: § 312f-Bestätigung sofort, Bericht wird probeweise erzeugt (Plausibilisierung), Auffälligkeits-Kennzeichen berechnet (Fonds, Beginn vor 1994, hoher Branchenwert-Anteil, Mehrwert > 200 % des Rückkaufswerts, Beitragssummen-Abweichung > 5 %), Markierung `erzeugt_am` + Kennzeichen + Lead-Status in den Stripe-Metadaten.
+- Phase B: Versand nach Freigabe in der Admin-Liste **oder automatisch nach 10 Stunden** über den Cron `GET /api/auslieferung/cron` (stündlich per `apps/web/vercel.json`; Auth: Bearer `CRON_SECRET` oder `?schluessel=ADMIN_PASSWORT`). **Achtung: Vercel-Hobby erlaubt nur tägliche Crons** – für die 12-Stunden-Zusage Pro-Tarif oder externer Zeitplaner nötig (docs/DEPLOY-VERCEL.md, Abschnitt 4). Erstkunden-Codes liefern weiterhin sofort.
+- **Admin-Liste** `/admin?schluessel=…`: bezahlte Bestellungen der letzten 30 Tage mit Kennzeichen, „Freigeben & senden“, Lead-Status (Bericht gekauft / Übernahme angefragt / Mandat / Vergleich oder Urteil), CSV-Export (`/api/admin/leads.csv`); der Cron holt sich die Sitzungen der letzten 3 Tage.
+
+**Texte und Seiten:**
+- Startseite nach 2.1: Mikrozeile „Kostenlos in 5 Minuten. Bericht in 12 Stunden per E-Mail.“, vier Schritte, neuer Block „Warum über uns“ (Platzhalter `[[KANZLEI: Name, Ort]]` → `NEXT_PUBLIC_PARTNERKANZLEI`, `[[ZAHL, belegbar]]` → `NEXT_PUBLIC_GEPRUEFTE_POLICEN`), FAQ mit 7 Fragen (inkl. 30.000-€-Frage; die FAQ „Ist das Rechtsberatung?“ ist laut Deck entfallen – gemeldet, TEXT-REVIEW Nr. 20).
+- Ergebnis-Seite nach 2.2 mit den vier Zuständen im Deck-Wortlaut; drei Accordions (Warum diese Einschätzung / Gegenposition / Unterlagen-Liste).
+- **„So verdienen wir“ ersatzlos entfernt** (Seite, Header-/Footer-Links, Transparenz-Kasten); Offenlegung der Vergütung jetzt in der Ankauf-Einwilligung, im Datenschutz („Vergütung“, Abschnitt Durchsetzung) und im Impressum („Offenlegung wirtschaftlicher Verbindungen“, mit `[[DURCHSETZUNGSSTRUKTUR]]`).
+- Neu **`/durchsetzung`**: „Wir übernehmen.“, drei Schritte, Konditionen-Platzhalter (`[[KONDITIONEN]]`, `config/durchsetzung.ts`), Formular mit Unterlagen-Upload (≤ 5 Dateien à 8 MB, PDF/JPG/PNG, gesamt ≤ 20 MB), Rechtsschutz-Frage, zwei nicht vorangekreuzten Einwilligungen; Unterlagen gehen als Mail-Anhang an info@, keine Server-Speicherung (Datenschutz ergänzt).
+- E-Mails: Berichtsversand „Ihr Prüfbericht ist da“ mit CTA „Durchsetzung beauftragen“ (Link auf `/durchsetzung`); neue Bestätigung „Übernahme angefragt“; Vertragsbestätigung nennt 12 Stunden + Plausibilisierung.
+- Bericht: Übernahme-Kasten auf Seite 7 (Kriterien, Konditionen, Durchsetzungs-URL); Methodikabsatz nennt die spezialisierten Anwälte.
+- Funnel: beendete Verträge werden bis zum Ergebnis geführt (die Ampel filtert, keine Schwellen-Hinweise im Fragebogen); neue Frage „Wie möchten Sie kontaktiert werden?“ (E-Mail/Telefon; Telefon → Pflichtnummer).
+- **Kundenstimmen live** (`verified: true`): Freigabe durch den Auftraggeber in Prompt 13 (0.7), dokumentiert in `docs/freigaben/freigabe-{manfred,ulla}-2026.md`; die Original-Kundeneinwilligungen sind dort ausdrücklich **nachzureichen**.
+- Anzeigen: neu „Bericht in 12 Stunden“, „Wir übernehmen Ihren Fall“; „Ergebnis sofort …“ gestrichen (docs/ADS.md).
+- Verbotsliste erweitert (Wording-Test): kein „nur wir“/„die einzige …“, kein „garantiert durchsetzen“, keine Zahlen zu Erfolgen/Policen ohne Beleg, keine Behauptung einer Prüfung, die nicht stattfindet („plausibilisiert“, nicht „von Gutachtern geprüft“); Anwalts-Mitnahme-Phrasen („Zum Mitnehmen …“) verboten.
+
+**Abnahme (Prompt 13, §7):** Alle sieben Prüfpunkte erfüllt (vier Ampel-Zustände aus Config; Grau/Rot ohne Kaufknopf, serverseitig abgelehnt; Gratis-Ansicht ohne Beträge/Wortbänder; „So verdienen wir“ nirgends verlinkt, Offenlegung vorhanden; 12-h-Mechanik mit Marker/Idempotenz getestet; Kontaktweg-Pflicht; Anzeigen ohne „sofort“). **Typecheck, 141 Tests, Build (53 Seiten) grün**; Beispielberichte A/B/C und `bericht-vorschau.png` regeneriert.
+
+**Offen aus Prompt 13:**
+- [ ] `[[DURCHSETZUNGSSTRUKTUR]]` entscheiden (RDG-Frage!) und Impressum/Datenschutz/Einwilligungen konkretisieren (LEGAL-OPEN Nr. 22a).
+- [ ] Partnerkanzlei benennen (`NEXT_PUBLIC_PARTNERKANZLEI`), belegbare Policen-Zahl (`NEXT_PUBLIC_GEPRUEFTE_POLICEN`), Konditionen der Übernahme (`config/durchsetzung.ts`), Entscheidung Preis-Anrechnung (`NEXT_PUBLIC_PREIS_ANRECHNUNG`).
+- [ ] Original-Kundeneinwilligungen (Manfred, Ulla) in `docs/freigaben/` ablegen (LEGAL-OPEN Nr. 22e).
+- [ ] 12-h-Betrieb absichern: Vercel Pro (stündlicher Cron) oder externer Zeitplaner; `ADMIN_PASSWORT`/`CRON_SECRET` setzen (docs/DEPLOY-VERCEL.md, Abschnitt 4).
+- [ ] Anwaltliche Abnahme des Prompt-13-Pakets (LEGAL-OPEN **Nr. 22**: Durchsetzungsstruktur/RDG, 30.000-€-Schwelle, 12-h-Zusage, Entfall der Rechtsberatungs-FAQ, Kundenstimmen-Originale, Konditionen, Datenschutz-Ergänzungen).

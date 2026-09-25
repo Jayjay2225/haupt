@@ -59,6 +59,12 @@ export default function ImpressumSeite() {
         nicht verpflichtet und nicht bereit. Bei Fragen zu einer Bestellung schreiben Sie uns an{' '}
         <KontaktAdresse adresse={BRAND.kontaktEmail} />.
       </p>
+      <h2>Offenlegung wirtschaftlicher Verbindungen</h2>
+      <p>
+        Wir verdienen am Prüfbericht. Kommt über uns ein Policen-Ankauf zustande, erhalten wir vom
+        Organisationspartner eine Vergütung; für die Durchsetzung arbeiten wir mit einer Partnerkanzlei
+        zusammen ([[DURCHSETZUNGSSTRUKTUR]], Konditionen vor Beauftragung auf /durchsetzung).
+      </p>
       <h2>Hinweis</h2>
       <p>
         Dieses Angebot erstellt strukturierte Berechnungen und Hinweise zur Vorbereitung einer

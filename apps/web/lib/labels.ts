@@ -72,11 +72,9 @@ export function labelOderLeer<T extends string>(
   return wert === '' ? '–' : labels[wert];
 }
 
-/** „Diese Unterlagen braucht ein Anwalt“ – statische Liste (Ergebnis-Seite). */
+/** „Diese Unterlagen brauchen wir von Ihnen“ (Prompt 13, 2.2). */
 export const UNTERLAGEN_LISTE: string[] = [
   'Police (Versicherungsschein)',
-  'Begleitschreiben, das mit der Police kam',
-  'Versicherungsbedingungen und Verbraucherinformation',
   'Letzte Standmitteilung',
-  'Kündigungs- oder Auszahlungsabrechnung (falls vorhanden)',
+  'Falls vorhanden: Kündigungs- oder Dynamikschreiben',
 ];

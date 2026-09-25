@@ -1,9 +1,17 @@
 /**
- * Auslieferung nach Zahlungseingang (Stripe-Webhook): Fall aus den Metadaten
- * lesen, rechnen, Bericht als PDF erzeugen, Rechnungslink holen und beides
- * per E-Mail schicken. Der Stand je Bestellung liegt als status.json im
- * Auslieferungsordner – damit ist der Ablauf wiederholbar (Stripe sendet
- * Ereignisse mehrfach) und ohne Datenbank nachvollziehbar.
+ * Auslieferung in zwei Phasen (Prompt 13, Abschnitt 3):
+ *
+ * Phase A (Webhook, sofort): Vertragsbestätigung (§ 312f BGB), Bericht
+ * erzeugen und plausibilisieren (Kennzeichen für die Freigabe-Liste),
+ * Marker `erzeugt` setzen – der Bericht wird NICHT sofort versendet.
+ *
+ * Phase B (Freigabe im Admin ODER automatisch nach `autoVersandNachStunden`,
+ * angestoßen vom Cron /api/auslieferung/cron): Bericht versenden, Marker
+ * `ausgeliefert`. So werden die zugesagten 12 Stunden immer gehalten.
+ *
+ * Erstkunden (EK-…) werden weiterhin direkt beliefert (erfuelleBestellung).
+ * Der Stand je Bestellung liegt als status.json im Auslieferungsordner;
+ * dauerhafte Marker (Serverless) liegen in den Stripe-PaymentIntent-Metadaten.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -17,6 +25,8 @@ import riskJson from '../../../data/risk-defaults.json';
 import rulesJson from '../../../data/legal-rules.json';
 import { AMPEL } from '@/config/ampel';
 import { BRAND } from '@/config/brand';
+import { BERICHT_VERSAND } from '@/config/business';
+import { KONDITIONEN_PLATZHALTER } from '@/config/durchsetzung';
 import { VARIANTE } from '@/config/variante';
 import { draftZuEingaben } from './berechnung';
 import { berichtVerzoegert, berichtVersand, internerFehlerHinweis, vertragsbestaetigung } from './emails';
@@ -64,7 +74,17 @@ export interface AuslieferungsMarker {
   ausgeliefert?: string;
   bestaetigt?: string;
   verzoegert?: string;
+  /** Phase A abgeschlossen: Bericht erzeugt und plausibilisiert (ISO-Zeit). */
+  erzeugt?: string;
+  /** Menschliche Freigabe im Admin (ISO-Zeit) – löst den Versand aus. */
+  freigegeben?: string;
+  /** Kennzeichen der Plausibilisierung, „;“-getrennt (Freigabe-Liste). */
+  kennzeichen?: string;
+  /** Lead-Status im Admin (Prompt 13, 2.3). */
+  leadStatus?: string;
 }
+
+export const LEAD_STATUS = ['Bericht gekauft', 'Übernahme angefragt', 'Mandat', 'Vergleich/Urteil'] as const;
 
 export interface ErfuellungsAbhaengigkeiten {
   erzeugeBericht: (daten: SitzungsDaten, ordner: string, jetzt: Date) => Promise<Berichtsdatei>;
@@ -151,9 +171,14 @@ export async function erzeugeBericht(daten: SitzungsDaten, ordner: string, jetzt
     contract: abbildung.contract,
     calc,
     eligibility,
-    // Verbraucherprodukt ohne Belehrungsbewertung; Ampel-Schwelle aus config/ampel.ts.
+    // Verbraucherprodukt ohne Belehrungsbewertung; Übernahme-Schwellen aus config/ampel.ts.
     belehrungsCheck: VARIANTE.belehrungsCheck,
-    ampelSchwellen: { mehrwertMinAbsolut: AMPEL.gruen.mehrwertMinAbsolut },
+    ampelSchwellen: {
+      mehrwertMinAbsolut: AMPEL.gruen.mehrwertMinAbsolut,
+      minRueckkaufswert: AMPEL.uebernahme.minRueckkaufswert,
+    },
+    durchsetzungUrl: `${basisUrl()}/durchsetzung`,
+    konditionenText: KONDITIONEN_PLATZHALTER,
   });
   mkdirSync(ordner, { recursive: true });
   const basisname = `${BRAND.produktname.replace(/\s+/g, '-')}_${daten.bestellnummer}`;
@@ -186,6 +211,10 @@ export function standardAbhaengigkeiten(stripe: Stripe): ErfuellungsAbhaengigkei
         ...((m['ausgeliefert_am'] ?? '') !== '' ? { ausgeliefert: m['ausgeliefert_am'] } : {}),
         ...((m['bestaetigt_am'] ?? '') !== '' ? { bestaetigt: m['bestaetigt_am'] } : {}),
         ...((m['verzoegert_am'] ?? '') !== '' ? { verzoegert: m['verzoegert_am'] } : {}),
+        ...((m['erzeugt_am'] ?? '') !== '' ? { erzeugt: m['erzeugt_am'] } : {}),
+        ...((m['freigegeben_am'] ?? '') !== '' ? { freigegeben: m['freigegeben_am'] } : {}),
+        ...((m['kennzeichen'] ?? '') !== '' ? { kennzeichen: m['kennzeichen'] } : {}),
+        ...((m['lead_status'] ?? '') !== '' ? { leadStatus: m['lead_status'] } : {}),
       };
     },
     setzeMarker: async (daten, patch) => {
@@ -197,11 +226,83 @@ export function standardAbhaengigkeiten(stripe: Stripe): ErfuellungsAbhaengigkei
           ...(patch.ausgeliefert !== undefined ? { ausgeliefert_am: patch.ausgeliefert } : {}),
           ...(patch.bestaetigt !== undefined ? { bestaetigt_am: patch.bestaetigt } : {}),
           ...(patch.verzoegert !== undefined ? { verzoegert_am: patch.verzoegert } : {}),
+          ...(patch.erzeugt !== undefined ? { erzeugt_am: patch.erzeugt } : {}),
+          ...(patch.freigegeben !== undefined ? { freigegeben_am: patch.freigegeben } : {}),
+          ...(patch.kennzeichen !== undefined ? { kennzeichen: patch.kennzeichen.slice(0, 480) } : {}),
+          ...(patch.leadStatus !== undefined ? { lead_status: patch.leadStatus } : {}),
         },
       });
     },
     jetzt: () => new Date(),
   };
+}
+
+/**
+ * Plausibilisierungs-Kennzeichen für die Freigabe-Liste (Prompt 13, 3):
+ * Datenabdeckung, Ausreißer, Fondsanteil, Vertrag vor 1994. Kein Kennzeichen
+ * heißt: unauffällig.
+ */
+export function berechneKennzeichen(daten: SitzungsDaten, jetzt: Date): string[] {
+  const draft = fallAusMetadaten(daten.metadata);
+  if (draft === undefined) {
+    return ['Falldaten fehlen'];
+  }
+  const abbildung = draftZuEingaben(draft, findeVersichererId, jetzt.toISOString().slice(0, 7));
+  const kennzeichen: string[] = [];
+  if (abbildung.contract.vertragsart === 'fonds-lv' || abbildung.contract.vertragsart === 'fonds-rv') {
+    kennzeichen.push('Fondsgebunden');
+  }
+  if (Number(abbildung.contract.beginn.slice(0, 4)) < 1994) {
+    kennzeichen.push('Vertrag vor 1994');
+  }
+  try {
+    const calc = berechneRueckabwicklung(abbildung.contract, insurersDaten, riskDefaults);
+    const basis = calc.szenarien.basis;
+    const reihe = basis.zinsreihe;
+    const geschaetzt = reihe.filter((j) => j.kennzeichen === 'estimated_branch').length;
+    if (reihe.length > 0) {
+      const anteil = Math.round((geschaetzt / reihe.length) * 100);
+      kennzeichen.push(`Branchenwerte ${anteil} %`);
+    }
+    const rkw = abbildung.contract.rueckkaufswert?.betrag;
+    if (rkw !== undefined && rkw > 0 && basis.mehrwertGegenKuendigung !== undefined && basis.mehrwertGegenKuendigung > 2 * rkw) {
+      kennzeichen.push('Ausreißer: Mehrwert über 200 % des Rückkaufswerts');
+    }
+    const summe = abbildung.contract.gesamtsummeLautMitteilung;
+    if (summe !== undefined && summe > 0) {
+      const abweichung = Math.abs(basis.summeBeitraege - summe) / summe;
+      if (abweichung > 0.05) {
+        kennzeichen.push(`Beitragssumme weicht ${Math.round(abweichung * 100)} % vom Beitragsstrom ab`);
+      }
+    }
+  } catch (fehler) {
+    kennzeichen.push(`Rechnung fehlgeschlagen: ${(fehler as Error).message.slice(0, 120)}`);
+  }
+  return kennzeichen;
+}
+
+export type VersandEntscheidung = 'erledigt' | 'senden' | 'warten' | 'unbereit';
+
+/**
+ * Versand-Entscheidung (Prompt 13, 3): frühestens nach Freigabe, spätestens
+ * `autoVersandNachStunden` nach der Erzeugung – so halten die 12 Stunden.
+ */
+export function entscheideVersand(
+  marker: AuslieferungsMarker,
+  jetzt: Date,
+  autoVersandNachStunden: number = BERICHT_VERSAND.autoVersandNachStunden,
+): VersandEntscheidung {
+  if (marker.ausgeliefert !== undefined) {
+    return 'erledigt';
+  }
+  if (marker.erzeugt === undefined) {
+    return 'unbereit';
+  }
+  if (marker.freigegeben !== undefined) {
+    return 'senden';
+  }
+  const erzeugtVor = jetzt.getTime() - new Date(marker.erzeugt).getTime();
+  return erzeugtVor >= autoVersandNachStunden * 60 * 60 * 1000 ? 'senden' : 'warten';
 }
 
 /**
@@ -278,7 +379,13 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
         // Rechnungslink ist optional – die Auslieferung darf daran nicht scheitern.
       }
     }
-    const vorlage = berichtVersand(daten.kundenname, daten.bestellnummer, status.rechnungLink, daten.bestellnummer.startsWith('EK-'));
+    const vorlage = berichtVersand(
+      daten.kundenname,
+      daten.bestellnummer,
+      status.rechnungLink,
+      daten.bestellnummer.startsWith('EK-'),
+      `${basisUrl()}/durchsetzung`,
+    );
     const dateiname = status.berichtDatei.split('/').pop() ?? `${daten.bestellnummer}.pdf`;
     const ergebnis = await deps.sendeMail(
       {
@@ -327,9 +434,100 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
   }
 }
 
-export type EreignisErgebnis = 'ausgeliefert' | 'fehler' | 'zahlung-ausstehend' | 'zahlung-fehlgeschlagen' | 'ignoriert';
+/**
+ * Phase A (Prompt 13, 3): Vertragsbestätigung, Bericht erzeugen und
+ * plausibilisieren, Marker `erzeugt` + Kennzeichen setzen – KEIN Versand.
+ * Bei Fehlern wirft die Funktion nicht, sondern meldet 'fehler' (der Webhook
+ * antwortet dann mit 500, Stripe stellt erneut zu).
+ */
+export async function bereiteBestellungVor(
+  daten: SitzungsDaten,
+  deps: ErfuellungsAbhaengigkeiten,
+): Promise<'vorbereitet' | 'erledigt' | 'fehler'> {
+  const ordner = resolve(auslieferungsVerzeichnis(), daten.bestellnummer);
+  const status: AuslieferungsStatus = ladeStatus(ordner) ?? {
+    bestellnummer: daten.bestellnummer,
+    sitzung: daten.id,
+    email: daten.email,
+    kundenname: daten.kundenname,
+    bezahltAm: deps.jetzt().toISOString(),
+  };
+  let marker: AuslieferungsMarker = {};
+  try {
+    marker = await deps.holeMarker(daten);
+  } catch {
+    // Marker nicht lesbar → weiter mit Dateistatus.
+  }
+  if (marker.ausgeliefert !== undefined) {
+    return 'erledigt';
+  }
+  mkdirSync(ordner, { recursive: true });
+  try {
+    // Vertragsbestätigung (§ 312f BGB) vor Beginn der Ausführung, genau einmal.
+    if (status.bestaetigungGesendetAm === undefined && marker.bestaetigt === undefined) {
+      const basis = basisUrl();
+      const bestaetigung = vertragsbestaetigung(daten.kundenname, daten.bestellnummer, {
+        agb: `${basis}/agb`,
+        widerruf: `${basis}/widerrufsbelehrung`,
+      });
+      await deps.sendeMail({ an: daten.email, betreff: bestaetigung.betreff, text: bestaetigung.text }, ordner);
+      status.bestaetigungGesendetAm = deps.jetzt().toISOString();
+      speichereStatus(ordner, status);
+      try {
+        await deps.setzeMarker(daten, { bestaetigt: status.bestaetigungGesendetAm, leadStatus: 'Bericht gekauft' });
+      } catch {
+        // Marker optional; Dateistatus trägt innerhalb der Instanz.
+      }
+    }
+    if (marker.erzeugt !== undefined) {
+      return 'vorbereitet';
+    }
+    // Bericht probeweise erzeugen (Validierung) und plausibilisieren.
+    const bericht = await deps.erzeugeBericht(daten, ordner, deps.jetzt());
+    status.berichtDatei = bericht.pfad;
+    status.berichtErstelltAm = deps.jetzt().toISOString();
+    speichereStatus(ordner, status);
+    const kennzeichen = berechneKennzeichen(daten, deps.jetzt());
+    try {
+      await deps.setzeMarker(daten, {
+        erzeugt: status.berichtErstelltAm,
+        kennzeichen: kennzeichen.join('; '),
+      });
+    } catch {
+      // Ohne Marker kann der Cron nicht ausliefern → als Fehler behandeln,
+      // damit Stripe erneut zustellt.
+      return 'fehler';
+    }
+    return 'vorbereitet';
+  } catch (fehler) {
+    const text = fehler instanceof Error ? fehler.message : String(fehler);
+    status.fehler = [...(status.fehler ?? []), `${deps.jetzt().toISOString()}: ${text}`];
+    speichereStatus(ordner, status);
+    try {
+      const intern = internerFehlerHinweis(daten.bestellnummer, text);
+      await deps.sendeMail({ an: BRAND.kontaktEmail, betreff: intern.betreff, text: intern.text }, ordner);
+    } catch {
+      // Letzte Instanz ist das Protokoll (status.json).
+    }
+    return 'fehler';
+  }
+}
 
-/** Verteilt Stripe-Ereignisse; nur Zahlungseingänge lösen die Auslieferung aus. */
+/**
+ * Phase B: Bericht versenden (nach Freigabe oder Auto-Frist). Erzeugt das
+ * PDF bei Bedarf neu (Serverless: /tmp der Phase A ist weg) und setzt den
+ * Marker `ausgeliefert`. Wiederholt aufrufbar.
+ */
+export async function versendeBericht(daten: SitzungsDaten, deps: ErfuellungsAbhaengigkeiten): Promise<AuslieferungsStatus> {
+  return erfuelleBestellung(daten, deps);
+}
+
+export type EreignisErgebnis = 'vorbereitet' | 'ausgeliefert' | 'fehler' | 'zahlung-ausstehend' | 'zahlung-fehlgeschlagen' | 'ignoriert';
+
+/**
+ * Verteilt Stripe-Ereignisse. Zahlungseingang löst Phase A aus (Erzeugen +
+ * Plausibilisieren); der Versand folgt über Freigabe oder Cron (Phase B).
+ */
 export async function verarbeiteStripeEreignis(ereignis: Stripe.Event, deps: ErfuellungsAbhaengigkeiten): Promise<EreignisErgebnis> {
   switch (ereignis.type) {
     case 'checkout.session.completed':
@@ -338,8 +536,11 @@ export async function verarbeiteStripeEreignis(ereignis: Stripe.Event, deps: Erf
       if (sitzung.payment_status !== 'paid') {
         return 'zahlung-ausstehend';
       }
-      const status = await erfuelleBestellung(sitzungsDaten(sitzung), deps);
-      return status.mailVersendetAm !== undefined ? 'ausgeliefert' : 'fehler';
+      const ergebnis = await bereiteBestellungVor(sitzungsDaten(sitzung), deps);
+      if (ergebnis === 'fehler') {
+        return 'fehler';
+      }
+      return ergebnis === 'erledigt' ? 'ausgeliefert' : 'vorbereitet';
     }
     case 'checkout.session.async_payment_failed':
       return 'zahlung-fehlgeschlagen';

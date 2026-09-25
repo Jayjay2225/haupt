@@ -31,6 +31,7 @@ function gueltigerDraft(): CaseDraft {
     rueckkaufswert: '310.658,00',
     auszahlungenErhalten: 'nein',
     email: 'erika@example.org',
+    kontaktWunsch: 'email',
     einwilligungDatenschutz: true,
     zustandekommen: 'policenmodell',
     belehrungVorhanden: 'unbekannt',
@@ -97,11 +98,14 @@ describe('validiereSchritt (Assistent)', () => {
     expect(validiereSchritt('auszahlungen', leer)['auszahlungenListe']).toMatch(/mindestens eine/);
   });
 
-  it('verlangt im Kontakt-Schritt E-Mail und Datenschutz-Häkchen', () => {
-    const ohne = { ...gueltigerDraft(), email: '', einwilligungDatenschutz: false };
+  it('verlangt im Kontakt-Schritt E-Mail, Kontaktweg und Datenschutz-Häkchen', () => {
+    const ohne = { ...gueltigerDraft(), email: '', kontaktWunsch: '' as const, einwilligungDatenschutz: false };
     const fehler = validiereSchritt('kontakt', ohne);
-    expect(Object.keys(fehler).sort()).toEqual(['einwilligungDatenschutz', 'email']);
+    expect(Object.keys(fehler).sort()).toEqual(['einwilligungDatenschutz', 'email', 'kontaktWunsch']);
     expect(validiereSchritt('kontakt', { ...gueltigerDraft(), email: 'kaputt@' })['email']).toMatch(/vollständig/);
+    // Kontaktweg Telefon verlangt eine Nummer (Prompt 13, §4).
+    const tel = { ...gueltigerDraft(), kontaktWunsch: 'telefon' as const, telefon: '' };
+    expect(validiereSchritt('kontakt', tel)['telefon']).toMatch(/Telefonnummer/);
   });
 
   it('meldet ein Beendet-Datum vor dem Beginn (Jahr vierstellig?)', () => {

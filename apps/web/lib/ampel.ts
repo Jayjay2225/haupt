@@ -1,112 +1,104 @@
 /**
- * Die eine, wirtschaftliche Ampel (Prompt 12, Abschnitt 0.2 und 1.3):
- * Sie vergleicht das Basis-Szenario des Rechenkerns mit dem Rückkaufswert –
- * für alle Jahrgänge (1980–2020) und alle klassischen Vertragsarten mit
- * derselben Formel. Schwellen und Wortbänder kommen aus config/ampel.ts.
+ * Übernahme-Ampel (Prompt 13, Abschnitt 1): Kommt der Vertrag für unser
+ * Verfahren in Frage? Reihenfolge der Prüfung: Status → Rückkaufswert-
+ * Schwelle → Rechnung. Schwellen aus config/ampel.ts.
  *
- * Grün  = Basis über RKW und mindestens 2.000 € Mehrwert.
- * Gelb  = Basis über RKW, aber unter der Grün-Schwelle.
- * Rot   = Basis nicht über RKW – „das sagen wir Ihnen auch“.
+ * Grün = wir übernehmen · Gelb = knapp · Rot = kommt nicht in Frage
+ * (Rechnung oder beendeter Vertrag) · Grau = für unser Verfahren zu klein.
  *
- * Beendete Verträge (gekündigt/ausgezahlt): Es gibt keine Kündigung mehr,
- * mit der man vergleichen könnte – Maßstab ist der Netto-Wert über das
- * bereits Erhaltene hinaus, mit denselben Schwellen.
+ * Die Gratis-Ansicht zeigt nur die Ampel – keine Beträge, keine Wortbänder,
+ * keine Spanne (Prompt 13, 0.4).
  */
 import type { CalcResult } from '@rueckab/calc';
 import { AMPEL } from '@/config/ampel';
 
-export type AmpelFarbe = 'gruen' | 'gelb' | 'rot';
+export type AmpelFarbe = 'gruen' | 'gelb' | 'rot' | 'grau';
 
 export type AmpelVertragsstatus = 'laufend' | 'beitragsfrei' | 'gekuendigt' | 'abgelaufen';
 
-export interface WirtschaftlicheAmpel {
+export interface UebernahmeAmpel {
   ampel: AmpelFarbe;
-  /** Überschrift der Ergebnis-Seite (Deck 3.3). */
+  /** Überschrift der Ergebnis-Seite (Prompt 13, 2.2). */
   titel: string;
-  /** Eine Zeile unter der Überschrift, ohne Euro-Beträge. */
+  /** Eine Zeile unter der Überschrift. */
   zeile: string;
-  grund: 'vorteil' | 'knapp' | 'kein-vorteil' | 'kein-rueckkaufswert' | 'beendet';
+  grund: 'uebernahme' | 'knapp' | 'kein-vorteil' | 'status' | 'zu-klein' | 'kein-rueckkaufswert';
 }
 
-/** Mehrwert in Worten nach den Stufen aus config/ampel.ts – nie als Betrag. */
-export function groessenordnungInWorten(betrag: number): string {
-  const b = Math.abs(betrag);
-  for (const stufe of AMPEL.groessenordnung) {
-    if (stufe.bis === null || b < stufe.bis) {
-      return stufe.text;
-    }
+/** Kaufknopf nur, wenn der Bericht zum Verfahren führen kann (Grün/Gelb). */
+export function berichtKaufbar(ampel: UebernahmeAmpel): boolean {
+  if (ampel.grund === 'zu-klein') {
+    return AMPEL.uebernahme.berichtUnterSchwelle;
   }
-  return AMPEL.groessenordnung[AMPEL.groessenordnung.length - 1]?.text ?? '';
+  return ampel.grund === 'uebernahme' || ampel.grund === 'knapp';
 }
 
-export function bestimmeWirtschaftlicheAmpel(
-  calc: CalcResult,
-  vertragsstatus?: AmpelVertragsstatus,
-): WirtschaftlicheAmpel {
-  const basis = calc.szenarien.basis;
-  const beendet = vertragsstatus === 'gekuendigt' || vertragsstatus === 'abgelaufen';
+const STATUS_MAP: Record<AmpelVertragsstatus, string> = {
+  laufend: 'laeuft',
+  beitragsfrei: 'beitragsfrei',
+  gekuendigt: 'gekuendigt',
+  abgelaufen: 'ausgezahlt',
+};
 
-  // Beendete Verträge: Vergleichsmaßstab ist der Netto-Wert über das bereits
-  // Erhaltene hinaus (Rückkaufswert bzw. Ablaufleistung sind gegengerechnet).
-  if (basis.mehrwertGegenKuendigung === undefined && beendet) {
-    const offen = basis.nettoanspruch;
-    if (offen >= AMPEL.gruen.mehrwertMinAbsolut) {
-      return {
-        ampel: 'gruen',
-        grund: 'beendet',
-        titel: 'Rechnerisch ist deutlich mehr drin, als Sie erhalten haben.',
-        zeile: `Größenordnung: ${groessenordnungInWorten(offen)} über dem bereits Erhaltenen – geschätzt, mit Bandbreite.`,
-      };
-    }
-    if (offen > AMPEL.gelb.mehrwertMin) {
-      return {
-        ampel: 'gelb',
-        grund: 'beendet',
-        titel: 'Gelb. Knapp – es könnte sich lohnen.',
-        zeile: 'Der Prüfbericht zeigt, ob es reicht.',
-      };
-    }
+export function bestimmeUebernahmeAmpel(
+  calc: CalcResult,
+  vertragsstatus: AmpelVertragsstatus | undefined,
+  rueckkaufswert: number | undefined,
+): UebernahmeAmpel {
+  // 1. Status: gekündigte oder ausgezahlte Verträge übernehmen wir nicht.
+  const status = STATUS_MAP[vertragsstatus ?? 'laufend'];
+  if (!(AMPEL.uebernahme.statusErlaubt as readonly string[]).includes(status)) {
     return {
       ampel: 'rot',
-      grund: 'kein-vorteil',
-      titel: 'Rot. Rechnerisch ist hier nicht mehr drin, als Sie erhalten haben.',
-      zeile: 'Sparen Sie sich den Bericht.',
+      grund: 'status',
+      titel: 'Rot. Gekündigte oder ausgezahlte Verträge übernehmen wir nicht.',
+      zeile: 'Lassen Sie sich dazu anwaltlich beraten.',
     };
   }
 
-  if (basis.mehrwertGegenKuendigung === undefined) {
+  const mehrwert = calc.szenarien.basis.mehrwertGegenKuendigung;
+  if (rueckkaufswert === undefined || mehrwert === undefined) {
     return {
       ampel: 'gelb',
       grund: 'kein-rueckkaufswert',
       titel: 'Gelb. Eine Zahl fehlt noch.',
-      zeile: 'Ohne Ihren Rückkaufswert können wir nicht vergleichen. Er steht in der letzten Standmitteilung.',
+      zeile: 'Ohne Ihren Rückkaufswert können wir nicht prüfen, ob wir übernehmen. Er steht in der letzten Standmitteilung.',
     };
   }
 
-  const mehrwert = basis.mehrwertGegenKuendigung;
+  // 2. Rückkaufswert-Schwelle: darunter ist der Fall für unser Verfahren zu
+  //    klein (Grau) – sofern die Rechnung überhaupt positiv ist, sonst Rot.
+  if (rueckkaufswert < AMPEL.uebernahme.minRueckkaufswert && mehrwert > 0) {
+    return {
+      ampel: 'grau',
+      grund: 'zu-klein',
+      titel: 'Ihr Vertrag ist für unser Verfahren zu klein.',
+      zeile:
+        'Wir übernehmen Fälle ab 30.000 € Rückkaufswert. Lassen Sie sich von einem Anwalt Ihrer Wahl oder der Verbraucherzentrale beraten.',
+    };
+  }
 
-  if (mehrwert > AMPEL.gruen.mehrwertMin && mehrwert >= AMPEL.gruen.mehrwertMinAbsolut) {
+  // 3. Rechnung.
+  if (mehrwert >= AMPEL.gruen.mehrwertMinAbsolut) {
     return {
       ampel: 'gruen',
-      grund: 'vorteil',
-      titel: 'Rechnerisch ist deutlich mehr drin als der Rückkaufswert.',
-      zeile: `Größenordnung: ${groessenordnungInWorten(mehrwert)} über dem Rückkaufswert – geschätzt, mit Bandbreite.`,
+      grund: 'uebernahme',
+      titel: 'Ihr Vertrag kommt für unser Verfahren in Frage.',
+      zeile: 'Der Prüfbericht nennt Ihre Zahl – innerhalb von 12 Stunden per E-Mail.',
     };
   }
-
   if (mehrwert > AMPEL.gelb.mehrwertMin) {
     return {
       ampel: 'gelb',
       grund: 'knapp',
-      titel: 'Gelb. Knapp – es könnte sich lohnen.',
-      zeile: 'Der Prüfbericht zeigt, ob es reicht.',
+      titel: 'Gelb. Knapp.',
+      zeile: 'Der Prüfbericht entscheidet, ob wir übernehmen.',
     };
   }
-
   return {
     ampel: 'rot',
     grund: 'kein-vorteil',
     titel: 'Rot. Rechnerisch ist hier nicht mehr drin als der Rückkaufswert.',
-    zeile: 'Sparen Sie sich den Bericht.',
+    zeile: 'Für unser Verfahren kommt der Vertrag nicht in Frage.',
   };
 }

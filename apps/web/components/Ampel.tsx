@@ -4,10 +4,12 @@
  * ausschließlich hier verwendet. Zustände:
  * - aus:            alle Punkte neutral (Ausgangszustand)
  * - gruen|gelb|rot: genau ein Punkt leuchtet (Glow, kein Dauerblinken)
+ * - grau:           kein Punkt leuchtet (Prompt 13: „für unser Verfahren zu
+ *                   klein“) – wie „aus“, aber mit eigener Beschreibung
  * `fortschritt` (0–4) lässt die Punkte beim Ausfüllen der Einstiegskarte
  * nacheinander heller werden.
  */
-export type AmpelZustand = 'aus' | 'gruen' | 'gelb' | 'rot';
+export type AmpelZustand = 'aus' | 'gruen' | 'gelb' | 'rot' | 'grau';
 
 interface AmpelProps {
   zustand: AmpelZustand;
@@ -23,6 +25,7 @@ const BESCHREIBUNG: Record<AmpelZustand, string> = {
   gruen: 'Ampel zeigt Grün',
   gelb: 'Ampel zeigt Gelb',
   rot: 'Ampel zeigt Rot',
+  grau: 'Ampel ohne Licht – für unser Verfahren zu klein',
 };
 
 export function Ampel({ zustand, fortschritt, gross, beschriftung }: AmpelProps) {

@@ -6,7 +6,7 @@
  * Die alte, breitere Liste gilt für den PDF-Bericht
  * (apps/report/test/wording-bericht.test.ts). Der Test liest die Quelltexte.
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -86,6 +86,13 @@ const VERBOTEN: { muster: RegExp; grund: string; nurWerbeflaechen?: boolean }[] 
   { muster: /§ ?5a|5a VVG/i, grund: '§ 5a auf Web-Flächen (Prompt 12: entfällt)', nurWerbeflaechen: true },
   { muster: /1994\s*(bis|–|-|und)\s*2007/i, grund: '„1994 bis 2007“ (Prompt 12: Zeitraum ist 1980–2020)', nurWerbeflaechen: true },
   { muster: /Widerspruchsweg nicht eröffnet/i, grund: 'alter Zonen-Hinweis (Prompt 12: entfällt)' },
+  // Prompt 13, Abschnitt 5: erweiterte Verbotsliste.
+  { muster: /\bnur wir\b/i, grund: 'Alleinstellungs-Behauptung „nur wir“ (Prompt 13)' },
+  { muster: /\b(als|die|der) einzige\w*/i, grund: 'Alleinstellungs-Behauptung „einzige“ (Prompt 13)' },
+  { muster: /garantiert durchsetzen/i, grund: '„garantiert durchsetzen“ (Prompt 13)' },
+  { muster: /\d[\d.]*\s*(geprüfte|Policen|Fälle|Mandate|Erfolge|Kundinnen|Kunden gewonnen)/i, grund: 'Zahl zu Erfolgen/Policen ohne Beleg-Referenz (Prompt 13)' },
+  // Prompt 13, 2.1 „Gestrichen überall“:
+  { muster: /Zum Mitnehmen zum Anwalt|mit dem Bericht in der Hand|Fertig für Anwalt/i, grund: 'gestrichene Anwalts-Selbsthilfe-Phrase (Prompt 13)' },
 ];
 
 /** Quelltext ohne Kommentare – geprüft wird nur, was Nutzer sehen können. */
@@ -133,7 +140,7 @@ describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
 
   it('die Deck-Betreffzeilen stimmen (Prompt 12, 3.4)', () => {
     expect(ergebnisLink('x').betreff).toBe('Ihre Ampel steht');
-    expect(berichtVersand('M', 'A-1').betreff).toBe('Ihr Prüfbericht ist fertig');
+    expect(berichtVersand('M', 'A-1').betreff).toBe('Ihr Prüfbericht ist da');
     expect(spaeterWeitermachen('M', 'x').betreff).toBe('Weitermachen, wo Sie aufgehört haben');
   });
 
@@ -159,9 +166,27 @@ describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
     expect(inhalt).not.toMatch(/Aufsicht/);
   });
 
-  it('Startseite enthält keine fest verdrahteten Beträge', () => {
-    const roh = readFileSync(join(WEB, 'app', 'page.tsx'), 'utf8');
+  it('Startseite enthält keine fest verdrahteten Beträge (außer der Übernahme-Grenze 30.000 €)', () => {
+    const roh = readFileSync(join(WEB, 'app', 'page.tsx'), 'utf8').replace(/30\.000\s*€/g, '');
     expect(roh).not.toMatch(/\d{1,3}\.\d{3}\s*€/);
+  });
+
+  it('„So verdienen wir“ existiert nirgends mehr – weder Text noch Route (Prompt 13, 7)', () => {
+    for (const datei of OBERFLAECHE) {
+      expect(textInhalt(datei), datei).not.toMatch(/So verdienen wir/);
+    }
+    expect(existsSync(join(WEB, 'app', 'so-verdienen-wir'))).toBe(false);
+    // Offenlegung stattdessen in Impressum, Datenschutz und Einwilligung:
+    expect(textInhalt(join(WEB, 'app', 'impressum', 'page.tsx'))).toContain('Offenlegung');
+    expect(textInhalt(join(WEB, 'app', 'datenschutz', 'page.tsx'))).toContain('Vergütung');
+    expect(textInhalt(join(WEB, 'components', 'funnel', 'ErgebnisAnsicht.tsx'))).toContain('Vergütung');
+  });
+
+  it('erwünschte Übernahme-Formulierungen sind da (Prompt 13, 5)', () => {
+    const startseite = textInhalt(join(WEB, 'app', 'page.tsx'));
+    expect(startseite).toContain('Wir übernehmen');
+    expect(startseite.replace(/\s+/g, ' ')).toContain('müssen nichts selbst verhandeln');
+    expect(textInhalt(join(WEB, 'app', 'durchsetzung', 'page.tsx'))).toContain('Wir übernehmen.');
   });
 
   it('Zeitraum: einheitlich 1980 bis 2020 aus config/brand.ts (Prompt 12, 0.1)', () => {
@@ -183,11 +208,14 @@ describe('Anzeigentexte (Prompt 12, Abschnitt 6)', () => {
     expect(META_HAUPTTEXT.length).toBeGreaterThan(0);
   });
 
-  it('nennen den Zeitraum 1980 bis 2020', () => {
+  it('nennen den Zeitraum 1980 bis 2020 und die neuen Übernahme-Zeilen (Prompt 13, 5)', () => {
     const alles = [...GOOGLE_UEBERSCHRIFTEN, ...GOOGLE_BESCHREIBUNGEN, META_HAUPTTEXT].join('\n');
     expect(alles).toContain('1980');
     expect(alles).toContain('2020');
     expect(alles).not.toMatch(/1994|2007/);
+    expect(GOOGLE_UEBERSCHRIFTEN).toContain('Bericht in 12 Stunden');
+    expect(GOOGLE_UEBERSCHRIFTEN).toContain('Wir übernehmen Ihren Fall');
+    expect(alles).not.toMatch(/Ergebnis sofort/);
   });
 });
 
@@ -221,9 +249,13 @@ describe('Kundenstimmen (Prompt 12, Abschnitt 5)', () => {
         },
       ]),
     ).toEqual([]);
-    // Die beiden Entwürfe (Manfred, Ulla) erscheinen erst, wenn die
-    // Freigabe-Dateien unter docs/freigaben/ liegen und verified gesetzt ist.
-    expect(nurVerifizierte(TESTIMONIALS)).toEqual([]);
+    // Prompt 13, 0.7: Manfred und Ulla sind freigegeben und live.
+    const live = nurVerifizierte(TESTIMONIALS);
+    expect(live.map((t) => t.name_display).sort()).toEqual(['Manfred', 'Ulla']);
+    for (const t of live) {
+      expect(t.consent_at).not.toBe('');
+      expect(t.customer_ref.startsWith('freigabe-')).toBe(true);
+    }
   });
 
   it('gerenderte Stimmen brauchen alle Pflichtfelder', () => {

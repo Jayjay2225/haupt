@@ -88,6 +88,10 @@ export function ZusammenfassungAnsicht({ draft }: { draft: CaseDraft }) {
   const kontakt: Zeile[] = [
     { begriff: 'E-Mail', wert: draft.email.trim() === '' ? '–' : draft.email },
     { begriff: 'Telefon', wert: draft.telefon.trim() === '' ? '–' : draft.telefon },
+    {
+      begriff: 'Kontakt gewünscht per',
+      wert: draft.kontaktWunsch === 'telefon' ? 'Telefon' : draft.kontaktWunsch === 'email' ? 'E-Mail' : '–',
+    },
     { begriff: 'Rechtsschutzversicherung', wert: draft.rechtsschutz ? 'Ja' : 'Keine Angabe' },
   ];
 

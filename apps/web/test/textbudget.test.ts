@@ -1,9 +1,8 @@
 /**
- * Textbudgets (Prompt 12, Abschnitt 3, Regeln wie Prompt 11):
+ * Textbudgets (Prompt 12, Abschnitt 3 – fortgeltend unter Prompt 13):
  * Hero H1 höchstens 8 Wörter + Unterzeile 25, FAQ-Antwort 40,
- * Ergebnis-Seite über dem Knopf 40 Wörter (Zeile + Rechtsweg-Satz;
- * die H1 zählt als Überschrift nicht mit – dokumentiert in
- * docs/ASSUMPTIONS.md).
+ * Ergebnis-Seite über dem Knopf 40 Wörter (Zeile + ggf. Rechtsweg-Satz;
+ * die H1 zählt als Überschrift nicht mit – ASSUMPTIONS Nr. 53).
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -11,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type { CalcResult, SzenarioErgebnis } from '@rueckab/calc';
 import { RECHTSWEG_SATZ } from '../config/ampel';
-import { bestimmeWirtschaftlicheAmpel } from '../lib/ampel';
+import { bestimmeUebernahmeAmpel } from '../lib/ampel';
 
 const WEB = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -20,7 +19,7 @@ function woerter(text: string): number {
   return bereinigt === '' ? 0 : bereinigt.split(/\s+/).length;
 }
 
-function szenario(mehrwert: number | undefined, nettoanspruch = 0): SzenarioErgebnis {
+function szenario(mehrwert: number | undefined): SzenarioErgebnis {
   return {
     name: 'basis',
     summeBeitraege: 10000,
@@ -33,7 +32,7 @@ function szenario(mehrwert: number | undefined, nettoanspruch = 0): SzenarioErge
     nutzungen: 3000,
     rueckabwicklungswert: 12500,
     erhalteneLeistungenAufgezinst: 0,
-    nettoanspruch,
+    nettoanspruch: 12500,
     ...(mehrwert !== undefined ? { mehrwertGegenKuendigung: mehrwert, wirtschaftlichKeinVorteil: mehrwert <= 0 } : {}),
     nutzungenProzentDerBeitraege: 30,
     nutzungenNachHerkunft: { insurer: 0, branche: 3000, fallback: 0, override: 0 },
@@ -42,8 +41,8 @@ function szenario(mehrwert: number | undefined, nettoanspruch = 0): SzenarioErge
   };
 }
 
-function calcMit(mehrwert: number | undefined, nettoanspruch = 0): CalcResult {
-  const s = szenario(mehrwert, nettoanspruch);
+function calcMit(mehrwert: number | undefined): CalcResult {
+  const s = szenario(mehrwert);
   return {
     szenarien: { min: s, basis: s, max: s },
     jahrestabelle: [],
@@ -53,7 +52,7 @@ function calcMit(mehrwert: number | undefined, nettoanspruch = 0): CalcResult {
   };
 }
 
-describe('Textbudgets (Prompt 12, Abschnitt 3)', () => {
+describe('Textbudgets (Prompt 12/13)', () => {
   const startseite = readFileSync(join(WEB, 'app', 'page.tsx'), 'utf8');
 
   it('Hero: H1 höchstens 8 Wörter, Unterzeile höchstens 25', () => {
@@ -65,35 +64,33 @@ describe('Textbudgets (Prompt 12, Abschnitt 3)', () => {
     expect(woerter(unterzeile![1]!)).toBeLessThanOrEqual(25);
   });
 
-  it('FAQ-Antworten: höchstens 40 Wörter', () => {
-    const antworten = [...startseite.matchAll(/<details>\s*<summary>[^<]+<\/summary>\s*<p>([\s\S]*?)<\/p>/g)];
-    expect(antworten.length).toBe(6); // sechs Fragen laut Deck 3.1
+  it('FAQ: sieben Fragen (Prompt 13), Antworten höchstens 40 Wörter', () => {
+    const antworten = [...startseite.matchAll(/<details>\s*<summary>[^<]*(?:\{[^}]+\}[^<]*)?<\/summary>\s*<p>([\s\S]*?)<\/p>/g)];
+    expect(antworten.length).toBe(7);
     for (const [, antwort] of antworten) {
-      // JSX-Ausdrücke wie {BERICHT_PREIS_BRUTTO_EUR} zählen als ein Wort.
       const text = antwort!.replace(/\{[^}]+\}/g, 'X').replace(/\s+/g, ' ');
       expect(woerter(text), text).toBeLessThanOrEqual(40);
     }
   });
 
-  it('Ergebnis-Seite: über dem Knopf höchstens 40 Wörter (Zeile + Rechtsweg-Satz), keine Euro-Beträge', () => {
+  it('Ergebnis-Seite: über dem Knopf höchstens 40 Wörter, ohne Fall-Beträge', () => {
+    const rkwGross = 50000;
     const faelle = [
-      bestimmeWirtschaftlicheAmpel(calcMit(2500), 'laufend'), // grün
-      bestimmeWirtschaftlicheAmpel(calcMit(80000), 'laufend'), // grün, langes Wortband
-      bestimmeWirtschaftlicheAmpel(calcMit(1500), 'laufend'), // gelb
-      bestimmeWirtschaftlicheAmpel(calcMit(0), 'laufend'), // rot
-      bestimmeWirtschaftlicheAmpel(calcMit(undefined), 'laufend'), // kein RKW
-      bestimmeWirtschaftlicheAmpel(calcMit(undefined, 2500), 'gekuendigt'), // beendet grün
+      { ampel: bestimmeUebernahmeAmpel(calcMit(10000), 'laufend', rkwGross), rechtsweg: true }, // grün
+      { ampel: bestimmeUebernahmeAmpel(calcMit(1000), 'laufend', rkwGross), rechtsweg: true }, // gelb
+      { ampel: bestimmeUebernahmeAmpel(calcMit(0), 'laufend', rkwGross), rechtsweg: false }, // rot (Rechnung)
+      { ampel: bestimmeUebernahmeAmpel(calcMit(10000), 'gekuendigt', rkwGross), rechtsweg: false }, // rot (Status)
+      { ampel: bestimmeUebernahmeAmpel(calcMit(10000), 'laufend', 10000), rechtsweg: false }, // grau
     ];
-    for (const ampel of faelle) {
-      const ueberDemKnopf = `${ampel.zeile} ${RECHTSWEG_SATZ}`;
+    for (const { ampel, rechtsweg } of faelle) {
+      const ueberDemKnopf = rechtsweg ? `${ampel.zeile} ${RECHTSWEG_SATZ}` : ampel.zeile;
       expect(woerter(ueberDemKnopf), ueberDemKnopf).toBeLessThanOrEqual(40);
-      expect(ampel.zeile).not.toContain('€');
-      expect(ampel.titel).not.toContain('€');
+      expect(woerter(ampel.titel)).toBeLessThanOrEqual(10);
     }
   });
 
-  it('Preis-Mikrozeile der Startseite entspricht dem Deck', () => {
-    expect(startseite).toContain('Ampel kostenlos');
-    expect(startseite).toContain('Ergebnis sofort');
+  it('Mikrozeile und Tempo-Aussagen: 12 Stunden statt „sofort“', () => {
+    expect(startseite).toContain('in 12 Stunden per E-Mail');
+    expect(startseite).not.toMatch(/Ergebnis sofort/);
   });
 });

@@ -23,6 +23,11 @@ Die Website (`apps/web`) ist eine Next.js-Anwendung mit Server-Funktionen (Ampel
    | `STRIPE_STEUERSATZ_ID` | Steuersatz „Umsatzsteuer 19 %, inklusiv“ aus Stripe (`txr_…`) |
    | `RESEND_API_KEY` | vom E-Mail-Dienst (ohne Schlüssel: Protokoll-Modus, keine Mails) |
    | `MAIL_ABSENDER` | `Renten-Rettung <info@renten-rettung.de>` |
+   | `ADMIN_PASSWORT` | frei gewähltes, langes Passwort – schützt die Freigabeliste `/admin` und dient als Schlüssel für manuelle Cron-Aufrufe (Abschnitt 4) |
+   | `CRON_SECRET` | zufälliger Wert (z. B. `openssl rand -hex 24`); Vercel sendet ihn bei Cron-Aufrufen automatisch als `Authorization: Bearer …` mit |
+   | `NEXT_PUBLIC_PARTNERKANZLEI` | Name und Ort der Partnerkanzlei – erst setzen, wenn entschieden; sonst zeigt „Warum über uns“ den Platzhalter |
+   | `NEXT_PUBLIC_GEPRUEFTE_POLICEN` | Zahl geprüfter Policen – **nur mit Beleg** setzen, sonst leer lassen |
+   | `NEXT_PUBLIC_PREIS_ANRECHNUNG` | `1` = Hinweis „89 € werden bei Übernahme angerechnet“ anzeigen (Entscheidung des Auftraggebers) |
 
    Nicht setzen: `CHROMIUM_PATH`, `AUSLIEFERUNG_VERZEICHNIS` (auf Vercel automatisch: gepacktes Chromium, `/tmp`).
 5. „Deploy“. Nach dem Build gibt es eine Vorschauadresse `https://<projekt>.vercel.app` – damit Schritt 3 und 4 testen.
@@ -52,7 +57,7 @@ Der Build ist am 21.09.2026 aus einem frischen Klon mit `pnpm install --frozen-l
 ## 2. Was auf Vercel anders läuft (bereits im Code berücksichtigt)
 
 - **Chromium:** kein installierter Browser; `@sparticuz/chromium` wird beim ersten Aufruf nach `/tmp` entpackt (Kaltstart einige Sekunden). Der Webhook hat dafür `maxDuration = 60`. Regionsvorgabe `fra1` (Frankfurt) in `apps/web/vercel.json`.
-- **Dateisystem:** nur `/tmp`, nur für die Dauer eines Aufrufs. Der Bestellstatus liegt deshalb zusätzlich als Markierung `ausgeliefert_am` in den Metadaten der Stripe-Zahlung; wiederholte Webhook-Zustellungen erzeugen so keinen zweiten Bericht. Berichte werden nicht dauerhaft abgelegt – bei Bedarf werden sie aus den Falldaten der Zahlungssitzung neu gerechnet (deterministisch, gleiche Versionen).
+- **Dateisystem:** nur `/tmp`, nur für die Dauer eines Aufrufs. Der Bestellstatus liegt deshalb vollständig in den Metadaten der Stripe-Zahlung (Markierungen `erzeugt_am`, `freigegeben_am`, `ausgeliefert_am`, dazu Auffälligkeits-Kennzeichen und Lead-Status); wiederholte Webhook-Zustellungen oder Cron-Läufe erzeugen so keinen zweiten Versand. Berichte werden nicht dauerhaft abgelegt – bei Bedarf werden sie aus den Falldaten der Zahlungssitzung neu gerechnet (deterministisch, gleiche Versionen).
 - **Ratenbegrenzung** gilt je Funktionsinstanz (weich). Für eine harte Grenze später ein gemeinsamer Speicher.
 - **Basic-Auth-Middleware** läuft am Vercel-Edge.
 
@@ -64,9 +69,23 @@ Im Stripe-Dashboard → Entwickler → Webhooks → Endpunkt hinzufügen:
 - Den angezeigten Signaturschlüssel (`whsec_…`) als `STRIPE_WEBHOOK_SECRET` bei Vercel eintragen und neu bereitstellen.
 - Außerdem im Dashboard: PayPal und Klarna als Zahlungsmethoden aktivieren; Steuersatz 19 % inklusiv anlegen; Rechnungsangaben (Firma, Anschrift, USt-IdNr. DE815896163) hinterlegen.
 
-Testlauf: Bestellung mit Stripe-Testkarte `4242 4242 4242 4242` – Vertragsbestätigung, Bericht (PDF) und Rechnungslink müssen per E-Mail ankommen (bzw. im Protokoll-Modus in den Vercel-Logs erscheinen).
+Testlauf: Bestellung mit Stripe-Testkarte `4242 4242 4242 4242` – die Vertragsbestätigung muss sofort ankommen (bzw. im Protokoll-Modus in den Vercel-Logs erscheinen); der Prüfbericht mit Rechnungslink folgt nach Freigabe unter `/admin` oder automatisch über den Cron (Abschnitt 4).
 
-## 4. Domain umstellen (bei united-domains)
+## 4. Zwölf-Stunden-Versand (Prompt 13): Cron und Freigabeliste
+
+Seit Prompt 13 wird der Bericht **nicht mehr sofort** versendet. Der Webhook prüft die Zahlung, erzeugt den Bericht probeweise (Plausibilisierung) und setzt die Markierung `erzeugt_am` samt Auffälligkeits-Kennzeichen; versendet wird in einem zweiten Schritt – **spätestens 12 Stunden nach Zahlungseingang** (Zusage auf Website, Danke-Seite und in der Bestätigungs-Mail):
+
+- **Freigabe von Hand:** `/admin?schluessel=<ADMIN_PASSWORT>` zeigt die bezahlten Bestellungen der letzten 30 Tage mit Kennzeichen (z. B. Fondsvertrag, Beginn vor 1994, hoher Branchenwert-Anteil). „Freigeben & senden“ verschickt den Bericht sofort. Dort auch: Lead-Status je Bestellung und CSV-Export.
+- **Automatisch:** ohne Freigabe versendet `GET /api/auslieferung/cron` jede Bestellung, deren Erzeugung mindestens 10 Stunden zurückliegt (2 Stunden Puffer zur 12-Stunden-Zusage). Der Cron ist in `apps/web/vercel.json` **stündlich** eingeplant (`0 * * * *`) und akzeptiert zwei Berechtigungen: `Authorization: Bearer <CRON_SECRET>` (sendet Vercel bei eigenen Cron-Aufrufen automatisch mit, sobald die Variable gesetzt ist) oder `?schluessel=<ADMIN_PASSWORT>` für manuelle Aufrufe.
+
+**Achtung, Vercel-Hobby-Tarif:** Cron-Jobs dürfen dort nur **einmal täglich** laufen – das reicht für die 12-Stunden-Zusage **nicht**. Zwei Auswege:
+
+1. **Pro-Tarif**: stündliche Crons sind erlaubt, die vorhandene `vercel.json` genügt.
+2. **Externer Zeitplaner** (z. B. cron-job.org oder ein beliebiger Uptime-Dienst): stündlich `https://renten-rettung.de/api/auslieferung/cron?schluessel=<ADMIN_PASSWORT>` aufrufen (GET). Dann den `crons`-Block aus `apps/web/vercel.json` entfernen oder den täglichen Vercel-Lauf als zusätzliche Absicherung stehen lassen.
+
+Bis eine der beiden Lösungen steht, gilt: Bestellungen zeitnah unter `/admin` von Hand freigeben. Erstkunden-Codes (`EK-…`) sind vom 12-Stunden-Fenster ausgenommen und liefern weiterhin sofort aus.
+
+## 5. Domain umstellen (bei united-domains)
 
 Erst nach erfolgreichem Test unter der Vorschauadresse und nach `docs/DOMAIN-UMZUG.md` Abschnitt 0–1 (Sicherung, `/einkehr`, Mail-Einträge notieren):
 
@@ -78,6 +97,6 @@ Erst nach erfolgreichem Test unter der Vorschauadresse und nach `docs/DOMAIN-UMZ
 3. Warten, bis Vercel „Valid Configuration“ meldet; TLS-Zertifikat stellt Vercel automatisch aus.
 4. Prüfen: `https://renten-rettung.de` lädt die neue Seite (mit Beta-Passwort), `info@renten-rettung.de` sendet und empfängt weiterhin.
 
-## 5. Go-live
+## 6. Go-live
 
 Wenn alle Punkte aus `docs/DOMAIN-UMZUG.md` Abschnitt 4 abgehakt sind: `BETA_PASSWORT` löschen, `NEXT_PUBLIC_INDEXIERUNG=1` setzen, Stripe auf Live-Schlüssel umstellen (auch den Webhook-Endpunkt im Live-Modus anlegen), neu bereitstellen.

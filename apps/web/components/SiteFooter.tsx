@@ -19,7 +19,7 @@ export function SiteFooter() {
         <nav className="fuss-nav" aria-label="Weitere Seiten">
           <Link href="/rechner">Rechner</Link>
           {VARIANTE.ankaufHinweis && <Link href="/verkaufen">Verkaufen</Link>}
-          {VARIANTE.transparenzKasten && <Link href="/so-verdienen-wir">So verdienen wir</Link>}
+          <Link href="/durchsetzung">Durchsetzung</Link>
           <Link href="/anfrage">Individuelle Prüfung</Link>
           <Link href="/lebensversicherung">Versicherer</Link>
         </nav>

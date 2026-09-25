@@ -61,26 +61,26 @@ export default async function DankeSeite({ searchParams }: { searchParams: Promi
   }
   return (
     <div className="container schmal abschnitt">
-      <h1>
-        Danke. <span className="hervor">Ihr Prüfbericht</span> wird erstellt.
-      </h1>
+      <h1>Danke. Ihr Prüfbericht kommt.</h1>
       {stand !== undefined ? (
         <>
           <p className="untertitel">
             {stand.bezahlt
               ? 'Ihre Zahlung ist eingegangen.'
-              : 'Ihre Zahlung wird noch bestätigt – bei Klarna oder PayPal kann das ein paar Minuten dauern.'}{' '}
+              : 'Ihre Zahlung wird noch bestätigt – bei Klarna, PayPal oder SEPA kann das dauern.'}{' '}
             Bestellnummer <strong className="tabellenziffern">{stand.bestellnummer}</strong>.
           </p>
           <p>
-            Rechnung und Prüfbericht (PDF) schicken wir an <strong>{stand.email}</strong> – in der
-            Regel innerhalb weniger Minuten. Bitte auch den Spam-Ordner prüfen. Drucken Sie den
-            Prüfbericht danach aus und nehmen Sie ihn mit zum Anwalt oder zu Ihrer
-            Rechtsschutzversicherung.
+            Ihr Prüfbericht kommt innerhalb von 12 Stunden per E-Mail an <strong>{stand.email}</strong>;
+            er wird vor dem Versand plausibilisiert. Die Rechnung kommt gesondert. Bitte auch den
+            Spam-Ordner prüfen.
           </p>
         </>
       ) : (
-        <p className="untertitel">Rechnung und Prüfbericht (PDF) kommen per E-Mail – in der Regel innerhalb weniger Minuten.</p>
+        <p className="untertitel">
+          Ihr Prüfbericht kommt innerhalb von 12 Stunden per E-Mail; er wird vor dem Versand
+          plausibilisiert. Die Rechnung kommt gesondert.
+        </p>
       )}
       <p>
         Nichts angekommen? Schreiben Sie an <KontaktAdresse adresse={BRAND.kontaktEmail} />

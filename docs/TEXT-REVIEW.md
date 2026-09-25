@@ -37,3 +37,14 @@ Neue Punkte (gemeldet statt stillschweigend umgeschrieben):
 | 14 | Funnel-Frage 5 „erster Monatsbeitrag“ | Zusatz-Auswahl „Gezahlt wurde … monatlich/…/Einmalbeitrag“ auf demselben Bildschirm (Vorgabe monatlich) | Ohne Zahlweise rechnet ein Jahreszahler um Faktor 12 falsch; die Auswahl bewahrt die Ein-Frage-Struktur (eine Frage, ein Zusatzregler) |
 | 15 | Frage 2 ohne Datum | Bei „Gekündigt/Ausgezahlt“ erscheint ein freiwilliges Monatsfeld „Wann war das?“ | Ohne Datum wird die erhaltene Auszahlung nicht gegenverzinst → Schätzung zu hoch (verkaufsfreundlich, aber unehrlich). Feld bleibt freiwillig; ohne Angabe rechnet der Kern konservativ ohne Aufzinsung und weist die Annahme aus |
 | 16 | Kundenstimmen Manfred/Ulla „freigegeben; Freigaben liegen unter docs/freigaben/“ | Einträge in `data/testimonials.json` angelegt, aber `verified: false`, solange die Freigabe-Dateien fehlen → sie erscheinen **noch nicht** | Prinzip 1 / Linie 1: `consent_at`, `consent_channel`, `customer_ref` dürfen nicht erfunden werden. Sobald die Dateien in `docs/freigaben/` liegen: Felder füllen, `verified: true` (Anleitung: docs/freigaben/README.md) |
+
+## Nachtrag Prompt 13 (25.09.2026): Übernahme-Ampel und Durchsetzung
+
+| Nr. | Punkt | Umsetzung | Grund |
+|---|---|---|---|
+| 17 | FAQ 6 „Ist das Rechtsberatung?“ | durch Deck-Frage „Was macht Renten-Rettung genau?“ ersetzt – **gemeldet**: der RDG-Abgrenzungssatz lebt nur noch in Fußzeile („keine Rechtsberatung“), Ergebnis-Hinweis und AGB (LEGAL-OPEN Nr. 22d) | Deck 2.1 zählt Frage 6 als „geändert“ |
+| 18 | „keine Zahlen“ über dem Knopf (2.2) vs. Grau-Zeile | Grau-Zeile nennt die feste Grenze „30.000 €“ – Deck-Wortlaut übernommen; Fall-Beträge bleiben tabu (Test) | Deck-eigener Text |
+| 19 | Bericht in 12 Stunden – Erstkunden | EK-Codes liefern weiterhin sofort (kein Zahlungseingang, Feedback-Programm; docs/ERSTKUNDEN.md) | 12-h-Puffer dient der Plausibilisierung bezahlter Berichte |
+| 20 | Ampel ohne Rückkaufswert (defensiv) | Gelb „Eine Zahl fehlt noch“ ohne Kaufknopf | Deck definiert den Fall nicht; Assistent erzwingt den Wert ohnehin |
+| 21 | „Erfahrung“-Karte | zeigt sichtbaren Platzhalter „[[ZAHL, belegbar]] geprüfte Policen“, bis NEXT_PUBLIC_GEPRUEFTE_POLICEN belegt gefüllt wird | Deck: „Platzhalter nicht durch Schätzungen ersetzen“; Wording-Test verbietet unbelegte Zahlen |
+| 22 | Vercel-Hobby-Cron nur täglich | dokumentiert (DEPLOY-VERCEL): für die 12-h-Zusage Pro-Plan oder externer Scheduler nötig | technische Grenze, keine Textfrage |

@@ -4,8 +4,8 @@
  * Personenbezug geloggt.
  *
  * Produktvarianten (config/variante.ts):
- * - privat:  die eine wirtschaftliche Ampel in Worten, KEINE Euro-Beträge in
- *            der Antwort (die Zahlen gibt es im Bericht).
+ * - privat:  NUR die Übernahme-Ampel (Prompt 13, 0.4) – keine Beträge,
+ *            keine Wortbänder, keine Spanne; „Warum“ rein qualitativ.
  * - kanzlei: vollständige Ergebnisse (Eignungs-Check, Szenarien).
  */
 import { NextResponse } from 'next/server';
@@ -17,7 +17,7 @@ import riskJson from '../../../../../data/risk-defaults.json';
 import rulesJson from '../../../../../data/legal-rules.json';
 import { RECHTSWEG_SATZ } from '@/config/ampel';
 import { VARIANTE } from '@/config/variante';
-import { bestimmeWirtschaftlicheAmpel } from '@/lib/ampel';
+import { bestimmeUebernahmeAmpel, berichtKaufbar, type UebernahmeAmpel } from '@/lib/ampel';
 import { draftZuEingaben } from '@/lib/berechnung';
 import { uebernehmeBekannteFelder } from '@/lib/draft';
 import { findeVersichererId, insurersDaten } from '@/lib/insurers-data';
@@ -30,19 +30,32 @@ function ohneEuro(texte: string[]): string[] {
   return texte.filter((t) => !t.includes('€'));
 }
 
-/** „Warum {Ampelwort}?“ – Szenarien in Worten plus Datenkennzeichen, ohne Beträge. */
-function warumZeilen(calc: CalcResult, beendet: boolean): string[] {
-  const vergleichswort = beendet ? 'dem bereits Erhaltenen' : 'dem Rückkaufswert';
+/** „Warum {Ampelwort}?“ – rein qualitativ, ohne Beträge (Prompt 13, 2.2). */
+function warumZeilen(ampel: UebernahmeAmpel, calc: CalcResult): string[] {
   const zeilen: string[] = [];
-  const namen: { key: 'min' | 'basis' | 'max'; wort: string }[] = [
-    { key: 'min', wort: 'Im konservativen Szenario' },
-    { key: 'basis', wort: 'Im Basis-Szenario' },
-    { key: 'max', wort: 'Im maximalen Szenario' },
-  ];
-  for (const { key, wort } of namen) {
-    const s = calc.szenarien[key];
-    const wert = s.mehrwertGegenKuendigung ?? s.nettoanspruch;
-    zeilen.push(`${wort} liegt das Ergebnis ${wert > 0 ? 'über' : 'nicht über'} ${vergleichswort}.`);
+  switch (ampel.grund) {
+    case 'uebernahme':
+      zeilen.push(
+        'Ihr Vertrag erfüllt unsere Kriterien: er läuft oder ist beitragsfrei, der Rückkaufswert liegt über unserer Mindestgrenze, die Rechnung liegt über dem Rückkaufswert.',
+      );
+      break;
+    case 'knapp':
+      zeilen.push(
+        'Ihr Vertrag erfüllt unsere Kriterien: er läuft oder ist beitragsfrei, der Rückkaufswert liegt über unserer Mindestgrenze. Die Rechnung liegt über dem Rückkaufswert – aber knapp; ob es reicht, entscheidet der Prüfbericht.',
+      );
+      break;
+    case 'kein-vorteil':
+      zeilen.push('Die Rechnung liegt nicht über dem Rückkaufswert – rechnerisch ist hier nichts zu holen.');
+      break;
+    case 'status':
+      zeilen.push('Ihr Vertrag ist gekündigt oder ausgezahlt – solche Verträge übernehmen wir nicht.');
+      break;
+    case 'zu-klein':
+      zeilen.push('Die Rechnung liegt über dem Rückkaufswert, aber der Rückkaufswert liegt unter unserer Mindestgrenze.');
+      break;
+    case 'kein-rueckkaufswert':
+      zeilen.push('Ohne den Rückkaufswert aus der Standmitteilung können wir die Kriterien nicht prüfen.');
+      break;
   }
   const reihe = calc.szenarien.basis.zinsreihe;
   const geschaetzt = reihe.filter((j) => j.kennzeichen === 'estimated_branch').length;
@@ -100,13 +113,18 @@ export async function POST(request: Request): Promise<NextResponse> {
       });
     }
 
-    const beendet = abbildung.contract.status === 'gekuendigt' || abbildung.contract.status === 'abgelaufen';
-    const ampel = bestimmeWirtschaftlicheAmpel(calc, abbildung.contract.status);
+    const ampel = bestimmeUebernahmeAmpel(
+      calc,
+      abbildung.contract.status,
+      abbildung.contract.rueckkaufswert?.betrag,
+    );
     return NextResponse.json({
       variante: 'privat',
       ampel,
-      rechtswegSatz: RECHTSWEG_SATZ,
-      warum: warumZeilen(calc, beendet),
+      kaufbar: berichtKaufbar(ampel),
+      // Rechtsweg-Satz nur bei Grün und Gelb (Prompt 13, 2.2).
+      rechtswegSatz: ampel.grund === 'uebernahme' || ampel.grund === 'knapp' ? RECHTSWEG_SATZ : null,
+      warum: warumZeilen(ampel, calc),
       annahmen: ohneEuro([...abbildung.zusatzAnnahmen, ...calc.annahmen.map((a) => a.text)]),
       warnungen: ohneEuro(calc.warnungen.map((w) => w.text)),
       versichererId: abbildung.contract.versichererId,

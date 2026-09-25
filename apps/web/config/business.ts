@@ -38,7 +38,18 @@ export const ZAHLUNG = {
   abwicklung: 'Stripe',
   wege: ['Kreditkarte oder Debitkarte', 'SEPA-Lastschrift', 'PayPal', 'Klarna'],
   lieferung:
-    'Nach Zahlungseingang erhalten Sie Rechnung und Bericht als PDF per E-Mail – in der Regel innerhalb weniger Minuten.',
+    'Nach Zahlungseingang erhalten Sie die Rechnung sofort und den Prüfbericht innerhalb von 12 Stunden per E-Mail.',
+} as const;
+
+/**
+ * Berichtsversand (Prompt 13, Abschnitt 3): Der Bericht wird nach Zahlung
+ * erzeugt, vor dem Versand plausibilisiert (Freigabe-Liste im Admin) und
+ * spätestens nach `autoVersandNachStunden` automatisch versendet, damit die
+ * zugesagten `maxStunden` immer gehalten werden.
+ */
+export const BERICHT_VERSAND = {
+  maxStunden: 12,
+  autoVersandNachStunden: 10,
 } as const;
 
 export type BusinessModelId = 'hybrid' | 'kanzlei';

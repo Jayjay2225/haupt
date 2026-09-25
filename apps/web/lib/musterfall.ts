@@ -9,7 +9,7 @@ import { berechneRueckabwicklung } from '@rueckab/calc';
 import type { ContractInput, RiskDefaults } from '@rueckab/calc';
 import riskJson from '../../../data/risk-defaults.json';
 import { insurersDaten } from './insurers-data';
-import { bestimmeWirtschaftlicheAmpel, type WirtschaftlicheAmpel } from './ampel';
+import { bestimmeUebernahmeAmpel, type UebernahmeAmpel } from './ampel';
 
 const riskDefaults = riskJson as unknown as RiskDefaults;
 
@@ -23,7 +23,7 @@ export interface Musterfall {
   basis: number;
   min: number;
   max: number;
-  ampel: WirtschaftlicheAmpel;
+  ampel: UebernahmeAmpel;
   contract: ContractInput;
 }
 
@@ -84,7 +84,7 @@ export function musterfaelle(): Musterfall[] {
       basis: rundeMusterwert(calc.szenarien.basis.rueckabwicklungswert),
       min: rundeMusterwert(calc.szenarien.min.rueckabwicklungswert),
       max: rundeMusterwert(calc.szenarien.max.rueckabwicklungswert),
-      ampel: bestimmeWirtschaftlicheAmpel(calc, contract.status),
+      ampel: bestimmeUebernahmeAmpel(calc, contract.status, contract.rueckkaufswert?.betrag),
       contract,
     };
   });

@@ -9,9 +9,13 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest): NextResponse {
   // Der Stripe-Webhook authentifiziert sich selbst über die Signaturprüfung
-  // (constructEvent); Basic-Auth würde jede Zustellung mit 401 abweisen und
-  // bezahlte Bestellungen unausgeliefert lassen.
-  if (request.nextUrl.pathname === '/api/stripe/webhook') {
+  // (constructEvent); der Versand-Cron über CRON_SECRET/ADMIN_PASSWORT.
+  // Basic-Auth würde beide mit 401 abweisen und bezahlte Bestellungen
+  // unausgeliefert lassen.
+  if (
+    request.nextUrl.pathname === '/api/stripe/webhook' ||
+    request.nextUrl.pathname === '/api/auslieferung/cron'
+  ) {
     return NextResponse.next();
   }
   const passwort = process.env['BETA_PASSWORT'];
@@ -38,5 +42,5 @@ export function middleware(request: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/stripe/webhook).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/stripe/webhook|api/auslieferung/cron).*)'],
 };

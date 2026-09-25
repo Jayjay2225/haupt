@@ -68,10 +68,18 @@ export default function DatenschutzSeite() {
           <p>
             Nur wenn Sie es auf der Ergebnis-Seite ausdrücklich ankreuzen, geben wir Ihre Kontaktdaten und die Eckdaten
             Ihrer Police an unseren Organisationspartner für den Ankauf [[Partner, Sitz]] weiter (Art. 6 Abs. 1 lit. a
-            DSGVO). Diese Einwilligung können Sie jederzeit mit Wirkung für die Zukunft widerrufen.
+            DSGVO). Diese Einwilligung können Sie jederzeit mit Wirkung für die Zukunft widerrufen. Offenlegung: Wir
+            erhalten vom Organisationspartner eine Vergütung, wenn ein Ankauf zustande kommt – nicht aus Ihrem Erlös.
           </p>
         </>
       )}
+      <h3>Durchsetzung mit Partnerkanzlei</h3>
+      <p>
+        Beauftragen Sie über /durchsetzung die Durchsetzung, geben wir Ihre Angaben und hochgeladenen Unterlagen mit
+        Ihrer ausdrücklichen Einwilligung an die Partnerkanzlei [[Kanzlei, Sitz]] weiter (Art. 6 Abs. 1 lit. a und b
+        DSGVO). Die Unterlagen werden bei uns nicht gespeichert, sondern als E-Mail weitergereicht. Die wirtschaftliche
+        Struktur der Zusammenarbeit ([[DURCHSETZUNGSSTRUKTUR]]) legen wir vor Beauftragung offen.
+      </p>
       <h3>Kontakt per E-Mail</h3>
       <p>
         Schreiben Sie uns, verarbeiten wir Ihre Angaben, um Ihre Anfrage zu beantworten (Art. 6 Abs. 1 lit. b oder

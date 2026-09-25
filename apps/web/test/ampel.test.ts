@@ -1,10 +1,8 @@
 /**
- * Die eine, wirtschaftliche Ampel (Prompt 12, Abschnitt 1.3 und 1.6):
- * Schwellen aus config/ampel.ts, Größenordnung in Worten, keine
- * Vertragsbeginn-Zonen. Dazu die beiden Pflichtfälle aus 1.6:
- * Vertrag 05/1986 (150 DM) rechnet mit estimated_branch-Kennzeichen durch;
- * Vertrag 03/2015 mit Rückkaufswert nahe der Beitragssumme wird Gelb oder
- * Rot – und Rot rendert keinen Kaufknopf.
+ * Übernahme-Ampel (Prompt 13, Abschnitte 1 und 7): vier Zustände aus der
+ * Konfiguration, Reihenfolge Status → Schwelle → Rechnung; Grau und beide
+ * Rot-Varianten ohne Kaufknopf; Gratis-Ansicht ohne Beträge, Wortbänder
+ * oder Spanne. Dazu die Pflichtfälle aus Prompt 12, 1.6.
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -14,13 +12,13 @@ import { berechneRueckabwicklung } from '@rueckab/calc';
 import type { CalcResult, ContractInput, RiskDefaults, SzenarioErgebnis } from '@rueckab/calc';
 import riskJson from '../../../data/risk-defaults.json';
 import { AMPEL, RECHTSWEG_SATZ } from '../config/ampel';
-import { bestimmeWirtschaftlicheAmpel, groessenordnungInWorten } from '../lib/ampel';
+import { berichtKaufbar, bestimmeUebernahmeAmpel } from '../lib/ampel';
 import { insurersDaten } from '../lib/insurers-data';
 
 const WEB = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const riskDefaults = riskJson as unknown as RiskDefaults;
 
-function szenario(mehrwert: number | undefined, nettoanspruch = 0): SzenarioErgebnis {
+function szenario(mehrwert: number | undefined): SzenarioErgebnis {
   return {
     name: 'basis',
     summeBeitraege: 10000,
@@ -33,7 +31,7 @@ function szenario(mehrwert: number | undefined, nettoanspruch = 0): SzenarioErge
     nutzungen: 3000,
     rueckabwicklungswert: 12500,
     erhalteneLeistungenAufgezinst: 0,
-    nettoanspruch,
+    nettoanspruch: 12500,
     ...(mehrwert !== undefined ? { mehrwertGegenKuendigung: mehrwert, wirtschaftlichKeinVorteil: mehrwert <= 0 } : {}),
     nutzungenProzentDerBeitraege: 30,
     nutzungenNachHerkunft: { insurer: 0, branche: 3000, fallback: 0, override: 0 },
@@ -42,8 +40,8 @@ function szenario(mehrwert: number | undefined, nettoanspruch = 0): SzenarioErge
   };
 }
 
-function calcMit(mehrwert: number | undefined, nettoanspruch = 0): CalcResult {
-  const s = szenario(mehrwert, nettoanspruch);
+function calcMit(mehrwert: number | undefined): CalcResult {
+  const s = szenario(mehrwert);
   return {
     szenarien: { min: s, basis: s, max: s },
     jahrestabelle: [],
@@ -53,55 +51,105 @@ function calcMit(mehrwert: number | undefined, nettoanspruch = 0): CalcResult {
   };
 }
 
-describe('Ampel-Schwellen (config/ampel.ts)', () => {
-  it('Grün ab 2.000 € Mehrwert im Basis-Szenario', () => {
-    const ampel = bestimmeWirtschaftlicheAmpel(calcMit(AMPEL.gruen.mehrwertMinAbsolut), 'laufend');
+describe('Übernahme-Ampel: vier Zustände aus config/ampel.ts', () => {
+  const rkwGross = AMPEL.uebernahme.minRueckkaufswert;
+
+  it('Grün ab 5.000 € Mehrwert bei erlaubtem Status und Rückkaufswert über der Schwelle', () => {
+    const ampel = bestimmeUebernahmeAmpel(calcMit(AMPEL.gruen.mehrwertMinAbsolut), 'laufend', rkwGross);
     expect(ampel.ampel).toBe('gruen');
-    expect(ampel.zeile).toContain('Größenordnung');
-    expect(ampel.zeile).toContain('geschätzt, mit Bandbreite');
+    expect(ampel.titel).toBe('Ihr Vertrag kommt für unser Verfahren in Frage.');
+    expect(ampel.zeile).toContain('12 Stunden');
+    expect(berichtKaufbar(ampel)).toBe(true);
   });
 
   it('Gelb zwischen 0 und der Grün-Schwelle', () => {
-    const ampel = bestimmeWirtschaftlicheAmpel(calcMit(AMPEL.gruen.mehrwertMinAbsolut - 1), 'laufend');
+    const ampel = bestimmeUebernahmeAmpel(calcMit(AMPEL.gruen.mehrwertMinAbsolut - 1), 'beitragsfrei', rkwGross);
     expect(ampel.ampel).toBe('gelb');
-    expect(ampel.titel).toBe('Gelb. Knapp – es könnte sich lohnen.');
-    expect(ampel.zeile).toBe('Der Prüfbericht zeigt, ob es reicht.');
+    expect(ampel.zeile).toBe('Der Prüfbericht entscheidet, ob wir übernehmen.');
+    expect(berichtKaufbar(ampel)).toBe(true);
   });
 
-  it('Rot, wenn das Basis-Szenario nicht über dem Rückkaufswert liegt – ehrlich formuliert', () => {
-    const ampel = bestimmeWirtschaftlicheAmpel(calcMit(0), 'laufend');
+  it('Rot (Rechnung): Basis nicht über dem Rückkaufswert – kein Kaufknopf', () => {
+    const ampel = bestimmeUebernahmeAmpel(calcMit(0), 'laufend', rkwGross);
     expect(ampel.ampel).toBe('rot');
-    expect(ampel.zeile).toBe('Sparen Sie sich den Bericht.');
+    expect(ampel.grund).toBe('kein-vorteil');
+    expect(berichtKaufbar(ampel)).toBe(false);
   });
 
-  it('Gelb ohne Rückkaufswert (laufender Vertrag)', () => {
-    const ampel = bestimmeWirtschaftlicheAmpel(calcMit(undefined), 'laufend');
-    expect(ampel.ampel).toBe('gelb');
-    expect(ampel.grund).toBe('kein-rueckkaufswert');
+  it('Rot (Status) hat Vorrang: gekündigte/ausgezahlte Verträge übernehmen wir nicht', () => {
+    for (const status of ['gekuendigt', 'abgelaufen'] as const) {
+      const ampel = bestimmeUebernahmeAmpel(calcMit(50000), status, rkwGross);
+      expect(ampel.ampel).toBe('rot');
+      expect(ampel.grund).toBe('status');
+      expect(ampel.zeile).toBe('Lassen Sie sich dazu anwaltlich beraten.');
+      expect(berichtKaufbar(ampel)).toBe(false);
+    }
   });
 
-  it('beendete Verträge: dieselben Schwellen auf den Netto-Wert', () => {
-    expect(bestimmeWirtschaftlicheAmpel(calcMit(undefined, 2500), 'gekuendigt').ampel).toBe('gruen');
-    expect(bestimmeWirtschaftlicheAmpel(calcMit(undefined, 500), 'abgelaufen').ampel).toBe('gelb');
-    expect(bestimmeWirtschaftlicheAmpel(calcMit(undefined, -100), 'gekuendigt').ampel).toBe('rot');
+  it('Grau: Rechnung positiv, aber Rückkaufswert unter der Mindestgrenze – kein Kaufknopf', () => {
+    const ampel = bestimmeUebernahmeAmpel(calcMit(50000), 'laufend', rkwGross - 1);
+    expect(ampel.ampel).toBe('grau');
+    expect(ampel.grund).toBe('zu-klein');
+    expect(berichtKaufbar(ampel)).toBe(AMPEL.uebernahme.berichtUnterSchwelle);
+    expect(AMPEL.uebernahme.berichtUnterSchwelle).toBe(false);
   });
 
-  it('der Rechtsweg-Satz ist konfiguriert (Prompt 12, 1.4)', () => {
-    expect(RECHTSWEG_SATZ).toContain('prüft Ihr Anwalt mit dem Bericht in der Hand');
+  it('unter der Schwelle UND ohne Rechnungs-Vorteil bleibt es Rot', () => {
+    const ampel = bestimmeUebernahmeAmpel(calcMit(-100), 'laufend', rkwGross - 1);
+    expect(ampel.ampel).toBe('rot');
+    expect(ampel.grund).toBe('kein-vorteil');
+  });
+
+  it('der neue Rechtsweg-Satz nennt die Anwälte, nicht den Bericht in der Hand', () => {
+    expect(RECHTSWEG_SATZ).toContain('spezialisierten Anwälte');
+    expect(RECHTSWEG_SATZ).not.toContain('mit dem Bericht in der Hand');
   });
 });
 
-describe('Größenordnung in Worten (Wortbänder aus config/ampel.ts)', () => {
-  it('folgt den konfigurierten Stufen', () => {
-    expect(groessenordnungInWorten(2500)).toBe('im niedrigen vierstelligen Bereich');
-    expect(groessenordnungInWorten(7500)).toBe('im hohen vierstelligen Bereich');
-    expect(groessenordnungInWorten(25000)).toBe('im fünfstelligen Bereich');
-    expect(groessenordnungInWorten(75000)).toBe('im hohen fünfstelligen Bereich');
-    expect(groessenordnungInWorten(250000)).toBe('im sechsstelligen Bereich');
+describe('Gratis-Ansicht: nur die Ampel (Prompt 13, 0.4 und 7)', () => {
+  it('keine Beträge und keine Wortbänder in Titel/Zeile (außer der festen Grau-Grenze)', () => {
+    const faelle = [
+      bestimmeUebernahmeAmpel(calcMit(10000), 'laufend', 50000),
+      bestimmeUebernahmeAmpel(calcMit(1000), 'laufend', 50000),
+      bestimmeUebernahmeAmpel(calcMit(0), 'laufend', 50000),
+      bestimmeUebernahmeAmpel(calcMit(10000), 'gekuendigt', 50000),
+    ];
+    for (const ampel of faelle) {
+      expect(ampel.titel).not.toMatch(/€|\d/);
+      expect(ampel.zeile).not.toMatch(/€/);
+      expect(`${ampel.titel} ${ampel.zeile}`).not.toMatch(/stelligen Bereich|Größenordnung|Spanne/);
+    }
+    // Grau nennt die feste Mindestgrenze (Deck-Wortlaut) – aber kein Fall-Ergebnis.
+    const grau = bestimmeUebernahmeAmpel(calcMit(10000), 'laufend', 10000);
+    expect(grau.zeile).toContain('30.000 €');
+    expect(grau.zeile).not.toMatch(/stelligen Bereich|Größenordnung|Spanne/);
+  });
+
+  it('die Ergebnis-Seite rendert Kaufknopf nur über das kaufbar-Flag und kennt keine Größenordnung', () => {
+    const quelle = readFileSync(join(WEB, 'components', 'funnel', 'ErgebnisAnsicht.tsx'), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\s*\/\/.*$/gm, '');
+    expect(quelle.match(/href="\/bestellen"/g) ?? []).toHaveLength(1);
+    const kaufblock = quelle.indexOf('vorschau.kaufbar &&');
+    expect(kaufblock).toBeGreaterThan(-1);
+    expect(quelle.indexOf('href="/bestellen"')).toBeGreaterThan(kaufblock);
+    expect(quelle).not.toMatch(/groessenordnung|Größenordnung/i);
+    // Keine Spannen-Anzeige im Privat-Teil; die Gegenposition DARF das Wort
+    // „Spanne“ erklären (unverändert laut Prompt 13, 2.2), Beträge zeigt nur
+    // die Kanzlei-Variante („Spanne Min–Max“).
+    const privatTeil = quelle.slice(0, quelle.indexOf("variante === 'kanzlei'"));
+    expect(privatTeil).not.toMatch(/Spanne Min|Spanne der Szenarien/);
+    expect(quelle).not.toContain('So verdienen wir');
+    expect(quelle).not.toContain('Lieber persönlich?');
+  });
+
+  it('die Vorschau-API liefert keine Größenordnung mehr', () => {
+    const quelle = readFileSync(join(WEB, 'app', 'api', 'vorschau', 'route.ts'), 'utf8');
+    expect(quelle).not.toMatch(/groessenordnung/i);
   });
 });
 
-describe('Pflichtfälle aus Prompt 12, Abschnitt 1.6 (echte Datenbasis)', () => {
+describe('Pflichtfälle aus Prompt 12, 1.6 (echte Datenbasis)', () => {
   it('Vertrag 05/1986, 150 DM monatlich: rechnet durch, estimated_branch 1986–2003 vorhanden, Ampel aus Config', () => {
     const contract: ContractInput = {
       versichererId: 'unbekannt',
@@ -120,14 +168,14 @@ describe('Pflichtfälle aus Prompt 12, Abschnitt 1.6 (echte Datenbasis)', () => 
       .filter((j) => j.jahr >= 1986 && j.jahr <= 2003)
       .filter((j) => j.kennzeichen === 'estimated_branch');
     expect(markiert.length).toBe(2003 - 1986 + 1);
-    const ampel = bestimmeWirtschaftlicheAmpel(calc, contract.status);
+    const ampel = bestimmeUebernahmeAmpel(calc, contract.status, contract.rueckkaufswert?.betrag);
     const mehrwert = calc.szenarien.basis.mehrwertGegenKuendigung ?? 0;
     const erwartet =
       mehrwert >= AMPEL.gruen.mehrwertMinAbsolut ? 'gruen' : mehrwert > AMPEL.gelb.mehrwertMin ? 'gelb' : 'rot';
     expect(ampel.ampel).toBe(erwartet);
   });
 
-  it('Vertrag 03/2015, 100 €, Rückkaufswert nahe Beitragssumme: Gelb oder Rot', () => {
+  it('Vertrag 03/2015, 100 €, Rückkaufswert nahe Beitragssumme: Gelb, Rot oder Grau (unter 30.000 €)', () => {
     const contract: ContractInput = {
       versichererId: 'unbekannt',
       vertragsart: 'kapital-lv',
@@ -141,21 +189,9 @@ describe('Pflichtfälle aus Prompt 12, Abschnitt 1.6 (echte Datenbasis)', () => 
       stichtag: '2026-09',
     };
     const calc = berechneRueckabwicklung(contract, insurersDaten, riskDefaults);
-    const ampel = bestimmeWirtschaftlicheAmpel(calc, contract.status);
-    expect(['gelb', 'rot']).toContain(ampel.ampel);
-  });
-
-  it('Rot wird in der Oberfläche ohne Kaufknopf gerendert (Ergebnis-Seite)', () => {
-    const quelle = readFileSync(join(WEB, 'components', 'funnel', 'ErgebnisAnsicht.tsx'), 'utf8');
-    // Der Kaufknopf existiert genau einmal – im Nicht-Rot-Zweig des Ternärs.
-    const kaufknopf = quelle.match(/href="\/bestellen"/g) ?? [];
-    expect(kaufknopf).toHaveLength(1);
-    const rotZweig = quelle.indexOf("ampel.ampel === 'rot' ? (");
-    const kaufPosition = quelle.indexOf('href="/bestellen"');
-    expect(rotZweig).toBeGreaterThan(-1);
-    // Der Kaufknopf steht nach dem Rot-Zweig (im Else-Teil), nie davor.
-    expect(kaufPosition).toBeGreaterThan(rotZweig);
-    expect(quelle.slice(rotZweig, kaufPosition)).toContain('VerkaufenKarte');
+    const ampel = bestimmeUebernahmeAmpel(calc, contract.status, contract.rueckkaufswert?.betrag);
+    expect(['gelb', 'rot', 'grau']).toContain(ampel.ampel);
+    expect(berichtKaufbar(ampel)).toBe(ampel.grund === 'knapp' || ampel.grund === 'uebernahme');
   });
 
   it('kein Test und keine Ampel-Logik verweist mehr auf Vertragsbeginn-Zonen', () => {

@@ -78,9 +78,10 @@ export interface CaseDraft {
   // 9 – „Gab es Auszahlungen?“
   auszahlungenErhalten: JaNeinUnbekannt;
   auszahlungenListe: AuszahlungsEintrag[];
-  // 10 – „Wohin sollen wir das Ergebnis schicken?“
+  // 10 – „Wohin sollen wir das Ergebnis schicken?“ (+ Kontaktweg, Prompt 13 §4)
   email: string;
   telefon: string;
+  kontaktWunsch: '' | 'email' | 'telefon';
   einwilligungDatenschutz: boolean;
   rechtsschutz: boolean;
   // Bestellung (Rechnung) – wird erst im Bestellformular erfragt.
@@ -123,6 +124,7 @@ export function leererDraft(): CaseDraft {
     auszahlungenListe: [],
     email: '',
     telefon: '',
+    kontaktWunsch: '',
     einwilligungDatenschutz: false,
     rechtsschutz: false,
     name: '',
@@ -356,6 +358,11 @@ export function validiereSchritt(
         fehler['email'] = 'Bitte Ihre E-Mail-Adresse eintragen – dorthin geht der Ergebnis-Link.';
       } else if (!EMAIL_MUSTER.test(draft.email.trim())) {
         fehler['email'] = 'Diese E-Mail-Adresse sieht nicht vollständig aus.';
+      }
+      if (draft.kontaktWunsch === '') {
+        fehler['kontaktWunsch'] = 'Bitte auswählen, wie wir Sie kontaktieren dürfen.';
+      } else if (draft.kontaktWunsch === 'telefon' && draft.telefon.trim() === '') {
+        fehler['telefon'] = 'Für den Rückruf brauchen wir Ihre Telefonnummer.';
       }
       if (!draft.einwilligungDatenschutz) {
         fehler['einwilligungDatenschutz'] = 'Ohne dieses Ja dürfen wir nicht rechnen.';

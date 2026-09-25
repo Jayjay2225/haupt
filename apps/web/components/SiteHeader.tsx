@@ -16,7 +16,6 @@ export function SiteHeader() {
           <nav className="kopf-nav" aria-label="Hauptnavigation">
             <Link href="/rechner">Rechner</Link>
             {VARIANTE.ankaufHinweis && <Link href="/verkaufen">Verkaufen</Link>}
-            {VARIANTE.transparenzKasten && <Link href="/so-verdienen-wir">So verdienen wir</Link>}
             <Link href="/#fragen">Fragen</Link>
             <Link href="/rechner" className="knopf haupt kopf-knopf">
               Jetzt prüfen

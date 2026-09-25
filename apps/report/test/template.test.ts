@@ -74,7 +74,7 @@ describe('Berichts-Template (Prompt 12)', () => {
 
   it('enthält den Methodikabsatz (Prompt 12, 1.4) wörtlich', () => {
     expect(html).toContain('Die Berechnung folgt der Rückabwicklungsformel');
-    expect(html).toContain('prüft der Rechtsanwalt anhand der Vertragsunterlagen');
+    expect(html).toContain('prüfen die spezialisierten Anwälte, mit denen wir arbeiten, anhand der Vertragsunterlagen');
     expect(html).toContain('Verhandlungsbasis mit Bandbreite');
   });
 

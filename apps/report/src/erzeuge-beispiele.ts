@@ -141,6 +141,8 @@ for (const beispiel of beispiele) {
     contract: beispiel.contract,
     calc,
     eligibility,
+    durchsetzungUrl: 'https://renten-rettung.de/durchsetzung',
+    konditionenText: '[[KONDITIONEN: Erfolgsbeteiligung, Kostenübernahme, Rechtsschutz-Fall]]',
   };
   const html = renderBerichtHtml(bericht);
   const basisname = `Pruefbericht_${beispiel.aktenzeichen}_${HEUTE}`;

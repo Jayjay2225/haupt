@@ -17,8 +17,8 @@ export default function BerichtSeite() {
     <div className="container schmal abschnitt">
       <h1>Das steht im Bericht.</h1>
       <p className="untertitel">
-        Die Ampel sagt, ob sich Rechnen lohnt. Der Prüfbericht sagt, wie viel – zum Mitnehmen zum
-        Anwalt.
+        Die Ampel sagt, ob Ihr Vertrag für unser Verfahren in Frage kommt. Der Prüfbericht nennt
+        Ihre Zahl – die Grundlage für unser Verfahren.
       </p>
 
       <h2>Was drinsteht</h2>
@@ -28,7 +28,7 @@ export default function BerichtSeite() {
         <li>Die Rechnung Jahr für Jahr: Beiträge, Schutzanteil, Kosten, Sparanteil, Zinsen.</li>
         <li>Jede Rendite mit Quelle und Datum; Branchenwerte sind als Schätzung gekennzeichnet.</li>
         <li>Die Gegenposition des Versicherers – die Einwände, die Sie kennen sollten.</li>
-        <li>Fertig für Anwalt und Rechtsschutzversicherung: Unterlagenliste und nächste Schritte.</li>
+        <li>Der nächste Schritt: Wir übernehmen – mit den Konditionen der Durchsetzung.</li>
       </ul>
 
       <h2>Was nicht drinsteht</h2>
@@ -48,7 +48,7 @@ export default function BerichtSeite() {
           </p>
           <ol className="punkteliste">
             <li>Sie bestellen den Prüfbericht und zahlen vorab – {ZAHLUNG.wege.join(', ')} – abgewickelt über {ZAHLUNG.abwicklung}.</li>
-            <li>Nach Zahlungseingang rechnen wir den Prüfbericht aus Ihren Angaben im Rechner.</li>
+            <li>Nach Zahlungseingang rechnen wir den Bericht aus Ihren Angaben; vor dem Versand wird er plausibilisiert.</li>
             <li>{ZAHLUNG.lieferung}</li>
           </ol>
           {aktiv ? (

@@ -28,8 +28,12 @@ export interface BerichtInput {
   eligibility: EligibilityResult;
   /** Kanzlei-Variante (Modell C): Belehrungsbewertung anzeigen. */
   belehrungsCheck?: boolean;
-  /** Grün-Schwelle der wirtschaftlichen Ampel (Standard wie config/ampel.ts). */
-  ampelSchwellen?: { mehrwertMinAbsolut: number };
+  /** Übernahme-Schwellen (Standard wie config/ampel.ts, Prompt 13). */
+  ampelSchwellen?: { mehrwertMinAbsolut: number; minRueckkaufswert?: number };
+  /** Link „Durchsetzung beauftragen“ (letzte Seite, Prompt 13 2.3). */
+  durchsetzungUrl?: string;
+  /** Konditionen der Durchsetzung (Platzhalter bis zur Festlegung). */
+  konditionenText?: string;
 }
 
 /** Design B – Token (Prompt 12, Abschnitt 4.1/4.5). */
@@ -56,7 +60,7 @@ interface Ansatzpunkte {
 
 const ANSATZPUNKTE = ansatzpunkteJson as unknown as Ansatzpunkte;
 
-type AmpelFarbe = 'gruen' | 'gelb' | 'rot';
+type AmpelFarbe = 'gruen' | 'gelb' | 'rot' | 'grau';
 
 interface WirtschaftlicheAmpel {
   farbe: AmpelFarbe;
@@ -64,22 +68,36 @@ interface WirtschaftlicheAmpel {
   punktFarbe: string;
 }
 
-/** Die eine, wirtschaftliche Ampel (Prompt 12, 1.3) – Basis-Szenario gegen den Vergleichsmaßstab. */
-function wirtschaftlicheAmpel(calc: CalcResult, contract: ContractInput, schwelle: number): WirtschaftlicheAmpel {
+/**
+ * Übernahme-Ampel (Prompt 13, 1): Status → Rückkaufswert-Schwelle →
+ * Rechnung; identische Kriterien wie config/ampel.ts der Website.
+ */
+function wirtschaftlicheAmpel(
+  calc: CalcResult,
+  contract: ContractInput,
+  schwelle: number,
+  minRueckkaufswert: number,
+): WirtschaftlicheAmpel {
   const basis = calc.szenarien.basis;
   const beendet = contract.status === 'gekuendigt' || contract.status === 'abgelaufen';
-  const mehrwert = basis.mehrwertGegenKuendigung ?? (beendet ? basis.nettoanspruch : undefined);
-  const vergleich = beendet ? 'dem bereits Erhaltenen' : 'dem Rückkaufswert';
-  if (mehrwert === undefined) {
+  if (beendet) {
+    return { farbe: 'rot', label: 'Rot – gekündigte oder ausgezahlte Verträge übernehmen wir nicht', punktFarbe: FARBEN.ampelRot };
+  }
+  const mehrwert = basis.mehrwertGegenKuendigung;
+  const rkw = contract.rueckkaufswert?.betrag;
+  if (mehrwert === undefined || rkw === undefined) {
     return { farbe: 'gelb', label: 'Gelb – ohne Rückkaufswert kein Vergleich möglich', punktFarbe: FARBEN.ampelGelb };
   }
+  if (rkw < minRueckkaufswert && mehrwert > 0) {
+    return { farbe: 'grau', label: 'Grau – für unser Verfahren zu klein (unter der Mindestgrenze)', punktFarbe: FARBEN.ampelAus };
+  }
   if (mehrwert >= schwelle) {
-    return { farbe: 'gruen', label: `Grün – rechnerisch deutlich mehr drin als ${vergleich}`, punktFarbe: FARBEN.ampelGruen };
+    return { farbe: 'gruen', label: 'Grün – der Vertrag kommt für unser Verfahren in Frage', punktFarbe: FARBEN.ampelGruen };
   }
   if (mehrwert > 0) {
-    return { farbe: 'gelb', label: `Gelb – knapp über ${vergleich}`, punktFarbe: FARBEN.ampelGelb };
+    return { farbe: 'gelb', label: 'Gelb – knapp; ob es reicht, zeigt dieser Bericht', punktFarbe: FARBEN.ampelGelb };
   }
-  return { farbe: 'rot', label: `Rot – rechnerisch nicht mehr drin als ${vergleich}`, punktFarbe: FARBEN.ampelRot };
+  return { farbe: 'rot', label: 'Rot – rechnerisch nicht mehr drin als der Rückkaufswert', punktFarbe: FARBEN.ampelRot };
 }
 
 function svgBeitragsaufteilung(calc: CalcResult): string {
@@ -295,9 +313,9 @@ function liste(punkte: string[]): string {
   return `<ul>${punkte.map((p) => `<li>${p}</li>`).join('')}</ul>`;
 }
 
-/** Methodikabsatz (Prompt 12, Abschnitt 1.4) – Wortlaut der Vorgabe. */
+/** Methodikabsatz (Prompt 12, 1.4; Anwaltssatz angepasst laut Prompt 13, 2.3). */
 const METHODIK_ABSATZ =
-  'Die Berechnung folgt der Rückabwicklungsformel: eingezahlte Beiträge abzüglich Risikoanteil, zuzüglich der Nutzungen, die der Versicherer aus den Beiträgen gezogen hat. Sie wird für alle Vertragsjahrgänge gleich angewendet. Welche rechtliche Grundlage im Einzelfall trägt (Widerspruch, Widerruf, Rücktritt, unwirksame Klauseln, Nachforderung beim Rückkaufswert oder anderes), prüft der Rechtsanwalt anhand der Vertragsunterlagen. Dieser Bericht ersetzt diese Prüfung nicht. Die meisten Verfahren enden durch Vergleich; das Ergebnis ist eine Verhandlungsbasis mit Bandbreite.';
+  'Die Berechnung folgt der Rückabwicklungsformel: eingezahlte Beiträge abzüglich Risikoanteil, zuzüglich der Nutzungen, die der Versicherer aus den Beiträgen gezogen hat. Sie wird für alle Vertragsjahrgänge gleich angewendet. Welche rechtliche Grundlage im Einzelfall trägt (Widerspruch, Widerruf, Rücktritt, unwirksame Klauseln, Nachforderung beim Rückkaufswert oder anderes), prüfen die spezialisierten Anwälte, mit denen wir arbeiten, anhand der Vertragsunterlagen. Dieser Bericht ersetzt diese Prüfung nicht. Die meisten Verfahren enden durch Vergleich; das Ergebnis ist eine Verhandlungsbasis mit Bandbreite.';
 
 function ansatzpunkteKasten(): string {
   if (ANSATZPUNKTE.punkte.length === 0) {
@@ -316,8 +334,10 @@ export function renderBerichtHtml(b: BerichtInput): string {
   const max = b.calc.szenarien.max;
   const rkw = b.contract.rueckkaufswert?.betrag;
   const belehrungsCheck = b.belehrungsCheck === true;
-  const schwelle = b.ampelSchwellen?.mehrwertMinAbsolut ?? 2000;
-  const ampel = wirtschaftlicheAmpel(b.calc, b.contract, schwelle);
+  const schwelle = b.ampelSchwellen?.mehrwertMinAbsolut ?? 5000;
+  const minRueckkaufswert = b.ampelSchwellen?.minRueckkaufswert ?? 30000;
+  const ampel = wirtschaftlicheAmpel(b.calc, b.contract, schwelle, minRueckkaufswert);
+  const durchsetzungUrl = b.durchsetzungUrl ?? '/durchsetzung';
   const keinVorteil = basis.wirtschaftlichKeinVorteil === true;
   const regimeB = b.eligibility.regime === 'alt-antragsmodell';
   const zitate = belehrungsCheck
@@ -390,6 +410,8 @@ export function renderBerichtHtml(b: BerichtInput): string {
   .ampel .punkt { width: 3.5mm; height: 3.5mm; border-radius: 50%; display: inline-block; background: ${FARBEN.ampelAus}; }
   .hinweisbox { background: ${FARBEN.sageLight}; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0; }
   .gegenposition { background: ${FARBEN.surface}; border: 1pt solid ${FARBEN.line}; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0; }
+  .uebernahme { background: ${FARBEN.brand}; color: #ffffff; border-radius: 2mm; padding: 4mm 5mm; margin: 4mm 0; }
+  .uebernahme .sekundaer { color: #dbe4ee; }
   .tabelle { width: 100%; border-collapse: collapse; margin: 3mm 0; font-size: 9.5pt; }
   .tabelle caption { text-align: left; font-weight: 700; margin-bottom: 1.5mm; }
   .tabelle th, .tabelle td { border-bottom: 0.5pt solid ${FARBEN.line}; padding: 1.4mm 2mm; text-align: left; vertical-align: top; }
@@ -441,7 +463,8 @@ export function renderBerichtHtml(b: BerichtInput): string {
   <div class="hinweisbox">
     <strong>Wichtig:</strong> Alle Werte sind Schätzungen unter offengelegten Annahmen (Seite 4) auf Basis öffentlich
     verfügbarer Kennzahlen – es wird kein Betrag zugesagt und keine Rechtsberatung im Einzelfall erteilt. Ob und auf
-    welchem Weg sich das durchsetzen lässt, prüft Ihr Anwalt mit diesem Bericht in der Hand.
+    welchem Weg sich das durchsetzen lässt, prüfen die spezialisierten Anwälte, mit denen wir arbeiten, anhand Ihrer
+    Unterlagen (Seite 7).
   </div>
 </section>
 
@@ -472,7 +495,7 @@ export function renderBerichtHtml(b: BerichtInput): string {
     <div>${liste([
       'eine strukturierte, nachvollziehbare Schätzung in drei Szenarien',
       'jede Kennzahl mit Quelle und Herkunft (Seite 4–5)',
-      'eine Rechen- und Verhandlungsgrundlage für Anwalt und Rechtsschutzversicherung',
+      'die Grundlage für unser Verfahren – die Anwälte, mit denen wir arbeiten, rechnen darauf auf',
     ])}</div>
     <div>${liste([
       'keine Rechtsberatung im Einzelfall und keine Vertretung',
@@ -578,11 +601,20 @@ export function renderBerichtHtml(b: BerichtInput): string {
   <h3>Empfohlene nächste Schritte</h3>
   ${liste([
     dokumente.length > 0
-      ? `Unterlagen vervollständigen: ${dokumente.map((d) => esc(d)).join('; ')}.`
-      : 'Police, Begleitschreiben, Verbraucherinformationen und aktuelle Standmitteilung bereitlegen.',
-    'Diesen Bericht einer auf Versicherungsrecht spezialisierten Kanzlei vorlegen; erst dort wird geklärt, ob und auf welchem Weg sich der Wert durchsetzen lässt.',
+      ? `Unterlagen bereitlegen: ${dokumente.map((d) => esc(d)).join('; ')}.`
+      : 'Police und letzte Standmitteilung bereitlegen; falls vorhanden Kündigungs- oder Dynamikschreiben.',
+    'Die Durchsetzung über uns beauftragen (Kasten oben) – die spezialisierten Anwälte, mit denen wir arbeiten, klären, ob und auf welchem Weg sich der Wert durchsetzen lässt.',
     'Keine Kündigung und keine Erklärung gegenüber dem Versicherer ohne anwaltlichen Rat.',
   ])}
+  <div class="uebernahme">
+    <p style="margin:0 0 1.5mm"><strong>Nächster Schritt: Wir übernehmen.</strong></p>
+    <p style="margin:0 0 1.5mm">
+      Spezialisierte Anwälte setzen sich für Sie mit dem Versicherer auseinander – Sie müssen nichts
+      selbst verhandeln und haben einen Ansprechpartner. Beauftragen:
+      <strong>${esc(durchsetzungUrl)}</strong> (oder antworten Sie auf die E-Mail mit diesem Bericht).
+    </p>
+    <p style="margin:0" class="sekundaer">Konditionen: ${esc(b.konditionenText ?? '[[KONDITIONEN]]')}</p>
+  </div>
   <div class="disclaimer">
     <strong>Rechtlicher Hinweis:</strong> Dieser Prüfbericht ist eine strukturierte Berechnung und keine
     Rechtsdienstleistung im Sinne des RDG; die rechtliche Prüfung des Einzelfalls obliegt einem Rechtsanwalt.
