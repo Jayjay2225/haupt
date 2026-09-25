@@ -1,0 +1,29 @@
+{
+  "insurerId": "beispiel-leben",
+  "quelle": {
+    "typ": "primary",
+    "titel": "Beispiel Lebensversicherung AG, Geschäftsbericht 2001, Mehrjahresübersicht",
+    "url": "https://web.archive.org/web/2002.../gb2001.pdf",
+    "dokument": "data/raw/altjahre/dokumente/beispiel-leben-gb2001.pdf",
+    "abrufdatum": "2026-09-18",
+    "hinweis": "optional: Definition der Kennzahl laut Fußnote"
+  },
+  "werte": [
+    {
+      "jahr": 2001,
+      "nettoverzinsung": 6.1,
+      "laufendeDurchschnittsverzinsung": null,
+      "fundstelle": "S. 4, Tabelle „Fünf Jahre im Überblick“, Zeile „Nettoverzinsung“",
+      "lesung2": { "nettoverzinsung": 6.1 },
+      "geprueft": false,
+      "ersetzen": false,
+      "hinweis": "optional"
+    },
+    {
+      "jahr": 2000,
+      "nettoverzinsung": 7.3,
+      "fundstelle": "S. 4, Tabelle „Fünf Jahre im Überblick“, Zeile „Nettoverzinsung“",
+      "quelle": { "typ": "secondary", "titel": "Pressemitteilung vom 12.03.2001", "url": "https://web.archive.org/web/2001.../pm.html", "abrufdatum": "2026-09-18" }
+    }
+  ]
+}

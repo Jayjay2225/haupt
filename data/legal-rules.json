@@ -1,0 +1,774 @@
+{
+  "version": "0.1.0",
+  "stand": "2026-09-18",
+  "beschreibung": "Maschinenlesbares Regelwerk zum Rechtsrahmen der Rückabwicklung (Prompt 1). Ausgewertet vom Eignungs-Check (packages/eligibility) und nachrichtlich vom Bericht. Bedingungs-Syntax: {alle:[...]}/{eine:[...]} mit Blättern {feld, ist|in} und Datumsvergleichen {feld:'vertragsschluss', vor|ab|zwischen}. Hinweis: Wörtliche Zitate und Details stehen in docs/LEGAL.md; der Primärquellen-Abgleich ist offener Punkt (docs/LEGAL-OPEN-QUESTIONS.md Nr. 1).",
+  "regeln": [
+    {
+      "id": "R-REGIME-VOR1994",
+      "regime": "keins",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "vertragsschluss",
+            "vor": "1994-07-29"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "ausschluss",
+        "text": "Vertragsschluss vor dem 29.07.1994: § 5a VVG a.F. galt noch nicht; ein Policenmodell-Widerspruchsrecht besteht nicht. Stattdessen kommen der Widerruf nach § 8 Abs. 4 VVG i.d.F. 1990 (ab 1991) und Nachforderungen aus der Rückkaufswert-Rechtsprechung in Betracht (Prüfung durch Partner)."
+      },
+      "gewicht": null,
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "Systematik § 5a VVG a.F. (eingeführt zum 29.07.1994), dargestellt in docs/LEGAL.md Abschnitt 1",
+          "dokument": "docs/LEGAL.md",
+          "abrufdatum": "2026-09-18"
+        },
+        {
+          "typ": "secondary",
+          "titel": "Recherche Zeiträume 1990–2016 (Rechtsprechungsnachweise)",
+          "dokument": "docs/RECHERCHE-ZEITRAEUME.md",
+          "abrufdatum": "2026-09-21"
+        }
+      ]
+    },
+    {
+      "id": "R-REGIME-A",
+      "regime": "alt-policenmodell",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "vertragsschluss",
+            "zwischen": [
+              "1994-07-29",
+              "2007-12-31"
+            ]
+          },
+          {
+            "feld": "zustandekommen",
+            "ist": "policenmodell"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "regime",
+        "wert": "alt-policenmodell",
+        "text": "Policenmodell: Widerspruch nach § 5a VVG a.F.; bei fehlerhafter Belehrung besteht das Widerspruchsrecht fort."
+      },
+      "gewicht": null,
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "EuGH, 19.12.2013, C-209/12 (Endress), Tenor",
+          "url": "https://lexetius.com/2013,4877",
+          "abrufdatum": "2026-09-18"
+        },
+        {
+          "typ": "secondary",
+          "titel": "BGH, 07.05.2014, IV ZR 76/11 (BGHZ 201, 101)",
+          "url": "https://lexetius.com/2014,1493",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-REGIME-B",
+      "regime": "alt-antragsmodell",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "vertragsschluss",
+            "zwischen": [
+              "1994-07-29",
+              "2007-12-31"
+            ]
+          },
+          {
+            "feld": "zustandekommen",
+            "ist": "antragsmodell"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "regime",
+        "wert": "alt-antragsmodell",
+        "text": "Antragsmodell: Rücktritt nach § 8 Abs. 4/5 VVG a.F.; die einmonatige Erlöschensregel ist bei Lebens- und Rentenversicherungen nicht anwendbar."
+      },
+      "gewicht": null,
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "BGH, 17.12.2014, IV ZR 260/11, amtlicher Leitsatz",
+          "url": "https://urteile-gesetze.de/rechtsprechung/iv-zr-260-11",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-REGIME-AB-UNBEKANNT",
+      "regime": "alt-unbekannt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "vertragsschluss",
+            "zwischen": [
+              "1994-07-29",
+              "2007-12-31"
+            ]
+          },
+          {
+            "feld": "zustandekommen",
+            "ist": "unbekannt"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "regime",
+        "wert": "alt-unbekannt",
+        "text": "Vertriebsmodell unbekannt: Für 1994–2007 war das Policenmodell marktüblich; die Einordnung (Policen- oder Antragsmodell) ist anhand von Antrag und Policenbegleitschreiben zu klären."
+      },
+      "gewicht": null,
+      "confidence": "medium",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "Darstellung beider Regime in docs/LEGAL.md Abschnitt 1 (IV ZR 76/11; IV ZR 260/11)",
+          "dokument": "docs/LEGAL.md",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-REGIME-C",
+      "regime": "neu-2008",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "vertragsschluss",
+            "ab": "2008-01-01"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "regime",
+        "wert": "neu-2008",
+        "text": "Vertragsschluss ab 2008: Widerruf nach § 8 VVG n.F. (bei Lebensversicherung § 152 VVG, 30 Tage). Rechtsfolge orientiert sich am Rückkaufswert nach § 169 VVG – der Anspruch ist in der Regel deutlich geringer als bei der Rückabwicklung nach altem Recht."
+      },
+      "gewicht": null,
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "primary",
+          "titel": "§ 152 VVG",
+          "url": "https://www.gesetze-im-internet.de/vvg_2008/__152.html",
+          "abrufdatum": "2026-09-18"
+        },
+        {
+          "typ": "primary",
+          "titel": "§ 8 VVG",
+          "url": "https://www.gesetze-im-internet.de/vvg_2008/__8.html",
+          "abrufdatum": "2026-09-18"
+        },
+        {
+          "typ": "primary",
+          "titel": "§ 9 VVG",
+          "url": "https://www.gesetze-im-internet.de/vvg_2008/__9.html",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-AUS-RISIKO-LV",
+      "regime": "alle",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "vertragsart",
+            "ist": "risiko-lv"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "ausschluss",
+        "text": "Reine Risikolebensversicherung: Die Prämien sind im Wesentlichen Risikoanteil und als genossener Versicherungsschutz anzurechnen – wirtschaftlich verbleibt regelmäßig kein Rückabwicklungswert."
+      },
+      "gewicht": null,
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "BGH, 07.05.2014, IV ZR 76/11, Rn. 51 (Anrechnung des Versicherungsschutzes)",
+          "url": "https://lexetius.com/2014,1493",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-HIN-RUECKDECKUNG",
+      "regime": "alle",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "vertragsart",
+            "ist": "rueckdeckung"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "hinweis",
+        "text": "Rückdeckungsversicherung/betrieblicher Kontext: Bezugsrechte und betriebsrentenrechtliche Bindungen können die Rückabwicklung ausschließen oder verändern – zwingend anwaltlich zu prüfen."
+      },
+      "gewicht": null,
+      "confidence": "medium",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "docs/LEGAL.md Abschnitt 6 (bAV-Sonderregeln, Open Question Nr. 10)",
+          "dokument": "docs/LEGAL.md",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FEHLER-KEINE-BELEHRUNG",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "belehrungVorhanden",
+            "ist": "nein"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "fehler",
+        "text": "In den Unterlagen ist keine Belehrung über das Widerspruchs-/Rücktrittsrecht auffindbar – der Kernfall der fortbestehenden Lösungsmöglichkeit."
+      },
+      "gewicht": "wesentlich",
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "EuGH C-209/12, Tenor",
+          "url": "https://lexetius.com/2013,4877",
+          "abrufdatum": "2026-09-18"
+        },
+        {
+          "typ": "secondary",
+          "titel": "BGH IV ZR 76/11",
+          "url": "https://lexetius.com/2014,1493",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FEHLER-BELEHRUNG-UNBEKANNT",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "belehrungVorhanden",
+            "ist": "unbekannt"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "fehler",
+        "text": "Ob und wie belehrt wurde, ist ohne die Police samt Begleitschreiben und Verbraucherinformation nicht feststellbar – diese Unterlagen werden benötigt.",
+        "benoetigtesDokument": "Police mit Begleitschreiben und Verbraucherinformationen (ggf. Zweitschrift beim Versicherer anfordern)"
+      },
+      "gewicht": "unbekannt",
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "§ 5a Abs. 2 Satz 1 VVG a.F. (Wiedergabe in IV ZR 76/11)",
+          "url": "https://lexetius.com/2014,1493",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FEHLER-UNTERLAGEN-UNVOLLSTAENDIG",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "unterlagenVollstaendig",
+            "ist": "nein"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "fehler",
+        "text": "Versicherungsbedingungen oder Verbraucherinformation wurden nicht vollständig überlassen – die Widerspruchsfrist konnte nicht anlaufen (§ 5a Abs. 2 Satz 1 VVG a.F.)."
+      },
+      "gewicht": "wesentlich",
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "§ 5a Abs. 2 Satz 1 VVG a.F. (Wiedergabe in IV ZR 76/11)",
+          "url": "https://lexetius.com/2014,1493",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FEHLER-HERVORHEBUNG",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "hervorhebung",
+            "ist": "nein"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "fehler",
+        "text": "Die Belehrung ist nicht drucktechnisch deutlich hervorgehoben – § 5a Abs. 2 Satz 1 VVG a.F. verlangt die drucktechnisch deutliche Form."
+      },
+      "gewicht": "wesentlich",
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "§ 5a Abs. 2 Satz 1 VVG a.F. (Wiedergabe in IV ZR 76/11)",
+          "url": "https://lexetius.com/2014,1493",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FEHLER-HERVORHEBUNG-UNBEKANNT",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "belehrungVorhanden",
+            "ist": "ja"
+          },
+          {
+            "feld": "hervorhebung",
+            "ist": "unbekannt"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "fehler",
+        "text": "Ob die Belehrung drucktechnisch hervorgehoben ist, ist offen – die Police im Original bzw. als vollständige Kopie wird benötigt.",
+        "benoetigtesDokument": "Police (Originallayout, keine Abschrift)"
+      },
+      "gewicht": "unbekannt",
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "§ 5a Abs. 2 Satz 1 VVG a.F.",
+          "url": "https://lexetius.com/2014,1493",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FEHLER-FRIST-ZU-KURZ",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "belehrungFrist",
+            "ist": "14-tage"
+          },
+          {
+            "feld": "vertragsschluss",
+            "ab": "2004-12-08"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "fehler",
+        "text": "Die Belehrung nennt 14 Tage, obwohl für Lebensversicherungen nach der Gesetzesänderung Ende 2004 eine 30-Tage-Frist galt – die zu kurz mitgeteilte Frist beschneidet die Ausübungsbedingungen (Gesamtwürdigung des Einzelfalls bleibt vorbehalten)."
+      },
+      "gewicht": "wesentlich",
+      "confidence": "medium",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "Maßstab: EuGH C-355/18 u. a. (Rust-Hackner), Tenor Frage 1 (zitiert nach RIS/OGH 7 Ob 10/20a)",
+          "url": "https://ris.bka.gv.at/Dokumente/Justiz/JJT_20200424_OGH0002_0070OB00010_20A0000_000/JJT_20200424_OGH0002_0070OB00010_20A0000_000.html",
+          "abrufdatum": "2026-09-18",
+          "hinweis": "Inkrafttreten der 30-Tage-Frist (08.12.2004) primär zu verifizieren – Open Question Nr. 4"
+        }
+      ]
+    },
+    {
+      "id": "R-FEHLER-FORM-SCHRIFT-STATT-TEXT",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "belehrungForm",
+            "ist": "schriftform"
+          },
+          {
+            "feld": "vertragsschluss",
+            "ab": "2001-08-01"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "fehler",
+        "text": "Die Belehrung verlangt Schriftform, obwohl ab der Fassung vom 13.07.2001 Textform genügte – nach BGH IV ZR 353/21 ein geringfügiger Fehler: Die späte Ausübung des Widerspruchs verstößt dann gegen Treu und Glauben (§ 242 BGB)."
+      },
+      "gewicht": "geringfuegig",
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "primary",
+          "titel": "BGH, Pressemitteilung Nr. 030/2023 zu IV ZR 353/21 (15.02.2023)",
+          "url": "https://www.bundesgerichtshof.de/SharedDocs/Pressemitteilungen/DE/2023/2023030.html",
+          "abrufdatum": "2026-09-18"
+        },
+        {
+          "typ": "secondary",
+          "titel": "Amtlicher Leitsatz IV ZR 353/21",
+          "url": "https://www.bld.de/aktuelles/rechtsprechung/ausuebung-des-widerspruchsrechts-verstoesst-bei-geringfuegigem-belehrungsfehler-gegen-treu-und-glauben/",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FEHLER-FORM-SONST",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "belehrungForm",
+            "ist": "andere"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "fehler",
+        "text": "Die Formangabe der Belehrung weicht ab – ob der Fehler wesentlich ist, hängt davon ab, ob er die Ausübung des Lösungsrechts ‚im Wesentlichen unter denselben Bedingungen' unmöglich machte (Gesamtwürdigung)."
+      },
+      "gewicht": "unbekannt",
+      "confidence": "medium",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "EuGH C-355/18 u. a., Tenor Frage 1 (RIS/OGH-Zitat)",
+          "url": "https://ris.bka.gv.at/Dokumente/Justiz/JJT_20200424_OGH0002_0070OB00010_20A0000_000/JJT_20200424_OGH0002_0070OB00010_20A0000_000.html",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-OK-BELEHRUNG",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "belehrungVorhanden",
+            "ist": "ja"
+          },
+          {
+            "feld": "hervorhebung",
+            "ist": "ja"
+          },
+          {
+            "eine": [
+              {
+                "feld": "belehrungFrist",
+                "ist": "30-tage"
+              },
+              {
+                "alle": [
+                  {
+                    "feld": "belehrungFrist",
+                    "ist": "14-tage"
+                  },
+                  {
+                    "feld": "vertragsschluss",
+                    "vor": "2004-12-08"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "eine": [
+              {
+                "feld": "belehrungForm",
+                "ist": "textform"
+              },
+              {
+                "alle": [
+                  {
+                    "feld": "belehrungForm",
+                    "ist": "schriftform"
+                  },
+                  {
+                    "feld": "vertragsschluss",
+                    "vor": "2001-08-01"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "folge": {
+        "typ": "ordnungsgemaess",
+        "text": "Die Belehrung weist nach Ihren Angaben keine der geprüften Fehlerkategorien auf – die Widerspruchs-/Rücktrittsfrist ist dann längst abgelaufen. Ein Lösungsrecht ist auf dieser Grundlage nicht erkennbar; maßgeblich bleibt die anwaltliche Prüfung der Originalunterlagen."
+      },
+      "gewicht": null,
+      "confidence": "medium",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "§ 5a VVG a.F. (Fristablauf bei ordnungsgemäßer Belehrung)",
+          "url": "https://lexetius.com/2014,1493",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-VERW-ABTRETUNG",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "abgetretenOderBeliehen",
+            "ist": "ja"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "verwirkungsindikator",
+        "staerke": "mittel",
+        "text": "Der Vertrag wurde abgetreten oder beliehen. Eine bloße Abtretung genügt für Verwirkung nicht (BGH IV ZR 482/14); bei engem zeitlichem Zusammenhang mit dem Vertragsschluss oder Mehrfachabtretung kann aber schutzwürdiges Vertrauen des Versicherers entstehen (BGH IV ZR 130/15) – anwaltlich zu prüfen."
+      },
+      "gewicht": null,
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "BGH, 01.06.2016, IV ZR 482/14",
+          "url": "https://urteile-gesetze.de/rechtsprechung/iv-zr-482-14",
+          "abrufdatum": "2026-09-18"
+        },
+        {
+          "typ": "secondary",
+          "titel": "BGH, Beschluss vom 27.01.2016, IV ZR 130/15",
+          "url": "https://urteile-gesetze.de/rechtsprechung/iv-zr-130-15",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-VERW-KENNTNIS-FORTFUEHRUNG",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "fortgefuehrtNachKenntnis",
+            "ist": "ja"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "verwirkungsindikator",
+        "staerke": "mittel",
+        "text": "Der Vertrag wurde nach Kenntnis des Belehrungsfehlers bewusst fortgeführt – in der Rechtsprechung anerkannter Umstand, der gegen die spätere Ausübung sprechen kann; anwaltlich zu prüfen."
+      },
+      "gewicht": null,
+      "confidence": "medium",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "Fallgruppen-Darstellung docs/LEGAL.md Abschnitt 4 (höchstrichterliche Präzisierung offen, Open Question Nr. 8)",
+          "dokument": "docs/LEGAL.md",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-VERW-ZEITABLAUF-NEGATIV",
+      "regime": "alt",
+      "bedingung": {
+        "eine": [
+          {
+            "feld": "status",
+            "in": [
+              "gekuendigt",
+              "beitragsfrei",
+              "abgelaufen",
+              "laufend"
+            ]
+          }
+        ]
+      },
+      "folge": {
+        "typ": "kein-verwirkungsindikator",
+        "text": "Bloßer Zeitablauf, jahrelange Prämienzahlung, Beitragsfreistellung oder Kündigung (auch mit ausgezahltem Rückkaufswert) begründen für sich genommen keine Verwirkung – der Versicherer hat die Lage durch die fehlerhafte Belehrung selbst herbeigeführt."
+      },
+      "gewicht": null,
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "BGH IV ZR 76/11 (Widerspruch nach Kündigung und RKW-Auszahlung)",
+          "url": "https://de.openlegaldata.io/case/bgh-2014-05-07-iv-zr-7611",
+          "abrufdatum": "2026-09-18"
+        },
+        {
+          "typ": "secondary",
+          "titel": "EuGH C-355/18 u. a., Tenor Frage 3 (RIS/OGH-Zitat)",
+          "url": "https://ris.bka.gv.at/Dokumente/Justiz/JJT_20200424_OGH0002_0070OB00010_20A0000_000/JJT_20200424_OGH0002_0070OB00010_20A0000_000.html",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FOLGE-NUTZUNGEN-SPARANTEIL",
+      "regime": "alt",
+      "bedingung": {
+        "alle": []
+      },
+      "folge": {
+        "typ": "methodik",
+        "text": "Nutzungsersatz gibt es nur für tatsächlich gezogene Nutzungen; der Vortrag braucht Bezug zur Ertragslage des jeweiligen Versicherers. Deshalb: Nutzungen auf den Sparanteil, Maßstab versichererindividuelle Nettoverzinsung; auf Verwaltungskostenanteile nur bei konkretem Nachweis (Max-Szenario als Obergrenze), nicht anhand der Eigenkapitalrendite."
+      },
+      "gewicht": null,
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "BGH, 11.11.2015, IV ZR 513/14, Leitsatz 2",
+          "url": "https://urteile-gesetze.de/rechtsprechung/iv-zr-513-14",
+          "abrufdatum": "2026-09-18"
+        },
+        {
+          "typ": "secondary",
+          "titel": "BGH, 29.04.2020, IV ZR 5/19, Leitsatz",
+          "url": "https://www.rws-verlag.de/aktuell/wirtschaftsrecht-aktuell/bgh-urteil-vom-29-april-2020-iv-zr-519-63734/",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FOLGE-FONDS",
+      "regime": "alt",
+      "bedingung": {
+        "eine": [
+          {
+            "feld": "vertragsart",
+            "in": [
+              "fonds-lv",
+              "fonds-rv"
+            ]
+          }
+        ]
+      },
+      "folge": {
+        "typ": "hinweis",
+        "text": "Fondsgebundener Vertrag: Fondsverluste auf die Sparanteile sind bereicherungsmindernd anzurechnen, und aus fondsgebundener Anlage zog der Versicherer regelmäßig keine eigenen Nutzungen. Die Nettoverzinsungs-Schätzung ist hier nur eine grobe Näherung – die tatsächliche Fondsentwicklung ist maßgeblich (Warnhinweis im Bericht)."
+      },
+      "gewicht": null,
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "BGH, 11.11.2015, IV ZR 513/14, Leitsatz 1",
+          "url": "https://urteile-gesetze.de/rechtsprechung/iv-zr-513-14",
+          "abrufdatum": "2026-09-18"
+        },
+        {
+          "typ": "secondary",
+          "titel": "BGH, 29.07.2015, IV ZR 384/14",
+          "url": "https://dejure.org/dienste/vernetzung/rechtsprechung?Gericht=BGH&Datum=29.07.2015&Aktenzeichen=IV+ZR+384/14",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FOLGE-VERJAEHRUNG",
+      "regime": "alt",
+      "bedingung": {
+        "alle": []
+      },
+      "folge": {
+        "typ": "hinweis",
+        "text": "Nach erklärtem Widerspruch verjährt der Zahlungsanspruch in drei Jahren ab dem Schluss des Jahres der Widerspruchserklärung (§§ 195, 199 BGB); das Widerspruchsrecht selbst unterliegt keiner Verjährung."
+      },
+      "gewicht": null,
+      "confidence": "medium",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "BGH, 08.04.2015, IV ZR 103/15, Leitsatz (Datum primär zu verifizieren, Open Question Nr. 9)",
+          "url": "https://urteile-gesetze.de/rechtsprechung/iv-zr-103-15",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FOLGE-KAPEST",
+      "regime": "alt",
+      "bedingung": {
+        "eine": [
+          {
+            "feld": "auszahlungenErhalten",
+            "ist": "ja"
+          },
+          {
+            "feld": "status",
+            "ist": "gekuendigt"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "hinweis",
+        "text": "Bei bereits erfolgten Auszahlungen: Einbehaltene Kapitalertragsteuer nebst Solidaritätszuschlag ist als Vermögensvorteil anzurechnen. Steuerliche Folgen der Rückabwicklung sind gesondert zu klären (keine steuerliche Beratung durch dieses Tool)."
+      },
+      "gewicht": null,
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "BGH, 29.07.2015, IV ZR 448/14, Leitsatz",
+          "url": "https://urteile-gesetze.de/rechtsprechung/iv-zr-448-14",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FOLGE-NEU2008",
+      "regime": "neu-2008",
+      "bedingung": {
+        "alle": []
+      },
+      "folge": {
+        "typ": "hinweis",
+        "text": "Für Verträge ab 2008 führt der Widerruf wirtschaftlich im Regelfall etwa zum Rückkaufswert nach § 169 VVG (zzgl. ggf. der Prämien des ersten Jahres bei fehlender Belehrung, § 9 VVG) – deutlich weniger als die Rückabwicklung nach altem Recht. Ein nennenswerter Mehrwert gegenüber der Kündigung ist die Ausnahme."
+      },
+      "gewicht": null,
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "primary",
+          "titel": "§§ 8, 9, 152 VVG",
+          "url": "https://www.gesetze-im-internet.de/vvg_2008/",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    }
+  ]
+}

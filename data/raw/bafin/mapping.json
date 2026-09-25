@@ -1,0 +1,43 @@
+{
+  "ALLIANZ LEBEN": "allianz-leben",
+  "ALTE LEIPZIGER LEBEN": "alte-leipziger-leben",
+  "AXA LEBEN": "axa-leben",
+  "BAYERN-VERS.": "bayern-versicherung-leben",
+  "CONTINENTALE LV AG": "continentale-leben",
+  "COSMOS LEBEN": "cosmos-leben",
+  "DEBEKA LEBEN": "debeka-leben",
+  "ERGO LEBEN AG": "ergo-leben",
+  "VICTORIA LEBEN": "victoria-leben",
+  "GENERALI LEBEN AG": [
+    {
+      "bisJahr": 2018,
+      "id": "proxalto-leben"
+    },
+    {
+      "abJahr": 2020,
+      "id": "generali-deutschland-leben"
+    }
+  ],
+  "PROXALTO LEBEN AG": "proxalto-leben",
+  "AACHENMüNCHENER LEB.": "generali-deutschland-leben",
+  "GOTHAER LEBEN AG": "gothaer-leben",
+  "HANNOVERSCHE LV AG": "hannoversche-leben",
+  "HANSEMERKUR LEBEN": "hansemerkur-leben",
+  "HEIDELBERGER LV": "heidelberger-leben",
+  "HUK-COBURG LEBEN": "huk-coburg-leben",
+  "HUK-COBURG-LEBEN": "huk-coburg-leben",
+  "IDUNA VEREINIGTE LV": "signal-iduna-leben",
+  "SIGNAL IDUNA LV": "signal-iduna-leben",
+  "LVM LEBEN": "lvm-leben",
+  "NÜRNBG. LEBEN": "nuernberger-leben",
+  "PROV.RHEINLAND LEBEN": "provinzial-leben",
+  "PROVINZIAL LEBEN": "provinzial-leben",
+  "R+V LEBENSVERS. AG": "r-v-leben",
+  "SKANDIA LEBEN": "skandia-leben",
+  "WÜRTT. LEBEN": "wuerttembergische-leben",
+  "ZURICH DTSCH. HEROLD": "zurich-deutscher-herold-leben",
+  "HDI-GERLING LEBEN": "hdi-leben",
+  "HDI LEBEN AG": "hdi-leben",
+  "KARLSRUHER LV AG": "karlsruher-leben",
+  "DBV DEUTSCHE BEAMTEN": "dbv-winterthur-leben"
+}

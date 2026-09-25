@@ -1,0 +1,19 @@
+{
+  "name": "@rueckab/report",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "beispiele": "tsx src/erzeuge-beispiele.ts",
+    "typecheck": "tsc --noEmit",
+    "vorschau-bild": "tsx scripts/bericht-vorschau.ts"
+  },
+  "dependencies": {
+    "@rueckab/calc": "workspace:*",
+    "@rueckab/eligibility": "workspace:*",
+    "@sparticuz/chromium": "^153.0.0",
+    "playwright-core": "^1.49.0"
+  }
+}
