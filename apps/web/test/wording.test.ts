@@ -1,10 +1,14 @@
 /**
  * Wording-Test (Prompt 12, Abschnitt 3 – die fünf harten Linien aus
- * Prompt 10 gelten weiter): Für Website, Funnel, E-Mails und Anzeigen.
- * Neu seit Prompt 12: keine Nennung von „§ 5a VVG“ oder „1994 bis 2007“
- * auf den Web-Flächen; der Zeitraum heißt einheitlich 1980 bis 2020.
- * Die alte, breitere Liste gilt für den PDF-Bericht
- * (apps/report/test/wording-bericht.test.ts). Der Test liest die Quelltexte.
+ * Prompt 10 gelten weiter; Prompt 13, 5 und Prompt 14, 0.2/0.6 erweitern die
+ * Liste): Für Website, Funnel, E-Mails und Anzeigen. Seit Prompt 14 heißt das
+ * Produkt „Gutachten“ – erlaubt; verboten bleiben „Sachverständigengutachten“
+ * (außer verneint), „öffentlich bestellt“, „vereidigt“, „staatlich
+ * anerkannt“, der alte Name „Prüfbericht“ und jede Erwähnung einer
+ * Versicherung für Rechtskosten (der Begriff steht nirgends mehr im Repo,
+ * darum auch hier nur zusammengesetzt). Die alte, breitere Liste gilt für
+ * das PDF (apps/report/test/wording-bericht.test.ts). Der Test liest die
+ * Quelltexte.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
@@ -18,8 +22,10 @@ import {
   anfrageEingegangen,
   berichtVerzoegert,
   berichtVersand,
-  ergebnisLink,
+  druckauftrag,
+  rueckfrageVertragsart,
   spaeterWeitermachen,
+  uebernahmeAngefragt,
   vertragsbestaetigung,
 } from '../lib/emails';
 
@@ -47,10 +53,15 @@ const OBERFLAECHE = [
   join(WEB, 'lib', 'draft.ts'),
   join(WEB, 'lib', 'labels.ts'),
   join(WEB, 'lib', 'bestellung.ts'),
+  join(WEB, 'lib', 'berechnung.ts'),
+  join(WEB, 'lib', 'preisblock.ts'),
+  join(WEB, 'lib', 'videocall.ts'),
   join(WEB, 'lib', 'erstkunden.ts'),
+  join(WEB, 'lib', 'zahlung.ts'),
   join(WEB, 'config', 'ampel.ts'),
   join(WEB, 'config', 'brand.ts'),
   join(WEB, 'config', 'business.ts'),
+  join(WEB, 'config', 'durchsetzung.ts'),
 ];
 
 /** Rechtstexte: Fachbegriffe wie „Widerspruch“ (DSGVO) bleiben dort zulässig. */
@@ -58,9 +69,10 @@ const RECHTSSEITEN = [sep + 'impressum' + sep, sep + 'datenschutz' + sep, sep + 
 
 /**
  * Fünf harte Linien (Prompt 10, Abschnitt 1) plus Wortwahl. Linie 1 (keine
- * erfundenen Kunden) sichert der Testimonials-Test unten ab.
+ * erfundenen Kunden) sichern der Testimonials-Test unten und der
+ * Geschichten-Test (prompt14.test.ts) ab.
  */
-const VERBOTEN: { muster: RegExp; grund: string; nurWerbeflaechen?: boolean }[] = [
+export const VERBOTEN: { muster: RegExp; grund: string; nurWerbeflaechen?: boolean }[] = [
   // Linie 2: keine Betrugs-Vorwürfe gegen Versicherer, auch nicht als Frage oder Zitat.
   { muster: /betrug|betrogen|abgezockt|abzocke|täuschung|getäuscht/i, grund: 'Betrugs-Vorwurf (Linie 2)' },
   // Linie 3: kein Ergebnisversprechen.
@@ -75,8 +87,14 @@ const VERBOTEN: { muster: RegExp; grund: string; nurWerbeflaechen?: boolean }[] 
   { muster: /\d+\s*%[^.\n]{0,40}Mehrerlös|Mehrerlös[^.\n]{0,40}\d+\s*%/i, grund: 'Prozent-Mehrerlös (Linie 4)' },
   // Linie 5: keine künstliche Verknappung.
   { muster: /countdown|nur heute|nur noch heute|nur für kurze Zeit|letzte Chance|Warteliste/i, grund: 'Verknappung (Linie 5)' },
-  // Wortwahl und Ankauf-Regeln (Prompt 10/12, weiter gültig).
-  { muster: /Gutachten/i, grund: '„Gutachten“ ist Sachverständigenbegriff – „Prüfbericht“/„Auswertung“' },
+  // Prompt 14, 0.6: Produktname „Gutachten“ – aber nie mit Sachverständigen-Anklang.
+  {
+    muster: /(?<!kein |keine |keinem |keinen )Sachverständigengutachten|öffentlich bestellt|vereidigt|staatlich anerkannt/i,
+    grund: 'Sachverständigen-Anklang (Prompt 14, 0.6)',
+  },
+  { muster: /Prüfbericht|Pruefbericht/i, grund: 'alter Produktname „Prüfbericht“ (Prompt 14, 0.6: „Gutachten“)' },
+  // Prompt 14, 0.2: die Frage nach einer Versicherung für Rechtskosten ist überall entfernt.
+  { muster: new RegExp('Rechts' + 'schutz', 'i'), grund: 'Versicherung für Rechtskosten (Prompt 14, 0.2: entfällt)' },
   { muster: /BaFin|Bundesanstalt für Finanzdienstleistungsaufsicht/i, grund: 'Keine Behördennennung' },
   { muster: /\bErlaubnis\b|\bZulassung\b|\bzugelassen\b/i, grund: 'Erlaubnis-/Zulassungsangabe' },
   { muster: /Wirtschaftsprüfer/i, grund: 'Abwicklungspartner sind Organisationspartner' },
@@ -93,10 +111,12 @@ const VERBOTEN: { muster: RegExp; grund: string; nurWerbeflaechen?: boolean }[] 
   { muster: /\d[\d.]*\s*(geprüfte|Policen|Fälle|Mandate|Erfolge|Kundinnen|Kunden gewonnen)/i, grund: 'Zahl zu Erfolgen/Policen ohne Beleg-Referenz (Prompt 13)' },
   // Prompt 13, 2.1 „Gestrichen überall“:
   { muster: /Zum Mitnehmen zum Anwalt|mit dem Bericht in der Hand|Fertig für Anwalt/i, grund: 'gestrichene Anwalts-Selbsthilfe-Phrase (Prompt 13)' },
+  // Prompt 14, 0.5: kein Streichpreis, kein erfundener Referenzpreis.
+  { muster: /statt\s*\d+\s*€|<s>|<del>|line-through|Streichpreis/i, grund: 'Streichpreis (Prompt 14, 0.5 / § 11 PAngV)' },
 ];
 
 /** Quelltext ohne Kommentare – geprüft wird nur, was Nutzer sehen können. */
-function textInhalt(datei: string): string {
+export function textInhalt(datei: string): string {
   return readFileSync(datei, 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/^\s*\/\/.*$/gm, '');
@@ -123,11 +143,15 @@ describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
 
   it('E-Mail-Vorlagen halten die Linien ein', () => {
     const texte = [
-      ergebnisLink('https://x.example/e'),
       spaeterWeitermachen('Muster', 'https://x.example/f'),
       berichtVersand('Muster', 'RR-2026-ABCDEF', 'https://x.example/r'),
+      berichtVersand('Muster', 'RR-2026-ABCDEF', 'https://x.example/r', false, 'https://x.example/d', true),
       berichtVersand('Muster', 'EK-CODE1', undefined, true),
       vertragsbestaetigung('Muster', 'RR-2026-ABCDEF', { agb: 'https://x.example/agb', widerruf: 'https://x.example/w' }),
+      vertragsbestaetigung('Muster', 'RR-2026-ABCDEF', { agb: 'https://x.example/agb', widerruf: 'https://x.example/w' }, undefined, true),
+      rueckfrageVertragsart('Muster', 'RR-2026-ABCDEF'),
+      uebernahmeAngefragt('Muster'),
+      druckauftrag('RR-2026-ABCDEF', 'Muster Person', 'Musterstraße 1, 12345 Musterstadt'),
       berichtVerzoegert('Muster', 'RR-2026-ABCDEF'),
       anfrageEingegangen('Muster'),
     ]
@@ -138,9 +162,8 @@ describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
     }
   });
 
-  it('die Deck-Betreffzeilen stimmen (Prompt 12, 3.4)', () => {
-    expect(ergebnisLink('x').betreff).toBe('Ihre Ampel steht');
-    expect(berichtVersand('M', 'A-1').betreff).toBe('Ihr Prüfbericht ist da');
+  it('die Betreffzeilen stimmen (Prompt 12, 3.4 / Prompt 14, 0.6)', () => {
+    expect(berichtVersand('M', 'A-1').betreff).toBe('Ihr Gutachten ist da');
     expect(spaeterWeitermachen('M', 'x').betreff).toBe('Weitermachen, wo Sie aufgehört haben');
   });
 
@@ -176,10 +199,10 @@ describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
       expect(textInhalt(datei), datei).not.toMatch(/So verdienen wir/);
     }
     expect(existsSync(join(WEB, 'app', 'so-verdienen-wir'))).toBe(false);
-    // Offenlegung stattdessen in Impressum, Datenschutz und Einwilligung:
+    // Offenlegung stattdessen in Impressum, Datenschutz und der Einwilligung der Verkaufen-Karte:
     expect(textInhalt(join(WEB, 'app', 'impressum', 'page.tsx'))).toContain('Offenlegung');
     expect(textInhalt(join(WEB, 'app', 'datenschutz', 'page.tsx'))).toContain('Vergütung');
-    expect(textInhalt(join(WEB, 'components', 'funnel', 'ErgebnisAnsicht.tsx'))).toContain('Vergütung');
+    expect(textInhalt(join(WEB, 'components', 'VerkaufenKarte.tsx'))).toContain('Vergütung');
   });
 
   it('erwünschte Übernahme-Formulierungen sind da (Prompt 13, 5)', () => {
@@ -195,6 +218,13 @@ describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
     const startseite = readFileSync(join(WEB, 'app', 'page.tsx'), 'utf8');
     expect(startseite).toContain('RANGE_TEXT');
   });
+
+  it('Produktname „Gutachten“ aus config/brand.ts – kein Sachverständigen-Anklang (Prompt 14, 0.6)', () => {
+    expect(BRAND.produktname).toBe('Gutachten');
+    const alteRoute = join(WEB, 'app', 'bericht');
+    expect(existsSync(alteRoute)).toBe(false);
+    expect(existsSync(join(WEB, 'app', 'gutachten', 'page.tsx'))).toBe(true);
+  });
 });
 
 describe('Anzeigentexte (Prompt 12, Abschnitt 6)', () => {
@@ -208,14 +238,14 @@ describe('Anzeigentexte (Prompt 12, Abschnitt 6)', () => {
     expect(META_HAUPTTEXT.length).toBeGreaterThan(0);
   });
 
-  it('nennen den Zeitraum 1980 bis 2020 und die neuen Übernahme-Zeilen (Prompt 13, 5)', () => {
+  it('nennen den Zeitraum 1980 bis 2020 und die Übernahme-Zeilen (Prompt 13, 5 / Prompt 14: Gutachten)', () => {
     const alles = [...GOOGLE_UEBERSCHRIFTEN, ...GOOGLE_BESCHREIBUNGEN, META_HAUPTTEXT].join('\n');
     expect(alles).toContain('1980');
     expect(alles).toContain('2020');
     expect(alles).not.toMatch(/1994|2007/);
-    expect(GOOGLE_UEBERSCHRIFTEN).toContain('Bericht in 12 Stunden');
+    expect(GOOGLE_UEBERSCHRIFTEN).toContain('Gutachten in 12 Stunden');
     expect(GOOGLE_UEBERSCHRIFTEN).toContain('Wir übernehmen Ihren Fall');
-    expect(alles).not.toMatch(/Ergebnis sofort/);
+    expect(alles).not.toMatch(/Ergebnis sofort|Prüfbericht/);
   });
 });
 

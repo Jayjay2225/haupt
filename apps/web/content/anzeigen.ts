@@ -1,8 +1,9 @@
 /**
- * Anzeigentexte (Prompt 12, Abschnitt 6). Google-RSA-Grenzen: Überschrift
- * höchstens 30, Beschreibung höchstens 90 Zeichen – der Wording-Test prüft
- * Längen und Verbotsliste. Zwei Zeilen des Decks mussten dafür gekürzt
- * werden (dokumentiert in docs/ADS.md und docs/TEXT-REVIEW.md).
+ * Anzeigentexte (Prompt 12, Abschnitt 6; Prompt 13, §5; Prompt 14, 0.6:
+ * „Gutachten“). Google-RSA-Grenzen: Überschrift höchstens 30, Beschreibung
+ * höchstens 90 Zeichen – der Wording-Test prüft Längen und Verbotsliste. Zwei
+ * Zeilen des Decks mussten dafür gekürzt werden (dokumentiert in docs/ADS.md
+ * und docs/TEXT-REVIEW.md).
  */
 export const GOOGLE_UEBERSCHRIFTEN: string[] = [
   'Alte Lebensversicherung?',
@@ -11,8 +12,8 @@ export const GOOGLE_UEBERSCHRIFTEN: string[] = [
   'Ampel in 5 Minuten',
   'Vertrag von 1980 bis 2020?',
   'Mit echten Versichererzahlen',
-  // Prompt 13, §5: ersetzt „Ergebnis sofort …“; neue Übernahme-Überschrift.
-  'Bericht in 12 Stunden',
+  // Prompt 13, §5: ersetzt „Ergebnis sofort …“; Prompt 14: Gutachten.
+  'Gutachten in 12 Stunden',
   'Wir übernehmen Ihren Fall',
 ];
 

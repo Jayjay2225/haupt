@@ -27,7 +27,11 @@ Die Website (`apps/web`) ist eine Next.js-Anwendung mit Server-Funktionen (Ampel
    | `CRON_SECRET` | zufälliger Wert (z. B. `openssl rand -hex 24`); Vercel sendet ihn bei Cron-Aufrufen automatisch als `Authorization: Bearer …` mit |
    | `NEXT_PUBLIC_PARTNERKANZLEI` | Name und Ort der Partnerkanzlei – erst setzen, wenn entschieden; sonst zeigt „Warum über uns“ den Platzhalter |
    | `NEXT_PUBLIC_GEPRUEFTE_POLICEN` | Zahl geprüfter Policen – **nur mit Beleg** setzen, sonst leer lassen |
-   | `NEXT_PUBLIC_PREIS_ANRECHNUNG` | `1` = Hinweis „89 € werden bei Übernahme angerechnet“ anzeigen (Entscheidung des Auftraggebers) |
+   | `NEXT_PUBLIC_PREIS_ANRECHNUNG` | `1` = Preisblock-Zeile „Bei Beauftragung angerechnet: dann 0 €.“ anzeigen (Entscheidung des Auftraggebers) |
+   | `NEXT_PUBLIC_VIDEOCALL_URL` | Buchungsadresse für den kostenlosen 15-Minuten-Videocall (Prompt 14); leer = sichtbarer Platzhalter `[[VIDEOCALL-URL]]` |
+   | `NEXT_PUBLIC_VIDEO_URL` / `NEXT_PUBLIC_VIDEO_POSTER` | selbst gehostetes Erklärvideo (MP4) und Posterbild; leer = Platzhalterrahmen (Drehbuch `docs/VIDEO.md`) |
+   | `NEXT_PUBLIC_BILD_RUHESTAND` / `NEXT_PUBLIC_BILD_ENKEL` | Pfade der beiden Stimmungsbilder unter `public/bilder/` – **nur nach Lizenznachweis** in `docs/LIZENZEN.md`; leer = Platzhalterrahmen |
+   | `NEXT_PUBLIC_PREISVERGLEICH_QUELLE` | Kennung des Belegs in `docs/QUELLEN.md` (z. B. `Q-01`) für den Vergleichssatz im Preisblock; leer = Satz entfällt |
 
    Nicht setzen: `CHROMIUM_PATH`, `AUSLIEFERUNG_VERZEICHNIS` (auf Vercel automatisch: gepacktes Chromium, `/tmp`).
 5. „Deploy“. Nach dem Build gibt es eine Vorschauadresse `https://<projekt>.vercel.app` – damit Schritt 3 und 4 testen.
@@ -58,7 +62,7 @@ Der Build ist am 21.09.2026 aus einem frischen Klon mit `pnpm install --frozen-l
 ## 2. Was auf Vercel anders läuft (bereits im Code berücksichtigt)
 
 - **Chromium:** kein installierter Browser; `@sparticuz/chromium` wird beim ersten Aufruf nach `/tmp` entpackt (Kaltstart einige Sekunden). Der Webhook hat dafür `maxDuration = 60`. Keine feste Regionsvorgabe mehr in `apps/web/vercel.json` (Hobby-Tarif erlaubt das nicht) – Region bei Bedarf unter Settings → Functions wählen.
-- **Dateisystem:** nur `/tmp`, nur für die Dauer eines Aufrufs. Der Bestellstatus liegt deshalb vollständig in den Metadaten der Stripe-Zahlung (Markierungen `erzeugt_am`, `freigegeben_am`, `ausgeliefert_am`, dazu Auffälligkeits-Kennzeichen und Lead-Status); wiederholte Webhook-Zustellungen oder Cron-Läufe erzeugen so keinen zweiten Versand. Berichte werden nicht dauerhaft abgelegt – bei Bedarf werden sie aus den Falldaten der Zahlungssitzung neu gerechnet (deterministisch, gleiche Versionen).
+- **Dateisystem:** nur `/tmp`, nur für die Dauer eines Aufrufs. Der Bestellstatus liegt deshalb vollständig in den Metadaten der Stripe-Zahlung (Markierungen `erzeugt_am`, `freigegeben_am`, `ausgeliefert_am`, dazu Auffälligkeits-Kennzeichen, Lead-Status und seit Prompt 14 der Post-Stand `post_status`/`post_am`); wiederholte Webhook-Zustellungen oder Cron-Läufe erzeugen so keinen zweiten Versand. Gutachten werden nicht dauerhaft abgelegt – bei Bedarf werden sie aus den Falldaten der Zahlungssitzung neu gerechnet (deterministisch, gleiche Versionen); die Druckvorlage für den Postversand lässt sich jederzeit unter `/api/admin/druck?schluessel=…&sitzung=…` neu erzeugen.
 - **Ratenbegrenzung** gilt je Funktionsinstanz (weich). Für eine harte Grenze später ein gemeinsamer Speicher.
 - **Basic-Auth-Middleware** läuft am Vercel-Edge.
 
@@ -70,7 +74,7 @@ Im Stripe-Dashboard → Entwickler → Webhooks → Endpunkt hinzufügen:
 - Den angezeigten Signaturschlüssel (`whsec_…`) als `STRIPE_WEBHOOK_SECRET` bei Vercel eintragen und neu bereitstellen.
 - Außerdem im Dashboard: PayPal und Klarna als Zahlungsmethoden aktivieren; Steuersatz 19 % inklusiv anlegen; Rechnungsangaben (Firma, Anschrift, USt-IdNr. DE815896163) hinterlegen.
 
-Testlauf: Bestellung mit Stripe-Testkarte `4242 4242 4242 4242` – die Vertragsbestätigung muss sofort ankommen (bzw. im Protokoll-Modus in den Vercel-Logs erscheinen); der Prüfbericht mit Rechnungslink folgt nach Freigabe unter `/admin` oder automatisch über den Cron (Abschnitt 4).
+Testlauf: Bestellung mit Stripe-Testkarte `4242 4242 4242 4242` – die Vertragsbestätigung muss sofort ankommen (bzw. im Protokoll-Modus in den Vercel-Logs erscheinen); das Gutachten mit Rechnungslink folgt nach Freigabe unter `/admin` oder automatisch über den Cron (Abschnitt 4). Mit angekreuztem Postversand geht zusätzlich der Druckauftrag mit der Druckvorlage an `info@` (Abschnitt 4a).
 
 ## 4. Zwölf-Stunden-Versand (Prompt 13): Cron und Freigabeliste
 
@@ -85,6 +89,17 @@ Seit Prompt 13 wird der Bericht **nicht mehr sofort** versendet. Der Webhook pr�
 2. **Externer Zeitplaner** (z. B. cron-job.org oder ein beliebiger Uptime-Dienst): stündlich `https://renten-rettung.de/api/auslieferung/cron?schluessel=<ADMIN_PASSWORT>` aufrufen (GET). Dann den `crons`-Block aus `apps/web/vercel.json` entfernen oder den täglichen Vercel-Lauf als zusätzliche Absicherung stehen lassen.
 
 Bis eine der beiden Lösungen steht, gilt: Bestellungen zeitnah unter `/admin` von Hand freigeben. Erstkunden-Codes (`EK-…`) sind vom 12-Stunden-Fenster ausgenommen und liefern weiterhin sofort aus.
+
+## 4a. Postversand (Prompt 14): gedruckte Fassung als kostenlose Zusatzoption
+
+Wer in Schritt 11 „Gutachten zusätzlich per Post (kostenlos, 2–7 Werktage)“ ankreuzt, bekommt das Gutachten unverändert per E-Mail **und** eine gedruckte Fassung. Ablauf ohne eigenen Speicher:
+
+1. Die Checkout-Sitzung trägt `post = 1`; der PaymentIntent startet mit `post_status = gewuenscht`.
+2. Beim Versand des Gutachtens (Freigabe oder Cron) erzeugt der Server die **Druckvorlage** (A4, beidseitig druckbar: Deckblatt mit Anschriftfeld für den Fensterumschlag, alle Gutachten-Seiten, einseitiger Beileger „Verkaufen statt kämpfen“) und schickt sie als **Druckauftrag** mit Anschrift an `info@renten-rettung.de` (`[Post] Druckvorlage RR-…`). Später geht diese Mail an den Druck- und Versanddienstleister mit Auftragsverarbeitungsvertrag (`[[DRUCKDIENST]]`, `config/business.ts`) – Adresse dort eintragen, sobald der Vertrag steht.
+3. In der Freigabeliste `/admin` zeigt die Spalte **„Post“** den Stand (gewünscht → gedruckt → versendet) mit Zeitpunkt; die Knöpfe „gedruckt“/„versendet“ setzen `post_status`/`post_am`. „Druckvorlage (PDF)“ erzeugt die Vorlage jederzeit neu (`/api/admin/druck`).
+4. Die Kosten je Sendung (`POST_VERSAND.postKosten.jeSendungEur`) bleiben `null`, bis das Angebot des Dienstleisters vorliegt – kein geschätzter Wert. Der CSV-Export enthält die Spalten `post` und `post_am`.
+
+Zusage nach außen: „2–7 Werktage“ (`POST_WERKTAGE_TEXT`) – bis ein Dienstleister angebunden ist, muss der Druck von Hand innerhalb dieser Frist erfolgen.
 
 ## 5. Domain umstellen (bei united-domains)
 

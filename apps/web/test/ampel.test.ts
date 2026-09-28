@@ -2,7 +2,8 @@
  * Übernahme-Ampel (Prompt 13, Abschnitte 1 und 7): vier Zustände aus der
  * Konfiguration, Reihenfolge Status → Schwelle → Rechnung; Grau und beide
  * Rot-Varianten ohne Kaufknopf; Gratis-Ansicht ohne Beträge, Wortbänder
- * oder Spanne. Dazu die Pflichtfälle aus Prompt 12, 1.6.
+ * oder Spanne. Seit Prompt 14 lebt die Ampel nur auf der Startseite
+ * (AmpelKarte). Dazu die Pflichtfälle aus Prompt 12, 1.6.
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -65,7 +66,7 @@ describe('Übernahme-Ampel: vier Zustände aus config/ampel.ts', () => {
   it('Gelb zwischen 0 und der Grün-Schwelle', () => {
     const ampel = bestimmeUebernahmeAmpel(calcMit(AMPEL.gruen.mehrwertMinAbsolut - 1), 'beitragsfrei', rkwGross);
     expect(ampel.ampel).toBe('gelb');
-    expect(ampel.zeile).toBe('Der Prüfbericht entscheidet, ob wir übernehmen.');
+    expect(ampel.zeile).toBe('Das Gutachten entscheidet, ob wir übernehmen.');
     expect(berichtKaufbar(ampel)).toBe(true);
   });
 
@@ -125,22 +126,21 @@ describe('Gratis-Ansicht: nur die Ampel (Prompt 13, 0.4 und 7)', () => {
     expect(grau.zeile).not.toMatch(/stelligen Bereich|Größenordnung|Spanne/);
   });
 
-  it('die Ergebnis-Seite rendert Kaufknopf nur über das kaufbar-Flag und kennt keine Größenordnung', () => {
-    const quelle = readFileSync(join(WEB, 'components', 'funnel', 'ErgebnisAnsicht.tsx'), 'utf8')
+  it('die Startseiten-Karte aktiviert den Kaufknopf nur über das kaufbar-Flag und kennt keine Größenordnung', () => {
+    const quelle = readFileSync(join(WEB, 'components', 'AmpelKarte.tsx'), 'utf8')
       .replace(/\/\*[\s\S]*?\*\//g, '')
       .replace(/^\s*\/\/.*$/gm, '');
-    expect(quelle.match(/href="\/bestellen"/g) ?? []).toHaveLength(1);
-    const kaufblock = quelle.indexOf('vorschau.kaufbar &&');
-    expect(kaufblock).toBeGreaterThan(-1);
-    expect(quelle.indexOf('href="/bestellen"')).toBeGreaterThan(kaufblock);
-    expect(quelle).not.toMatch(/groessenordnung|Größenordnung/i);
-    // Keine Spannen-Anzeige im Privat-Teil; die Gegenposition DARF das Wort
-    // „Spanne“ erklären (unverändert laut Prompt 13, 2.2), Beträge zeigt nur
-    // die Kanzlei-Variante („Spanne Min–Max“).
-    const privatTeil = quelle.slice(0, quelle.indexOf("variante === 'kanzlei'"));
-    expect(privatTeil).not.toMatch(/Spanne Min|Spanne der Szenarien/);
+    // Ein Kaufknopf, gesperrt solange nicht kaufbar; kein Link auf eine Bestellseite.
+    expect(quelle.match(/className="knopf kauf"/g) ?? []).toHaveLength(1);
+    expect(quelle).toContain('disabled={!kaufbar}');
+    expect(quelle).toMatch(/const kaufbar = ergebnis\?\.kaufbar === true && \(ampel\?\.ampel === 'gruen' \|\| ampel\?\.ampel === 'gelb'\)/);
+    expect(quelle).not.toContain('href="/bestellen"');
+    expect(quelle).not.toMatch(/groessenordnung|Größenordnung|Spanne Min|Spanne der Szenarien|stelligen Bereich/i);
     expect(quelle).not.toContain('So verdienen wir');
-    expect(quelle).not.toContain('Lieber persönlich?');
+    // Die Kanzlei-Ergebnisseite bleibt für die Kanzlei-Variante reserviert.
+    const ergebnis = readFileSync(join(WEB, 'app', 'rechner', 'ergebnis', 'page.tsx'), 'utf8');
+    expect(ergebnis).toContain('notFound');
+    expect(ergebnis).toContain('VARIANTE.belehrungsCheck');
   });
 
   it('die Vorschau-API liefert keine Größenordnung mehr', () => {

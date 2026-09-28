@@ -1,17 +1,24 @@
 /**
- * Validierung des Rechner-Assistenten (Prompt 12, Abschnitt 3.2):
- * eine Frage je Schritt, Zeitraum aus BRAND.range, DM-Beiträge,
- * Auszahlungsliste, Kontakt-Schritt mit Datenschutz-Häkchen.
+ * Validierung des Rechner-Assistenten (Prompt 12, 3.2 – umgebaut nach
+ * Prompt 14, Abschnitt 2): elf Schritte, eine Frage je Bildschirm, „Weiß ich
+ * nicht“ überall außer beim Rückkaufswert, Schritt „Über Sie“ mit Anschrift
+ * und Geburtsdatum, letzter Schritt „Ihre Bestellung“.
  */
 import { describe, expect, it } from 'vitest';
 import {
   BEGINN_MAX,
   BEGINN_MIN,
   SCHRITTE,
+  SCHRITT_FRAGE,
+  SCHRITT_HILFEFELD,
+  SCHRITT_HILFESATZ,
+  eintrittsalter,
+  kundenname,
   leererDraft,
   uebernehmeBekannteFelder,
   validiereBis,
   validiereSchritt,
+  vertragBeendet,
   type CaseDraft,
 } from '../lib/draft';
 
@@ -30,22 +37,64 @@ function gueltigerDraft(): CaseDraft {
     dynamikSatz: '5',
     rueckkaufswert: '310.658,00',
     auszahlungenErhalten: 'nein',
-    email: 'erika@example.org',
-    kontaktWunsch: 'email',
+    anrede: 'herr',
+    vorname: 'Erik',
+    nachname: 'Beispiel',
+    geburtsdatum: '1962-03-14',
+    strasse: 'Beispielweg 2',
+    plz: '10115',
+    ort: 'Berlin',
+    email: 'erik@example.org',
     einwilligungDatenschutz: true,
+    agbGelesen: true,
+    ausfuehrungZugestimmt: true,
     zustandekommen: 'policenmodell',
     belehrungVorhanden: 'unbekannt',
     abgetretenOderBeliehen: 'nein',
   };
 }
 
+describe('Elf Schritte (Prompt 14, Abschnitt 2)', () => {
+  it('Reihenfolge: Vertragsart … Auszahlungen, Über Sie, Bestellung – keine Kontakt-Frage, keine Ergebnis-Seite', () => {
+    expect(SCHRITTE).toEqual([
+      'typ',
+      'status',
+      'versicherer',
+      'beginn',
+      'beitrag',
+      'dynamik',
+      'beitragssumme',
+      'rueckkaufswert',
+      'auszahlungen',
+      'person',
+      'bestellung',
+    ]);
+    expect(SCHRITTE).toHaveLength(11);
+    expect((SCHRITTE as readonly string[]).includes('kontakt')).toBe(false);
+  });
+
+  it('jeder Schritt hat Frage und Hilfesatz; „Wo finde ich das?“ an allen Sachfragen und beim Geburtsdatum', () => {
+    for (const schritt of SCHRITTE) {
+      expect(SCHRITT_FRAGE[schritt].trim()).not.toBe('');
+      expect(SCHRITT_HILFESATZ[schritt].trim()).not.toBe('');
+    }
+    expect(SCHRITT_FRAGE.person).toBe('Über Sie');
+    expect(SCHRITT_FRAGE.bestellung).toBe('Ihre Bestellung');
+    expect(SCHRITT_HILFESATZ.person).toBe('Adresse für Rechnung und Postversand. Geburtsdatum für die Rechnung Ihres Risikoanteils.');
+    expect(Object.keys(SCHRITT_HILFEFELD).sort()).toEqual(
+      ['typ', 'status', 'versicherer', 'beginn', 'beitrag', 'dynamik', 'beitragssumme', 'rueckkaufswert', 'auszahlungen', 'person'].sort(),
+    );
+    expect(SCHRITT_HILFEFELD.person).toBe('geburtsdatum');
+  });
+});
+
 describe('validiereSchritt (Assistent)', () => {
   it('akzeptiert einen vollständig ausgefüllten Entwurf in jedem Schritt', () => {
     const draft = gueltigerDraft();
     for (const schritt of SCHRITTE) {
-      expect(validiereSchritt(schritt, draft)).toEqual({});
+      expect(validiereSchritt(schritt, draft), schritt).toEqual({});
     }
-    expect(validiereBis('kontakt', draft)).toEqual({});
+    expect(validiereBis('bestellung', draft)).toEqual({});
   });
 
   it('verlangt je Frage genau die Pflichtangabe', () => {
@@ -60,6 +109,33 @@ describe('validiereSchritt (Assistent)', () => {
     expect(Object.keys(validiereSchritt('auszahlungen', leer))).toEqual(['auszahlungenErhalten']);
     // Beitragssumme ist überspringbar – keine Pflicht.
     expect(validiereSchritt('beitragssumme', leer)).toEqual({});
+    expect(Object.keys(validiereSchritt('person', leer)).sort()).toEqual(
+      ['anrede', 'email', 'geburtsdatum', 'nachname', 'ort', 'plz', 'strasse', 'vorname'].sort(),
+    );
+    expect(Object.keys(validiereSchritt('bestellung', leer)).sort()).toEqual(
+      ['agbGelesen', 'ausfuehrungZugestimmt', 'einwilligungDatenschutz'].sort(),
+    );
+  });
+
+  it('„Weiß ich nicht“ ist überall gültig – außer beim Rückkaufswert', () => {
+    const basis = gueltigerDraft();
+    expect(validiereSchritt('typ', { ...basis, vertragsart: 'unbekannt' })).toEqual({});
+    // Beginn: „Weiß nicht genau“ → nur das Jahr (als Jahresmitte kodiert).
+    expect(validiereSchritt('beginn', { ...basis, beginn: '1998-06', beginnUngefaehr: true })).toEqual({});
+    expect(validiereSchritt('beginn', { ...basis, beginn: '', beginnUngefaehr: true })['beginn']).toMatch(/Jahr vierstellig/);
+    // Beitrag: „Weiß ich nicht“ nur zusammen mit der Beitragssumme.
+    const ohneBeitrag = { ...basis, erstbeitrag: '', erstbeitragUnbekannt: true };
+    expect(validiereSchritt('beitrag', ohneBeitrag)).toEqual({});
+    expect(validiereSchritt('beitragssumme', ohneBeitrag)['gesamtsummeLautMitteilung']).toMatch(/Police nachsehen/);
+    expect(validiereSchritt('beitragssumme', { ...ohneBeitrag, gesamtsummeLautMitteilung: '50.000' })).toEqual({});
+    expect(validiereSchritt('dynamik', { ...basis, dynamik: 'unbekannt', dynamikSatz: '' })).toEqual({});
+    expect(validiereSchritt('auszahlungen', { ...basis, auszahlungenErhalten: 'unbekannt' })).toEqual({});
+    // Rückkaufswert: Pflicht, kein „Weiß nicht“.
+    expect(validiereSchritt('rueckkaufswert', { ...basis, rueckkaufswert: '' })['rueckkaufswert']).toMatch(/Standmitteilung/);
+  });
+
+  it('Schalter „heutiger Beitrag“ (Schritt 5) ist ein gültiger Beitrag', () => {
+    expect(validiereSchritt('beitrag', { ...gueltigerDraft(), beitragArt: 'heutiger', erstbeitrag: '150', erstbeitragWaehrung: 'EUR' })).toEqual({});
   });
 
   it('hält den Zeitraum aus BRAND.range ein (1980–2020)', () => {
@@ -69,8 +145,7 @@ describe('validiereSchritt (Assistent)', () => {
     expect(validiereSchritt('beginn', zuAlt)['beginn']).toMatch(/1980 bis 2020/);
     const zuNeu = { ...gueltigerDraft(), beginn: '2021-01' };
     expect(validiereSchritt('beginn', zuNeu)['beginn']).toMatch(/1980 bis 2020/);
-    const grenzen = { ...gueltigerDraft(), beginn: '1980-01' };
-    expect(validiereSchritt('beginn', grenzen)).toEqual({});
+    expect(validiereSchritt('beginn', { ...gueltigerDraft(), beginn: '1980-01' })).toEqual({});
     expect(validiereSchritt('beginn', { ...gueltigerDraft(), beginn: '2020-12' })).toEqual({});
   });
 
@@ -98,21 +173,33 @@ describe('validiereSchritt (Assistent)', () => {
     expect(validiereSchritt('auszahlungen', leer)['auszahlungenListe']).toMatch(/mindestens eine/);
   });
 
-  it('verlangt im Kontakt-Schritt E-Mail, Kontaktweg und Datenschutz-Häkchen', () => {
-    const ohne = { ...gueltigerDraft(), email: '', kontaktWunsch: '' as const, einwilligungDatenschutz: false };
-    const fehler = validiereSchritt('kontakt', ohne);
-    expect(Object.keys(fehler).sort()).toEqual(['einwilligungDatenschutz', 'email', 'kontaktWunsch']);
-    expect(validiereSchritt('kontakt', { ...gueltigerDraft(), email: 'kaputt@' })['email']).toMatch(/vollständig/);
-    // Kontaktweg Telefon verlangt eine Nummer (Prompt 13, §4).
-    const tel = { ...gueltigerDraft(), kontaktWunsch: 'telefon' as const, telefon: '' };
-    expect(validiereSchritt('kontakt', tel)['telefon']).toMatch(/Telefonnummer/);
+  it('„Über Sie“: Anrede, Name, Anschrift, E-Mail und ein zum Vertrag passendes Geburtsdatum', () => {
+    const basis = gueltigerDraft();
+    expect(validiereSchritt('person', { ...basis, email: 'kaputt@' })['email']).toMatch(/vollständig/);
+    expect(validiereSchritt('person', { ...basis, plz: '1234' })['plz']).toMatch(/fünfstellig/);
+    expect(validiereSchritt('person', { ...basis, anrede: '' })['anrede']).toMatch(/Keine Anrede/);
+    // Geburtsdatum 1990 bei Vertragsbeginn 1995: Eintrittsalter 5 → unplausibel.
+    expect(validiereSchritt('person', { ...basis, geburtsdatum: '1990-01-01' })['geburtsdatum']).toMatch(/Vertragsbeginn/);
+    expect(validiereSchritt('person', { ...basis, geburtsdatum: '14.03.1962' })['geburtsdatum']).toMatch(/Geburtsdatum/);
+    // Telefon bleibt freiwillig.
+    expect(validiereSchritt('person', { ...basis, telefon: '' })).toEqual({});
+    expect(kundenname(basis)).toBe('Erik Beispiel');
   });
 
-  it('meldet ein Beendet-Datum vor dem Beginn (Jahr vierstellig?)', () => {
+  it('Eintrittsalter aus Geburtsdatum und Vertragsbeginn (volle Jahre)', () => {
+    expect(eintrittsalter('1960-03-14', '1995-10')).toBe(35);
+    expect(eintrittsalter('1960-11-14', '1995-10')).toBe(34);
+    expect(eintrittsalter('', '1995-10')).toBeUndefined();
+  });
+
+  it('meldet ein Beendet-Datum vor dem Beginn (Jahr vierstellig?) und erkennt beendete Verträge', () => {
     const draft = { ...gueltigerDraft(), status: 'gekuendigt' as const, statusDatum: '1935-01' };
     expect(validiereSchritt('status', draft)['statusDatum']).toMatch(/vor dem Vertragsbeginn/);
     // Ohne Datum bleibt der Schritt gültig (Datum ist freiwillig).
     expect(validiereSchritt('status', { ...gueltigerDraft(), status: 'gekuendigt', statusDatum: '' })).toEqual({});
+    expect(vertragBeendet({ ...gueltigerDraft(), status: 'gekuendigt' })).toBe(true);
+    expect(vertragBeendet({ ...gueltigerDraft(), status: 'abgelaufen' })).toBe(true);
+    expect(vertragBeendet({ ...gueltigerDraft(), status: 'beitragsfrei' })).toBe(false);
   });
 });
 
@@ -123,10 +210,14 @@ describe('uebernehmeBekannteFelder', () => {
       email: 'a@b.de',
       boese: 'ignorieren',
       einwilligungDatenschutz: 'ja', // falscher Typ
+      postversand: 'ja', // falscher Typ
+      startAmpel: 'gruen',
     });
     expect(draft.beginn).toBe('1995-10');
     expect(draft.email).toBe('a@b.de');
     expect(draft.einwilligungDatenschutz).toBe(false);
+    expect(draft.postversand).toBe(false);
+    expect(draft.startAmpel).toBe('gruen');
     expect((draft as unknown as Record<string, unknown>)['boese']).toBeUndefined();
   });
 

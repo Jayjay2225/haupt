@@ -1,8 +1,8 @@
 /**
- * Textbudgets (Prompt 12, Abschnitt 3 – fortgeltend unter Prompt 13):
- * Hero H1 höchstens 8 Wörter + Unterzeile 25, FAQ-Antwort 40,
- * Ergebnis-Seite über dem Knopf 40 Wörter (Zeile + ggf. Rechtsweg-Satz;
- * die H1 zählt als Überschrift nicht mit – ASSUMPTIONS Nr. 53).
+ * Textbudgets (Prompt 12, Abschnitt 3 – fortgeltend unter Prompt 13/14):
+ * Hero H1 höchstens 8 Wörter + Unterzeile 25, FAQ-Antwort 40, Text unter der
+ * Startseiten-Ampel 40 Wörter (Zeile + ggf. Rechtsweg-Satz; die H1 zählt als
+ * Überschrift nicht mit – ASSUMPTIONS Nr. 53).
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type { CalcResult, SzenarioErgebnis } from '@rueckab/calc';
 import { RECHTSWEG_SATZ } from '../config/ampel';
-import { bestimmeUebernahmeAmpel } from '../lib/ampel';
+import { AMPEL_TEXT_AUS, ampelKartenText, bestimmeUebernahmeAmpel } from '../lib/ampel';
 
 const WEB = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -52,28 +52,29 @@ function calcMit(mehrwert: number | undefined): CalcResult {
   };
 }
 
-describe('Textbudgets (Prompt 12/13)', () => {
+describe('Textbudgets (Prompt 12/13/14)', () => {
   const startseite = readFileSync(join(WEB, 'app', 'page.tsx'), 'utf8');
 
-  it('Hero: H1 höchstens 8 Wörter, Unterzeile höchstens 25', () => {
+  it('Hero: H1 „Der Rückkaufswert ist nicht das letzte Wort.“, Unterzeile höchstens 25 Wörter', () => {
     const h1 = /<h1>([^<]+)<\/h1>/.exec(startseite);
     expect(h1).not.toBeNull();
+    expect(h1![1]).toBe('Der Rückkaufswert ist nicht das letzte Wort.');
     expect(woerter(h1![1]!)).toBeLessThanOrEqual(8);
     const unterzeile = /className="untertitel">\s*([^<]+?)\s*<\/p>/.exec(startseite);
     expect(unterzeile).not.toBeNull();
     expect(woerter(unterzeile![1]!)).toBeLessThanOrEqual(25);
   });
 
-  it('FAQ: sieben Fragen (Prompt 13), Antworten höchstens 40 Wörter', () => {
+  it('FAQ: acht Fragen (Prompt 13 + Papier-Frage aus Prompt 14), Antworten höchstens 40 Wörter', () => {
     const antworten = [...startseite.matchAll(/<details>\s*<summary>[^<]*(?:\{[^}]+\}[^<]*)?<\/summary>\s*<p>([\s\S]*?)<\/p>/g)];
-    expect(antworten.length).toBe(7);
+    expect(antworten.length).toBe(8);
     for (const [, antwort] of antworten) {
-      const text = antwort!.replace(/\{[^}]+\}/g, 'X').replace(/\s+/g, ' ');
+      const text = antwort!.replace(/\{[^}]+\}/g, 'X').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ');
       expect(woerter(text), text).toBeLessThanOrEqual(40);
     }
   });
 
-  it('Ergebnis-Seite: über dem Knopf höchstens 40 Wörter, ohne Fall-Beträge', () => {
+  it('Startseiten-Ampel: Text unter der Ampel höchstens 40 Wörter, ohne Fall-Beträge', () => {
     const rkwGross = 50000;
     const faelle = [
       { ampel: bestimmeUebernahmeAmpel(calcMit(10000), 'laufend', rkwGross), rechtsweg: true }, // grün
@@ -83,14 +84,16 @@ describe('Textbudgets (Prompt 12/13)', () => {
       { ampel: bestimmeUebernahmeAmpel(calcMit(10000), 'laufend', 10000), rechtsweg: false }, // grau
     ];
     for (const { ampel, rechtsweg } of faelle) {
-      const ueberDemKnopf = rechtsweg ? `${ampel.zeile} ${RECHTSWEG_SATZ}` : ampel.zeile;
-      expect(woerter(ueberDemKnopf), ueberDemKnopf).toBeLessThanOrEqual(40);
+      const unterDerAmpel = rechtsweg ? `${ampelKartenText(ampel)} ${RECHTSWEG_SATZ}` : ampelKartenText(ampel);
+      expect(woerter(unterDerAmpel), unterDerAmpel).toBeLessThanOrEqual(40);
       expect(woerter(ampel.titel)).toBeLessThanOrEqual(10);
     }
+    expect(woerter(AMPEL_TEXT_AUS)).toBeLessThanOrEqual(12);
   });
 
-  it('Mikrozeile und Tempo-Aussagen: 12 Stunden statt „sofort“', () => {
+  it('Mikrozeile und Tempo-Aussagen: „Ampel kostenlos · Gutachten 89 € · in 12 Stunden per E-Mail“', () => {
     expect(startseite).toContain('in 12 Stunden per E-Mail');
+    expect(startseite).toMatch(/Ampel kostenlos · Gutachten \{BERICHT_PREIS_BRUTTO_EUR\} € · in 12 Stunden per E-Mail/);
     expect(startseite).not.toMatch(/Ergebnis sofort/);
   });
 });

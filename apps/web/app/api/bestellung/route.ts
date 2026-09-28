@@ -1,7 +1,9 @@
 /**
- * Bestellung anlegen: Formular und Fall prüfen, Stripe-Checkout-Sitzung
- * erzeugen und die Weiterleitungsadresse zurückgeben. Gespeichert wird hier
- * nichts; der Fall reist kodiert in den Sitzungs-Metadaten mit.
+ * Bestellung anlegen (Prompt 14, Schritt 11): Entwurf samt Person und
+ * Bestätigungen prüfen, Stripe-Checkout-Sitzung erzeugen und die
+ * Weiterleitungsadresse zurückgeben. Gespeichert wird hier nichts; der Fall
+ * (inklusive Postwunsch und Anschrift) reist kodiert in den
+ * Sitzungs-Metadaten mit.
  */
 import { NextResponse } from 'next/server';
 import { berechneRueckabwicklung } from '@rueckab/calc';
@@ -10,9 +12,8 @@ import riskJson from '../../../../../data/risk-defaults.json';
 import { BRAND } from '@/config/brand';
 import { berichtKaufbar, bestimmeUebernahmeAmpel } from '@/lib/ampel';
 import { draftZuEingaben } from '@/lib/berechnung';
-import { pruefeBestellformular } from '@/lib/bestellung';
-import type { Bestellformular } from '@/lib/bestellung';
-import { BEGINN_MAX, BEGINN_MIN, uebernehmeBekannteFelder } from '@/lib/draft';
+import { pruefeBestellung } from '@/lib/bestellung';
+import { BEGINN_MAX, BEGINN_MIN, kundenname, uebernehmeBekannteFelder } from '@/lib/draft';
 import { findeVersichererId, insurersDaten } from '@/lib/insurers-data';
 import { begrenzt, clientSchluessel } from '@/lib/ratenlimit';
 import { erfuelleBestellung, erzeugeBericht } from '@/lib/erfuellung';
@@ -38,25 +39,16 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ fehler: { fall: 'Ungültige Anfrage.' } }, { status: 400 });
   }
   const eingabe = roh as Record<string, unknown>;
-  // Spam-Schutz: Honigtopf-Feld (nur Bots füllen es), Mindestzeit im Formular, Ratenbegrenzung.
+  // Spam-Schutz: Honigtopf-Feld (nur Bots füllen es) und Ratenbegrenzung.
   if (typeof eingabe['firma_webseite'] === 'string' && eingabe['firma_webseite'] !== '') {
     return NextResponse.json({ fehler: { fall: 'Ungültige Anfrage.' } }, { status: 400 });
   }
-  // (Eine Mindest-Ausfüllzeit über die Client-Uhr wurde entfernt: Bots lassen das
-  // Feld einfach weg, und ein Uhrenversatz sperrt echte Kundschaft aus. Es bleiben
-  // Honigtopf und Ratenbegrenzung.)
   if (begrenzt(`bestellung:${clientSchluessel(request)}`, 10, 60 * 60 * 1000)) {
     return NextResponse.json({ fehler: { fall: 'Zu viele Versuche. Bitte in einer Stunde erneut versuchen.' } }, { status: 429 });
   }
   const draft = uebernehmeBekannteFelder(
     typeof eingabe['draft'] === 'object' && eingabe['draft'] !== null ? (eingabe['draft'] as Record<string, unknown>) : {},
   );
-  const formular: Bestellformular = {
-    name: typeof eingabe['name'] === 'string' ? eingabe['name'] : '',
-    email: typeof eingabe['email'] === 'string' ? eingabe['email'] : '',
-    agbGelesen: eingabe['agbGelesen'] === true,
-    ausfuehrungZugestimmt: eingabe['ausfuehrungZugestimmt'] === true,
-  };
   const freischaltcode = typeof eingabe['freischaltcode'] === 'string' ? eingabe['freischaltcode'].trim() : '';
 
   // Ohne Zahlungsanbieter ist nur der Erstkunden-Weg offen.
@@ -64,14 +56,16 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ fehler: { fall: 'Die Bestellung ist noch nicht freigeschaltet.' } }, { status: 503 });
   }
 
-  const fehler = pruefeBestellformular(formular, draft);
+  const fehler = pruefeBestellung(draft);
   if (Object.keys(fehler).length > 0) {
     return NextResponse.json({ fehler }, { status: 422 });
   }
+  const name = kundenname(draft);
+  const email = draft.email.trim();
 
   // Rechnet der Fall überhaupt durch? Sonst nichts verkaufen. Fondsgebundene
   // Verträge laufen im Anfrage-Modus (config/ampel.ts) über die individuelle
-  // Prüfung, nicht über den Bericht; der Zeitraum ist auf BRAND.range begrenzt.
+  // Prüfung, nicht über das Gutachten; der Zeitraum ist auf BRAND.range begrenzt.
   try {
     const abbildung = draftZuEingaben(draft, findeVersichererId, new Date().toISOString().slice(0, 7));
     if (abbildung.fehler.length > 0) {
@@ -91,13 +85,13 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json(
         {
           fehler: {
-            fall: `Der Bericht deckt Verträge mit Beginn ${BRAND.range.from} bis ${BRAND.range.to} ab. Für andere Jahrgänge nutzen Sie bitte die individuelle Anfrage.`,
+            fall: `Das Gutachten deckt Verträge mit Beginn ${BRAND.range.from} bis ${BRAND.range.to} ab. Für andere Jahrgänge nutzen Sie bitte die individuelle Anfrage.`,
           },
         },
         { status: 422 },
       );
     }
-    // Übernahme-Ampel (Prompt 13): Verkauft wird der Bericht nur bei Grün/Gelb
+    // Übernahme-Ampel (Prompt 13/14): Verkauft wird das Gutachten nur bei Grün/Gelb
     // (Grau nur, wenn berichtUnterSchwelle das freischaltet).
     const calc = berechneRueckabwicklung(abbildung.contract, insurersDaten, riskDefaults);
     const ampel = bestimmeUebernahmeAmpel(
@@ -108,10 +102,10 @@ export async function POST(request: Request): Promise<NextResponse> {
     if (!berichtKaufbar(ampel)) {
       const text =
         ampel.grund === 'status'
-          ? 'Gekündigte oder ausgezahlte Verträge übernehmen wir nicht – deshalb verkaufen wir Ihnen dafür auch keinen Bericht.'
+          ? 'Gekündigte oder ausgezahlte Verträge übernehmen wir nicht – deshalb verkaufen wir Ihnen dafür auch kein Gutachten.'
           : ampel.grund === 'zu-klein'
             ? 'Ihr Vertrag liegt unter unserer Mindestgrenze – für unser Verfahren zu klein; wir berechnen hier nichts.'
-            : 'Für diesen Vertrag kommt unser Verfahren rechnerisch nicht in Frage – wir verkaufen Ihnen dafür keinen Bericht.';
+            : 'Für diesen Vertrag kommt unser Verfahren rechnerisch nicht in Frage – wir verkaufen Ihnen dafür kein Gutachten.';
       return NextResponse.json({ fehler: { fall: text } }, { status: 422 });
     }
   } catch {
@@ -121,7 +115,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
   }
 
-  // Erstkunden-Programm: gültiger Code → Prüfbericht kostenlos, direkte Auslieferung.
+  // Erstkunden-Programm: gültiger Code → Gutachten kostenlos, direkte Auslieferung.
   if (freischaltcode !== '') {
     // Enger als die allgemeine Bremse: Gratis-PDF + Mail sind teuer und missbrauchbar.
     if (begrenzt(`erstkunde:${clientSchluessel(request)}`, 3, 60 * 60 * 1000)) {
@@ -150,9 +144,10 @@ export async function POST(request: Request): Promise<NextResponse> {
       {
         id: `ek_${code}`,
         bestellnummer,
-        kundenname: formular.name.trim(),
-        email: formular.email.trim(),
-        metadata: { bestellnummer, kundenname: formular.name.trim(), ...fallAlsMetadaten(draft) },
+        kundenname: name,
+        email,
+        postversand: draft.postversand,
+        metadata: { bestellnummer, kundenname: name, post: draft.postversand ? '1' : '0', ...fallAlsMetadaten(draft) },
       },
       {
         erzeugeBericht,
@@ -170,13 +165,13 @@ export async function POST(request: Request): Promise<NextResponse> {
       entferneCodeVerwendet(code);
     }
     return NextResponse.json(
-      { fehler: { fall: 'Der Prüfbericht ließ sich gerade nicht erstellen. Ihr Code bleibt gültig; wir haben eine Meldung erhalten und melden uns.' } },
+      { fehler: { fall: 'Das Gutachten ließ sich gerade nicht erstellen. Ihr Code bleibt gültig; wir haben eine Meldung erhalten und melden uns.' } },
       { status: 502 },
     );
   }
 
   try {
-    const ergebnis = await erstelleCheckoutSitzung({ draft, name: formular.name, email: formular.email });
+    const ergebnis = await erstelleCheckoutSitzung({ draft, name, email, postversand: draft.postversand });
     return NextResponse.json(ergebnis);
   } catch (grund) {
     console.error('Checkout-Sitzung fehlgeschlagen:', grund instanceof Error ? grund.message : 'unbekannter Fehler');

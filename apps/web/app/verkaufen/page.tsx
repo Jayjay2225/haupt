@@ -36,7 +36,7 @@ export default function VerkaufenSeite() {
         </article>
         <article className="karte">
           <h2>Rückabwicklung prüfen</h2>
-          <p>Rechnerisch ist oft mehr drin als der Rückkaufswert; der Bericht liefert die Zahl.</p>
+          <p>Rechnerisch ist oft mehr drin als der Rückkaufswert; das Gutachten liefert die Zahl.</p>
           <p className="erklaerung">
             Das geben Sie auf: Zeit – ein Verfahren dauert, und ohne anwaltliche Prüfung geht nichts.
           </p>
@@ -82,7 +82,7 @@ export default function VerkaufenSeite() {
       <p className="erklaerung">
         Steuern können bei jedem Weg eine Rolle spielen. Dazu beraten wir nicht – fragen Sie Ihre
         Steuerberatung. Wir empfehlen keinen der Wege; erst rechnen hilft:{' '}
-        <Link href="/rechner">zur kostenlosen Ampel</Link>.
+        <Link href="/#ampel">zur kostenlosen Ampel</Link>.
       </p>
     </div>
   );

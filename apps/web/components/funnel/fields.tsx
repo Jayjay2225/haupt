@@ -14,6 +14,20 @@ interface BasisProps {
   label: string;
   erklaerung?: string | undefined;
   fehler?: string | undefined;
+  /** Info-Symbol „Wo finde ich das?“ neben der Beschriftung (Prompt 14, 1.4). */
+  hilfe?: ReactNode | undefined;
+}
+
+function FeldKopf({ id, label, hilfe }: { id: string; label: string; hilfe?: ReactNode | undefined }) {
+  if (hilfe === undefined) {
+    return <label htmlFor={id}>{label}</label>;
+  }
+  return (
+    <div className="feld-kopf">
+      <label htmlFor={id}>{label}</label>
+      {hilfe}
+    </div>
+  );
 }
 
 function beschreibungIds(id: string, erklaerung?: string, fehler?: string): string | undefined {
@@ -44,7 +58,7 @@ export function TextFeld(props: TextFeldProps) {
   const { id, label, erklaerung, fehler, wert, onChange } = props;
   return (
     <div className={fehler === undefined ? 'feld' : 'feld hat-fehler'}>
-      <label htmlFor={id}>{label}</label>
+      <FeldKopf id={id} label={label} hilfe={props.hilfe} />
       {erklaerung !== undefined && (
         <p className="erklaerung" id={`${id}-erklaerung`}>
           {erklaerung}
@@ -145,6 +159,7 @@ export function MonatsFeld(props: MonatsFeldProps) {
         label={label}
         erklaerung={erklaerung}
         fehler={fehler}
+        hilfe={props.hilfe}
         wert={text}
         onChange={(roh) => {
           setText(roh);
@@ -250,6 +265,7 @@ export function RadioGruppe(props: RadioGruppeProps) {
       aria-describedby={beschreibungIds(id, erklaerung, fehler)}
     >
       <legend>{label}</legend>
+      {props.hilfe !== undefined && <div className="feld-hilfe">{props.hilfe}</div>}
       {erklaerung !== undefined && (
         <p className="erklaerung" id={`${id}-erklaerung`}>
           {erklaerung}

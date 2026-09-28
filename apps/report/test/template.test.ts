@@ -6,7 +6,7 @@ import { berechneRueckabwicklung } from '@rueckab/calc';
 import type { ContractInput, InsurersDaten, RiskDefaults } from '@rueckab/calc';
 import { pruefeEignung } from '@rueckab/eligibility';
 import type { Regelwerk } from '@rueckab/eligibility';
-import { renderBerichtHtml, type BerichtInput } from '../src/template';
+import { GUTACHTEN_UNTERZEILE, VERKAUFEN_TITEL, renderBerichtHtml, renderDruckvorlageHtml, type BerichtInput } from '../src/template';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const daten = JSON.parse(readFileSync(resolve(REPO, 'data/insurers.json'), 'utf8')) as InsurersDaten;
@@ -123,5 +123,68 @@ describe('Berichts-Template (Prompt 12)', () => {
 
   it('zeigt den Ansatzpunkte-Kasten nicht, solange config/ansatzpunkte.json leer ist', () => {
     expect(html).not.toContain('Typische Ansatzpunkte');
+  });
+});
+
+describe('Gutachten (Prompt 14, Abschnitte 0.6 und 3)', () => {
+  const html = renderBerichtHtml(beispielBericht());
+
+  it('heißt „Gutachten“ und trägt auf Seite 1 die Unterzeile wörtlich – nie „Prüfbericht“', () => {
+    expect(html).toContain('<h1>Gutachten zu Ihrer Rentenversicherung</h1>');
+    expect(GUTACHTEN_UNTERZEILE).toBe(
+      'Automatisierte versicherungsmathematische Auswertung auf Basis Ihrer Angaben und veröffentlichter Versichererkennzahlen – kein Sachverständigengutachten.',
+    );
+    expect(html).toContain(GUTACHTEN_UNTERZEILE);
+    expect(html).not.toMatch(/Prüfbericht/i);
+    expect(html).not.toMatch(new RegExp('Rechts' + 'schutz', 'i'));
+    expect(html).not.toMatch(/öffentlich bestellt|vereidigt|staatlich anerkannt/i);
+  });
+
+  it('Kasten „Ihre Angaben und unsere Annahmen“ nach den Vertragsdaten – mit und ohne „Weiß ich nicht“-Annahmen', () => {
+    expect(html).toContain('Ihre Angaben und unsere Annahmen');
+    expect(html).toContain('ergänzende Annahmen aus „Weiß ich nicht“-Antworten waren nicht nötig');
+    const mit = renderBerichtHtml({
+      ...beispielBericht(),
+      annahmenKunde: ['Annahme: Ob eine Dynamik vereinbart war, ist nicht bekannt; gerechnet wurde ohne Dynamik.'],
+    });
+    expect(mit).toContain('Annahme: Ob eine Dynamik vereinbart war, ist nicht bekannt; gerechnet wurde ohne Dynamik.');
+    expect(mit).toContain('Jede dieser Annahmen ist im Gutachten so gekennzeichnet.');
+    // Der Kasten steht auf der Seite „Ihre Angaben“ (nach den Vertragsdaten, vor dem Rechenweg).
+    const kasten = mit.indexOf('Ihre Angaben und unsere Annahmen');
+    expect(kasten).toBeGreaterThan(mit.indexOf('<h2>2. Ihre Angaben</h2>'));
+    expect(kasten).toBeLessThan(mit.indexOf('<h2>3. Rechenweg und Annahmen</h2>'));
+  });
+
+  it('letzte Seite: „Nächster Schritt: Wir übernehmen.“ oben, darunter „Verkaufen statt kämpfen“ mit renten-rettung.de/verkaufen', () => {
+    const letzteSeite = html.slice(html.lastIndexOf('<section class="seite">'));
+    expect(letzteSeite).toContain('Nächster Schritt: Wir übernehmen.');
+    expect(letzteSeite).toContain(VERKAUFEN_TITEL);
+    expect(letzteSeite).toContain('renten-rettung.de/verkaufen');
+    expect(letzteSeite.indexOf('Nächster Schritt: Wir übernehmen.')).toBeLessThan(letzteSeite.indexOf(VERKAUFEN_TITEL));
+    expect(letzteSeite).toContain('Wir empfehlen keinen der Wege');
+    // Kanzlei-Variante: kein Ankauf-Block.
+    expect(renderBerichtHtml({ ...beispielBericht(), ankaufHinweis: false })).not.toContain(VERKAUFEN_TITEL);
+  });
+
+  it('Druckvorlage: Deckblatt mit Name und Anschrift, alle Seiten, einseitiger Beileger zum Ankauf', () => {
+    const druck = renderDruckvorlageHtml(beispielBericht(), {
+      name: 'Erika Beispiel',
+      strasse: 'Musterstraße 1',
+      plz: '12345',
+      ort: 'Musterstadt',
+    });
+    expect(druck.match(/<section class="seite/g)).toHaveLength(9); // Deckblatt + 7 Seiten + Beileger
+    expect(druck).toContain('class="seite deckblatt"');
+    expect(druck).toContain('Erika Beispiel\nMusterstraße 1\n12345 Musterstadt');
+    expect(druck).toContain('Ihr Gutachten, Bestellnummer TEST-1');
+    expect(druck).toContain(GUTACHTEN_UNTERZEILE);
+    expect(druck).toContain('class="seite beileger"');
+    expect(druck).toContain('Beileger · Verkaufen statt kämpfen');
+    expect(druck).toContain('Offenlegung');
+    expect(druck.indexOf('class="seite deckblatt"')).toBeLessThan(druck.indexOf('<h1>Gutachten zu Ihrer'));
+    expect(druck.indexOf('<h1>Gutachten zu Ihrer')).toBeLessThan(druck.indexOf('class="seite beileger"'));
+    // Beileger ohne Beträge, Prozente oder Aufkäufer-Namen (Ankauf-Regeln).
+    const beileger = druck.slice(druck.indexOf('class="seite beileger"'));
+    expect(beileger).not.toMatch(/\d+\s*€|%|Prozent|GmbH|\bAG\b/);
   });
 });

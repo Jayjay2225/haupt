@@ -1,12 +1,24 @@
 import Link from 'next/link';
 import { BRAND, RANGE_TEXT } from '@/config/brand';
-import { BERICHT_PREIS_BRUTTO_EUR } from '@/config/business';
-import { GEPRUEFTE_POLICEN, KANZLEI_NAME, PREIS_ANRECHNUNG } from '@/config/durchsetzung';
+import { BERICHT_PREIS_BRUTTO_EUR, POST_WERKTAGE_TEXT } from '@/config/business';
+import { GEPRUEFTE_POLICEN, KANZLEI_NAME } from '@/config/durchsetzung';
 import { VARIANTE } from '@/config/variante';
-import { Schnellcheck } from '@/components/Schnellcheck';
+import { AmpelKarte } from '@/components/AmpelKarte';
+import { Geschichten } from '@/components/Geschichten';
+import { Bildplatzhalter, VideoPlatzhalter } from '@/components/Platzhalter';
+import { Preisblock } from '@/components/Preisblock';
 import { Testimonials } from '@/components/Testimonials';
+import { VideocallSatz } from '@/components/VideocallSatz';
 import { alleVersichererNamen } from '@/lib/insurers-data';
 
+/**
+ * Startseite (Prompt 14, Abschnitt 1): Hero mit Erklärvideo-Platzhalter links
+ * und der Ampel-Karte rechts (vier Angaben → Ampel hochkant → grüner
+ * Kaufknopf). Danach: Vertrauenszeile, vier Schritte, „Wir übernehmen“ (mit
+ * Stimmungsbild), „Das steckt in Ihrem Gutachten“, Preisblock ohne
+ * Streichpreis, Verkaufen (mit Stimmungsbild), Kundenstimmen, Geschichten,
+ * FAQ. Bilder stehen nie neben Kundenstimmen, Geschichten oder Beträgen.
+ */
 export default function Startseite() {
   const namen = alleVersichererNamen();
 
@@ -21,16 +33,17 @@ export default function Startseite() {
               In 5 Minuten wissen Sie, ob rechnerisch mehr drin ist – gerechnet mit den echten
               Zahlen Ihres Versicherers.
             </p>
-            <p style={{ marginBottom: '0.5rem' }}>
-              <Link href="/rechner" className="knopf haupt">
+            <VideoPlatzhalter />
+            <p style={{ margin: '1rem 0 0.5rem' }}>
+              <a href="#ampel" className="knopf haupt">
                 Jetzt prüfen
-              </Link>
+              </a>
             </p>
             <p className="erklaerung mikrozeile">
-              Ampel kostenlos · Bericht {BERICHT_PREIS_BRUTTO_EUR} € · in 12 Stunden per E-Mail
+              Ampel kostenlos · Gutachten {BERICHT_PREIS_BRUTTO_EUR} € · in 12 Stunden per E-Mail
             </p>
           </div>
-          <Schnellcheck versichererNamen={namen} />
+          <AmpelKarte versichererNamen={namen} />
         </div>
       </section>
 
@@ -46,7 +59,7 @@ export default function Startseite() {
           </div>
           <div className="vertrauen-karte">
             <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" strokeLinecap="round"/></svg>
-            <p>Ampel in 5 Minuten, Bericht in 12 Stunden</p>
+            <p>Ampel in 5 Minuten, Gutachten in 12 Stunden</p>
           </div>
           <div className="vertrauen-karte">
             <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 21h16M6 21V8l6-4 6 4v13M10 21v-5h4v5" strokeLinejoin="round"/></svg>
@@ -72,8 +85,8 @@ export default function Startseite() {
               <p>Grün heißt: Ihr Vertrag kommt für unser Verfahren in Frage.</p>
             </li>
             <li>
-              <h3>Prüfbericht bestellen – {BERICHT_PREIS_BRUTTO_EUR} €</h3>
-              <p>Ihre Zahl, Jahr für Jahr, mit Quellen. Innerhalb von 12 Stunden per E-Mail.</p>
+              <h3>Gutachten bestellen – {BERICHT_PREIS_BRUTTO_EUR} €</h3>
+              <p>Ihre Zahl, Jahr für Jahr, mit Quellen. Innerhalb von 12 Stunden per E-Mail, auf Wunsch auch per Post.</p>
             </li>
             <li>
               <h3>Wir übernehmen</h3>
@@ -87,47 +100,74 @@ export default function Startseite() {
       </section>
 
       <section className="abschnitt getoent" aria-labelledby="warum-titel">
-        <div className="container">
-          <h2 id="warum-titel">Sie kämpfen nicht allein gegen einen Versicherer.</h2>
-          <div className="preis-raster wege-karten">
-            <article className="karte">
-              <h3>Spezialisierte Anwälte</h3>
-              <p>Kanzlei für Versicherungsrecht, {KANZLEI_NAME}.</p>
-            </article>
-            <article className="karte">
-              <h3>Erfahrung</h3>
-              <p>
-                {GEPRUEFTE_POLICEN !== '' ? GEPRUEFTE_POLICEN : '[[ZAHL, belegbar]]'} geprüfte
-                Policen. Wir kennen die Versicherer und ihre Argumente.
-              </p>
-            </article>
-            <article className="karte">
-              <h3>Ein Ansprechpartner</h3>
-              <p>Sie schicken uns die Unterlagen. Den Rest machen wir.</p>
-            </article>
+        <div className="container hero-raster">
+          <div>
+            <h2 id="warum-titel">Sie kämpfen nicht allein gegen einen Versicherer.</h2>
+            <p style={{ fontSize: '1.15rem' }}>
+              Wir übernehmen: Wir organisieren die Durchsetzung mit spezialisierten Anwälten. Sie haben
+              einen Ansprechpartner und müssen nichts selbst verhandeln.
+            </p>
+            <div className="preis-raster">
+              <article className="karte klein">
+                <h3>Spezialisierte Anwälte</h3>
+                <p>Kanzlei für Versicherungsrecht, {KANZLEI_NAME}.</p>
+              </article>
+              <article className="karte klein">
+                <h3>Erfahrung</h3>
+                <p>
+                  {GEPRUEFTE_POLICEN !== '' ? GEPRUEFTE_POLICEN : '[[ZAHL, belegbar]]'} geprüfte
+                  Policen. Wir kennen die Versicherer und ihre Argumente.
+                </p>
+              </article>
+              <article className="karte klein">
+                <h3>Ein Ansprechpartner</h3>
+                <p>Sie schicken uns die Unterlagen. Den Rest machen wir.</p>
+              </article>
+            </div>
           </div>
+          {/* Stimmungsbild (Prompt 14, 1.7): Paar im Ruhestand – keine Kunden, keine Bildunterschrift. */}
+          <Bildplatzhalter motiv="ruhestand" />
         </div>
       </section>
 
-      <section className="abschnitt" aria-labelledby="bericht-titel">
+      <section className="abschnitt" aria-labelledby="gutachten-titel">
         <div className="container hero-raster">
-          <div>
-            <h2 id="bericht-titel">Das steht im Bericht</h2>
-            <ul className="punkteliste" style={{ fontSize: '1.1rem' }}>
-              <li>Ihre Zahl, Jahr für Jahr aufgeschlüsselt</li>
-              <li>Jede Rendite mit Quelle</li>
-              <li>Die Grundlage für unser Verfahren</li>
-            </ul>
-          </div>
           {/* Seite 1 des echten Musterfall-PDFs (scripts/bericht-vorschau.ts) */}
           <img
             className="bericht-vorschau"
             src="/bericht-vorschau.png"
             width={620}
             height={877}
-            alt="Erste Seite eines Prüfberichts (Musterfall): Ampel, Spanne und Eckdaten des Vertrags"
+            alt="Erste Seite eines Gutachtens (Musterfall): Ampel, Spanne und Eckdaten des Vertrags"
             loading="lazy"
           />
+          <div>
+            <h2 id="gutachten-titel">Das steckt in Ihrem Gutachten</h2>
+            <ul className="punkteliste merkmal-liste">
+              <li>
+                <strong>Ihre Zahl.</strong> Was Ihr Vertrag rechnerisch wert ist – auf den Euro.
+              </li>
+              <li>
+                <strong>Der Vergleich.</strong> Rückkaufswert gegen Rechnung, als Balken. Sie sehen sofort,
+                was Sie beim Kündigen aufgeben würden.
+              </li>
+              <li>
+                <strong>Jahr für Jahr.</strong> Jeder Beitrag, jede Rendite, jede Quelle. Nichts Pauschales.
+              </li>
+              <li>
+                <strong>Die Zahlen Ihres Versicherers.</strong> Aus der amtlichen Statistik, kein
+                Branchendurchschnitt, wo es Einzelwerte gibt.
+              </li>
+              <li>
+                <strong>Drei Szenarien.</strong> Vorsichtig, realistisch, maximal. Damit Sie wissen, wo die
+                Verhandlung stattfindet.
+              </li>
+              <li>
+                <strong>Ihr nächster Schritt.</strong> Was wir für Sie tun – und wie Sie starten.
+              </li>
+            </ul>
+            <p className="schlusszeile">Wer kündigt, ohne diese Zahl zu kennen, verschenkt sie.</p>
+          </div>
         </div>
       </section>
 
@@ -140,31 +180,41 @@ export default function Startseite() {
               <p>Die Ampel. Sofort am Bildschirm.</p>
             </article>
             <article className="karte">
-              <h3>{BERICHT_PREIS_BRUTTO_EUR} € einmalig</h3>
-              <p>
-                Prüfbericht mit Ihrer Zahl, Jahr für Jahr, mit allen Quellen. Innerhalb von 12
-                Stunden per E-Mail.{PREIS_ANRECHNUNG ? ' Wird bei Beauftragung angerechnet.' : ''}
+              <h3>Das Gutachten</h3>
+              <Preisblock />
+              <p className="erklaerung" style={{ marginTop: '0.75rem' }}>
+                Innerhalb von 12 Stunden per E-Mail. Auf Wunsch zusätzlich gedruckt per Post – kostenlos,{' '}
+                {POST_WERKTAGE_TEXT}.
               </p>
             </article>
           </div>
         </div>
       </section>
 
-      <Testimonials />
-
       {VARIANTE.ankaufHinweis && (
-        <section className="abschnitt getoent" aria-labelledby="ankauf-titel">
-          <div className="container schmal">
-            <h2 id="ankauf-titel">Klagen ist nicht Ihr Ding? Dann verkaufen Sie.</h2>
-            <p>
-              Manche wollen ihr Geld, aber keinen Streit. Wir zeigen Ihnen beide Wege nebeneinander.
-            </p>
-            <p>
-              <Link href="/verkaufen">Zum Ankaufsangebot</Link>
-            </p>
+        <section className="abschnitt" aria-labelledby="ankauf-titel">
+          <div className="container hero-raster">
+            <div>
+              <h2 id="ankauf-titel">Verkaufen statt kündigen – und der Familie etwas Gutes tun.</h2>
+              <p style={{ fontSize: '1.15rem' }}>
+                Manche wollen ihr Geld, aber keinen Streit. Wir zeigen Ihnen beide Wege nebeneinander –
+                Sie entscheiden.
+              </p>
+              <p>
+                <Link href="/verkaufen" className="knopf zweitrangig">
+                  Zum Ankaufsangebot
+                </Link>
+              </p>
+            </div>
+            {/* Stimmungsbild (Prompt 14, 1.7): Paar mit Enkelkindern – keine Kunden, keine Bildunterschrift. */}
+            <Bildplatzhalter motiv="enkel" />
           </div>
         </section>
       )}
+
+      <Testimonials />
+
+      <Geschichten />
 
       <section className="abschnitt faq" id="fragen" aria-labelledby="fragen-titel">
         <div className="container schmal">
@@ -172,7 +222,7 @@ export default function Startseite() {
           <details>
             <summary>Was kostet das?</summary>
             <p>
-              Die Ampel nichts. Der Prüfbericht {BERICHT_PREIS_BRUTTO_EUR} € einmalig. Keine
+              Die Ampel nichts. Das Gutachten {BERICHT_PREIS_BRUTTO_EUR} € einmalig. Keine
               weiteren Kosten, kein Abo.
             </p>
           </details>
@@ -183,20 +233,17 @@ export default function Startseite() {
           <details>
             <summary>Mein Vertrag ist von 1985. Lohnt sich das?</summary>
             <p>
-              Die Ampel zeigt, ob Ihr Vertrag für unser Verfahren in Frage kommt. Der Bericht nennt
+              Die Ampel zeigt, ob Ihr Vertrag für unser Verfahren in Frage kommt. Das Gutachten nennt
               Ihre Zahl.
             </p>
           </details>
           <details>
-            <summary>Brauche ich eine Rechtsschutzversicherung?</summary>
-            <p>
-              Sie hilft, ist aber keine Voraussetzung. Wir fragen danach und besprechen mit Ihnen
-              den passenden Weg.
-            </p>
+            <summary>Wie schnell geht das?</summary>
+            <p>Ampel in 5 Minuten. Gutachten innerhalb von 12 Stunden per E-Mail. Danach melden wir uns.</p>
           </details>
           <details>
-            <summary>Wie schnell geht das?</summary>
-            <p>Ampel in 5 Minuten. Bericht innerhalb von 12 Stunden per E-Mail. Danach melden wir uns.</p>
+            <summary>Bekomme ich das Gutachten auch auf Papier?</summary>
+            <p>Ja, kostenlos, {POST_WERKTAGE_TEXT}. Wählen Sie das bei der Bestellung.</p>
           </details>
           <details>
             <summary>Was macht {BRAND.name} genau?</summary>
@@ -211,6 +258,10 @@ export default function Startseite() {
               Dann ist Ihr Vertrag für unser Verfahren zu klein. Lassen Sie sich von einem Anwalt
               Ihrer Wahl oder der Verbraucherzentrale beraten.
             </p>
+          </details>
+          <details>
+            <summary>Ich habe noch Fragen.</summary>
+            <p><VideocallSatz /></p>
           </details>
         </div>
       </section>

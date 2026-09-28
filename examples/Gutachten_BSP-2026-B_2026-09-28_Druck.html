@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Prüfbericht BSP-2026-C</title>
+<title>Gutachten BSP-2026-B – Druckvorlage</title>
 <style>
   @font-face {
     font-family: 'Newsreader';
@@ -28,11 +28,12 @@
   .seite { page-break-after: always; }
   .seite:last-child { page-break-after: auto; }
   h1, h2, h3 { font-family: 'Newsreader', Georgia, serif; font-weight: 600; color: #14365D; }
-  h1 { font-size: 21pt; margin: 0 0 4mm; line-height: 1.2; }
+  h1 { font-size: 21pt; margin: 0 0 2mm; line-height: 1.2; }
   h2 { font-size: 14pt; margin: 0 0 3mm; border-bottom: 1.5pt solid #DDE4E6; padding-bottom: 1.5mm; }
   h3 { font-size: 11.5pt; margin: 4mm 0 1.5mm; }
   p { margin: 0 0 2.5mm; }
   .sekundaer { color: #5B6772; }
+  .unterzeile { color: #5B6772; font-size: 9.5pt; margin: 0 0 4mm; }
   .kopfbalken {
     background: #14365D;
     color: #ffffff;
@@ -52,9 +53,11 @@
   .ampel { display: inline-flex; align-items: center; gap: 2.5mm; background: #E4EFEA; border-radius: 10mm; padding: 2mm 4.5mm; font-weight: 600; margin-top: 3mm; }
   .ampel .punkt { width: 3.5mm; height: 3.5mm; border-radius: 50%; display: inline-block; background: #B9CCC3; }
   .hinweisbox { background: #E4EFEA; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0; }
+  .hinweisbox.annahmen strong { display: block; margin-bottom: 1.5mm; }
   .gegenposition { background: #FFFFFF; border: 1pt solid #DDE4E6; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0; }
   .uebernahme { background: #14365D; color: #ffffff; border-radius: 2mm; padding: 4mm 5mm; margin: 4mm 0; }
   .uebernahme .sekundaer { color: #dbe4ee; }
+  .verkaufen { border: 1.5pt solid #7FAF9B; border-radius: 2mm; padding: 3.5mm 5mm; margin: 4mm 0; }
   .tabelle { width: 100%; border-collapse: collapse; margin: 3mm 0; font-size: 9.5pt; }
   .tabelle caption { text-align: left; font-weight: 700; margin-bottom: 1.5mm; }
   .tabelle th, .tabelle td { border-bottom: 0.5pt solid #DDE4E6; padding: 1.4mm 2mm; text-align: left; vertical-align: top; }
@@ -81,40 +84,71 @@
   li { margin-bottom: 1mm; }
   .fussnote { font-size: 8pt; color: #5B6772; }
   .disclaimer { border: 1pt solid #DDE4E6; border-radius: 2mm; padding: 3mm 4mm; font-size: 8.5pt; color: #5B6772; }
+  /* Druckvorlage (Postversand): Deckblatt mit Anschriftfeld für Fensterumschlag, Beileger. */
+  .deckblatt .absender { font-size: 7.5pt; color: #5B6772; margin: 22mm 0 2mm 6mm; }
+  .deckblatt .anschrift { margin: 0 0 0 6mm; min-height: 32mm; font-size: 11pt; line-height: 1.45; white-space: pre-line; }
+  .deckblatt .datum { text-align: right; color: #5B6772; font-size: 9.5pt; margin: 6mm 0 10mm; }
+  .beileger h2 { border: none; padding: 0; font-size: 17pt; }
+  .beileger .schritt { display: flex; gap: 4mm; margin: 3mm 0; }
+  .beileger .nummer { flex: 0 0 8mm; height: 8mm; border-radius: 50%; background: #14365D; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; }
 </style>
 </head>
 <body>
 
+<!-- Deckblatt (Postversand) -->
+<section class="seite deckblatt">
+  <div class="kopfbalken"><span class="marke">Renten-Rettung</span><span class="zusatz">Gutachten · gedruckte Fassung</span></div>
+  <p class="absender">Renten-Rettung · Kaufmannsladen Gebhard GmbH · Helmkrautstraße 35 A · 13503 Berlin</p>
+  <p class="anschrift">Musterfall B (anonymisiert)
+Musterstraße 1
+12345 Musterstadt</p>
+  <p class="datum">28.09.2026</p>
+  <h1>Ihr Gutachten, Bestellnummer BSP-2026-B</h1>
+  <p class="unterzeile">Automatisierte versicherungsmathematische Auswertung auf Basis Ihrer Angaben und veröffentlichter Versichererkennzahlen – kein Sachverständigengutachten.</p>
+  <p>Guten Tag Musterfall B (anonymisiert),</p>
+  <p>
+    wie gewünscht erhalten Sie Ihr Gutachten zusätzlich gedruckt. Es ist inhaltlich identisch mit der
+    Fassung, die Sie per E-Mail bekommen haben: Ihre Zahl, Jahr für Jahr aufgeschlüsselt, jede Rendite mit
+    Quelle – und die Gegenposition des Versicherers.
+  </p>
+  <p>
+    Der nächste Schritt steht auf der letzten Seite: Wir übernehmen. Wenn Sie lieber verkaufen als streiten,
+    liegt ein Blatt dazu bei.
+  </p>
+  <p>Freundliche Grüße<br>Ihr Team von Renten-Rettung</p>
+  <p class="fussnote">Schätzung mit Bandbreite, keine Rechtsberatung. Alle Angaben und Annahmen: Seite 3 und 4.</p>
+</section>
 <!-- Seite 1: Deckblatt -->
 <section class="seite">
-  <div class="kopfbalken"><span class="marke">Renten-Rettung</span><span class="zusatz">Prüfbericht · Schätzung mit Bandbreite</span></div>
-  <h1>Prüfbericht zu Ihrer Lebensversicherung</h1>
+  <div class="kopfbalken"><span class="marke">Renten-Rettung</span><span class="zusatz">Gutachten · Schätzung mit Bandbreite</span></div>
+  <h1>Gutachten zu Ihrer Lebensversicherung</h1>
+  <p class="unterzeile">Automatisierte versicherungsmathematische Auswertung auf Basis Ihrer Angaben und veröffentlichter Versichererkennzahlen – kein Sachverständigengutachten.</p>
   <div class="meta-box">
-    <span><strong>Bestellnummer:</strong> BSP-2026-C</span>
-    <span><strong>Erstellt am:</strong> 25.09.2026</span>
-    <span><strong>Für:</strong> Musterfall C (anonymisiert)</span>
-    <span><strong>Versicherer:</strong> nicht benannt (Branchendurchschnitt)</span>
+    <span><strong>Bestellnummer:</strong> BSP-2026-B</span>
+    <span><strong>Erstellt am:</strong> 28.09.2026</span>
+    <span><strong>Für:</strong> Musterfall B (anonymisiert)</span>
+    <span><strong>Versicherer:</strong> Allianz Lebensversicherungs-AG (Kennzahlen: Branchendurchschnitt)</span>
   </div>
   <div class="hero">
     <p class="sekundaer" style="margin:0">Geschätzter Rückabwicklungswert (Basis-Szenario)</p>
-    <p class="zahl">102.146,54 €</p>
-    <p class="spanne">Spanne der Szenarien konservativ–maximal: 90.542,51 € bis 106.462,40 €</p>
-    <p class="spanne">Zum Vergleich – aktueller Rückkaufswert: <strong>32.000,00 €</strong></p>
+    <p class="zahl">639.598,15 €</p>
+    <p class="spanne">Spanne der Szenarien konservativ–maximal: 596.560,33 € bis 667.461,91 €</p>
+    <p class="spanne">Zum Vergleich – aktueller Rückkaufswert: <strong>310.658,00 €</strong></p>
   </div>
-  <p>Gegenüber dem aktuellen Rückkaufswert ergäbe sich im Basis-Szenario ein geschätzter Mehrwert von <strong>70.146,54 €</strong> – unter den auf Seite 4 genannten Annahmen.</p>
+  <p>Gegenüber dem aktuellen Rückkaufswert ergäbe sich im Basis-Szenario ein geschätzter Mehrwert von <strong>328.940,15 €</strong> – unter den auf Seite 3 und 4 genannten Annahmen.</p>
   <p class="ampel"><span class="punkt" style="background:#1E8E4E"></span> Grün – der Vertrag kommt für unser Verfahren in Frage</p>
   <div class="hinweisbox">
-    <strong>Wichtig:</strong> Alle Werte sind Schätzungen unter offengelegten Annahmen (Seite 4) auf Basis öffentlich
-    verfügbarer Kennzahlen – es wird kein Betrag zugesagt und keine Rechtsberatung im Einzelfall erteilt. Ob und auf
-    welchem Weg sich das durchsetzen lässt, prüfen die spezialisierten Anwälte, mit denen wir arbeiten, anhand Ihrer
-    Unterlagen (Seite 7).
+    <strong>Wichtig:</strong> Alle Werte sind Schätzungen unter offengelegten Annahmen (Seite 3 und 4) auf Basis
+    öffentlich verfügbarer Kennzahlen – es wird kein Betrag zugesagt und keine Rechtsberatung im Einzelfall
+    erteilt. Ob und auf welchem Weg sich das durchsetzen lässt, prüfen die spezialisierten Anwälte, mit denen
+    wir arbeiten, anhand Ihrer Unterlagen (Seite 7).
   </div>
 </section>
 
 <!-- Seite 2: Grundlage und Methodik -->
 <section class="seite">
   <h2>1. Grundlage und Methodik</h2>
-  <p>Die Berechnung folgt der Rückabwicklungsformel: eingezahlte Beiträge abzüglich Risikoanteil, zuzüglich der Nutzungen, die der Versicherer aus den Beiträgen gezogen hat. Sie wird für alle Vertragsjahrgänge gleich angewendet. Welche rechtliche Grundlage im Einzelfall trägt (Widerspruch, Widerruf, Rücktritt, unwirksame Klauseln, Nachforderung beim Rückkaufswert oder anderes), prüfen die spezialisierten Anwälte, mit denen wir arbeiten, anhand der Vertragsunterlagen. Dieser Bericht ersetzt diese Prüfung nicht. Die meisten Verfahren enden durch Vergleich; das Ergebnis ist eine Verhandlungsbasis mit Bandbreite.</p>
+  <p>Die Berechnung folgt der Rückabwicklungsformel: eingezahlte Beiträge abzüglich Risikoanteil, zuzüglich der Nutzungen, die der Versicherer aus den Beiträgen gezogen hat. Sie wird für alle Vertragsjahrgänge gleich angewendet. Welche rechtliche Grundlage im Einzelfall trägt (Widerspruch, Widerruf, Rücktritt, unwirksame Klauseln, Nachforderung beim Rückkaufswert oder anderes), prüfen die spezialisierten Anwälte, mit denen wir arbeiten, anhand der Vertragsunterlagen. Dieses Gutachten ersetzt diese Prüfung nicht. Die meisten Verfahren enden durch Vergleich; das Ergebnis ist eine Verhandlungsbasis mit Bandbreite.</p>
   
   
   <h3>Rechtsprechung zur Rechenformel</h3>
@@ -128,10 +162,10 @@
         <p style="margin:0">„Der Versicherungsnehmer kann nur vom Versicherer tatsächlich gezogene Nutzungen herausverlangen und trägt hierfür die Darlegungs- und Beweislast. Er kann seinen Tatsachenvortrag nicht ohne Bezug zur Ertragslage des jeweiligen Versicherers auf eine tatsächliche Vermutung einer Gewinnerzielung in bestimmter Höhe stützen." (Leitsatz 2)</p>
       </div>
   <p class="fussnote">Wiedergabe der Entscheidungstexte nach frei zugänglichen Volltext-Spiegeln (lexetius.com, urteile-gesetze.de, RIS); der Wort-für-Wort-Abgleich mit den amtlichen Entscheidungsdatenbanken ist in Arbeit.</p>
-  <h3>Was dieser Bericht ist – und was nicht</h3>
+  <h3>Was dieses Gutachten ist – und was nicht</h3>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:6mm">
-    <div><ul><li>eine strukturierte, nachvollziehbare Schätzung in drei Szenarien</li><li>jede Kennzahl mit Quelle und Herkunft (Seite 4–5)</li><li>die Grundlage für unser Verfahren – die Anwälte, mit denen wir arbeiten, rechnen darauf auf</li></ul></div>
-    <div><ul><li>keine Rechtsberatung im Einzelfall und keine Vertretung</li><li>keine Zusage eines Betrags oder Erfolgs</li><li>keine steuerliche Beratung; keine Empfehlung, zu kündigen, zu verkaufen oder zu behalten</li></ul></div>
+    <div><ul><li>eine automatisierte versicherungsmathematische Auswertung: strukturiert, nachvollziehbar, in drei Szenarien</li><li>jede Kennzahl mit Quelle und Herkunft (Seite 4–5)</li><li>die Grundlage für unser Verfahren – die Anwälte, mit denen wir arbeiten, rechnen darauf auf</li></ul></div>
+    <div><ul><li>kein Sachverständigengutachten, keine Rechtsberatung im Einzelfall und keine Vertretung</li><li>keine Zusage eines Betrags oder Erfolgs</li><li>keine steuerliche Beratung; keine Empfehlung, zu kündigen, zu verkaufen oder zu behalten</li></ul></div>
   </div>
 </section>
 
@@ -140,13 +174,14 @@
   <h2>2. Ihre Angaben</h2>
   <table class="tabelle">
     <caption>Ihre Angaben im Überblick</caption>
-    <tbody><tr><th scope="row">Auftrags-/Aktenzeichen</th><td>BSP-2026-C</td></tr><tr><th scope="row">Name</th><td>Musterfall C (anonymisiert)</td></tr><tr><th scope="row">Versicherer (Angabe laut Police)</th><td>nicht benannt (Branchendurchschnitt)</td></tr><tr><th scope="row">Vertragsart</th><td>kapital-lv</td></tr><tr><th scope="row">Vertragsbeginn</th><td>05/1986</td></tr><tr><th scope="row">Geplantes Vertragsende</th><td>–</td></tr><tr><th scope="row">Stand des Vertrags</th><td>laufend</td></tr><tr><th scope="row">Zahlweise</th><td>monatlich</td></tr><tr><th scope="row">Erstbeitrag</th><td>150,00 DM (Umrechnung: 1 € = 1,95583 DM)</td></tr><tr><th scope="row">Aktueller Beitrag</th><td>–</td></tr><tr><th scope="row">Beitragsdynamik</th><td>nein</td></tr><tr><th scope="row">Eingezahlt laut Standmitteilung</th><td>–</td></tr><tr><th scope="row">Aktueller Rückkaufswert</th><td>32.000,00 €</td></tr><tr><th scope="row">Erhaltene Auszahlungen</th><td>keine angegeben</td></tr><tr><th scope="row">Eintrittsalter</th><td>30</td></tr><tr><th scope="row">Stichtag der Berechnung</th><td>09/2026</td></tr></tbody>
+    <tbody><tr><th scope="row">Auftrags-/Aktenzeichen</th><td>BSP-2026-B</td></tr><tr><th scope="row">Name</th><td>Musterfall B (anonymisiert)</td></tr><tr><th scope="row">Versicherer (Angabe laut Police)</th><td>Allianz Lebensversicherungs-AG (Kennzahlen: Branchendurchschnitt)</td></tr><tr><th scope="row">Vertragsart</th><td>kapital-lv</td></tr><tr><th scope="row">Vertragsbeginn</th><td>10/1995</td></tr><tr><th scope="row">Geplantes Vertragsende</th><td>–</td></tr><tr><th scope="row">Stand des Vertrags</th><td>laufend</td></tr><tr><th scope="row">Beitragszahlung bis</th><td>– (laufend bzw. bis Stichtag)</td></tr><tr><th scope="row">Zahlweise</th><td>monatlich</td></tr><tr><th scope="row">Erstbeitrag</th><td>1.000,00 DM (Umrechnung: 1 € = 1,95583 DM)</td></tr><tr><th scope="row">Aktueller Beitrag</th><td>–</td></tr><tr><th scope="row">Beitragsdynamik</th><td>ja, 5,00 % p. a.</td></tr><tr><th scope="row">Eingezahlt laut Standmitteilung</th><td>439.455,00 €</td></tr><tr><th scope="row">Aktueller Rückkaufswert</th><td>310.658,00 €</td></tr><tr><th scope="row">Erhaltene Auszahlungen</th><td>keine angegeben</td></tr><tr><th scope="row">Eintrittsalter</th><td>35</td></tr><tr><th scope="row">Stichtag der Berechnung</th><td>09/2026</td></tr></tbody>
   </table>
   <p class="sekundaer">DM-Beträge wurden mit dem amtlichen Kurs 1 € = 1,95583 DM umgerechnet.</p>
+  <div class="hinweisbox annahmen"><strong>Ihre Angaben und unsere Annahmen</strong><p style="margin:0">Alle Angaben lagen vor; ergänzende Annahmen aus „Weiß ich nicht“-Antworten waren nicht nötig. Die allgemeinen Annahmen der Rechenmethode stehen auf Seite 4.</p></div>
   <div class="hinweisbox">
     <strong>Bitte prüfen Sie diese Angaben auf Richtigkeit.</strong> Die Schätzung ist nur so gut wie die
     Eingaben; Abweichungen (z. B. bei Beitragshöhe, Dynamik oder Auszahlungen) verändern das Ergebnis.
-    Für eine belastbarere Einordnung fehlen: Police und Belehrungstexte (Widerruf nach § 8 Abs. 4 VVG i.d.F. 1990).
+    
   </div>
 </section>
 
@@ -158,9 +193,9 @@
     <figure class="diagramm" role="img" aria-label="Aufteilung der Beiträge in Spar-, Risiko-, Abschluss- und Verwaltungskostenanteil">
       <svg viewBox="0 0 660 40" width="100%" height="40">
         <clipPath id="bar-clip"><rect x="0" y="0" width="660" height="40" rx="4" /></clipPath>
-        <g clip-path="url(#bar-clip)"><rect x="0.0" y="0" width="610.1" height="40" fill="#14365D" /><rect x="612.1" y="0" width="26.2" height="40" fill="#C24E2B" /><rect x="640.3" y="0" width="19.7" height="40" fill="#7FAF9B" /></g>
+        <g clip-path="url(#bar-clip)"><rect x="0.0" y="0" width="577.4" height="40" fill="#14365D" /><rect x="579.4" y="0" width="39.2" height="40" fill="#C24E2B" /><rect x="620.6" y="0" width="26.2" height="40" fill="#5B6772" /><rect x="648.8" y="0" width="11.2" height="40" fill="#7FAF9B" /></g>
       </svg>
-      <figcaption class="legende"><span class="legende-eintrag"><span class="legende-farbe" style="background:#14365D"></span>Sparanteil: 34.592,73 € (93,0 %)</span><span class="legende-eintrag"><span class="legende-farbe" style="background:#C24E2B"></span>Risikoanteil (inkl. BUZ): 1.487,86 € (4,0 %)</span><span class="legende-eintrag"><span class="legende-farbe" style="background:#7FAF9B"></span>Verwaltungskosten: 1.115,89 € (3,0 %)</span></figcaption>
+      <figcaption class="legende"><span class="legende-eintrag"><span class="legende-farbe" style="background:#14365D"></span>Sparanteil: 387.962,39 € (88,3 %)</span><span class="legende-eintrag"><span class="legende-farbe" style="background:#C24E2B"></span>Risikoanteil (inkl. BUZ): 26.367,30 € (6,0 %)</span><span class="legende-eintrag"><span class="legende-farbe" style="background:#5B6772"></span>Abschlusskosten: 17.578,20 € (4,0 %)</span><span class="legende-eintrag"><span class="legende-farbe" style="background:#7FAF9B"></span>Verwaltungskosten: 7.547,11 € (1,7 %)</span></figcaption>
     </figure>
   <p>
     Nutzungen werden – der Rechtsprechung folgend – nur auf den <strong>Sparanteil</strong> gerechnet
@@ -171,8 +206,8 @@
   <h3>Die drei Szenarien</h3>
   <ul><li><strong>Konservativ:</strong> je Jahr der niedrigere Wert aus Nettoverzinsung und laufender Durchschnittsverzinsung; Risikoanteil am oberen Rand; keine Nutzungen auf Kostenanteile.</li><li><strong>Basis:</strong> Nettoverzinsung der Kapitalanlagen; Risikoanteil im Mittel; keine Nutzungen auf Kostenanteile.</li><li><strong>Maximal:</strong> Nettoverzinsung; Risikoanteil am unteren Rand; zusätzlich Nutzungen auf den Verwaltungskostenanteil – von Gerichten nur bei konkretem Nachweis zuerkannt, daher ausdrücklich Obergrenze.</li></ul>
   <h3>Annahmen und Vereinfachungen dieser Berechnung</h3>
-  <ul><li>Erstbeitrag in DM angegeben; Umrechnung mit dem amtlichen Kurs 1 € = 1.95583 DM. Der nominale DM-Beitrag läuft ab 2002 als identischer Euro-Gegenwert weiter.</li><li>Risikoanteil pauschal 4 % des Beitrags (Vertragsart kapital-lv, Eintrittsalter 30, Szenarioband basis); Modellannahme aus data/risk-defaults.json, durch Vertragswerte ersetzbar.</li><li>Für 485 Beitragsmonat(e) lag keine Verwaltungskostenquote des Versicherers vor; Fallback aus data/risk-defaults.json (Modellannahme).</li><li>Für die Versicherer-ID &quot;unbekannt&quot; liegen keine Kennzahlen vor; es gilt durchgängig der Branchendurchschnitt (als Schätzung markiert).</li></ul>
-  <h3>Warnhinweise</h3><ul><li>Kein Höchstzillmersatz für das Abschlussjahr 1986 hinterlegt – Abschlusskosten wurden mit 0 angesetzt (anspruchserhöhend; Datenlücke in insurers.json).</li><li>Für 1986 liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert 1985 (8.12 %) verwendet.</li><li>Für 1987 liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert 1985 (8.12 %) verwendet.</li><li>Für 1988 liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert 1985 (8.12 %) verwendet.</li><li>Für 1989 liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert 1985 (8.12 %) verwendet.</li><li>Für 2025 liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert 2024 (2.37 %) verwendet.</li><li>Für 2026 liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert 2024 (2.37 %) verwendet.</li></ul>
+  <ul><li>Erstbeitrag in DM angegeben; Umrechnung mit dem amtlichen Kurs 1 € = 1.95583 DM. Der nominale DM-Beitrag läuft ab 2002 als identischer Euro-Gegenwert weiter.</li><li>Beitragsreihe proportional auf die Gesamtsumme laut Standmitteilung skaliert (Faktor 1.0122).</li><li>Risikoanteil pauschal 6 % des Beitrags (Vertragsart kapital-lv, Eintrittsalter 35, Szenarioband basis); Modellannahme aus data/risk-defaults.json, durch Vertragswerte ersetzbar.</li><li>Abschlusskosten mit dem Höchstzillmersatz von 40 ‰ der Beitragssumme angesetzt (Abschlussjahr 1995).</li><li>Für 204 Beitragsmonat(e) lag keine Verwaltungskostenquote des Versicherers vor; Fallback aus data/risk-defaults.json (Modellannahme).</li><li>Für 14 Jahr(e) fehlten Unternehmenswerte; dort wurde der Branchendurchschnitt verwendet (als Schätzung markiert).</li></ul>
+  <h3>Warnhinweise</h3><ul><li>In einzelnen Monaten überstiegen Risiko- und Kostenanteile den Beitrag; die Kostenanteile wurden gekürzt (Sparanteil 0). Typisch in der Zillmerungsphase alter Verträge.</li><li>Für 2025 liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert 2024 (2.37 %) verwendet.</li><li>Für 2026 liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert 2024 (2.37 %) verwendet.</li></ul>
 </section>
 
 <!-- Seite 5: Jahrestabelle -->
@@ -182,456 +217,357 @@
     <caption>Jahresweise Aufschlüsselung (Basis-Szenario, Beträge in Euro)</caption>
     <thead><tr><th scope="col">Jahr</th><th scope="col">Beiträge</th><th scope="col">Risiko (inkl. BUZ)</th><th scope="col">Abschluss</th><th scope="col">Verwaltung</th><th scope="col">Sparanteil</th><th scope="col">Zinssatz</th><th scope="col">Quelle</th><th scope="col">Nutzungen</th><th scope="col">Stand kumuliert</th></tr></thead>
     <tbody><tr>
-        <th scope="row">1986</th>
-        <td class="betrag">613,55</td>
-        <td class="betrag">24,54</td>
-        <td class="betrag">0,00</td>
-        <td class="betrag">18,41</td>
-        <td class="betrag">570,60</td>
-        <td class="betrag">8,12 %</td>
-        <td>Näherung</td>
-        <td class="betrag">13,70</td>
-        <td class="betrag">584,30</td>
-      </tr><tr>
-        <th scope="row">1987</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
-        <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">8,12 %</td>
-        <td>Näherung</td>
-        <td class="betrag">81,83</td>
-        <td class="betrag">1.522,04</td>
-      </tr><tr>
-        <th scope="row">1988</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
-        <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">8,12 %</td>
-        <td>Näherung</td>
-        <td class="betrag">160,88</td>
-        <td class="betrag">2.538,82</td>
-      </tr><tr>
-        <th scope="row">1989</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
-        <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">8,12 %</td>
-        <td>Näherung</td>
-        <td class="betrag">246,58</td>
-        <td class="betrag">3.641,30</td>
-      </tr><tr>
-        <th scope="row">1990</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
-        <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">6,78 %</td>
-        <td>Branche</td>
-        <td class="betrag">281,80</td>
-        <td class="betrag">4.779,01</td>
-      </tr><tr>
-        <th scope="row">1991</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
-        <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">7,44 %</td>
-        <td>Branche</td>
-        <td class="betrag">397,73</td>
-        <td class="betrag">6.032,65</td>
-      </tr><tr>
-        <th scope="row">1992</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
-        <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">7,39 %</td>
-        <td>Branche</td>
-        <td class="betrag">490,82</td>
-        <td class="betrag">7.379,37</td>
-      </tr><tr>
-        <th scope="row">1993</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
-        <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">7,59 %</td>
-        <td>Branche</td>
-        <td class="betrag">610,41</td>
-        <td class="betrag">8.845,68</td>
-      </tr><tr>
-        <th scope="row">1994</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
-        <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">7,15 %</td>
-        <td>Branche</td>
-        <td class="betrag">682,22</td>
-        <td class="betrag">10.383,80</td>
-      </tr><tr>
         <th scope="row">1995</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">1.552,61</td>
+        <td class="betrag">93,16</td>
+        <td class="betrag">1.459,45</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">7,37 %</td>
-        <td>Branche</td>
-        <td class="betrag">821,19</td>
-        <td class="betrag">12.060,89</td>
+        <td class="betrag">0,00</td>
+        <td class="betrag">7,49 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">0,00</td>
+        <td class="betrag">0,00</td>
       </tr><tr>
         <th scope="row">1996</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">6.288,06</td>
+        <td class="betrag">377,28</td>
+        <td class="betrag">5.910,78</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">7,37 %</td>
-        <td>Branche</td>
-        <td class="betrag">949,05</td>
-        <td class="betrag">13.865,84</td>
+        <td class="betrag">0,00</td>
+        <td class="betrag">7,46 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">0,00</td>
+        <td class="betrag">0,00</td>
       </tr><tr>
         <th scope="row">1997</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">6.602,46</td>
+        <td class="betrag">396,15</td>
+        <td class="betrag">6.206,32</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">0,00</td>
         <td class="betrag">7,46 %</td>
         <td>Branche</td>
-        <td class="betrag">1.100,38</td>
-        <td class="betrag">15.822,13</td>
+        <td class="betrag">0,00</td>
+        <td class="betrag">0,00</td>
       </tr><tr>
         <th scope="row">1998</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
-        <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">6.932,59</td>
+        <td class="betrag">415,96</td>
+        <td class="betrag">4.001,65</td>
+        <td class="betrag">88,16</td>
+        <td class="betrag">2.426,82</td>
         <td class="betrag">7,57 %</td>
         <td>Branche</td>
-        <td class="betrag">1.270,51</td>
-        <td class="betrag">17.948,54</td>
+        <td class="betrag">27,16</td>
+        <td class="betrag">2.453,98</td>
       </tr><tr>
         <th scope="row">1999</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">7.279,22</td>
+        <td class="betrag">436,75</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">218,38</td>
+        <td class="betrag">6.624,09</td>
         <td class="betrag">7,60 %</td>
         <td>Branche</td>
-        <td class="betrag">1.443,07</td>
-        <td class="betrag">20.247,52</td>
+        <td class="betrag">426,43</td>
+        <td class="betrag">9.504,50</td>
       </tr><tr>
         <th scope="row">2000</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">7.643,18</td>
+        <td class="betrag">458,59</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">229,30</td>
+        <td class="betrag">6.955,29</td>
         <td class="betrag">7,51 %</td>
         <td>Branche</td>
-        <td class="betrag">1.604,12</td>
-        <td class="betrag">22.707,54</td>
+        <td class="betrag">980,87</td>
+        <td class="betrag">17.440,66</td>
       </tr><tr>
         <th scope="row">2001</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">8.025,34</td>
+        <td class="betrag">481,52</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">240,76</td>
+        <td class="betrag">7.303,06</td>
         <td class="betrag">6,12 %</td>
         <td>Branche</td>
-        <td class="betrag">1.453,77</td>
-        <td class="betrag">25.017,22</td>
+        <td class="betrag">1.304,08</td>
+        <td class="betrag">26.047,80</td>
       </tr><tr>
         <th scope="row">2002</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">8.426,60</td>
+        <td class="betrag">505,60</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">252,80</td>
+        <td class="betrag">7.668,21</td>
         <td class="betrag">4,68 %</td>
         <td>Branche</td>
-        <td class="betrag">1.214,85</td>
-        <td class="betrag">27.087,97</td>
+        <td class="betrag">1.410,48</td>
+        <td class="betrag">35.126,49</td>
       </tr><tr>
         <th scope="row">2003</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">8.847,93</td>
+        <td class="betrag">530,88</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">265,44</td>
+        <td class="betrag">8.051,62</td>
         <td class="betrag">5,05 %</td>
         <td>Branche</td>
-        <td class="betrag">1.420,14</td>
-        <td class="betrag">29.364,01</td>
+        <td class="betrag">2.002,61</td>
+        <td class="betrag">45.180,72</td>
       </tr><tr>
         <th scope="row">2004</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">9.290,33</td>
+        <td class="betrag">557,42</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">278,71</td>
+        <td class="betrag">8.454,20</td>
         <td class="betrag">4,90 %</td>
         <td>Branche</td>
-        <td class="betrag">1.491,08</td>
-        <td class="betrag">31.711,00</td>
+        <td class="betrag">2.454,78</td>
+        <td class="betrag">56.089,70</td>
       </tr><tr>
         <th scope="row">2005</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">9.754,85</td>
+        <td class="betrag">585,29</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">292,65</td>
+        <td class="betrag">8.876,91</td>
         <td class="betrag">5,18 %</td>
         <td>Branche</td>
-        <td class="betrag">1.702,81</td>
-        <td class="betrag">34.269,71</td>
+        <td class="betrag">3.187,08</td>
+        <td class="betrag">68.153,69</td>
       </tr><tr>
         <th scope="row">2006</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">10.242,59</td>
+        <td class="betrag">614,56</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">307,28</td>
+        <td class="betrag">9.320,76</td>
         <td class="betrag">4,82 %</td>
         <td>Branche</td>
-        <td class="betrag">1.707,95</td>
-        <td class="betrag">36.833,56</td>
+        <td class="betrag">3.565,14</td>
+        <td class="betrag">81.039,59</td>
       </tr><tr>
         <th scope="row">2007</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">10.754,72</td>
+        <td class="betrag">645,28</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">322,64</td>
+        <td class="betrag">9.786,79</td>
         <td class="betrag">4,65 %</td>
         <td>Branche</td>
-        <td class="betrag">1.768,22</td>
-        <td class="betrag">39.457,68</td>
+        <td class="betrag">4.058,86</td>
+        <td class="betrag">94.885,24</td>
       </tr><tr>
         <th scope="row">2008</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">11.292,45</td>
+        <td class="betrag">677,55</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">338,77</td>
+        <td class="betrag">10.276,13</td>
         <td class="betrag">3,54 %</td>
         <td>Branche</td>
-        <td class="betrag">1.433,71</td>
-        <td class="betrag">41.747,30</td>
+        <td class="betrag">3.580,65</td>
+        <td class="betrag">108.742,03</td>
       </tr><tr>
         <th scope="row">2009</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">11.857,08</td>
+        <td class="betrag">711,42</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">355,71</td>
+        <td class="betrag">10.789,94</td>
         <td class="betrag">4,18 %</td>
         <td>Branche</td>
-        <td class="betrag">1.795,45</td>
-        <td class="betrag">44.398,65</td>
+        <td class="betrag">4.840,54</td>
+        <td class="betrag">124.372,51</td>
       </tr><tr>
         <th scope="row">2010</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">12.449,93</td>
+        <td class="betrag">747,00</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">373,50</td>
+        <td class="betrag">11.329,44</td>
         <td class="betrag">4,27 %</td>
         <td>Branche</td>
-        <td class="betrag">1.950,32</td>
-        <td class="betrag">47.204,87</td>
+        <td class="betrag">5.637,99</td>
+        <td class="betrag">141.339,93</td>
       </tr><tr>
         <th scope="row">2011</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">13.072,43</td>
+        <td class="betrag">784,35</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">4,13 %</td>
-        <td>Branche</td>
-        <td class="betrag">2.003,28</td>
-        <td class="betrag">50.064,06</td>
+        <td class="betrag">143,80</td>
+        <td class="betrag">12.144,29</td>
+        <td class="betrag">4,50 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">6.744,20</td>
+        <td class="betrag">160.228,42</td>
       </tr><tr>
         <th scope="row">2012</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">13.726,05</td>
+        <td class="betrag">823,56</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">4,59 %</td>
-        <td>Branche</td>
-        <td class="betrag">2.365,14</td>
-        <td class="betrag">53.285,10</td>
+        <td class="betrag">164,71</td>
+        <td class="betrag">12.737,77</td>
+        <td class="betrag">4,90 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">8.317,00</td>
+        <td class="betrag">181.283,19</td>
       </tr><tr>
         <th scope="row">2013</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">14.412,35</td>
+        <td class="betrag">864,74</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">4,68 %</td>
-        <td>Branche</td>
-        <td class="betrag">2.566,53</td>
-        <td class="betrag">56.707,54</td>
+        <td class="betrag">144,12</td>
+        <td class="betrag">13.403,49</td>
+        <td class="betrag">5,40 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">10.368,60</td>
+        <td class="betrag">205.055,28</td>
       </tr><tr>
         <th scope="row">2014</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">15.132,97</td>
+        <td class="betrag">907,98</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">4,63 %</td>
-        <td>Branche</td>
-        <td class="betrag">2.700,40</td>
-        <td class="betrag">60.263,84</td>
+        <td class="betrag">151,33</td>
+        <td class="betrag">14.073,66</td>
+        <td class="betrag">4,80 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">10.372,71</td>
+        <td class="betrag">229.501,65</td>
       </tr><tr>
         <th scope="row">2015</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">15.889,62</td>
+        <td class="betrag">953,38</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">4,52 %</td>
-        <td>Branche</td>
-        <td class="betrag">2.799,03</td>
-        <td class="betrag">63.918,77</td>
+        <td class="betrag">174,79</td>
+        <td class="betrag">14.761,45</td>
+        <td class="betrag">4,60 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">11.094,56</td>
+        <td class="betrag">255.357,67</td>
       </tr><tr>
         <th scope="row">2016</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">16.684,10</td>
+        <td class="betrag">1.001,05</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">4,36 %</td>
-        <td>Branche</td>
-        <td class="betrag">2.860,54</td>
-        <td class="betrag">67.635,21</td>
+        <td class="betrag">166,84</td>
+        <td class="betrag">15.516,21</td>
+        <td class="betrag">4,40 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">11.778,68</td>
+        <td class="betrag">282.652,56</td>
       </tr><tr>
         <th scope="row">2017</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">17.518,30</td>
+        <td class="betrag">1.051,10</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">4,49 %</td>
-        <td>Branche</td>
-        <td class="betrag">3.117,94</td>
-        <td class="betrag">71.609,05</td>
+        <td class="betrag">157,66</td>
+        <td class="betrag">16.309,54</td>
+        <td class="betrag">4,50 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">13.322,18</td>
+        <td class="betrag">312.284,28</td>
       </tr><tr>
         <th scope="row">2018</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">18.394,22</td>
+        <td class="betrag">1.103,65</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">3,59 %</td>
-        <td>Branche</td>
-        <td class="betrag">2.627,71</td>
-        <td class="betrag">75.092,67</td>
+        <td class="betrag">165,55</td>
+        <td class="betrag">17.125,02</td>
+        <td class="betrag">4,20 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">13.701,55</td>
+        <td class="betrag">343.110,85</td>
       </tr><tr>
         <th scope="row">2019</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">19.313,93</td>
+        <td class="betrag">1.158,84</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">3,92 %</td>
-        <td>Branche</td>
-        <td class="betrag">3.012,65</td>
-        <td class="betrag">78.961,22</td>
+        <td class="betrag">135,20</td>
+        <td class="betrag">18.019,90</td>
+        <td class="betrag">4,20 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">15.038,73</td>
+        <td class="betrag">376.169,48</td>
       </tr><tr>
         <th scope="row">2020</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">20.279,63</td>
+        <td class="betrag">1.216,78</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">3,74 %</td>
-        <td>Branche</td>
-        <td class="betrag">3.019,13</td>
-        <td class="betrag">82.836,25</td>
+        <td class="betrag">162,24</td>
+        <td class="betrag">18.900,61</td>
+        <td class="betrag">4,00 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">15.672,57</td>
+        <td class="betrag">410.742,66</td>
       </tr><tr>
         <th scope="row">2021</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">21.293,61</td>
+        <td class="betrag">1.277,62</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">3,57 %</td>
-        <td>Branche</td>
-        <td class="betrag">3.020,27</td>
-        <td class="betrag">86.712,42</td>
+        <td class="betrag">212,94</td>
+        <td class="betrag">19.803,06</td>
+        <td class="betrag">3,70 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">15.793,74</td>
+        <td class="betrag">446.339,45</td>
       </tr><tr>
         <th scope="row">2022</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">22.358,29</td>
+        <td class="betrag">1.341,50</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">2,16 %</td>
-        <td>Branche</td>
-        <td class="betrag">1.900,17</td>
-        <td class="betrag">89.468,49</td>
+        <td class="betrag">245,94</td>
+        <td class="betrag">20.770,85</td>
+        <td class="betrag">2,00 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">9.198,60</td>
+        <td class="betrag">476.308,90</td>
       </tr><tr>
         <th scope="row">2023</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">23.476,20</td>
+        <td class="betrag">1.408,57</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">2,27 %</td>
-        <td>Branche</td>
-        <td class="betrag">2.061,16</td>
-        <td class="betrag">92.385,55</td>
+        <td class="betrag">281,71</td>
+        <td class="betrag">21.785,92</td>
+        <td class="betrag">2,50 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">12.293,95</td>
+        <td class="betrag">510.388,76</td>
       </tr><tr>
         <th scope="row">2024</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">24.650,01</td>
+        <td class="betrag">1.479,00</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
-        <td class="betrag">2,37 %</td>
-        <td>Branche</td>
-        <td class="betrag">2.222,84</td>
-        <td class="betrag">95.464,29</td>
+        <td class="betrag">295,80</td>
+        <td class="betrag">22.875,21</td>
+        <td class="betrag">2,90 %</td>
+        <td>Versicherer</td>
+        <td class="betrag">15.303,01</td>
+        <td class="betrag">548.566,98</td>
       </tr><tr>
         <th scope="row">2025</th>
-        <td class="betrag">920,33</td>
-        <td class="betrag">36,81</td>
+        <td class="betrag">25.882,51</td>
+        <td class="betrag">1.552,95</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">27,61</td>
-        <td class="betrag">855,90</td>
+        <td class="betrag">776,48</td>
+        <td class="betrag">23.553,09</td>
         <td class="betrag">2,37 %</td>
         <td>Näherung</td>
-        <td class="betrag">2.296,60</td>
-        <td class="betrag">98.616,80</td>
+        <td class="betrag">13.398,13</td>
+        <td class="betrag">585.518,20</td>
       </tr><tr>
         <th scope="row">2026</th>
-        <td class="betrag">690,24</td>
-        <td class="betrag">27,61</td>
+        <td class="betrag">20.130,84</td>
+        <td class="betrag">1.207,85</td>
         <td class="betrag">0,00</td>
-        <td class="betrag">20,71</td>
-        <td class="betrag">641,93</td>
+        <td class="betrag">603,93</td>
+        <td class="betrag">18.319,07</td>
         <td class="betrag">2,37 %</td>
         <td>Näherung</td>
-        <td class="betrag">1.771,92</td>
-        <td class="betrag">101.030,64</td>
+        <td class="betrag">10.635,58</td>
+        <td class="betrag">614.472,84</td>
       </tr></tbody>
   </table>
   <p class="fussnote">Herkunft „Branche“ = Branchendurchschnitt (Datenkennzeichen „estimated_branch“, Schätzung); „Näherung“ = nächstliegender Branchenwert bei Datenlücke.</p>
@@ -653,47 +589,47 @@
     </tr></thead>
     <tbody><tr>
         <th scope="row">Konservativ</th>
-        <td class="betrag">34.592,73 €</td>
-        <td class="betrag">55.949,78 €</td>
-        <td class="betrag">90.542,51 €</td>
+        <td class="betrag">395.509,50 €</td>
+        <td class="betrag">201.050,83 €</td>
+        <td class="betrag">596.560,33 €</td>
         <td class="betrag">0,00 €</td>
-        <td class="betrag">90.542,51 €</td>
-        <td class="betrag">58.542,51 €</td>
+        <td class="betrag">596.560,33 €</td>
+        <td class="betrag">285.902,33 €</td>
       </tr><tr>
         <th scope="row">Basis</th>
-        <td class="betrag">35.708,62 €</td>
-        <td class="betrag">66.437,91 €</td>
-        <td class="betrag">102.146,54 €</td>
+        <td class="betrag">413.087,70 €</td>
+        <td class="betrag">226.510,45 €</td>
+        <td class="betrag">639.598,15 €</td>
         <td class="betrag">0,00 €</td>
-        <td class="betrag">102.146,54 €</td>
-        <td class="betrag">70.146,54 €</td>
+        <td class="betrag">639.598,15 €</td>
+        <td class="betrag">328.940,15 €</td>
       </tr><tr>
         <th scope="row">Maximal (Obergrenze)</th>
-        <td class="betrag">36.452,55 €</td>
-        <td class="betrag">70.009,84 €</td>
-        <td class="betrag">106.462,40 €</td>
+        <td class="betrag">426.271,35 €</td>
+        <td class="betrag">241.190,56 €</td>
+        <td class="betrag">667.461,91 €</td>
         <td class="betrag">0,00 €</td>
-        <td class="betrag">106.462,40 €</td>
-        <td class="betrag">74.462,40 €</td>
+        <td class="betrag">667.461,91 €</td>
+        <td class="betrag">356.803,91 €</td>
       </tr></tbody>
   </table>
   <p class="sekundaer">
-    Nutzungen im Basis-Szenario entsprechen 178,6 % der eingezahlten
+    Nutzungen im Basis-Szenario entsprechen 51,5 % der eingezahlten
     Beiträge – diese Kennzahl ist nur zusammen mit der daneben ausgewiesenen Zinsreihe aussagekräftig.
   </p>
   <p>
-    <strong>Datenbasis der Nutzungen:</strong> 0,0 % der Nutzungen
-    beruhen auf Kennzahlen des Versicherers (0,00 €),
-    93,1 %
-    auf Branchendurchschnitten (61.866,40 €) und
-    6,9 %
-    auf Näherungen für Jahre ohne Daten (4.571,52 €).
+    <strong>Datenbasis der Nutzungen:</strong> 74,6 % der Nutzungen
+    beruhen auf Kennzahlen des Versicherers (169.000,08 €),
+    14,8 %
+    auf Branchendurchschnitten (33.476,67 €) und
+    10,6 %
+    auf Näherungen für Jahre ohne Daten (24.033,70 €).
     Je höher der Unternehmensanteil, desto belastbarer ist die Schätzung gegenüber dem Versicherer.
   </p>
   <div class="spalten"><table class="tabelle klein zebra">
     <caption>Verwendete Zinsreihe (Basis-Szenario) mit Quelle je Jahr</caption>
     <thead><tr><th scope="col">Jahr</th><th scope="col">Satz</th><th scope="col">Quelle</th></tr></thead>
-    <tbody><tr><th scope="row">1986</th><td class="betrag">8,12 %</td><td>Näherung (nächstliegender Branchenwert) *</td></tr><tr><th scope="row">1987</th><td class="betrag">8,12 %</td><td>Näherung (nächstliegender Branchenwert) *</td></tr><tr><th scope="row">1988</th><td class="betrag">8,12 %</td><td>Näherung (nächstliegender Branchenwert) *</td></tr><tr><th scope="row">1989</th><td class="betrag">8,12 %</td><td>Näherung (nächstliegender Branchenwert) *</td></tr><tr><th scope="row">1990</th><td class="betrag">6,78 %</td><td>GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001) *</td></tr><tr><th scope="row">1991</th><td class="betrag">7,44 %</td><td>GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001) *</td></tr><tr><th scope="row">1992</th><td class="betrag">7,39 %</td><td>GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001) *</td></tr><tr><th scope="row">1993</th><td class="betrag">7,59 %</td><td>GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001) *</td></tr><tr><th scope="row">1994</th><td class="betrag">7,15 %</td><td>GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001) *</td></tr><tr><th scope="row">1995</th><td class="betrag">7,37 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">1996</th><td class="betrag">7,37 %</td><td>GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001) *</td></tr><tr><th scope="row">1997</th><td class="betrag">7,46 %</td><td>GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001) *</td></tr><tr><th scope="row">1998</th><td class="betrag">7,57 %</td><td>GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001) *</td></tr><tr><th scope="row">1999</th><td class="betrag">7,60 %</td><td>GDV-Pressemitteilung vom 06.06.2007 („rund 7,6 Prozent&quot; Nettoverzinsung 1999), Wiedergabe verbaende.com *</td></tr><tr><th scope="row">2000</th><td class="betrag">7,51 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2001</th><td class="betrag">6,12 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2002</th><td class="betrag">4,68 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2003</th><td class="betrag">5,05 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2004</th><td class="betrag">4,90 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2005</th><td class="betrag">5,18 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2006</th><td class="betrag">4,82 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2007</th><td class="betrag">4,65 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2008</th><td class="betrag">3,54 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2009</th><td class="betrag">4,18 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2010</th><td class="betrag">4,27 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2011</th><td class="betrag">4,13 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2012</th><td class="betrag">4,59 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2013</th><td class="betrag">4,68 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2014</th><td class="betrag">4,63 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2015</th><td class="betrag">4,52 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2016</th><td class="betrag">4,36 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2017</th><td class="betrag">4,49 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2018</th><td class="betrag">3,59 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2019</th><td class="betrag">3,92 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2020</th><td class="betrag">3,74 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2021</th><td class="betrag">3,57 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2022</th><td class="betrag">2,16 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2023</th><td class="betrag">2,27 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2024</th><td class="betrag">2,37 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2025</th><td class="betrag">2,37 %</td><td>Näherung (nächstliegender Branchenwert) *</td></tr><tr><th scope="row">2026</th><td class="betrag">2,37 %</td><td>Näherung (nächstliegender Branchenwert) *</td></tr></tbody>
+    <tbody><tr><th scope="row">1995</th><td class="betrag">7,49 %</td><td>Versicherer</td></tr><tr><th scope="row">1996</th><td class="betrag">7,46 %</td><td>Versicherer</td></tr><tr><th scope="row">1997</th><td class="betrag">7,46 %</td><td>GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001) *</td></tr><tr><th scope="row">1998</th><td class="betrag">7,57 %</td><td>GDV, Geschäftsentwicklung 2000 – Die deutsche Lebensversicherung in Zahlen (Ausgabe 2001) *</td></tr><tr><th scope="row">1999</th><td class="betrag">7,60 %</td><td>GDV-Pressemitteilung vom 06.06.2007 („rund 7,6 Prozent&quot; Nettoverzinsung 1999), Wiedergabe verbaende.com *</td></tr><tr><th scope="row">2000</th><td class="betrag">7,51 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2001</th><td class="betrag">6,12 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2002</th><td class="betrag">4,68 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2003</th><td class="betrag">5,05 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2004</th><td class="betrag">4,90 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2005</th><td class="betrag">5,18 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2006</th><td class="betrag">4,82 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2007</th><td class="betrag">4,65 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2008</th><td class="betrag">3,54 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2009</th><td class="betrag">4,18 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2010</th><td class="betrag">4,27 %</td><td>GDV, „Die deutsche Lebensversicherung in Zahlen 2025&quot;, Tabelle „Nettoverzinsung der Kapitalanlagen&quot; *</td></tr><tr><th scope="row">2011</th><td class="betrag">4,50 %</td><td>Versicherer</td></tr><tr><th scope="row">2012</th><td class="betrag">4,90 %</td><td>Versicherer</td></tr><tr><th scope="row">2013</th><td class="betrag">5,40 %</td><td>Versicherer</td></tr><tr><th scope="row">2014</th><td class="betrag">4,80 %</td><td>Versicherer</td></tr><tr><th scope="row">2015</th><td class="betrag">4,60 %</td><td>Versicherer</td></tr><tr><th scope="row">2016</th><td class="betrag">4,40 %</td><td>Versicherer</td></tr><tr><th scope="row">2017</th><td class="betrag">4,50 %</td><td>Versicherer</td></tr><tr><th scope="row">2018</th><td class="betrag">4,20 %</td><td>Versicherer</td></tr><tr><th scope="row">2019</th><td class="betrag">4,20 %</td><td>Versicherer</td></tr><tr><th scope="row">2020</th><td class="betrag">4,00 %</td><td>Versicherer</td></tr><tr><th scope="row">2021</th><td class="betrag">3,70 %</td><td>Versicherer</td></tr><tr><th scope="row">2022</th><td class="betrag">2,00 %</td><td>Versicherer</td></tr><tr><th scope="row">2023</th><td class="betrag">2,50 %</td><td>Versicherer</td></tr><tr><th scope="row">2024</th><td class="betrag">2,90 %</td><td>Versicherer</td></tr><tr><th scope="row">2025</th><td class="betrag">2,37 %</td><td>Näherung (nächstliegender Branchenwert) *</td></tr><tr><th scope="row">2026</th><td class="betrag">2,37 %</td><td>Näherung (nächstliegender Branchenwert) *</td></tr></tbody>
   </table></div>
   <p class="fussnote">* = Branchen- oder Näherungswert statt Unternehmenswert (Datenkennzeichen „estimated_branch“, Schätzung).</p>
   <div class="gegenposition">
@@ -701,7 +637,7 @@
     Zahlen des jeweiligen Unternehmens herzuleiten – ein Branchendurchschnitt genüge der Darlegungslast nicht;
     die Nettoverzinsung enthalte Einmaleffekte (z. B. realisierte Bewertungsreserven ab 2012) und überzeichne
     die laufenden Erträge; Risiko- und Kostenanteile seien höher als pauschal angesetzt. Diese Einwände
-    betreffen die Höhe, nicht das Ob der Methodik; sie sind der Grund, warum dieser Prüfbericht eine Schätzung
+    betreffen die Höhe, nicht das Ob der Methodik; sie sind der Grund, warum dieses Gutachten eine Schätzung
     mit Bandbreite ist und die anwaltliche Prüfung mit Unternehmenszahlen der nächste Schritt bleibt.
   </div>
 </section>
@@ -714,48 +650,69 @@
       <svg viewBox="0 0 660 170" width="100%" height="170">
         
         <text x="0" y="21" class="svg-label">Aktueller Rückkaufswert</text>
-        <rect x="210" y="6" width="114.2" height="20" rx="4" fill="#5B6772" />
-        <text x="330.2" y="21" class="svg-wert">32.000,00 €</text>
+        <rect x="210" y="6" width="176.9" height="20" rx="4" fill="#5B6772" />
+        <text x="392.9" y="21" class="svg-wert">310.658,00 €</text>
         <text x="0" y="55" class="svg-label">Szenario konservativ</text>
-        <rect x="210" y="40" width="323.2" height="20" rx="4" fill="#7FAF9B" />
-        <text x="539.2" y="55" class="svg-wert">90.542,51 €</text>
+        <rect x="210" y="40" width="339.6" height="20" rx="4" fill="#7FAF9B" />
+        <text x="555.6" y="55" class="svg-wert">596.560,33 €</text>
         <text x="0" y="89" class="svg-label">Szenario Basis</text>
-        <rect x="210" y="74" width="364.6" height="20" rx="4" fill="#14365D" />
-        <text x="580.6" y="89" class="svg-wert">102.146,54 €</text>
+        <rect x="210" y="74" width="364.1" height="20" rx="4" fill="#14365D" />
+        <text x="580.1" y="89" class="svg-wert">639.598,15 €</text>
         <text x="0" y="123" class="svg-label">Szenario maximal</text>
         <rect x="210" y="108" width="380.0" height="20" rx="4" fill="#7FAF9B" />
-        <text x="596.0" y="123" class="svg-wert">106.462,40 €</text>
+        <text x="596.0" y="123" class="svg-wert">667.461,91 €</text>
         <text x="0" y="157" class="svg-label">Mehrwert ggü. Rückkaufswert (Basis)</text>
-        <rect x="210" y="142" width="250.4" height="20" rx="4" fill="#C24E2B" />
-        <text x="466.4" y="157" class="svg-wert">70.146,54 €</text>
+        <rect x="210" y="142" width="187.3" height="20" rx="4" fill="#C24E2B" />
+        <text x="403.3" y="157" class="svg-wert">328.940,15 €</text>
       </svg>
     </figure>
   
   <h3>Was bei einer Rückabwicklung aufgegeben würde</h3>
   <ul><li>der Versicherungsschutz des Vertrags (insbesondere Todesfallschutz, ggf. BUZ)</li><li>Garantiezins und künftige Überschussbeteiligung bis zum Ablauf</li><li>die vertragliche Ablaufleistung</li></ul>
   <h3>Hinweise</h3>
-  <ul><li>Steuern: Auszahlungen und eine Rückabwicklung können steuerliche Folgen haben; einbehaltene Kapitalertragsteuer ist anzurechnen. Dieser Bericht enthält keine steuerliche Beratung.</li></ul>
+  <ul><li>Bloßer Zeitablauf, jahrelange Prämienzahlung, Beitragsfreistellung oder Kündigung (auch mit ausgezahltem Rückkaufswert) begründen für sich genommen keine Verwirkung – der Versicherer hat die Lage durch die fehlerhafte Belehrung selbst herbeigeführt. <span class="fussnote">[R-VERW-ZEITABLAUF-NEGATIV]</span></li><li>Nutzungsersatz gibt es nur für tatsächlich gezogene Nutzungen; der Vortrag braucht Bezug zur Ertragslage des jeweiligen Versicherers. Deshalb: Nutzungen auf den Sparanteil, Maßstab versichererindividuelle Nettoverzinsung; auf Verwaltungskostenanteile nur bei konkretem Nachweis (Max-Szenario als Obergrenze), nicht anhand der Eigenkapitalrendite. <span class="fussnote">[R-FOLGE-NUTZUNGEN-SPARANTEIL]</span></li><li>Nach erklärtem Widerspruch verjährt der Zahlungsanspruch in drei Jahren ab dem Schluss des Jahres der Widerspruchserklärung (§§ 195, 199 BGB); das Widerspruchsrecht selbst unterliegt keiner Verjährung. <span class="fussnote">[R-FOLGE-VERJAEHRUNG]</span></li><li>Steuern: Auszahlungen und eine Rückabwicklung können steuerliche Folgen haben; einbehaltene Kapitalertragsteuer ist anzurechnen. Dieses Gutachten enthält keine steuerliche Beratung.</li></ul>
   <h3>Empfohlene nächste Schritte</h3>
-  <ul><li>Unterlagen bereitlegen: Police und Belehrungstexte (Widerruf nach § 8 Abs. 4 VVG i.d.F. 1990).</li><li>Die Durchsetzung über uns beauftragen (Kasten oben) – die spezialisierten Anwälte, mit denen wir arbeiten, klären, ob und auf welchem Weg sich der Wert durchsetzen lässt.</li><li>Keine Kündigung und keine Erklärung gegenüber dem Versicherer ohne anwaltlichen Rat.</li></ul>
+  <ul><li>Police und letzte Standmitteilung bereitlegen; falls vorhanden Kündigungs- oder Dynamikschreiben.</li><li>Die Durchsetzung über uns beauftragen (Kasten unten) – die spezialisierten Anwälte, mit denen wir arbeiten, klären, ob und auf welchem Weg sich der Wert durchsetzen lässt.</li><li>Keine Kündigung und keine Erklärung gegenüber dem Versicherer ohne anwaltlichen Rat.</li></ul>
   <div class="uebernahme">
     <p style="margin:0 0 1.5mm"><strong>Nächster Schritt: Wir übernehmen.</strong></p>
     <p style="margin:0 0 1.5mm">
       Spezialisierte Anwälte setzen sich für Sie mit dem Versicherer auseinander – Sie müssen nichts
       selbst verhandeln und haben einen Ansprechpartner. Beauftragen:
-      <strong>https://renten-rettung.de/durchsetzung</strong> (oder antworten Sie auf die E-Mail mit diesem Bericht).
+      <strong>https://renten-rettung.de/durchsetzung</strong> (oder antworten Sie auf die E-Mail mit diesem Gutachten).
     </p>
-    <p style="margin:0" class="sekundaer">Konditionen: [[KONDITIONEN: Erfolgsbeteiligung, Kostenübernahme, Rechtsschutz-Fall]]</p>
+    <p style="margin:0" class="sekundaer">Konditionen: [[KONDITIONEN: Erfolgsbeteiligung, Kostenübernahme]]</p>
+  </div>
+  <div class="verkaufen">
+    <p style="margin:0 0 1.5mm"><strong>Verkaufen statt kämpfen</strong></p>
+    <p style="margin:0">Sie wollen Ihr Geld, aber keinen Streit? Laufende und beitragsfreie Verträge können verkauft werden – mit einem Angebot auf Basis Ihrer Police, das wir für Sie organisieren. Anfrage: <strong>renten-rettung.de/verkaufen</strong>. Wir empfehlen keinen der Wege – Sie entscheiden.</p>
   </div>
   <div class="disclaimer">
-    <strong>Rechtlicher Hinweis:</strong> Dieser Prüfbericht ist eine strukturierte Berechnung und keine
-    Rechtsdienstleistung im Sinne des RDG; die rechtliche Prüfung des Einzelfalls obliegt einem Rechtsanwalt.
-    Alle Werte sind Schätzungen mit Bandbreite auf Basis der genannten Quellen und Annahmen; es wird kein Betrag
-    zugesagt. Wiedergabe der Entscheidungstexte nach frei zugänglichen Volltext-Spiegeln (lexetius.com, urteile-gesetze.de, RIS); der Wort-für-Wort-Abgleich mit den amtlichen Entscheidungsdatenbanken ist in Arbeit.<br>
+    <strong>Rechtlicher Hinweis:</strong> Dieses Gutachten ist eine automatisierte versicherungsmathematische
+    Auswertung – kein Sachverständigengutachten und keine Rechtsdienstleistung im Sinne des RDG; die rechtliche
+    Prüfung des Einzelfalls obliegt einem Rechtsanwalt. Alle Werte sind Schätzungen mit Bandbreite auf Basis der
+    genannten Quellen und Annahmen; es wird kein Betrag zugesagt. Wiedergabe der Entscheidungstexte nach frei zugänglichen Volltext-Spiegeln (lexetius.com, urteile-gesetze.de, RIS); der Wort-für-Wort-Abgleich mit den amtlichen Entscheidungsdatenbanken ist in Arbeit.<br>
     Datenstand: insurers-Datenbank 0.5.0 · Rechenkern 0.2.0 ·
     Regelwerk 0.1.0 (2026-09-18) ·
     Eignungs-Check 0.2.0 · Stichtag 09/2026.
   </div>
 </section>
-
+<!-- Beileger (Postversand): Verkaufen statt kämpfen -->
+<section class="seite beileger">
+  <div class="kopfbalken"><span class="marke">Renten-Rettung</span><span class="zusatz">Beileger · Verkaufen statt kämpfen</span></div>
+  <h2>Verkaufen statt kämpfen</h2>
+  <p style="font-size:12pt">Sie wollen Ihr Geld, aber keinen Streit? Laufende und beitragsfreie Verträge können verkauft werden – mit einem Angebot auf Basis Ihrer Police, das wir für Sie organisieren.</p>
+  <h3>Drei Wege – Sie entscheiden</h3>
+  <ul><li><strong>Kündigen.</strong> Der Rückkaufswert kommt meist innerhalb weniger Wochen. Das geben Sie auf: Schutz, Garantien – und alles, was eine Rückabwicklung oder ein Verkauf mehr gebracht hätte.</li><li><strong>Rückabwicklung prüfen.</strong> Rechnerisch ist oft mehr drin als der Rückkaufswert; dieses Gutachten liefert die Zahl. Das geben Sie auf: Zeit – ein Verfahren dauert.</li><li><strong>Verkaufen.</strong> Sie erhalten einen Kaufpreis; der Käufer führt den Vertrag weiter. Das geben Sie auf: Schutz und Ablaufleistung gehen an den Käufer.</li></ul>
+  <h3>Wie es läuft</h3>
+  <div class="schritt"><div class="nummer">1</div><div><strong>Sie fragen an.</strong> Über renten-rettung.de/verkaufen – mit eigenem Häkchen, vorher geben wir nichts weiter.</div></div>
+  <div class="schritt"><div class="nummer">2</div><div><strong>Sie bekommen ein Angebot.</strong> Ein Organisationspartner wickelt ab und nennt Ihnen den Preis. Sie vergleichen in Ruhe.</div></div>
+  <div class="schritt"><div class="nummer">3</div><div><strong>Sie entscheiden.</strong> Annehmen, ablehnen, nachdenken. Alles ist erlaubt. Nichts eilt.</div></div>
+  <div class="hinweisbox">
+    <strong>Offenlegung:</strong> Kommt über uns ein Ankauf zustande, erhalten wir vom Organisationspartner eine
+    Vergütung – nicht aus Ihrem Erlös. Wir empfehlen keinen der Wege. Steuern können bei jedem Weg eine Rolle
+    spielen; dazu beraten wir nicht.
+  </div>
+  <p class="fussnote">Anfrage: renten-rettung.de/verkaufen · Schätzung mit Bandbreite, keine Rechtsberatung.</p>
+</section>
 </body>
 </html>

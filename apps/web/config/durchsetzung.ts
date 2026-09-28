@@ -17,13 +17,14 @@ export const KANZLEI_NAME = process.env['NEXT_PUBLIC_PARTNERKANZLEI'] ?? '[[KANZ
 /** Belegbare Zahl geprüfter Policen; leer = Platzhalter wird angezeigt. */
 export const GEPRUEFTE_POLICEN = process.env['NEXT_PUBLIC_GEPRUEFTE_POLICEN'] ?? '';
 
-/** Konditionen der Durchsetzung (Erfolgsbeteiligung, Kosten, Rechtsschutz-Fall). */
+/** Konditionen der Durchsetzung (Erfolgsbeteiligung, Kostenübernahme). */
 export const KONDITIONEN_PLATZHALTER =
-  '[[KONDITIONEN: Erfolgsbeteiligung, Kostenübernahme, Rechtsschutz-Fall – von Jack/Kanzlei, vor Beauftragung anwaltlich abgenommen]]';
+  '[[KONDITIONEN: Erfolgsbeteiligung, Kostenübernahme – von Jack/Kanzlei, vor Beauftragung anwaltlich abgenommen]]';
 
 /**
- * Preis-Anrechnung (Prompt 13, 2.1): „Wird bei Beauftragung angerechnet.“
- * erscheint nur, wenn Jack das entscheidet (PREIS_ANRECHNUNG=1).
+ * Preis-Anrechnung (Prompt 13, 2.1 / Prompt 14, 4): „Bei Beauftragung
+ * angerechnet: dann 0 €.“ erscheint nur, wenn Jack das entscheidet
+ * (PREIS_ANRECHNUNG=1).
  */
 export const PREIS_ANRECHNUNG = process.env['NEXT_PUBLIC_PREIS_ANRECHNUNG'] === '1';
 

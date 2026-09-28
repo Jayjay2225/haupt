@@ -256,7 +256,7 @@ export default async function VersichererSeite({ params }: { params: Promise<Par
         kostenlos. Rot heißt: lohnt nicht. Das sagen wir Ihnen auch.
       </p>
       <p>
-        <Link href="/rechner" className="knopf haupt">
+        <Link href="/#ampel" className="knopf haupt">
           Jetzt prüfen
         </Link>
       </p>

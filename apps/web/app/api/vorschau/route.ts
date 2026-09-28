@@ -4,7 +4,8 @@
  * Personenbezug geloggt.
  *
  * Produktvarianten (config/variante.ts):
- * - privat:  NUR die Übernahme-Ampel (Prompt 13, 0.4) – keine Beträge,
+ * - privat:  NUR die Übernahme-Ampel (Prompt 13, 0.4; Prompt 14: auf der
+ *            Startseite, springt bei vier Feldern an) – keine Beträge,
  *            keine Wortbänder, keine Spanne; „Warum“ rein qualitativ.
  * - kanzlei: vollständige Ergebnisse (Eignungs-Check, Szenarien).
  */
@@ -41,7 +42,7 @@ function warumZeilen(ampel: UebernahmeAmpel, calc: CalcResult): string[] {
       break;
     case 'knapp':
       zeilen.push(
-        'Ihr Vertrag erfüllt unsere Kriterien: er läuft oder ist beitragsfrei, der Rückkaufswert liegt über unserer Mindestgrenze. Die Rechnung liegt über dem Rückkaufswert – aber knapp; ob es reicht, entscheidet der Prüfbericht.',
+        'Ihr Vertrag erfüllt unsere Kriterien: er läuft oder ist beitragsfrei, der Rückkaufswert liegt über unserer Mindestgrenze. Die Rechnung liegt über dem Rückkaufswert – aber knapp; ob es reicht, entscheidet das Gutachten.',
       );
       break;
     case 'kein-vorteil':

@@ -1,23 +1,24 @@
 /**
- * Erzeugt die Beispielberichte für die beiden Golden-Verträge
- * (docs/PROMPTS.md, Prompt 3/5) unter examples/.
+ * Erzeugt die Beispiel-Gutachten für die Golden-Verträge (docs/PROMPTS.md,
+ * Prompt 3/5) unter examples/ – seit Prompt 14 als „Gutachten“, dazu für
+ * Musterfall B die Druckvorlage des Postversands (Deckblatt + Beileger).
  *
  * Datenschutz: Es werden ausschließlich anonymisierte Musterdaten verwendet;
  * geloggt werden nur Aktenzeichen und Dateipfade, keine Personendaten.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { berechneRueckabwicklung } from '@rueckab/calc';
 import type { ContractInput, InsurersDaten, RiskDefaults } from '@rueckab/calc';
 import { pruefeEignung } from '@rueckab/eligibility';
 import type { EligibilityInput, Regelwerk } from '@rueckab/eligibility';
-import { renderBerichtHtml, type BerichtInput } from './template';
+import { renderBerichtHtml, renderDruckvorlageHtml, type BerichtInput } from './template';
 import { htmlZuPdf } from './pdf';
 import { formatDatum } from './format';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-const HEUTE = '2026-09-25';
+const HEUTE = '2026-09-28';
 
 const daten = JSON.parse(readFileSync(resolve(REPO, 'data/insurers.json'), 'utf8')) as InsurersDaten;
 const defaults = JSON.parse(readFileSync(resolve(REPO, 'data/risk-defaults.json'), 'utf8')) as RiskDefaults;
@@ -29,6 +30,10 @@ interface Beispiel {
   versichererAnzeigename: string;
   contract: ContractInput;
   eligibility: EligibilityInput;
+  /** Annahmen aus „Weiß ich nicht“-Antworten (Prompt 14) – nur zur Illustration. */
+  annahmenKunde?: string[];
+  /** Druckvorlage (Postversand) mit Musteradresse erzeugen. */
+  druck?: boolean;
 }
 
 const beispiele: Beispiel[] = [
@@ -91,10 +96,11 @@ const beispiele: Beispiel[] = [
       abgetretenOderBeliehen: 'nein',
       auszahlungenErhalten: 'nein',
     },
+    druck: true,
   },
   // Prompt 12, Abschnitt 1.6: Vertrag von 1986 (150 DM monatlich, ohne
   // Dynamik) läuft mit derselben Formel durch; Branchenjahre bis 2003 sind
-  // als estimated_branch gekennzeichnet.
+  // als estimated_branch gekennzeichnet. Prompt 14: mit Annahmen-Kasten.
   {
     aktenzeichen: 'BSP-2026-C',
     kundenname: 'Musterfall C (anonymisiert)',
@@ -102,7 +108,7 @@ const beispiele: Beispiel[] = [
     contract: {
       versichererId: 'unbekannt',
       vertragsart: 'kapital-lv',
-      beginn: '1986-05',
+      beginn: '1986-06',
       zahlweise: 'monatlich',
       erstbeitrag: { betrag: 150, waehrung: 'DM' },
       dynamik: { aktiv: false },
@@ -112,7 +118,7 @@ const beispiele: Beispiel[] = [
       stichtag: '2026-09',
     },
     eligibility: {
-      vertragsschluss: '1986-05',
+      vertragsschluss: '1986-06',
       vertragsart: 'kapital-lv',
       zustandekommen: 'unbekannt',
       belehrungVorhanden: 'unbekannt',
@@ -123,11 +129,21 @@ const beispiele: Beispiel[] = [
       abgetretenOderBeliehen: 'nein',
       auszahlungenErhalten: 'nein',
     },
+    annahmenKunde: [
+      'Annahme: Der Vertragsbeginn ist nur ungefähr bekannt (Jahr 1986); gerechnet wurde mit der Jahresmitte. Mit dem genauen Monat aus der Police wird die Zahl präziser.',
+      'Annahme: Ob eine Dynamik vereinbart war, ist nicht bekannt; gerechnet wurde ohne Dynamik. Mit Dynamik läge die Zahl höher – bitte in Police oder Nachträgen nachsehen.',
+    ],
   },
 ];
 
 const ausgabe = resolve(REPO, 'examples');
 mkdirSync(ausgabe, { recursive: true });
+// Alte Beispiele (frühere Daten/Namen) entfernen – es gilt immer der aktuelle Stand.
+for (const datei of readdirSync(ausgabe)) {
+  if (/^(Pruefbericht|Gutachten)_BSP-2026-/.test(datei)) {
+    unlinkSync(resolve(ausgabe, datei));
+  }
+}
 
 for (const beispiel of beispiele) {
   const calc = berechneRueckabwicklung(beispiel.contract, daten, defaults);
@@ -142,19 +158,34 @@ for (const beispiel of beispiele) {
     calc,
     eligibility,
     durchsetzungUrl: 'https://renten-rettung.de/durchsetzung',
-    konditionenText: '[[KONDITIONEN: Erfolgsbeteiligung, Kostenübernahme, Rechtsschutz-Fall]]',
+    verkaufenUrl: 'renten-rettung.de/verkaufen',
+    konditionenText: '[[KONDITIONEN: Erfolgsbeteiligung, Kostenübernahme]]',
+    absender: 'Renten-Rettung · Kaufmannsladen Gebhard GmbH · Helmkrautstraße 35 A · 13503 Berlin',
+    ...(beispiel.annahmenKunde !== undefined ? { annahmenKunde: beispiel.annahmenKunde } : {}),
   };
-  const html = renderBerichtHtml(bericht);
-  const basisname = `Pruefbericht_${beispiel.aktenzeichen}_${HEUTE}`;
-  writeFileSync(resolve(ausgabe, `${basisname}.html`), html);
-  await htmlZuPdf(html, resolve(ausgabe, `${basisname}.pdf`), {
+  const kopf = {
     marke: 'Renten-Rettung',
     aktenzeichen: beispiel.aktenzeichen,
     kundenname: beispiel.kundenname,
     datum: formatDatum(HEUTE),
-  });
+  };
+  const html = renderBerichtHtml(bericht);
+  const basisname = `Gutachten_${beispiel.aktenzeichen}_${HEUTE}`;
+  writeFileSync(resolve(ausgabe, `${basisname}.html`), html);
+  await htmlZuPdf(html, resolve(ausgabe, `${basisname}.pdf`), kopf);
   const mehrwert = calc.szenarien.basis.mehrwertGegenKuendigung;
   console.log(
     `erzeugt: examples/${basisname}.pdf (Basis ${calc.szenarien.basis.rueckabwicklungswert.toFixed(2)} €, Mehrwert ${mehrwert === undefined ? '–' : mehrwert.toFixed(2)} €)`,
   );
+  if (beispiel.druck === true) {
+    const druckHtml = renderDruckvorlageHtml(bericht, {
+      name: beispiel.kundenname,
+      strasse: 'Musterstraße 1',
+      plz: '12345',
+      ort: 'Musterstadt',
+    });
+    writeFileSync(resolve(ausgabe, `${basisname}_Druck.html`), druckHtml);
+    await htmlZuPdf(druckHtml, resolve(ausgabe, `${basisname}_Druck.pdf`), kopf);
+    console.log(`erzeugt: examples/${basisname}_Druck.pdf (Druckvorlage: Deckblatt, Gutachten, Beileger)`);
+  }
 }

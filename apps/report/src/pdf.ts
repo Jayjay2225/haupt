@@ -81,7 +81,7 @@ export async function htmlZuPdf(html: string, pfad: string, kopf: KopfzeilenDate
           <span>${esc(kopf.aktenzeichen)} · ${esc(kopf.kundenname)} · ${esc(kopf.datum)}</span>
         </div>`,
       footerTemplate: `<div style="${stil}display:flex;justify-content:space-between;">
-          <span>${esc(kopf.marke)} – Prüfbericht (Schätzung mit Bandbreite, keine Rechtsberatung)</span>
+          <span>${esc(kopf.marke)} – Gutachten (Schätzung mit Bandbreite, keine Rechtsberatung, kein Sachverständigengutachten)</span>
           <span>Seite <span class="pageNumber"></span> von <span class="totalPages"></span></span>
         </div>`,
       margin: { top: '18mm', bottom: '16mm', left: '14mm', right: '14mm' },

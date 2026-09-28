@@ -4,6 +4,9 @@
  * - Zahlung vorab; eine Sitzung enthält Preis, Zahlungsarten (Karte, PayPal,
  *   Klarna – im Stripe-Konto zu aktivieren), Rechnungserstellung und den
  *   kodierten Fall in den Metadaten (lib/fall-kodierung.ts).
+ * - Prompt 14: Metadatum `post` = '1', wenn die kostenlose gedruckte Fassung
+ *   gewählt wurde; der PaymentIntent trägt dann von Anfang an den Marker
+ *   `post_status = gewuenscht` (Admin-Spalte „Post“).
  * - Ohne STRIPE_SECRET_KEY ist die Bestellung aus (`bestellungAktiv()`).
  * - Es wird nichts mit Personenbezug geloggt.
  */
@@ -66,6 +69,8 @@ export interface CheckoutAnfrage {
   draft: CaseDraft;
   name: string;
   email: string;
+  /** Gedruckte Fassung per Post (kostenlos, Prompt 14, 0.3). */
+  postversand?: boolean;
 }
 
 export interface CheckoutErgebnis {
@@ -73,13 +78,19 @@ export interface CheckoutErgebnis {
   bestellnummer: string;
 }
 
+/** Produktbeschreibung für Kasse und Rechnung – ohne Sachverständigen-Anklang (Prompt 14, 0.6). */
+export const PRODUKT_BESCHREIBUNG =
+  'Automatisierte versicherungsmathematische Auswertung zu einer Lebens- oder Rentenversicherung (PDF, Schätzung mit Bandbreite)';
+
 export async function erstelleCheckoutSitzung(anfrage: CheckoutAnfrage, stripe: Stripe = stripeClient()): Promise<CheckoutErgebnis> {
   const bestellnummer = neueBestellnummer();
   const steuersatz = process.env['STRIPE_STEUERSATZ_ID'];
+  const post = anfrage.postversand === true;
   const metadata: Record<string, string> = {
     bestellnummer,
     kundenname: anfrage.name.trim().slice(0, 200),
     produkt: BRAND.produktname,
+    post: post ? '1' : '0',
     ...fallAlsMetadaten(anfrage.draft),
   };
   const sitzung = await stripe.checkout.sessions.create({
@@ -98,8 +109,8 @@ export async function erstelleCheckoutSitzung(anfrage: CheckoutAnfrage, stripe: 
           unit_amount: Math.round(BERICHT_PREIS_BRUTTO_EUR * 100),
           tax_behavior: 'inclusive',
           product_data: {
-            name: `${BRAND.produktname} – schriftlicher Bericht`,
-            description: 'Prüfbericht zu einer Lebens- oder Rentenversicherung (PDF, Schätzung mit Bandbreite)',
+            name: BRAND.produktname,
+            description: `${PRODUKT_BESCHREIBUNG}${post ? ', zusätzlich gedruckt per Post (kostenlos)' : ''}`,
           },
         },
       },
@@ -107,7 +118,7 @@ export async function erstelleCheckoutSitzung(anfrage: CheckoutAnfrage, stripe: 
     invoice_creation: {
       enabled: true,
       invoice_data: {
-        description: `${BRAND.produktname} – schriftlicher Bericht, Bestellnummer ${bestellnummer}`,
+        description: `${BRAND.produktname}, Bestellnummer ${bestellnummer} – Lieferung per E-Mail${post ? ' und per Post' : ''}`,
         footer: `${BRAND.anbieter}${BRAND.anbieterRegister !== '' ? `, ${BRAND.anbieterRegister}` : ''}. Leistungsdatum entspricht dem Rechnungsdatum.`,
         metadata: { bestellnummer },
         rendering_options: { amount_tax_display: 'include_inclusive_tax' },
@@ -115,7 +126,7 @@ export async function erstelleCheckoutSitzung(anfrage: CheckoutAnfrage, stripe: 
     },
     payment_intent_data: {
       description: `${BRAND.produktname} ${bestellnummer}`,
-      metadata: { bestellnummer },
+      metadata: { bestellnummer, ...(post ? { post_status: 'gewuenscht' } : {}) },
     },
     metadata,
     success_url: `${basisUrl()}/bestellen/danke?sitzung={CHECKOUT_SESSION_ID}`,

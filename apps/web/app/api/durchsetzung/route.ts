@@ -43,7 +43,6 @@ export async function POST(request: Request): Promise<NextResponse> {
   const email = feld(daten, 'email', 200);
   const telefon = feld(daten, 'telefon', 60);
   const bestellnummer = feld(daten, 'bestellnummer', 60);
-  const rechtsschutz = feld(daten, 'rechtsschutz', 20);
   const nachricht = feld(daten, 'nachricht', 2000);
   const einwilligungBeauftragung = feld(daten, 'einwilligungBeauftragung') === '1';
   const einwilligungWeitergabe = feld(daten, 'einwilligungWeitergabe') === '1';
@@ -86,7 +85,6 @@ export async function POST(request: Request): Promise<NextResponse> {
     `E-Mail: ${email}`,
     `Telefon: ${telefon || '–'}`,
     `Bestellnummer: ${bestellnummer || '–'}`,
-    `Rechtsschutzversicherung: ${rechtsschutz || '–'}`,
     `Unterlagen: ${anhaenge.length} Datei(en) im Anhang`,
     '',
     nachricht === '' ? '' : `Anmerkungen:\n${nachricht}`,

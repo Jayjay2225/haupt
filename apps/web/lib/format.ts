@@ -105,3 +105,38 @@ export function formatDatumDe(isoDatum: string): string {
   }
   return `${treffer[3]}.${treffer[2]}.${treffer[1]}`;
 }
+
+/**
+ * Liest ein Datum, wie Menschen es tippen: „14.03.1962“, „14.3.1962“,
+ * „14/03/1962“, „14031962“ oder ISO „1962-03-14“. Ergebnis ISO (YYYY-MM-DD)
+ * oder null bei unlesbarer bzw. kalendarisch unmöglicher Eingabe.
+ */
+export function parseDatumDe(eingabe: string): string | null {
+  const text = eingabe.trim();
+  if (text === '') {
+    return null;
+  }
+  let jahr: number;
+  let monat: number;
+  let tag: number;
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  const deutsch = /^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/.exec(text);
+  const kompakt = /^(\d{2})(\d{2})(\d{4})$/.exec(text);
+  if (iso) {
+    [jahr, monat, tag] = [Number(iso[1]), Number(iso[2]), Number(iso[3])];
+  } else if (deutsch) {
+    [tag, monat, jahr] = [Number(deutsch[1]), Number(deutsch[2]), Number(deutsch[3])];
+  } else if (kompakt) {
+    [tag, monat, jahr] = [Number(kompakt[1]), Number(kompakt[2]), Number(kompakt[3])];
+  } else {
+    return null;
+  }
+  if (jahr < 1900 || jahr > 2100 || monat < 1 || monat > 12 || tag < 1 || tag > 31) {
+    return null;
+  }
+  const datum = new Date(Date.UTC(jahr, monat - 1, tag));
+  if (datum.getUTCMonth() !== monat - 1 || datum.getUTCDate() !== tag) {
+    return null;
+  }
+  return `${String(jahr).padStart(4, '0')}-${String(monat).padStart(2, '0')}-${String(tag).padStart(2, '0')}`;
+}

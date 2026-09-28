@@ -1,8 +1,9 @@
-# Anzeigentexte (Prompt 12, Abschnitt 6 · aktualisiert nach Prompt 13, §5)
+# Anzeigentexte (Prompt 12, Abschnitt 6 · aktualisiert nach Prompt 13, §5 und Prompt 14, 0.6)
 
 Quelle im Code: `apps/web/content/anzeigen.ts` – alle Texte laufen durch den
 Wording-Test (fünf harte Linien, erweiterte Verbotsliste aus Prompt 13,
-Längen, Zeitraum 1980–2020).
+Produktname „Gutachten“ ohne Sachverständigen-Anklang aus Prompt 14, Längen,
+Zeitraum 1980–2020).
 
 ## Google Responsive Search Ads
 
@@ -16,7 +17,7 @@ Längen, Zeitraum 1980–2020).
 | Ampel in 5 Minuten | 18 |
 | Vertrag von 1980 bis 2020? | 26 |
 | Mit echten Versichererzahlen | 28 |
-| Bericht in 12 Stunden | 21 |
+| Gutachten in 12 Stunden | 23 |
 | Wir übernehmen Ihren Fall | 25 |
 
 **Beschreibungen (≤ 90 Zeichen):**
@@ -42,6 +43,16 @@ Längen, Zeitraum 1980–2020).
 - Die erweiterte Verbotsliste gilt auch für Anzeigen: kein „nur wir“ /
   „die einzige …“, kein „garantiert durchsetzen“, keine Zahlen zu Erfolgen
   oder geprüften Policen ohne Beleg (Test in `apps/web/test/wording.test.ts`).
+
+## Änderungen durch Prompt 14 (0.6)
+
+- Überschrift **„Bericht in 12 Stunden“ → „Gutachten in 12 Stunden“** (23
+  Zeichen): Das Produkt heißt seit Prompt 14 „Gutachten“ (`config/brand.ts`).
+- In Anzeigen nie „Sachverständigengutachten“, „öffentlich bestellt“,
+  „vereidigt“, „staatlich anerkannt“; kein Streichpreis, keine „statt 119 €“-
+  Anker (§ 11 PAngV) – der Wording-Test verbietet beides.
+- Mikrozeile der Startseite als Anzeigen-Vorlage: „Ampel kostenlos · Gutachten
+  89 € · in 12 Stunden per E-Mail“.
 
 ## Abweichungen vom Deck (gemeldet, nicht stillschweigend – Prompt 10 Regel)
 

@@ -1,6 +1,6 @@
 /**
- * Erzeugt das Berichtsvorschau-Bild der Startseite (Prompt 12, Abschnitt 3.1):
- * Seite 1 des ECHTEN Musterfall-Prüfberichts (BSP-2026-B) als PNG.
+ * Erzeugt das Vorschaubild der Startseite („Das steckt in Ihrem Gutachten“,
+ * Prompt 14, 1.5): Seite 1 des ECHTEN Musterfall-Gutachtens (BSP-2026-B) als PNG.
  * Voraussetzung: `pnpm --filter @rueckab/report beispiele` ist gelaufen.
  *
  * Aufruf: pnpm vorschau:bild
@@ -12,7 +12,7 @@ import { chromium } from 'playwright-core';
 const REPO = resolve(import.meta.dirname, '../../..');
 const beispiele = resolve(REPO, 'examples');
 const html = readdirSync(beispiele)
-  .filter((d) => d.startsWith('Pruefbericht_BSP-2026-B') && d.endsWith('.html'))
+  .filter((d) => d.startsWith('Gutachten_BSP-2026-B') && d.endsWith('.html') && !d.includes('_Druck'))
   .sort()
   .pop();
 if (html === undefined) {

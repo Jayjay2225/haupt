@@ -1,27 +1,18 @@
 'use client';
 
 /**
- * Ergebnis-Seite (Prompt 13, Abschnitt 2.2). Verbraucherprodukt: NUR die
- * Übernahme-Ampel – keine Beträge, keine Wortbänder, keine Spanne. Über dem
- * Knopf höchstens 40 Wörter. Vier Zustände: Grün/Gelb (Kaufknopf), Rot
- * (Rechnung: Verkaufen-Karte zuerst; Status: nur Beratungs-Hinweis), Grau
- * (zu klein). Drei aufklappbare Zeilen; „So verdienen wir“ und „Lieber
- * persönlich?“ sind entfallen.
- * Kanzlei-Variante: Eignungs-Check mit Regel-IDs und Szenario-Beträge.
+ * Ergebnis-Seite – seit Prompt 14 NUR noch für die Kanzlei-Variante
+ * (Modell C: Eignungs-Check mit Regel-IDs, Szenario-Beträge). Das
+ * Verbraucherprodukt hat keine Ergebnis-Seite mehr: Die Ampel lebt auf der
+ * Startseite, der Funnel endet in der Bestellung (Prompt 14, 0.1).
  */
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { CalcResult } from '@rueckab/calc';
 import type { EligibilityResult } from '@rueckab/eligibility';
-import { BERICHT_PREIS_BRUTTO_EUR } from '@/config/business';
-import { ANKAUF_MIN_RUECKKAUFSWERT } from '@/config/durchsetzung';
-import { BRAND } from '@/config/brand';
-import { VARIANTE } from '@/config/variante';
 import { Ampel } from '@/components/Ampel';
-import type { UebernahmeAmpel } from '@/lib/ampel';
-import { ladeDraft, leererDraft, loescheDraft, speichereDraft, type CaseDraft } from '@/lib/draft';
-import { formatEuro, parseDecimalDe } from '@/lib/format';
-import { UNTERLAGEN_LISTE } from '@/lib/labels';
+import { ladeDraft, leererDraft, loescheDraft, type CaseDraft } from '@/lib/draft';
+import { formatEuro } from '@/lib/format';
 import { ZusammenfassungAnsicht } from './Zusammenfassung';
 
 interface VorschauKanzlei {
@@ -31,35 +22,17 @@ interface VorschauKanzlei {
   zusatzAnnahmen: string[];
 }
 
-interface VorschauPrivat {
-  variante: 'privat';
-  ampel: UebernahmeAmpel;
-  kaufbar: boolean;
-  rechtswegSatz: string | null;
-  warum: string[];
-  annahmen: string[];
-  warnungen: string[];
-  meta: { calcVersion: string; dataVersion: string };
-}
-
 interface VorschauAnfrage {
   variante: 'anfrage';
   grund: string;
   text: string;
 }
 
-type Vorschau = VorschauKanzlei | VorschauPrivat | VorschauAnfrage;
+type Vorschau = VorschauKanzlei | VorschauAnfrage | { variante: 'privat' };
 
 /** Typische Einwände des Versicherers – vollständig, eingeklappt (unverändert). */
 const GEGENPOSITION =
-  'Der Versicherer wird sagen: Zinsen nur aus den eigenen Zahlen, nicht aus dem Branchenschnitt; die Nettoverzinsung enthalte Einmaleffekte; Schutz- und Kostenanteile seien höher. Genau deshalb rechnen wir mit einer Spanne statt mit einer einzigen Zahl – und legen im Bericht jede Quelle offen.';
-
-const AMPEL_WORT: Record<UebernahmeAmpel['ampel'], string> = {
-  gruen: 'Grün',
-  gelb: 'Gelb',
-  rot: 'Rot',
-  grau: 'Grau',
-};
+  'Der Versicherer wird sagen: Zinsen nur aus den eigenen Zahlen, nicht aus dem Branchenschnitt; die Nettoverzinsung enthalte Einmaleffekte; Schutz- und Kostenanteile seien höher. Genau deshalb rechnen wir mit einer Spanne statt mit einer einzigen Zahl – und legen im Gutachten jede Quelle offen.';
 
 const AMPEL_KANZLEI: Record<EligibilityResult['ampel'], string> = {
   gruen: 'Grün – Merkmale sprechen für eine vertiefte Prüfung',
@@ -67,63 +40,12 @@ const AMPEL_KANZLEI: Record<EligibilityResult['ampel'], string> = {
   rot: 'Rot – kein geeigneter Fall erkennbar',
 };
 
-function VerkaufenKarte({
-  einwilligung,
-  onEinwilligung,
-}: {
-  einwilligung: boolean;
-  onEinwilligung: (angehakt: boolean) => void;
-}) {
-  return (
-    <section aria-labelledby="verkaufen-titel" className="karte">
-      <h2 id="verkaufen-titel">Nicht streiten? Verkaufen prüfen.</h2>
-      <p>Der dritte Weg neben Kündigen und Rückabwicklung.</p>
-      <div className="feld">
-        <div className="optionen">
-          <label>
-            <input
-              type="checkbox"
-              checked={einwilligung}
-              onChange={(ereignis) => onEinwilligung(ereignis.target.checked)}
-            />
-            <span>
-              Ja, {BRAND.name} darf mich zu einem Ankaufsangebot kontaktieren und dafür meine
-              Vertragsangaben nutzen. Wir erhalten vom Organisationspartner eine Vergütung.
-              (freiwillig, jederzeit widerrufbar)
-            </span>
-          </label>
-        </div>
-      </div>
-      <p style={{ marginBottom: 0 }}>
-        <Link
-          href="/verkaufen"
-          className="knopf zweitrangig"
-          aria-disabled={!einwilligung}
-          onClick={(ereignis) => {
-            if (!einwilligung) {
-              ereignis.preventDefault();
-            }
-          }}
-        >
-          Unverbindliches Ankaufsangebot anfordern
-        </Link>
-      </p>
-      {!einwilligung && (
-        <p className="erklaerung" style={{ marginTop: '0.5rem', marginBottom: 0 }}>
-          Erst mit Ihrem Häkchen geht es weiter – ohne Ja geben wir nichts weiter.
-        </p>
-      )}
-    </section>
-  );
-}
-
 export function ErgebnisAnsicht() {
   const [draft, setDraft] = useState<CaseDraft>(leererDraft);
   const [geladen, setGeladen] = useState(false);
   const [vorschau, setVorschau] = useState<Vorschau | null>(null);
   const [fehler, setFehler] = useState<string | null>(null);
   const [laedt, setLaedt] = useState(false);
-  const [linkHinweis, setLinkHinweis] = useState<string | null>(null);
 
   useEffect(() => {
     const d = ladeDraft();
@@ -159,10 +81,10 @@ export function ErgebnisAnsicht() {
     return (
       <>
         <h1>Noch nichts gerechnet.</h1>
-        <p>Auf diesem Gerät liegen keine abgeschickten Angaben. Fünf Minuten, dann steht die Ampel.</p>
+        <p>Auf diesem Gerät liegen keine abgeschickten Angaben.</p>
         <p>
           <Link href="/rechner" className="knopf haupt">
-            Jetzt prüfen
+            Zum Rechner
           </Link>
         </p>
       </>
@@ -174,24 +96,6 @@ export function ErgebnisAnsicht() {
     setDraft(leererDraft());
     setVorschau(null);
   }
-
-  function ankaufEinwilligung(angehakt: boolean) {
-    const neu = { ...draft, einwilligungAnkaufKontakt: angehakt };
-    setDraft(neu);
-    speichereDraft(neu);
-  }
-
-  function linkErneutSenden() {
-    setLinkHinweis('Der Link ist unterwegs an Ihre E-Mail-Adresse.');
-    void fetch('/api/ergebnis-link', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ draft }),
-    }).catch(() => undefined);
-  }
-
-  const rkw = parseDecimalDe(draft.rueckkaufswert) ?? 0;
-  const ankaufErreicht = ANKAUF_MIN_RUECKKAUFSWERT !== null && rkw >= ANKAUF_MIN_RUECKKAUFSWERT;
 
   return (
     <>
@@ -211,85 +115,6 @@ export function ErgebnisAnsicht() {
               Anfrage senden
             </Link>
           </p>
-        </>
-      )}
-
-      {vorschau?.variante === 'privat' && (
-        <>
-          <Ampel zustand={vorschau.ampel.ampel} gross beschriftung={AMPEL_WORT[vorschau.ampel.ampel]} />
-          <h1 style={{ marginTop: '1rem' }}>{vorschau.ampel.titel}</h1>
-          {/* Über dem Knopf: höchstens 40 Wörter (Zeile + ggf. Rechtsweg-Satz). */}
-          <p style={{ fontSize: '1.2rem' }}>{vorschau.ampel.zeile}</p>
-          {vorschau.rechtswegSatz !== null && <p>{vorschau.rechtswegSatz}</p>}
-
-          {vorschau.kaufbar && VARIANTE.berichtKostenpflichtig && (
-            <div className="formular-aktionen" style={{ marginTop: '1rem' }}>
-              <Link href="/bestellen" className="knopf haupt">
-                Prüfbericht bestellen · {BERICHT_PREIS_BRUTTO_EUR} €
-              </Link>
-              <button type="button" className="knopf zweitrangig" onClick={linkErneutSenden}>
-                Später weitermachen – Link per E-Mail
-              </button>
-            </div>
-          )}
-          {linkHinweis !== null && <p className="erklaerung">{linkHinweis}</p>}
-
-          {/* Rot (Rechnung): Verkaufen-Karte an erster Stelle – der Vertrag läuft
-              oder ist beitragsfrei (beendete Verträge haben den Grund „status“). */}
-          {vorschau.ampel.grund === 'kein-vorteil' && VARIANTE.ankaufHinweis && (
-            <VerkaufenKarte einwilligung={draft.einwilligungAnkaufKontakt} onEinwilligung={ankaufEinwilligung} />
-          )}
-          {/* Grau: Verkaufen-Karte nur, wenn der Ankauf-Mindestwert erreicht ist. */}
-          {vorschau.ampel.grund === 'zu-klein' && VARIANTE.ankaufHinweis && ankaufErreicht && (
-            <VerkaufenKarte einwilligung={draft.einwilligungAnkaufKontakt} onEinwilligung={ankaufEinwilligung} />
-          )}
-
-          <div className="accordion-liste" style={{ marginTop: '2rem' }}>
-            <details>
-              <summary>Warum {AMPEL_WORT[vorschau.ampel.ampel]}?</summary>
-              <ul className="punkteliste" style={{ marginTop: '0.75rem' }}>
-                {vorschau.warum.map((zeile) => (
-                  <li key={zeile}>{zeile}</li>
-                ))}
-                {vorschau.annahmen.map((text) => (
-                  <li key={text}>{text}</li>
-                ))}
-                {vorschau.warnungen.map((text) => (
-                  <li key={text}>
-                    <strong>Hinweis:</strong> {text}
-                  </li>
-                ))}
-              </ul>
-              <p className="erklaerung">
-                Rechenkern {vorschau.meta.calcVersion}, Datenbank {vorschau.meta.dataVersion}. Grundlagen in den{' '}
-                <Link href="/agb#rechenweg">AGB („So rechnen wir“)</Link>.
-              </p>
-            </details>
-            <details>
-              <summary>Was sagt der Versicherer dazu?</summary>
-              <p style={{ marginTop: '0.75rem' }}>{GEGENPOSITION}</p>
-            </details>
-            <details>
-              <summary>Diese Unterlagen brauchen wir von Ihnen</summary>
-              <ul className="punkteliste" style={{ marginTop: '0.75rem' }}>
-                {UNTERLAGEN_LISTE.map((eintrag) => (
-                  <li key={eintrag}>{eintrag}</li>
-                ))}
-              </ul>
-              <p className="erklaerung">
-                Fehlt etwas? Schreiben Sie dem Versicherer kurz: „Bitte schicken Sie mir eine
-                Zweitschrift von Police und Versicherungsbedingungen zu Vertrag Nummer …“ – das muss
-                er liefern.
-              </p>
-            </details>
-          </div>
-
-          <div className="hinweis neutral">
-            <p>
-              Diese Ampel ist eine Schätzung unter offengelegten Annahmen, keine Rechtsberatung –
-              und keine Empfehlung, zu kündigen, zu verkaufen oder zu behalten.
-            </p>
-          </div>
         </>
       )}
 
@@ -378,7 +203,7 @@ export function ErgebnisAnsicht() {
       )}
 
       <h2>Ihre Angaben im Überblick</h2>
-      <ZusammenfassungAnsicht draft={draft} />
+      <ZusammenfassungAnsicht draft={draft} mitPerson={false} />
 
       <div className="formular-aktionen">
         <Link href="/rechner" className="knopf zweitrangig">

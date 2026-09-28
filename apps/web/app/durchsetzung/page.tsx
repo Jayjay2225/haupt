@@ -1,16 +1,18 @@
 import type { Metadata } from 'next';
 import { KONDITIONEN_PLATZHALTER } from '@/config/durchsetzung';
 import { DurchsetzungFormular } from '@/components/DurchsetzungFormular';
+import { VideocallSatz } from '@/components/VideocallSatz';
 
 export const metadata: Metadata = {
   title: 'Wir übernehmen',
 };
 
 /**
- * Durchsetzung beauftragen (Prompt 13, Abschnitt 2.3): drei Schritte,
- * Rechtsschutz-Frage, Konditionen, Formular mit Unterlagen-Upload und
- * eigenen Einwilligungen. Formulierung „Wir organisieren die Durchsetzung
- * mit spezialisierten Anwälten“ gilt in beiden Rechtsstrukturen
+ * Durchsetzung beauftragen (Prompt 13, Abschnitt 2.3; Prompt 14: Videocall-
+ * Satz, keine Frage nach Versicherungen für Anwaltskosten mehr): drei
+ * Schritte, Konditionen, Formular mit Unterlagen-Upload und eigenen
+ * Einwilligungen. Formulierung „Wir organisieren die Durchsetzung mit
+ * spezialisierten Anwälten“ gilt in beiden Rechtsstrukturen
  * (config/durchsetzung.ts, [[DURCHSETZUNGSSTRUKTUR]]).
  */
 export default function DurchsetzungSeite() {
@@ -41,10 +43,14 @@ export default function DurchsetzungSeite() {
         <p style={{ margin: 0 }}>
           <strong>Konditionen:</strong> {KONDITIONEN_PLATZHALTER}
           <br />
-          Die Konditionen stehen hier, in der E-Mail nach dem Bericht und im Auftragsformular,
+          Die Konditionen stehen hier, in der E-Mail mit dem Gutachten und im Auftragsformular,
           bevor Sie beauftragen.
         </p>
       </div>
+
+      <p className="erklaerung">
+        <VideocallSatz />
+      </p>
 
       <h2>Durchsetzung beauftragen</h2>
       <DurchsetzungFormular />

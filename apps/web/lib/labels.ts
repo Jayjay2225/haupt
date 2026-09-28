@@ -3,6 +3,7 @@
  * gehaltenen Feldwerte des CaseDraft.
  */
 import type {
+  Anrede,
   BelehrungForm,
   BelehrungFrist,
   JaNeinUnbekannt,
@@ -41,6 +42,12 @@ export const JNU_LABEL: Record<Exclude<JaNeinUnbekannt, ''>, string> = {
   ja: 'Ja',
   nein: 'Nein',
   unbekannt: 'Weiß ich nicht',
+};
+
+export const ANREDE_LABEL: Record<Exclude<Anrede, ''>, string> = {
+  frau: 'Frau',
+  herr: 'Herr',
+  keine: 'Keine Anrede',
 };
 
 export const ZUSTANDEKOMMEN_LABEL: Record<Exclude<Zustandekommen, ''>, string> = {

@@ -1,13 +1,19 @@
 /**
- * Auslieferung in zwei Phasen (Prompt 13, Abschnitt 3):
+ * Auslieferung in zwei Phasen (Prompt 13, Abschnitt 3; Prompt 14: Gutachten,
+ * Annahmen-Kasten, Postversand mit Druckvorlage, Rückfrage bei unbekannter
+ * Vertragsart):
  *
- * Phase A (Webhook, sofort): Vertragsbestätigung (§ 312f BGB), Bericht
- * erzeugen und plausibilisieren (Kennzeichen für die Freigabe-Liste),
- * Marker `erzeugt` setzen – der Bericht wird NICHT sofort versendet.
+ * Phase A (Webhook, sofort): Vertragsbestätigung (§ 312f BGB), ggf. Rückfrage
+ * zur Vertragsart, Gutachten erzeugen und plausibilisieren (Kennzeichen für
+ * die Freigabe-Liste), Marker `erzeugt` setzen – das Gutachten wird NICHT
+ * sofort versendet.
  *
  * Phase B (Freigabe im Admin ODER automatisch nach `autoVersandNachStunden`,
- * angestoßen vom Cron /api/auslieferung/cron): Bericht versenden, Marker
- * `ausgeliefert`. So werden die zugesagten 12 Stunden immer gehalten.
+ * angestoßen vom Cron /api/auslieferung/cron): Gutachten versenden, Marker
+ * `ausgeliefert`. So werden die zugesagten 12 Stunden immer gehalten. Ist der
+ * Postversand gewählt, geht zusätzlich die Druckvorlage (Deckblatt mit
+ * Anschrift, Gutachten, Beileger) als Druckauftrag an den Anbieter; der Stand
+ * (gewünscht → gedruckt → versendet) steht als Marker `post_status`/`post_am`.
  *
  * Erstkunden (EK-…) werden weiterhin direkt beliefert (erfuelleBestellung).
  * Der Stand je Bestellung liegt als status.json im Auslieferungsordner;
@@ -20,7 +26,8 @@ import { berechneRueckabwicklung } from '@rueckab/calc';
 import type { RiskDefaults } from '@rueckab/calc';
 import { pruefeEignung } from '@rueckab/eligibility';
 import type { Regelwerk } from '@rueckab/eligibility';
-import { formatDatum, htmlZuPdf, renderBerichtHtml } from '@rueckab/report';
+import { formatDatum, htmlZuPdf, renderBerichtHtml, renderDruckvorlageHtml } from '@rueckab/report';
+import type { BerichtInput, KopfzeilenDaten } from '@rueckab/report';
 import riskJson from '../../../data/risk-defaults.json';
 import rulesJson from '../../../data/legal-rules.json';
 import { AMPEL } from '@/config/ampel';
@@ -29,7 +36,15 @@ import { BERICHT_VERSAND } from '@/config/business';
 import { KONDITIONEN_PLATZHALTER } from '@/config/durchsetzung';
 import { VARIANTE } from '@/config/variante';
 import { draftZuEingaben } from './berechnung';
-import { berichtVerzoegert, berichtVersand, internerFehlerHinweis, vertragsbestaetigung } from './emails';
+import { versandadresse, type Versandadresse } from './bestellung';
+import {
+  berichtVerzoegert,
+  berichtVersand,
+  druckauftrag,
+  internerFehlerHinweis,
+  rueckfrageVertragsart,
+  vertragsbestaetigung,
+} from './emails';
 import { fallAusMetadaten } from './fall-kodierung';
 import { findeVersichererId, insurersDaten, versichererNachId } from './insurers-data';
 import { sendeMail } from './versand';
@@ -45,11 +60,14 @@ export interface AuslieferungsStatus {
   kundenname: string;
   bezahltAm: string;
   berichtDatei?: string;
+  /** Druckvorlage für den Postversand (nur wenn gewählt). */
+  druckDatei?: string;
   berichtErstelltAm?: string;
   rechnungLink?: string;
   bestaetigungGesendetAm?: string;
   mailVersendetAm?: string;
   mailWeg?: string;
+  druckauftragGesendetAm?: string;
   verzoegerungGemeldetAm?: string;
   fehler?: string[];
 }
@@ -60,6 +78,8 @@ export interface SitzungsDaten {
   kundenname: string;
   email: string;
   metadata: Record<string, string>;
+  /** Gedruckte Fassung per Post gewählt (Metadatum `post` = '1'). */
+  postversand: boolean;
   rechnungId?: string;
   zahlungId?: string;
 }
@@ -67,14 +87,28 @@ export interface SitzungsDaten {
 export interface Berichtsdatei {
   pfad: string;
   dateiname: string;
+  /** Druckvorlage (A4, beidseitig) – nur bei Postversand. */
+  druckPfad?: string;
+  druckDateiname?: string;
 }
+
+/** Stand des Postversands (Admin-Spalte „Post“, Prompt 14, 3). */
+export type PostStand = 'gewuenscht' | 'gedruckt' | 'versendet';
+
+export const POST_STAENDE: readonly PostStand[] = ['gewuenscht', 'gedruckt', 'versendet'];
+
+export const POST_STAND_LABEL: Record<PostStand, string> = {
+  gewuenscht: 'gewünscht',
+  gedruckt: 'gedruckt',
+  versendet: 'versendet',
+};
 
 /** Dauerhafte Marker außerhalb des Dateisystems (Serverless: /tmp überlebt den Aufruf nicht). */
 export interface AuslieferungsMarker {
   ausgeliefert?: string;
   bestaetigt?: string;
   verzoegert?: string;
-  /** Phase A abgeschlossen: Bericht erzeugt und plausibilisiert (ISO-Zeit). */
+  /** Phase A abgeschlossen: Gutachten erzeugt und plausibilisiert (ISO-Zeit). */
   erzeugt?: string;
   /** Menschliche Freigabe im Admin (ISO-Zeit) – löst den Versand aus. */
   freigegeben?: string;
@@ -82,9 +116,13 @@ export interface AuslieferungsMarker {
   kennzeichen?: string;
   /** Lead-Status im Admin (Prompt 13, 2.3). */
   leadStatus?: string;
+  /** Postversand: gewünscht / gedruckt / versendet (Prompt 14, 3). */
+  post?: PostStand;
+  /** Zeitpunkt der letzten Post-Änderung (ISO). */
+  postAm?: string;
 }
 
-export const LEAD_STATUS = ['Bericht gekauft', 'Übernahme angefragt', 'Mandat', 'Vergleich/Urteil'] as const;
+export const LEAD_STATUS = ['Gutachten gekauft', 'Übernahme angefragt', 'Mandat', 'Vergleich/Urteil'] as const;
 
 export interface ErfuellungsAbhaengigkeiten {
   erzeugeBericht: (daten: SitzungsDaten, ordner: string, jetzt: Date) => Promise<Berichtsdatei>;
@@ -143,13 +181,22 @@ export function sitzungsDaten(sitzung: Stripe.Checkout.Session): SitzungsDaten {
     kundenname: metadata['kundenname'] ?? sitzung.customer_details?.name ?? '',
     email,
     metadata,
+    postversand: metadata['post'] === '1',
     ...(rechnungId !== undefined ? { rechnungId } : {}),
     ...(zahlungId !== undefined ? { zahlungId } : {}),
   };
 }
 
-/** Rechnet den Fall und schreibt HTML + PDF des Berichts in den Bestellordner. */
-export async function erzeugeBericht(daten: SitzungsDaten, ordner: string, jetzt: Date): Promise<Berichtsdatei> {
+export interface GutachtenDaten {
+  bericht: BerichtInput;
+  adresse: Versandadresse;
+  kopf: KopfzeilenDaten;
+  /** Vertragsart „Weiß ich nicht“ – Rückfrage per E-Mail (Prompt 14, Schritt 1). */
+  rueckfrageVertragsart: boolean;
+}
+
+/** Rechnet den Fall aus den Sitzungs-Metadaten und baut die Eingaben des Gutachtens. */
+export function gutachtenDaten(daten: SitzungsDaten, jetzt: Date): GutachtenDaten {
   const draft = fallAusMetadaten(daten.metadata);
   if (draft === undefined) {
     throw new Error('Falldaten fehlen in der Zahlungssitzung.');
@@ -162,7 +209,8 @@ export async function erzeugeBericht(daten: SitzungsDaten, ordner: string, jetzt
   const calc = berechneRueckabwicklung(abbildung.contract, insurersDaten, riskDefaults);
   const eligibility = pruefeEignung(abbildung.eligibility, regelwerk);
   const versicherer = versichererNachId(abbildung.contract.versichererId);
-  const html = renderBerichtHtml({
+  const a = BRAND.anbieterAnschrift;
+  const bericht: BerichtInput = {
     marke: BRAND.name,
     aktenzeichen: daten.bestellnummer,
     kundenname: daten.kundenname,
@@ -178,19 +226,74 @@ export async function erzeugeBericht(daten: SitzungsDaten, ordner: string, jetzt
       minRueckkaufswert: AMPEL.uebernahme.minRueckkaufswert,
     },
     durchsetzungUrl: `${basisUrl()}/durchsetzung`,
+    verkaufenUrl: `${BRAND.domain}/verkaufen`,
     konditionenText: KONDITIONEN_PLATZHALTER,
-  });
+    // Prompt 14, 3: alle „Weiß ich nicht“-Annahmen im Kasten „Ihre Angaben und unsere Annahmen“.
+    annahmenKunde: abbildung.zusatzAnnahmen,
+    ankaufHinweis: VARIANTE.ankaufHinweis,
+    absender: `${BRAND.name} · ${BRAND.anbieter} · ${a.strasse} · ${a.plz} ${a.ort}`,
+  };
+  return {
+    bericht,
+    adresse: versandadresse(draft),
+    kopf: { marke: BRAND.name, aktenzeichen: daten.bestellnummer, kundenname: daten.kundenname, datum: formatDatum(heute) },
+    rueckfrageVertragsart: abbildung.rueckfrageVertragsart,
+  };
+}
+
+function basisname(bestellnummer: string): string {
+  return `${BRAND.produktname.replace(/\s+/g, '-')}_${bestellnummer}`;
+}
+
+/**
+ * Rechnet den Fall und schreibt HTML + PDF des Gutachtens in den Bestellordner –
+ * bei Postversand zusätzlich die Druckvorlage (Deckblatt, Gutachten, Beileger).
+ */
+export async function erzeugeBericht(daten: SitzungsDaten, ordner: string, jetzt: Date): Promise<Berichtsdatei> {
+  const { bericht, adresse, kopf } = gutachtenDaten(daten, jetzt);
   mkdirSync(ordner, { recursive: true });
-  const basisname = `${BRAND.produktname.replace(/\s+/g, '-')}_${daten.bestellnummer}`;
-  writeFileSync(resolve(ordner, `${basisname}.html`), html);
-  const pfad = resolve(ordner, `${basisname}.pdf`);
-  await htmlZuPdf(html, pfad, {
-    marke: BRAND.name,
-    aktenzeichen: daten.bestellnummer,
-    kundenname: daten.kundenname,
-    datum: formatDatum(heute),
-  });
-  return { pfad, dateiname: `${basisname}.pdf` };
+  const name = basisname(daten.bestellnummer);
+  const html = renderBerichtHtml(bericht);
+  writeFileSync(resolve(ordner, `${name}.html`), html);
+  const pfad = resolve(ordner, `${name}.pdf`);
+  await htmlZuPdf(html, pfad, kopf);
+  const ergebnis: Berichtsdatei = { pfad, dateiname: `${name}.pdf` };
+  if (daten.postversand) {
+    const druckHtml = renderDruckvorlageHtml(bericht, adresse);
+    writeFileSync(resolve(ordner, `${name}_Druck.html`), druckHtml);
+    const druckPfad = resolve(ordner, `${name}_Druck.pdf`);
+    await htmlZuPdf(druckHtml, druckPfad, kopf);
+    ergebnis.druckPfad = druckPfad;
+    ergebnis.druckDateiname = `${name}_Druck.pdf`;
+  }
+  return ergebnis;
+}
+
+/** Druckvorlage auf Abruf (Admin: erneut herunterladen) – unabhängig vom Metadatum `post`. */
+export async function erzeugeDruckvorlage(daten: SitzungsDaten, jetzt: Date): Promise<Berichtsdatei> {
+  const { bericht, adresse, kopf } = gutachtenDaten(daten, jetzt);
+  const ordner = resolve(auslieferungsVerzeichnis(), daten.bestellnummer);
+  mkdirSync(ordner, { recursive: true });
+  const name = `${basisname(daten.bestellnummer)}_Druck`;
+  const html = renderDruckvorlageHtml(bericht, adresse);
+  const pfad = resolve(ordner, `${name}.pdf`);
+  await htmlZuPdf(html, pfad, kopf);
+  return { pfad, dateiname: `${name}.pdf` };
+}
+
+function markerAusMetadaten(m: Record<string, string>): AuslieferungsMarker {
+  const post = m['post_status'];
+  return {
+    ...((m['ausgeliefert_am'] ?? '') !== '' ? { ausgeliefert: m['ausgeliefert_am'] } : {}),
+    ...((m['bestaetigt_am'] ?? '') !== '' ? { bestaetigt: m['bestaetigt_am'] } : {}),
+    ...((m['verzoegert_am'] ?? '') !== '' ? { verzoegert: m['verzoegert_am'] } : {}),
+    ...((m['erzeugt_am'] ?? '') !== '' ? { erzeugt: m['erzeugt_am'] } : {}),
+    ...((m['freigegeben_am'] ?? '') !== '' ? { freigegeben: m['freigegeben_am'] } : {}),
+    ...((m['kennzeichen'] ?? '') !== '' ? { kennzeichen: m['kennzeichen'] } : {}),
+    ...((m['lead_status'] ?? '') !== '' ? { leadStatus: m['lead_status'] } : {}),
+    ...(post !== undefined && (POST_STAENDE as readonly string[]).includes(post) ? { post: post as PostStand } : {}),
+    ...((m['post_am'] ?? '') !== '' ? { postAm: m['post_am'] } : {}),
+  };
 }
 
 export function standardAbhaengigkeiten(stripe: Stripe): ErfuellungsAbhaengigkeiten {
@@ -206,16 +309,7 @@ export function standardAbhaengigkeiten(stripe: Stripe): ErfuellungsAbhaengigkei
         return {};
       }
       const zahlung = await stripe.paymentIntents.retrieve(daten.zahlungId);
-      const m = zahlung.metadata;
-      return {
-        ...((m['ausgeliefert_am'] ?? '') !== '' ? { ausgeliefert: m['ausgeliefert_am'] } : {}),
-        ...((m['bestaetigt_am'] ?? '') !== '' ? { bestaetigt: m['bestaetigt_am'] } : {}),
-        ...((m['verzoegert_am'] ?? '') !== '' ? { verzoegert: m['verzoegert_am'] } : {}),
-        ...((m['erzeugt_am'] ?? '') !== '' ? { erzeugt: m['erzeugt_am'] } : {}),
-        ...((m['freigegeben_am'] ?? '') !== '' ? { freigegeben: m['freigegeben_am'] } : {}),
-        ...((m['kennzeichen'] ?? '') !== '' ? { kennzeichen: m['kennzeichen'] } : {}),
-        ...((m['lead_status'] ?? '') !== '' ? { leadStatus: m['lead_status'] } : {}),
-      };
+      return markerAusMetadaten(zahlung.metadata);
     },
     setzeMarker: async (daten, patch) => {
       if (daten.zahlungId === undefined) {
@@ -230,6 +324,8 @@ export function standardAbhaengigkeiten(stripe: Stripe): ErfuellungsAbhaengigkei
           ...(patch.freigegeben !== undefined ? { freigegeben_am: patch.freigegeben } : {}),
           ...(patch.kennzeichen !== undefined ? { kennzeichen: patch.kennzeichen.slice(0, 480) } : {}),
           ...(patch.leadStatus !== undefined ? { lead_status: patch.leadStatus } : {}),
+          ...(patch.post !== undefined ? { post_status: patch.post } : {}),
+          ...(patch.postAm !== undefined ? { post_am: patch.postAm } : {}),
         },
       });
     },
@@ -239,8 +335,9 @@ export function standardAbhaengigkeiten(stripe: Stripe): ErfuellungsAbhaengigkei
 
 /**
  * Plausibilisierungs-Kennzeichen für die Freigabe-Liste (Prompt 13, 3):
- * Datenabdeckung, Ausreißer, Fondsanteil, Vertrag vor 1994. Kein Kennzeichen
- * heißt: unauffällig.
+ * Datenabdeckung, Ausreißer, Fondsanteil, Vertrag vor 1994; seit Prompt 14
+ * auch die Zahl der „Weiß ich nicht“-Annahmen und die Rückfrage zur
+ * Vertragsart. Kein Kennzeichen heißt: unauffällig.
  */
 export function berechneKennzeichen(daten: SitzungsDaten, jetzt: Date): string[] {
   const draft = fallAusMetadaten(daten.metadata);
@@ -249,6 +346,12 @@ export function berechneKennzeichen(daten: SitzungsDaten, jetzt: Date): string[]
   }
   const abbildung = draftZuEingaben(draft, findeVersichererId, jetzt.toISOString().slice(0, 7));
   const kennzeichen: string[] = [];
+  if (abbildung.rueckfrageVertragsart) {
+    kennzeichen.push('Vertragsart unbekannt – Rückfrage per E-Mail');
+  }
+  if (abbildung.zusatzAnnahmen.length > 0) {
+    kennzeichen.push(`Annahmen: ${abbildung.zusatzAnnahmen.length}`);
+  }
   if (abbildung.contract.vertragsart === 'fonds-lv' || abbildung.contract.vertragsart === 'fonds-rv') {
     kennzeichen.push('Fondsgebunden');
   }
@@ -281,6 +384,16 @@ export function berechneKennzeichen(daten: SitzungsDaten, jetzt: Date): string[]
   return kennzeichen;
 }
 
+/** Vertragsart „Weiß ich nicht“ gewählt? Dann geht mit der Bestätigung eine Rückfrage raus. */
+export function rueckfrageNoetig(daten: SitzungsDaten): boolean {
+  return fallAusMetadaten(daten.metadata)?.vertragsart === 'unbekannt';
+}
+
+/** Anschrift als eine Zeile (Druckauftrag). */
+function anschriftZeile(adresse: Versandadresse): string {
+  return `${adresse.strasse}, ${adresse.plz} ${adresse.ort}`;
+}
+
 export type VersandEntscheidung = 'erledigt' | 'senden' | 'warten' | 'unbereit';
 
 /**
@@ -303,6 +416,28 @@ export function entscheideVersand(
   }
   const erzeugtVor = jetzt.getTime() - new Date(marker.erzeugt).getTime();
   return erzeugtVor >= autoVersandNachStunden * 60 * 60 * 1000 ? 'senden' : 'warten';
+}
+
+/** Vertragsbestätigung (§ 312f BGB) und ggf. Rückfrage zur Vertragsart – genau einmal. */
+async function sendeBestaetigung(
+  daten: SitzungsDaten,
+  deps: ErfuellungsAbhaengigkeiten,
+  ordner: string,
+  preisText: string | undefined,
+): Promise<void> {
+  const basis = basisUrl();
+  const bestaetigung = vertragsbestaetigung(
+    daten.kundenname,
+    daten.bestellnummer,
+    { agb: `${basis}/agb`, widerruf: `${basis}/widerrufsbelehrung` },
+    preisText,
+    daten.postversand,
+  );
+  await deps.sendeMail({ an: daten.email, betreff: bestaetigung.betreff, text: bestaetigung.text }, ordner);
+  if (rueckfrageNoetig(daten)) {
+    const rueckfrage = rueckfrageVertragsart(daten.kundenname, daten.bestellnummer);
+    await deps.sendeMail({ an: daten.email, betreff: rueckfrage.betreff, text: rueckfrage.text }, ordner);
+  }
 }
 
 /**
@@ -342,18 +477,16 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
     status.verzoegerungGemeldetAm = marker.verzoegert;
   }
   mkdirSync(ordner, { recursive: true });
+  const erstkunde = daten.bestellnummer.startsWith('EK-');
   try {
     // Vertragsbestätigung (§ 312f BGB) vor Beginn der Ausführung, genau einmal.
     if (status.bestaetigungGesendetAm === undefined) {
-      const basis = basisUrl();
-      const erstkunde = daten.bestellnummer.startsWith('EK-');
-      const bestaetigung = vertragsbestaetigung(
-        daten.kundenname,
-        daten.bestellnummer,
-        { agb: `${basis}/agb`, widerruf: `${basis}/widerrufsbelehrung` },
-        erstkunde ? 'kostenlos im Erstkunden-Programm – als Dank bitten wir nach dem Prüfbericht um Ihr kurzes Feedback' : undefined,
+      await sendeBestaetigung(
+        daten,
+        deps,
+        ordner,
+        erstkunde ? 'kostenlos im Erstkunden-Programm – als Dank bitten wir nach dem Gutachten um Ihr kurzes Feedback' : undefined,
       );
-      await deps.sendeMail({ an: daten.email, betreff: bestaetigung.betreff, text: bestaetigung.text }, ordner);
       status.bestaetigungGesendetAm = deps.jetzt().toISOString();
       speichereStatus(ordner, status);
       try {
@@ -362,9 +495,16 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
         // Marker optional; Dateistatus trägt innerhalb der Instanz.
       }
     }
-    if (status.berichtDatei === undefined || !existsSync(status.berichtDatei)) {
+    if (
+      status.berichtDatei === undefined ||
+      !existsSync(status.berichtDatei) ||
+      (daten.postversand && (status.druckDatei === undefined || !existsSync(status.druckDatei)))
+    ) {
       const bericht = await deps.erzeugeBericht(daten, ordner, deps.jetzt());
       status.berichtDatei = bericht.pfad;
+      if (bericht.druckPfad !== undefined) {
+        status.druckDatei = bericht.druckPfad;
+      }
       status.berichtErstelltAm = deps.jetzt().toISOString();
       speichereStatus(ordner, status);
     }
@@ -383,8 +523,9 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
       daten.kundenname,
       daten.bestellnummer,
       status.rechnungLink,
-      daten.bestellnummer.startsWith('EK-'),
+      erstkunde,
       `${basisUrl()}/durchsetzung`,
+      daten.postversand,
     );
     const dateiname = status.berichtDatei.split('/').pop() ?? `${daten.bestellnummer}.pdf`;
     const ergebnis = await deps.sendeMail(
@@ -400,9 +541,35 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
     status.mailWeg = ergebnis.weg;
     speichereStatus(ordner, status);
     try {
-      await deps.setzeMarker(daten, { ausgeliefert: status.mailVersendetAm });
+      await deps.setzeMarker(daten, {
+        ausgeliefert: status.mailVersendetAm,
+        // Postversand: Stand „gewünscht“ sicherstellen (Erstkunden-Weg hat keinen Checkout-Marker).
+        ...(daten.postversand && marker.post === undefined ? { post: 'gewuenscht', postAm: status.mailVersendetAm } : {}),
+      });
     } catch {
       // Markierung fehlgeschlagen: Dateistatus verhindert Doppelversand innerhalb der Instanz.
+    }
+    // Druckauftrag (Prompt 14, 0.3): Druckvorlage an den Anbieter – bestmöglich, ohne den Versand zu gefährden.
+    if (daten.postversand && status.druckDatei !== undefined && status.druckauftragGesendetAm === undefined) {
+      try {
+        const { adresse } = gutachtenDaten(daten, deps.jetzt());
+        const auftrag = druckauftrag(daten.bestellnummer, daten.kundenname, anschriftZeile(adresse));
+        const druckname = status.druckDatei.split('/').pop() ?? `${daten.bestellnummer}_Druck.pdf`;
+        await deps.sendeMail(
+          {
+            an: BRAND.kontaktEmail,
+            betreff: auftrag.betreff,
+            text: auftrag.text,
+            anhaenge: [{ dateiname: druckname, inhalt: readFileSync(status.druckDatei), typ: 'application/pdf' }],
+          },
+          ordner,
+        );
+        status.druckauftragGesendetAm = deps.jetzt().toISOString();
+        speichereStatus(ordner, status);
+      } catch (grund) {
+        status.fehler = [...(status.fehler ?? []), `${deps.jetzt().toISOString()}: Druckauftrag: ${(grund as Error).message}`];
+        speichereStatus(ordner, status);
+      }
     }
     return status;
   } catch (fehler) {
@@ -435,10 +602,10 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
 }
 
 /**
- * Phase A (Prompt 13, 3): Vertragsbestätigung, Bericht erzeugen und
- * plausibilisieren, Marker `erzeugt` + Kennzeichen setzen – KEIN Versand.
- * Bei Fehlern wirft die Funktion nicht, sondern meldet 'fehler' (der Webhook
- * antwortet dann mit 500, Stripe stellt erneut zu).
+ * Phase A (Prompt 13, 3): Vertragsbestätigung (+ Rückfrage zur Vertragsart),
+ * Gutachten erzeugen und plausibilisieren, Marker `erzeugt` + Kennzeichen
+ * setzen – KEIN Versand. Bei Fehlern wirft die Funktion nicht, sondern meldet
+ * 'fehler' (der Webhook antwortet dann mit 500, Stripe stellt erneut zu).
  */
 export async function bereiteBestellungVor(
   daten: SitzungsDaten,
@@ -465,16 +632,15 @@ export async function bereiteBestellungVor(
   try {
     // Vertragsbestätigung (§ 312f BGB) vor Beginn der Ausführung, genau einmal.
     if (status.bestaetigungGesendetAm === undefined && marker.bestaetigt === undefined) {
-      const basis = basisUrl();
-      const bestaetigung = vertragsbestaetigung(daten.kundenname, daten.bestellnummer, {
-        agb: `${basis}/agb`,
-        widerruf: `${basis}/widerrufsbelehrung`,
-      });
-      await deps.sendeMail({ an: daten.email, betreff: bestaetigung.betreff, text: bestaetigung.text }, ordner);
+      await sendeBestaetigung(daten, deps, ordner, undefined);
       status.bestaetigungGesendetAm = deps.jetzt().toISOString();
       speichereStatus(ordner, status);
       try {
-        await deps.setzeMarker(daten, { bestaetigt: status.bestaetigungGesendetAm, leadStatus: 'Bericht gekauft' });
+        await deps.setzeMarker(daten, {
+          bestaetigt: status.bestaetigungGesendetAm,
+          leadStatus: 'Gutachten gekauft',
+          ...(daten.postversand && marker.post === undefined ? { post: 'gewuenscht', postAm: status.bestaetigungGesendetAm } : {}),
+        });
       } catch {
         // Marker optional; Dateistatus trägt innerhalb der Instanz.
       }
@@ -482,9 +648,12 @@ export async function bereiteBestellungVor(
     if (marker.erzeugt !== undefined) {
       return 'vorbereitet';
     }
-    // Bericht probeweise erzeugen (Validierung) und plausibilisieren.
+    // Gutachten probeweise erzeugen (Validierung) und plausibilisieren.
     const bericht = await deps.erzeugeBericht(daten, ordner, deps.jetzt());
     status.berichtDatei = bericht.pfad;
+    if (bericht.druckPfad !== undefined) {
+      status.druckDatei = bericht.druckPfad;
+    }
     status.berichtErstelltAm = deps.jetzt().toISOString();
     speichereStatus(ordner, status);
     const kennzeichen = berechneKennzeichen(daten, deps.jetzt());
@@ -514,7 +683,7 @@ export async function bereiteBestellungVor(
 }
 
 /**
- * Phase B: Bericht versenden (nach Freigabe oder Auto-Frist). Erzeugt das
+ * Phase B: Gutachten versenden (nach Freigabe oder Auto-Frist). Erzeugt das
  * PDF bei Bedarf neu (Serverless: /tmp der Phase A ist weg) und setzt den
  * Marker `ausgeliefert`. Wiederholt aufrufbar.
  */

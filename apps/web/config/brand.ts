@@ -1,9 +1,12 @@
 /**
- * Marken-Konfiguration (Prompt 12, Abschnitt 4: Design B „Nachtblau & Salbei“).
+ * Marken-Konfiguration (Prompt 12, Abschnitt 4: Design B „Nachtblau & Salbei“;
+ * Prompt 14, 0.6: Produktname „Gutachten“).
  *
- * Renten-Rettung ist die Privatkunden-Marke; das Produkt heißt „Prüfbericht“
- * (nie „Gutachten“). Zeitraum: Verträge mit Beginn 1980 bis 2020 (BRAND.range),
- * überall aus dieser Datei referenziert.
+ * Renten-Rettung ist die Privatkunden-Marke; das kostenpflichtige Produkt heißt
+ * „Gutachten“ – eine automatisierte versicherungsmathematische Auswertung,
+ * nie „Sachverständigengutachten“, nie „öffentlich bestellt“, „vereidigt“ oder
+ * „staatlich anerkannt“ (Wording-Test). Zeitraum: Verträge mit Beginn 1980 bis
+ * 2020 (BRAND.range), überall aus dieser Datei referenziert.
  *
  * Anbieter ist die Kaufmannsladen Gebhard GmbH (Entscheidung 20.09.2026);
  * die Registerdaten stammen aus dem Handelsregister (Abruf 20.09.2026 über
@@ -25,7 +28,7 @@ export interface Anschrift {
 export interface Marke {
   name: string;
   domain: string;
-  /** Produktname des kostenpflichtigen Berichts („Prüfbericht“, nie „Gutachten“). */
+  /** Produktname der kostenpflichtigen Auswertung („Gutachten“, Prompt 14). */
   produktname: string;
   claim: string;
   /** Vertragsbeginn-Zeitraum, der auf der Website genannt wird. */
@@ -51,9 +54,10 @@ export interface Marke {
 
 /**
  * Design B – Farb-Token (Prompt 12, Abschnitt 4.1). Ampelfarben werden
- * ausschließlich im Ampel-Element verwendet; auf `cta` und `brand` steht
- * immer weiße Schrift, auf `ampelGelb` immer dunkle (`ink`).
- * Kontrastmessung: docs/DESIGN.md.
+ * ausschließlich im Ampel-Element verwendet; auf `cta`, `ctaKauf` und `brand`
+ * steht immer weiße Schrift, auf `ampelGelb` immer dunkle (`ink`).
+ * `ctaKauf` (Prompt 14, 1.3) ist allein dem Kaufknopf vorbehalten; alle
+ * anderen Knöpfe bleiben Koralle. Kontrastmessung: docs/DESIGN.md.
  */
 export const COLORS = {
   bg: '#F5F8F7',
@@ -68,10 +72,15 @@ export const COLORS = {
   line: '#DDE4E6',
   cta: '#C24E2B',
   ctaHover: '#A9411F',
+  ctaKauf: '#1B7D45',
+  ctaKaufHover: '#155F35',
   ampelGruen: '#1E8E4E',
   ampelGelb: '#D9A400',
   ampelRot: '#C62828',
   ampelAus: '#B9CCC3',
+  /** Verkehrsampel (Prompt 14, 1.2): Gehäuse und matte Leuchten. */
+  ampelGehaeuse: '#1E2A33',
+  ampelMatt: '#3A4A55',
   focus: '#14365D',
 } as const;
 
@@ -84,7 +93,7 @@ export const SCHRIFTEN = {
 const RENTEN_RETTUNG: Marke = {
   name: 'Renten-Rettung',
   domain: 'renten-rettung.de',
-  produktname: 'Prüfbericht',
+  produktname: 'Gutachten',
   claim: 'Der Rückkaufswert ist nicht das letzte Wort.',
   range: { from: 1980, to: 2020 },
   stadt: 'Berlin',
@@ -105,7 +114,7 @@ const RENTEN_RETTUNG: Marke = {
 const KANZLEI_NEUTRAL: Marke = {
   name: process.env['NEXT_PUBLIC_KANZLEI_NAME'] ?? 'Policen-Check Kanzleiversion',
   domain: process.env['NEXT_PUBLIC_KANZLEI_DOMAIN'] ?? '[[KANZLEI-DOMAIN]]',
-  produktname: 'Prüfbericht',
+  produktname: 'Gutachten',
   claim: 'Rückabwicklung von Lebens- und Rentenversicherungen – Kurzprüfung',
   range: { from: 1980, to: 2020 },
   stadt: '',

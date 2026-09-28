@@ -1,8 +1,10 @@
-/* Renten-Rettung – Design B „Nachtblau & Salbei“ (Prompt 12, Abschnitt 4).
-   Token aus config/brand.ts (COLORS); Ampelfarben ausschließlich im
-   Ampel-Element; auf --cta und --brand immer weiße Schrift, auf --ampel-gelb
-   dunkle. Keine Verläufe, keine Archivfotos, keine Emojis, keine
-   Straßenampel-Grafik. Abstände im 8-px-Raster. Kontraste: docs/DESIGN.md. */
+/* Renten-Rettung – Design B „Nachtblau & Salbei“ (Prompt 12, Abschnitt 4;
+   Prompt 14: Verkehrsampel und grüner Kaufknopf). Token aus config/brand.ts
+   (COLORS); Ampelfarben ausschließlich im Ampel-Element (seit Prompt 14 als
+   hochkante Verkehrsampel auf der Startseite); auf --cta, --cta-kauf und
+   --brand immer weiße Schrift, auf --ampel-gelb dunkle. Keine Verläufe,
+   keine Archivfotos, keine Emojis. Abstände im 8-px-Raster. Kontraste:
+   docs/DESIGN.md. */
 
 :root {
   --bg: #f5f8f7;
@@ -17,10 +19,16 @@
   --line: #dde4e6;
   --cta: #c24e2b;
   --cta-hover: #a9411f;
+  /* Kaufknopf (Prompt 14, 1.3): Grün nur für „Gutachten bestellen“. */
+  --cta-kauf: #1b7d45;
+  --cta-kauf-hover: #155f35;
   --ampel-gruen: #1e8e4e;
   --ampel-gelb: #d9a400;
   --ampel-rot: #c62828;
   --ampel-aus: #b9ccc3;
+  /* Verkehrsampel (Prompt 14, 1.2): Gehäuse und matte Leuchten. */
+  --ampel-gehaeuse: #1e2a33;
+  --ampel-matt: #3a4a55;
   --focus: #14365d;
   --trenn: #edf1f0;
   --radius-karte: 24px;
@@ -557,9 +565,10 @@ th.betrag {
   margin-bottom: 0.5rem;
 }
 
-/* Ampel-Element (4.4): Pille in Salbei-Hell, drei Punkte – keine
-   Straßenampel-Grafik. Aktiver Punkt: Farbe aus dem Ergebnis, Glow
-   0 0 0 6px mit 18 % Alpha. Ergebnis-Seite: 40-px-Punkte. */
+/* Ampel-Element, Variante „pille“ (Prompt 12, 4.4): Pille in Salbei-Hell,
+   drei Punkte – bleibt für die Kanzlei-Ergebnisseite. Aktiver Punkt: Farbe
+   aus dem Ergebnis, Glow 0 0 0 6px mit 18 % Alpha. Die Verkehrsampel der
+   Startseite (Prompt 14) steht am Ende dieser Datei. */
 .ampel {
   display: inline-flex;
   gap: 0.75rem;
@@ -626,20 +635,13 @@ th.betrag {
   font-size: 1.5625rem;
 }
 
-/* Einstiegskarte (Schnellcheck) */
-.schnellcheck h2 {
+/* Einstiegskarte (Ampel-Karte, Prompt 14, 1.1): vier Felder, darunter die
+   Verkehrsampel, darunter der grüne Kaufknopf. */
+.ampel-karte h2 {
   margin-bottom: 0.75rem;
 }
 
-.schnellcheck-kopf {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-
-.schnellcheck .felder {
+.ampel-karte .felder {
   display: grid;
   gap: 0.5rem;
 }
@@ -973,4 +975,504 @@ fieldset.feld legend {
   background: var(--brand);
   color: #ffffff;
   border-color: var(--brand);
+}
+
+/* ==================================================================
+   Prompt 14 – Startseite/Funnel: Verkehrsampel (1.2), grüner Kaufknopf
+   (1.3), „Wo finde ich das?“ (1.4), Bild-/Video-Platzhalter (1.7/1.9),
+   Preisblock (4), Geschichten (5).
+   ================================================================== */
+
+/* Ampel-Bereich der Einstiegskarte: Ampel hochkant, Text darunter. */
+.ampel-bereich {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  margin-block: 1.25rem 1rem;
+  text-align: center;
+}
+
+.ampel-kartentext {
+  margin: 0;
+  max-width: 26rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  min-height: 3em;
+}
+
+/* Verkehrsampel (Inline-SVG): mobil 96 × 240 px, Desktop 120 × 300 px. */
+.ampel-verkehr-behaelter {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+}
+
+.ampel-verkehr {
+  display: block;
+  width: 6rem; /* 96 px */
+  height: 15rem; /* 240 px */
+  overflow: visible;
+}
+
+@media (min-width: 52rem) {
+  .ampel-verkehr {
+    width: 7.5rem; /* 120 px */
+    height: 18.75rem; /* 300 px */
+  }
+}
+
+.ampel-verkehr .ampel-gehaeuse {
+  fill: var(--ampel-gehaeuse);
+  stroke: transparent;
+  stroke-width: 3;
+  transition: stroke 0.3s ease;
+}
+
+.ampel-verkehr .ampel-mast {
+  fill: #2b3a45;
+}
+
+.ampel-verkehr .ampel-fassung {
+  fill: #121b22;
+}
+
+/* Aus: alle Leuchten matt (#3A4A55). */
+.ampel-verkehr .ampel-lampe {
+  fill: var(--ampel-matt);
+  transition: fill 0.3s ease;
+}
+
+.ampel-verkehr .ampel-blende {
+  fill: rgba(0, 0, 0, 0.35);
+}
+
+/* An: volle Farbe plus Glow (24 px, 45 % Alpha), Übergang 300 ms. */
+.ampel-verkehr .ampel-glow {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ampel-verkehr .ampel-leuchte[data-an='ja'] .ampel-glow {
+  opacity: 0.45;
+}
+
+.ampel-verkehr .ampel-leuchte--rot[data-an='ja'] .ampel-lampe,
+.ampel-verkehr .ampel-leuchte--rot[data-an='ja'] .ampel-glow {
+  fill: var(--ampel-rot);
+}
+
+.ampel-verkehr .ampel-leuchte--gelb[data-an='ja'] .ampel-lampe,
+.ampel-verkehr .ampel-leuchte--gelb[data-an='ja'] .ampel-glow {
+  fill: var(--ampel-gelb);
+}
+
+.ampel-verkehr .ampel-leuchte--gruen[data-an='ja'] .ampel-lampe,
+.ampel-verkehr .ampel-leuchte--gruen[data-an='ja'] .ampel-glow {
+  fill: var(--ampel-gruen);
+}
+
+/* Grau: alle Leuchten matt, Rahmen in Salbei, Etikett unter dem Gehäuse. */
+.ampel-verkehr[data-zustand='grau'] .ampel-gehaeuse {
+  stroke: var(--sage);
+}
+
+.ampel-etikett {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--sage-light);
+  border: 1px solid var(--sage);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ampel-verkehr .ampel-lampe,
+  .ampel-verkehr .ampel-glow,
+  .ampel-verkehr .ampel-gehaeuse,
+  .ampel .punkt {
+    transition: none;
+  }
+}
+
+/* Kaufknopf (1.3): Grün #1B7D45, Hover #155F35, weiße Schrift 19 px fett. */
+.knopf.kauf {
+  background: var(--cta-kauf);
+  color: #ffffff;
+  font-size: 1.1875rem;
+  font-weight: 700;
+}
+
+.knopf.kauf:hover:not(:disabled):not([aria-disabled='true']) {
+  background: var(--cta-kauf-hover);
+}
+
+.knopf.kauf:disabled,
+.knopf.kauf[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.kauf-bereich {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.kauf-bereich .knopf.kauf {
+  width: 100%;
+  max-width: 26rem;
+}
+
+.kauf-unterzeile {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+/* „Wo finde ich das?“ (1.4): Info-Symbol mit 44-px-Tippfläche, Info-Fenster,
+   aufklappbare Zeile im Funnel. */
+.feld-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  max-width: 26rem;
+  margin-bottom: 0.25rem;
+}
+
+.feld-kopf label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.info-knopf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem; /* 44 px */
+  height: 2.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--brand);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.info-knopf:hover {
+  background: var(--sage-light);
+}
+
+.info-knopf:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.info-fenster {
+  width: 100%;
+  max-width: min(34rem, calc(100vw - 2rem));
+  border: none;
+  border-radius: var(--radius-karte);
+  padding: 0;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 24px 64px rgba(12, 36, 64, 0.25);
+}
+
+.info-fenster::backdrop {
+  background: rgba(12, 36, 64, 0.45);
+}
+
+.info-fenster-inhalt {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.5rem 1.75rem;
+}
+
+.info-fenster-inhalt h3,
+.info-fenster-inhalt p {
+  margin: 0;
+}
+
+.info-fenster-inhalt .knopf {
+  justify-self: end;
+}
+
+.wo-finde {
+  margin-top: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-klein);
+  background: var(--surface);
+}
+
+.wo-finde summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  color: var(--brand);
+  cursor: pointer;
+  list-style: none;
+}
+
+.wo-finde summary::-webkit-details-marker {
+  display: none;
+}
+
+.wo-finde summary::before {
+  content: 'i';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-family: var(--schrift-titel-stack);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.wo-finde-inhalt {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0 1rem 1rem;
+}
+
+.wo-finde-inhalt p {
+  margin: 0;
+}
+
+/* Schematische Skizze (Inline-SVG): markierte Stelle in Salbei – keine Ampelfarben. */
+.skizze {
+  display: block;
+  width: 100%;
+  max-width: 22rem;
+  height: auto;
+  font-family: var(--schrift-text-stack);
+}
+
+.skizze-blatt {
+  fill: #ffffff;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.skizze-logo {
+  fill: var(--sage-light);
+  stroke: var(--sage);
+}
+
+.skizze-kopf {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--ink-soft);
+}
+
+.skizze-titel {
+  font-size: 15px;
+  font-weight: 700;
+  fill: var(--ink);
+}
+
+.skizze-linie {
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.skizze-label {
+  font-size: 12px;
+  fill: var(--ink-soft);
+}
+
+.skizze-label--markiert {
+  font-weight: 700;
+  fill: var(--brand);
+}
+
+.skizze-wert {
+  font-size: 12px;
+  fill: var(--muted);
+}
+
+.skizze-markierung {
+  fill: var(--sage-light);
+  stroke: var(--sage);
+  stroke-width: 2;
+}
+
+/* Stimmungsbilder (1.7) und Platzhalterrahmen bis zur Lizenz. */
+.stimmungsbild {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-karte);
+}
+
+.bild-platzhalter {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 1.5rem;
+  border: 2px dashed var(--sage);
+  border-radius: var(--radius-karte);
+  background: var(--surface);
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.bild-platzhalter-text {
+  font-weight: 600;
+}
+
+/* Erklärvideo (1.9): 16:9, Poster mit Play-Symbol. */
+.video-rahmen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-top: 1rem;
+  border-radius: var(--radius-karte);
+  overflow: hidden;
+  background: var(--brand-deep);
+}
+
+.video-rahmen .video {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.video-platzhalter {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  text-align: center;
+}
+
+.video-play {
+  display: block;
+  line-height: 0;
+}
+
+.video-text {
+  font-family: var(--schrift-titel-stack);
+  font-weight: 600;
+  font-size: 1.375rem;
+}
+
+.video-platzhalter .erklaerung {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.875rem;
+}
+
+/* Preisblock (4): kein Streichpreis. */
+.preisblock {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.preisblock p {
+  margin: 0;
+}
+
+.preisblock-haupt {
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+
+.preisblock-haupt strong {
+  display: block;
+  font-family: var(--schrift-titel-stack);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--brand);
+}
+
+.preisblock-zeile {
+  font-size: 1.0625rem;
+}
+
+.preisblock--kompakt .preisblock-haupt strong {
+  display: inline;
+  font-size: 1.5rem;
+}
+
+/* „Das steckt in Ihrem Gutachten“ (1.5) */
+.merkmal-liste li {
+  margin-bottom: 0.75rem;
+}
+
+.schlusszeile {
+  margin: 1rem 0 0;
+  font-family: var(--schrift-titel-stack);
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--brand);
+}
+
+/* Geschichten (5): Initialen-Avatar, keine Bilder. */
+.geschichte-kopf {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.geschichte-kopf h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--sage-light);
+  color: var(--brand);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Funnel-Ergänzungen: Textknopf, „Später weitermachen“, Verkaufen-Karte. */
+.link-knopf {
+  min-height: 2.75rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--brand);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.weitermachen {
+  margin-top: 1.5rem;
+}
+
+.verkaufen-karte {
+  margin-top: 1rem;
+  border: 2px solid var(--sage);
+}
+
+.feld-hilfe {
+  margin-top: 0.25rem;
+}
+
+.videocall-satz a {
+  font-weight: 600;
 }

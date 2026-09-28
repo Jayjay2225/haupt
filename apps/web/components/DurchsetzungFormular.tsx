@@ -2,15 +2,15 @@
 
 /**
  * Auftragsformular Durchsetzung (Prompt 13, 2.3): Kontakt, Bestellnummer,
- * Rechtsschutz-Frage, Unterlagen-Upload (als E-Mail-Anhang weitergereicht,
- * keine Speicherung auf dem Server), eigene, nicht vorangekreuzte
- * Einwilligungen. Honigtopf gegen Bots.
+ * Unterlagen-Upload (als E-Mail-Anhang weitergereicht, keine Speicherung auf
+ * dem Server), eigene, nicht vorangekreuzte Einwilligungen. Honigtopf gegen
+ * Bots. Prompt 14: keine Frage nach Versicherungen für Anwaltskosten.
  */
 import { useState } from 'react';
 import Link from 'next/link';
 import { BRAND } from '@/config/brand';
 import { KONDITIONEN_PLATZHALTER } from '@/config/durchsetzung';
-import { Kontrollkaestchen, RadioGruppe, TextFeld } from './funnel/fields';
+import { Kontrollkaestchen, TextFeld } from './funnel/fields';
 
 const MAX_DATEIEN = 5;
 const MAX_GROESSE = 8 * 1024 * 1024; // je Datei; die API begrenzt zusätzlich die Summe.
@@ -20,7 +20,6 @@ export function DurchsetzungFormular() {
   const [email, setEmail] = useState('');
   const [telefon, setTelefon] = useState('');
   const [bestellnummer, setBestellnummer] = useState('');
-  const [rechtsschutz, setRechtsschutz] = useState('');
   const [nachricht, setNachricht] = useState('');
   const [dateien, setDateien] = useState<File[]>([]);
   const [einwilligungBeauftragung, setEinwilligungBeauftragung] = useState(false);
@@ -58,7 +57,6 @@ export function DurchsetzungFormular() {
       daten.set('email', email);
       daten.set('telefon', telefon);
       daten.set('bestellnummer', bestellnummer);
-      daten.set('rechtsschutz', rechtsschutz);
       daten.set('nachricht', nachricht);
       daten.set('firma_webseite', honigtopf);
       daten.set('einwilligungBeauftragung', einwilligungBeauftragung ? '1' : '');
@@ -107,24 +105,11 @@ export function DurchsetzungFormular() {
       <TextFeld id="du-telefon" label="Telefon (freiwillig)" typ="tel" inputMode="tel" autoComplete="tel" wert={telefon} onChange={setTelefon} />
       <TextFeld
         id="du-bestellnummer"
-        label="Bestellnummer des Prüfberichts (falls vorhanden)"
-        erklaerung="Steht in der E-Mail mit Ihrem Bericht, z. B. RR-2026-ABCDEF."
+        label="Bestellnummer des Gutachtens (falls vorhanden)"
+        erklaerung="Steht in der E-Mail mit Ihrem Gutachten, z. B. RR-2026-ABCDEF."
         autoComplete="off"
         wert={bestellnummer}
         onChange={setBestellnummer}
-      />
-      <RadioGruppe
-        id="du-rechtsschutz"
-        label="Haben Sie eine Rechtsschutzversicherung?"
-        erklaerung="Sie hilft, ist aber keine Voraussetzung."
-        nebeneinander
-        optionen={[
-          { wert: 'ja', label: 'Ja' },
-          { wert: 'nein', label: 'Nein' },
-          { wert: 'unbekannt', label: 'Weiß ich nicht' },
-        ]}
-        wert={rechtsschutz}
-        onChange={setRechtsschutz}
       />
       <div className="feld">
         <label htmlFor="du-unterlagen">Unterlagen (Police, letzte Standmitteilung – PDF oder Foto)</label>

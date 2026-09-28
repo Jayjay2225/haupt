@@ -61,7 +61,7 @@ export default function ImpressumSeite() {
       </p>
       <h2>Offenlegung wirtschaftlicher Verbindungen</h2>
       <p>
-        Wir verdienen am Prüfbericht. Kommt über uns ein Policen-Ankauf zustande, erhalten wir vom
+        Wir verdienen am Gutachten. Kommt über uns ein Policen-Ankauf zustande, erhalten wir vom
         Organisationspartner eine Vergütung; für die Durchsetzung arbeiten wir mit einer Partnerkanzlei
         zusammen ([[DURCHSETZUNGSSTRUKTUR]], Konditionen vor Beauftragung auf /durchsetzung).
       </p>

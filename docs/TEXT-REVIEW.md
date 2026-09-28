@@ -48,3 +48,19 @@ Neue Punkte (gemeldet statt stillschweigend umgeschrieben):
 | 20 | Ampel ohne Rückkaufswert (defensiv) | Gelb „Eine Zahl fehlt noch“ ohne Kaufknopf | Deck definiert den Fall nicht; Assistent erzwingt den Wert ohnehin |
 | 21 | „Erfahrung“-Karte | zeigt sichtbaren Platzhalter „[[ZAHL, belegbar]] geprüfte Policen“, bis NEXT_PUBLIC_GEPRUEFTE_POLICEN belegt gefüllt wird | Deck: „Platzhalter nicht durch Schätzungen ersetzen“; Wording-Test verbietet unbelegte Zahlen |
 | 22 | Vercel-Hobby-Cron nur täglich | dokumentiert (DEPLOY-VERCEL): für die 12-h-Zusage Pro-Plan oder externer Scheduler nötig | technische Grenze, keine Textfrage |
+
+## Nachtrag Prompt 14 (28.09.2026): Startseite, Funnel, Gutachten, Postversand
+
+| Nr. | Vorgabe (Prompt 14) | Umsetzung | Grund |
+|---|---|---|---|
+| 23 | Block „Verkaufen statt kämpfen“: „Wir kaufen laufende und beitragsfreie Verträge an – mit einem Angebot auf Basis Ihrer Police.“ | „Sie wollen Ihr Geld, aber keinen Streit? Laufende und beitragsfreie Verträge können verkauft werden – mit einem Angebot auf Basis Ihrer Police, das wir für Sie organisieren. Anfrage: renten-rettung.de/verkaufen.“ (Gutachten letzte Seite, Beileger) | Renten-Rettung kauft nicht selbst an (Organisationspartner, Vergütungsoffenlegung, Ankauf-Regeln) – Deck-Fassung als Alternative, sobald Ankauf im eigenen Namen bestätigt ist; LEGAL-OPEN Nr. 23g |
+| 24 | Preisblock, dritte Zeile „Zum Vergleich: Einzelgutachten von Versicherungsmathematikern kosten mehrere hundert Euro. [[QUELLE …]]“ | **gestrichen**, solange docs/QUELLEN.md (Q-01) keinen Beleg hat; erscheint mit `NEXT_PUBLIC_PREISVERGLEICH_QUELLE` | Deck: „sonst Satz streichen“ |
+| 25 | Schritt 10 „Über Sie“ mit abschließender Feldliste | Kontaktweg-Frage (Prompt 13, §4) entfällt; Telefon freiwillig | Feldliste des Decks ist abschließend; ohne Telefonpflicht kein Kontaktweg-Zwang |
+| 26 | FAQ: Eintrag zur Kostenschutz-Police streichen, Papier-Frage neu | Papier-Frage aufgenommen (acht Fragen); ein FAQ-Eintrag zur Kostenschutz-Police existierte nicht – die Frage stand nur im /durchsetzung-Formular, in der E-Mail an den Anbieter und im Konditionen-Platzhalter: dort entfernt | Repo-Scan (Test) statt Einzelstellen |
+| 27 | Gutachten-E-Mail: Videocall-Satz als letzte Zeile | steht nach dem Abschluss/der Fußnote als letzte Zeile (`videocallText()`), Link zeigt auf `[[VIDEOCALL-URL]]` bis das Buchungstool feststeht | wörtlich |
+| 28 | Vertragsart „Weiß ich nicht“ → Rückfrage per E-Mail | neuer Text `rueckfrageVertragsart` („Kurze Rückfrage zu Ihrer Bestellung …“, Gutachten wird als Kapital-LV gerechnet und als Annahme ausgewiesen; Foto der ersten Police-Seite reicht) – **zur Abnahme** (LEGAL-OPEN Nr. 23f) | Deck nennt nur den Mechanismus, keinen Wortlaut |
+| 29 | Postversand: Deckblatt, Beileger, Druckauftrag | neue Texte: Deckblatt-Anschreiben („wie gewünscht erhalten Sie Ihr Gutachten zusätzlich gedruckt …“), Beileger (drei Wege, Ablauf, Offenlegung), interner Druckauftrag – **zur Abnahme** | Deck nennt Aufbau, keinen Wortlaut |
+| 30 | Bilder „lizenziert, bis dahin Platzhalterrahmen“ | Rahmen mit sichtbarem Hinweis „Bild folgt: Paar im Ruhestand am Küchentisch · [[BILD …]]“ | Beta-Sichtbarkeit; nichts wird stillschweigend weggelassen |
+| 31 | Hilfetexte wörtlich, mit Skizze | zehn Texte wörtlich; Skizzen schematisch mit Platzhalter-Punkten statt Zahlen („•••.••• €“) | keine echten Dokumente, keine Beträge |
+| 32 | Ampel-Texte unter der Ampel | aus/grün/gelb wörtlich; Rot und Grau zeigen Titel + Zeile aus Prompt 13, 2.2 | Deck verweist auf die P13-Texte |
+| 33 | Kaufknopf bei Rot/Grau | Rot (Rechnung): Verkaufen-Karte statt Knopf; Rot (Status) im Funnel als Ende mit Rot-Text; Grau: Hinweis „Individuelle Prüfung anfragen“ | Deck: „bei rot/grau Verkaufen-Karte bzw. Hinweis“; Verkaufen-Karte bei Grau erst mit `[[ANKAUF-PRIVAT]]`-Mindestwert |

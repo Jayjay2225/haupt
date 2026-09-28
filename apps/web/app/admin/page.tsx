@@ -1,17 +1,22 @@
 import type { Metadata } from 'next';
 import { adminAutorisiert } from '@/lib/admin';
 import { ladeBestellungen, type BestellZeile } from '@/lib/admin-liste';
-import { LEAD_STATUS } from '@/lib/erfuellung';
+import { LEAD_STATUS, POST_STAND_LABEL } from '@/lib/erfuellung';
 import { bestellungAktiv, stripeClient } from '@/lib/zahlung';
 
 export const metadata: Metadata = { title: 'Freigaben (intern)', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
 
+function zeit(iso: string | undefined): string {
+  return iso === undefined ? '' : iso.slice(0, 16).replace('T', ' ');
+}
+
 /**
  * Interne Freigabe-Liste (Prompt 13, Abschnitt 3): bezahlte Bestellungen mit
  * Plausibilisierungs-Kennzeichen; Freigabe mit einem Klick, Lead-Status
- * (2.3) und CSV-Export. Zugang: ?schluessel=ADMIN_PASSWORT (zusätzlich zur
- * Beta-Basic-Auth).
+ * (2.3), Spalte „Post“ (Prompt 14, 3: gewünscht → gedruckt → versendet, mit
+ * Datum, Druckvorlage zum Herunterladen) und CSV-Export. Zugang:
+ * ?schluessel=ADMIN_PASSWORT (zusätzlich zur Beta-Basic-Auth).
  */
 export default async function AdminSeite({
   searchParams,
@@ -46,14 +51,16 @@ export default async function AdminSeite({
     fehler = (grund as Error).message;
   }
   const offen = zeilen.filter((z) => z.entscheidung === 'warten' || z.entscheidung === 'unbereit');
+  const postOffen = zeilen.filter((z) => z.postversand && z.post !== 'versendet');
+  const q = encodeURIComponent(schluessel);
 
   return (
     <div className="container abschnitt">
       <h1>Freigaben.</h1>
       <p className="erklaerung">
         Bezahlte Bestellungen der letzten 30 Tage. Versand: Freigabe-Klick oder automatisch nach 10
-        Stunden (Cron, stündlich). Protokoll = Marker in den Stripe-Metadaten.{' '}
-        <a href={`/api/admin/leads.csv?schluessel=${encodeURIComponent(schluessel)}`}>CSV-Export</a>
+        Stunden (Cron). Protokoll = Marker in den Stripe-Metadaten.{' '}
+        <a href={`/api/admin/leads.csv?schluessel=${q}`}>CSV-Export</a>
       </p>
       {meldung !== '' && (
         <div className="hinweis">
@@ -66,7 +73,7 @@ export default async function AdminSeite({
         </div>
       )}
       <p>
-        <strong>{offen.length}</strong> wartend · {zeilen.length} gesamt
+        <strong>{offen.length}</strong> wartend · <strong>{postOffen.length}</strong> Post offen · {zeilen.length} gesamt
       </p>
       <div className="tabellen-scroll">
         <table className="zusammenfassung">
@@ -77,6 +84,7 @@ export default async function AdminSeite({
               <th>Bezahlt</th>
               <th>Kennzeichen</th>
               <th>Stand</th>
+              <th>Post</th>
               <th>Lead-Status</th>
               <th>Aktion</th>
             </tr>
@@ -90,16 +98,45 @@ export default async function AdminSeite({
                   <br />
                   <span className="erklaerung">{z.email}</span>
                 </td>
-                <td>{z.bezahltAm.slice(0, 16).replace('T', ' ')}</td>
+                <td>{zeit(z.bezahltAm)}</td>
                 <td>{z.kennzeichen.length > 0 ? z.kennzeichen.join('; ') : 'unauffällig'}</td>
                 <td>
                   {z.entscheidung === 'erledigt'
-                    ? `versendet ${z.marker.ausgeliefert?.slice(0, 16).replace('T', ' ') ?? ''}`
+                    ? `versendet ${zeit(z.marker.ausgeliefert)}`
                     : z.entscheidung === 'warten'
                       ? `wartet (erzeugt ${z.marker.erzeugt?.slice(11, 16) ?? ''})`
                       : z.entscheidung === 'unbereit'
                         ? 'noch nicht erzeugt'
                         : 'sendebereit'}
+                </td>
+                <td>
+                  {z.postversand ? (
+                    <div style={{ display: 'grid', gap: '0.25rem' }}>
+                      <span>
+                        {POST_STAND_LABEL[z.post ?? 'gewuenscht']}
+                        {z.postAm !== undefined ? ` ${zeit(z.postAm)}` : ''}
+                      </span>
+                      <a href={`/api/admin/druck?schluessel=${q}&sitzung=${encodeURIComponent(z.sitzung)}`}>
+                        Druckvorlage (PDF)
+                      </a>
+                      {z.post !== 'versendet' && (
+                        <form method="post" action="/api/admin/post" style={{ display: 'flex', gap: '0.25rem' }}>
+                          <input type="hidden" name="schluessel" value={schluessel} />
+                          <input type="hidden" name="sitzung" value={z.sitzung} />
+                          {z.post !== 'gedruckt' && (
+                            <button type="submit" name="stand" value="gedruckt" className="knopf zweitrangig klein">
+                              gedruckt
+                            </button>
+                          )}
+                          <button type="submit" name="stand" value="versendet" className="knopf zweitrangig klein">
+                            versendet
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  ) : (
+                    '–'
+                  )}
                 </td>
                 <td>
                   <form method="post" action="/api/admin/lead-status" style={{ display: 'flex', gap: '0.25rem' }}>

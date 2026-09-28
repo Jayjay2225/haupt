@@ -9,7 +9,7 @@ export function SiteFooter() {
   return (
     <footer className="fuss">
       <div className="container fuss-innen">
-        <p style={{ margin: 0, fontWeight: 600 }}>Schätzung mit Bandbreite · keine Rechtsberatung</p>
+        <p style={{ margin: 0, fontWeight: 600 }}>Schätzung mit Bandbreite · keine Rechtsberatung · kein Sachverständigengutachten</p>
         <nav className="fuss-nav" aria-label="Rechtliches">
           <Link href="/impressum">Impressum</Link>
           <Link href="/datenschutz">Datenschutz</Link>
@@ -17,7 +17,8 @@ export function SiteFooter() {
           <Link href="/widerrufsbelehrung">Widerruf</Link>
         </nav>
         <nav className="fuss-nav" aria-label="Weitere Seiten">
-          <Link href="/rechner">Rechner</Link>
+          <Link href={VARIANTE.berichtKostenpflichtig ? '/#ampel' : '/rechner'}>Ampel</Link>
+          <Link href="/gutachten">Gutachten</Link>
           {VARIANTE.ankaufHinweis && <Link href="/verkaufen">Verkaufen</Link>}
           <Link href="/durchsetzung">Durchsetzung</Link>
           <Link href="/anfrage">Individuelle Prüfung</Link>

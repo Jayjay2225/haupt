@@ -11,20 +11,20 @@ export default function AgbSeite() {
       <h1>Allgemeine Geschäftsbedingungen</h1>
       <EntwurfHinweis />
       <p>
-        Die AGB werden mit der Entscheidung über das Geschäftsmodell (Festpreis-Prüfbericht,
-        kostenlose Vorschau mit optionaler Weitergabe an eine Partnerkanzlei oder
+        Die AGB werden mit der Entscheidung über das Geschäftsmodell (Festpreis-Gutachten,
+        kostenlose Ampel mit optionaler Weitergabe an eine Partnerkanzlei oder
         B2B-Zugang) anwaltlich erstellt. Feststehen wird insbesondere:
       </p>
       <ul className="punkteliste">
-        <li>Leistungsbeschreibung: Berechnung und strukturierte Hinweise, keine Rechtsberatung im Einzelfall</li>
-        <li>Zustandekommen des Vertrags, Preise und Zahlungsweise (sofern kostenpflichtig)</li>
+        <li>Leistungsbeschreibung: automatisierte versicherungsmathematische Auswertung („Gutachten“) und strukturierte Hinweise, keine Rechtsberatung im Einzelfall, kein Sachverständigengutachten</li>
+        <li>Zustandekommen des Vertrags, Preise und Zahlungsweise (sofern kostenpflichtig); Lieferung per E-Mail, auf Wunsch zusätzlich kostenlos per Post</li>
         <li>Mitwirkungspflichten: Richtigkeit der Angaben, Charakter der Ergebnisse als Schätzung</li>
         <li>Haftung, Verfügbarkeit, Vertragslaufzeit und Kündigung</li>
       </ul>
 
       <h2 id="rechenweg">So rechnen wir – Annahmen und Datenherkunft</h2>
       <p>
-        Diese Grundsätze gelten für Ampel und Bericht; die Ergebnis-Seite verweist hierauf. Sie werden
+        Diese Grundsätze gelten für Ampel und Gutachten; die Bestellseite verweist hierauf. Sie werden
         Bestandteil der endgültigen AGB.
       </p>
       <ul className="punkteliste">
@@ -45,13 +45,13 @@ export default function AgbSeite() {
         </li>
         <li>
           Jede Kennzahl stammt aus Geschäftsberichten der Versicherer oder den Statistiken von Aufsicht
-          und Verband und trägt im Bericht Quelle und Abrufdatum. Fehlt ein Unternehmenswert, rechnen
+          und Verband und trägt im Gutachten Quelle und Abrufdatum. Fehlt ein Unternehmenswert, rechnen
           wir mit dem Branchendurchschnitt und kennzeichnen das als Schätzung.
         </li>
         <li>
           Der Versicherer wird der Rechnung entgegenhalten: eigene Zahlen statt Branchenschnitt,
           Einmaleffekte in der Nettoverzinsung, höhere Schutz- und Kostenanteile. Diese Gegenposition
-          steht ausführlich im Bericht – und ist der Grund für die Bandbreite.
+          steht ausführlich im Gutachten – und ist der Grund für die Bandbreite.
         </li>
         <li>
           Rechenkern und Datenbank sind versioniert; die im Ergebnis genannten Versionsstände gehören

@@ -1,21 +1,27 @@
 'use client';
 
 /**
- * Die Bildschirme des Rechner-Assistenten (Prompt 12, Abschnitt 3.2):
- * eine Frage je Bildschirm. Die Frage selbst rendert RechnerFunnel
- * (SCHRITT_FRAGE); hier stehen nur Eingabefeld und Hilfetext.
+ * Die Bildschirme des Rechner-Assistenten (Prompt 12, 3.2 – umgebaut nach
+ * Prompt 14, Abschnitt 2): eine Frage je Bildschirm, „Weiß ich nicht“ überall
+ * außer beim Rückkaufswert. Frage, Hilfesatz und „Wo finde ich das?“ rendert
+ * RechnerFunnel; hier stehen nur Eingabefelder und feldnahe Hinweise.
  */
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { BRAND } from '@/config/brand';
-import type { CaseDraft } from '@/lib/draft';
-import type { Fehlerliste } from '@/lib/draft';
-import { formatEuro, parseDecimalDe } from '@/lib/format';
+import { POST_WERKTAGE_TEXT, ZAHLUNG } from '@/config/business';
+import type { CaseDraft, Fehlerliste, Schritt } from '@/lib/draft';
+import { UNGEFAEHR_MONAT } from '@/lib/draft';
+import { formatDatumDe, formatEuro, parseDatumDe, parseDecimalDe } from '@/lib/format';
 import {
+  ANREDE_LABEL,
   BELEHRUNG_FORM_LABEL,
   BELEHRUNG_FRIST_LABEL,
   JNU_LABEL,
   ZUSTANDEKOMMEN_LABEL,
 } from '@/lib/labels';
+import { Preisblock } from '../Preisblock';
+import { ZusammenfassungAnsicht } from './Zusammenfassung';
 import {
   Kontrollkaestchen,
   MonatsFeld,
@@ -24,11 +30,24 @@ import {
   type Option,
 } from './fields';
 
+export interface BestellZustand {
+  freischaltcode: string;
+  setFreischaltcode: (wert: string) => void;
+  honig: string;
+  setHonig: (wert: string) => void;
+  /** Fehler aus der Bestell-API, der keinem Feld zuzuordnen ist. */
+  fallFehler?: string | undefined;
+}
+
 export interface SchrittProps {
   draft: CaseDraft;
   fehler: Fehlerliste;
   aendere: <K extends keyof CaseDraft>(feld: K, wert: CaseDraft[K]) => void;
   versichererNamen: string[];
+  /** Schritt 11: „Angaben ändern“ springt zum jeweiligen Schritt. */
+  springeZu?: ((schritt: Schritt) => void) | undefined;
+  /** Schritt 11: Freischaltcode, Honigtopf, API-Fehler. */
+  bestellung?: BestellZustand | undefined;
 }
 
 function betragEcho(eingabe: string, waehrung: 'EUR' | 'DM' = 'EUR'): string | undefined {
@@ -53,27 +72,33 @@ const TYP_OPTIONEN: Option[] = [
 
 export function SchrittTyp({ draft, fehler, aendere }: SchrittProps) {
   return (
-    <RadioGruppe
-      id="vertragsart"
-      label=""
-      erklaerung="Steht oben auf der Police."
-      optionen={TYP_OPTIONEN}
-      wert={draft.vertragsart}
-      onChange={(wert) => aendere('vertragsart', wert as CaseDraft['vertragsart'])}
-      fehler={fehler['vertragsart']}
-    />
+    <>
+      <RadioGruppe
+        id="vertragsart"
+        label=""
+        optionen={TYP_OPTIONEN}
+        wert={draft.vertragsart}
+        onChange={(wert) => aendere('vertragsart', wert as CaseDraft['vertragsart'])}
+        fehler={fehler['vertragsart']}
+      />
+      {draft.vertragsart === 'unbekannt' && (
+        <p className="erklaerung">
+          In Ordnung – wir rechnen wie für eine Kapitallebensversicherung (im Gutachten als Annahme
+          gekennzeichnet) und fragen per E-Mail nach.
+        </p>
+      )}
+    </>
   );
 }
 
 const STATUS_OPTIONEN: Option[] = [
-  { wert: 'laufend', label: 'Ja' },
+  { wert: 'laufend', label: 'Läuft' },
+  { wert: 'beitragsfrei', label: 'Beitragsfrei seit …' },
   { wert: 'gekuendigt', label: 'Gekündigt' },
-  { wert: 'beitragsfrei', label: 'Beitragsfrei' },
   { wert: 'abgelaufen', label: 'Ausgezahlt' },
 ];
 
 export function SchrittStatus({ draft, fehler, aendere }: SchrittProps) {
-  const beendet = draft.status === 'gekuendigt' || draft.status === 'abgelaufen';
   return (
     <>
       <RadioGruppe
@@ -84,11 +109,11 @@ export function SchrittStatus({ draft, fehler, aendere }: SchrittProps) {
         onChange={(wert) => aendere('status', wert as CaseDraft['status'])}
         fehler={fehler['status']}
       />
-      {beendet && (
+      {draft.status === 'beitragsfrei' && (
         <MonatsFeld
           id="statusDatum"
-          label="Wann war das? (Monat/Jahr, hilft der Genauigkeit)"
-          erklaerung="Steht auf der Abrechnung. Sie können das Feld auch leer lassen."
+          label="Beitragsfrei seit (Monat/Jahr)"
+          erklaerung="Steht im Schreiben zur Beitragsfreistellung. Sie können das Feld auch leer lassen."
           startJahr={2015}
           wert={draft.statusDatum}
           onChange={(wert) => aendere('statusDatum', wert)}
@@ -105,7 +130,6 @@ export function SchrittVersicherer({ draft, fehler, aendere, versichererNamen }:
       <TextFeld
         id="versicherer"
         label=""
-        erklaerung="Steht auf jeder Standmitteilung."
         platzhalter="Name auf der Police"
         wert={draft.versicherer}
         onChange={(wert) => aendere('versicherer', wert)}
@@ -123,16 +147,49 @@ export function SchrittVersicherer({ draft, fehler, aendere, versichererNamen }:
 }
 
 export function SchrittBeginn({ draft, fehler, aendere }: SchrittProps) {
+  const [jahrText, setJahrText] = useState(() => (draft.beginnUngefaehr ? draft.beginn.slice(0, 4) : ''));
   return (
-    <MonatsFeld
-      id="beginn"
-      label=""
-      erklaerung={`Versicherungsbeginn, nicht Antragsdatum. ${BRAND.range.from} bis ${BRAND.range.to}.`}
-      startJahr={2000}
-      wert={draft.beginn}
-      onChange={(wert) => aendere('beginn', wert)}
-      fehler={fehler['beginn']}
-    />
+    <>
+      {!draft.beginnUngefaehr ? (
+        <MonatsFeld
+          id="beginn"
+          label=""
+          erklaerung={`Versicherungsbeginn, nicht Antragsdatum. ${BRAND.range.from} bis ${BRAND.range.to}.`}
+          startJahr={2000}
+          wert={draft.beginn}
+          onChange={(wert) => aendere('beginn', wert)}
+          fehler={fehler['beginn']}
+        />
+      ) : (
+        <TextFeld
+          id="beginnJahr"
+          label="Jahr des Vertragsbeginns"
+          erklaerung="Nur das Jahr – im Gutachten steht dann „ungefähr“ (gerechnet wird mit der Jahresmitte)."
+          inputMode="numeric"
+          platzhalter="zum Beispiel 1998"
+          wert={jahrText}
+          onChange={(wert) => {
+            const ziffern = wert.replace(/\D/g, '').slice(0, 4);
+            setJahrText(ziffern);
+            aendere('beginn', ziffern.length === 4 ? `${ziffern}-${UNGEFAEHR_MONAT}` : '');
+          }}
+          fehler={fehler['beginn']}
+        />
+      )}
+      <Kontrollkaestchen
+        id="beginnUngefaehr"
+        label="Weiß nicht genau – ich kenne nur das Jahr."
+        angehakt={draft.beginnUngefaehr}
+        onChange={(angehakt) => {
+          aendere('beginnUngefaehr', angehakt);
+          if (angehakt) {
+            const jahr = draft.beginn.slice(0, 4);
+            setJahrText(jahr);
+            aendere('beginn', /^\d{4}$/.test(jahr) ? `${jahr}-${UNGEFAEHR_MONAT}` : '');
+          }
+        }}
+      />
+    </>
   );
 }
 
@@ -146,48 +203,78 @@ const ZAHLWEISE_OPTIONEN: Option[] = [
 
 export function SchrittBeitrag({ draft, fehler, aendere }: SchrittProps) {
   const vorEuro = draft.beginn !== '' && draft.beginn < '2002-01';
-  // Vor 2002 stand der Beitrag in DM – Vorauswahl DM, umschaltbar.
+  const heutiger = draft.beitragArt === 'heutiger';
+  // Vor 2002 stand der erste Beitrag in DM – Vorauswahl DM, umschaltbar; der heutige Beitrag ist in Euro.
   useEffect(() => {
-    if (vorEuro && draft.erstbeitrag === '' && draft.erstbeitragWaehrung === 'EUR') {
+    if (vorEuro && !heutiger && draft.erstbeitrag === '' && draft.erstbeitragWaehrung === 'EUR') {
       aendere('erstbeitragWaehrung', 'DM');
     }
+    if (heutiger && draft.erstbeitragWaehrung === 'DM') {
+      aendere('erstbeitragWaehrung', 'EUR');
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vorEuro]);
+  }, [vorEuro, heutiger]);
   return (
     <>
-      <TextFeld
-        id="erstbeitrag"
-        label=""
-        erklaerung="Der Beitrag aus dem ersten Vertragsjahr – er steht in der Police."
-        inputMode="decimal"
-        platzhalter={draft.erstbeitragWaehrung === 'DM' ? 'zum Beispiel 150' : 'zum Beispiel 100'}
-        wert={draft.erstbeitrag}
-        onChange={(wert) => aendere('erstbeitrag', wert)}
-        fehler={fehler['erstbeitrag']}
-        echo={betragEcho(draft.erstbeitrag, draft.erstbeitragWaehrung)}
-      />
-      {vorEuro && (
-        <RadioGruppe
-          id="erstbeitragWaehrung"
-          label="Währung"
-          erklaerung="Vor 2002 stand der Beitrag meist in DM."
-          nebeneinander
-          optionen={[
-            { wert: 'DM', label: 'DM' },
-            { wert: 'EUR', label: 'Euro' },
-          ]}
-          wert={draft.erstbeitragWaehrung}
-          onChange={(wert) => aendere('erstbeitragWaehrung', wert as CaseDraft['erstbeitragWaehrung'])}
-        />
+      {!draft.erstbeitragUnbekannt && (
+        <>
+          <TextFeld
+            id="erstbeitrag"
+            label=""
+            inputMode="decimal"
+            platzhalter={draft.erstbeitragWaehrung === 'DM' ? 'zum Beispiel 150' : 'zum Beispiel 100'}
+            wert={draft.erstbeitrag}
+            onChange={(wert) => aendere('erstbeitrag', wert)}
+            fehler={fehler['erstbeitrag']}
+            echo={betragEcho(draft.erstbeitrag, draft.erstbeitragWaehrung)}
+          />
+          <RadioGruppe
+            id="beitragArt"
+            label="Das ist mein …"
+            nebeneinander
+            optionen={[
+              { wert: 'erster', label: 'erster Beitrag' },
+              { wert: 'heutiger', label: 'heutiger Beitrag' },
+            ]}
+            wert={draft.beitragArt}
+            onChange={(wert) => aendere('beitragArt', wert as CaseDraft['beitragArt'])}
+          />
+          {vorEuro && !heutiger && (
+            <RadioGruppe
+              id="erstbeitragWaehrung"
+              label="Währung"
+              erklaerung="Vor 2002 stand der Beitrag meist in DM."
+              nebeneinander
+              optionen={[
+                { wert: 'DM', label: 'DM' },
+                { wert: 'EUR', label: 'Euro' },
+              ]}
+              wert={draft.erstbeitragWaehrung}
+              onChange={(wert) => aendere('erstbeitragWaehrung', wert as CaseDraft['erstbeitragWaehrung'])}
+            />
+          )}
+          <RadioGruppe
+            id="zahlweise"
+            label="Gezahlt wurde …"
+            nebeneinander
+            optionen={ZAHLWEISE_OPTIONEN}
+            wert={draft.zahlweise}
+            onChange={(wert) => aendere('zahlweise', wert as CaseDraft['zahlweise'])}
+          />
+        </>
       )}
-      <RadioGruppe
-        id="zahlweise"
-        label="Gezahlt wurde …"
-        nebeneinander
-        optionen={ZAHLWEISE_OPTIONEN}
-        wert={draft.zahlweise}
-        onChange={(wert) => aendere('zahlweise', wert as CaseDraft['zahlweise'])}
+      <Kontrollkaestchen
+        id="erstbeitragUnbekannt"
+        label="Weiß ich nicht."
+        angehakt={draft.erstbeitragUnbekannt}
+        onChange={(angehakt) => aendere('erstbeitragUnbekannt', angehakt)}
       />
+      {draft.erstbeitragUnbekannt && (
+        <p className="erklaerung">
+          Dann brauchen wir in Schritt 7 die Summe der gezahlten Beiträge aus der Standmitteilung –
+          sonst bitte in der Police nachsehen.
+        </p>
+      )}
     </>
   );
 }
@@ -198,11 +285,11 @@ export function SchrittDynamik({ draft, fehler, aendere }: SchrittProps) {
       <RadioGruppe
         id="dynamik"
         label=""
-        erklaerung="Dynamik heißt: Der Beitrag stieg jedes Jahr automatisch."
         nebeneinander
         optionen={[
           { wert: 'nein', label: 'Nein' },
           { wert: 'ja', label: 'Ja' },
+          { wert: 'unbekannt', label: 'Weiß ich nicht' },
         ]}
         wert={draft.dynamik}
         onChange={(wert) => aendere('dynamik', wert as CaseDraft['dynamik'])}
@@ -220,6 +307,9 @@ export function SchrittDynamik({ draft, fehler, aendere }: SchrittProps) {
           fehler={fehler['dynamikSatz']}
         />
       )}
+      {draft.dynamik === 'unbekannt' && (
+        <p className="erklaerung">Wir rechnen ohne Dynamik und weisen das im Gutachten als Annahme aus.</p>
+      )}
     </>
   );
 }
@@ -229,7 +319,11 @@ export function SchrittBeitragssumme({ draft, fehler, aendere }: SchrittProps) {
     <TextFeld
       id="gesamtsummeLautMitteilung"
       label=""
-      erklaerung="Falls die Standmitteilung eine Summe der eingezahlten Beiträge nennt. Sie können diesen Schritt überspringen."
+      erklaerung={
+        draft.erstbeitragUnbekannt
+          ? 'Ohne ersten Beitrag ist diese Summe die Grundlage der Rechnung.'
+          : 'Falls die Standmitteilung eine Summe der eingezahlten Beiträge nennt. Sie können diesen Schritt überspringen.'
+      }
       inputMode="decimal"
       platzhalter="zum Beispiel 24.000"
       wert={draft.gesamtsummeLautMitteilung}
@@ -241,16 +335,11 @@ export function SchrittBeitragssumme({ draft, fehler, aendere }: SchrittProps) {
 }
 
 export function SchrittRueckkaufswert({ draft, fehler, aendere }: SchrittProps) {
-  const beendet = draft.status === 'gekuendigt' || draft.status === 'abgelaufen';
   return (
     <TextFeld
       id="rueckkaufswert"
       label=""
-      erklaerung={
-        beendet
-          ? 'Die wichtigste Zahl. Bei beendeten Verträgen: der ausgezahlte Betrag laut Abrechnung.'
-          : 'Die wichtigste Zahl. Steht in der letzten Standmitteilung.'
-      }
+      erklaerung="Pflichtangabe – ohne sie können wir nicht prüfen, ob wir übernehmen."
       inputMode="decimal"
       platzhalter="zum Beispiel 25.000"
       wert={draft.rueckkaufswert}
@@ -277,11 +366,12 @@ export function SchrittAuszahlungen({ draft, fehler, aendere }: SchrittProps) {
       <RadioGruppe
         id="auszahlungenErhalten"
         label=""
-        erklaerung="Gemeint sind Teilauszahlungen oder Gewinnentnahmen während der Laufzeit – nicht der Rückkaufswert selbst."
+        erklaerung="Gemeint sind Teilauszahlungen, Vorschüsse oder ein Policendarlehen – nicht der Rückkaufswert selbst."
         nebeneinander
         optionen={[
           { wert: 'nein', label: 'Nein' },
           { wert: 'ja', label: 'Ja' },
+          { wert: 'unbekannt', label: 'Weiß ich nicht' },
         ]}
         wert={draft.auszahlungenErhalten}
         onChange={(wert) => {
@@ -292,6 +382,9 @@ export function SchrittAuszahlungen({ draft, fehler, aendere }: SchrittProps) {
         }}
         fehler={fehler['auszahlungenErhalten']}
       />
+      {draft.auszahlungenErhalten === 'unbekannt' && (
+        <p className="erklaerung">Wir rechnen ohne Auszahlungen und weisen das im Gutachten als Annahme aus.</p>
+      )}
       {draft.auszahlungenErhalten === 'ja' && (
         <>
           {fehler['auszahlungenListe'] !== undefined && (
@@ -402,13 +495,44 @@ export function SchrittEignung({ draft, fehler, aendere }: SchrittProps) {
   );
 }
 
-export function SchrittKontakt({ draft, fehler, aendere }: SchrittProps) {
+/** Schritt 10 „Über Sie“ (Prompt 14, 2): Rechnung, Postversand, Risikoanteil. */
+export function SchrittPerson({ draft, fehler, aendere }: SchrittProps) {
+  const [geburtsText, setGeburtsText] = useState(() => formatDatumDe(draft.geburtsdatum));
+  const erkannt = parseDatumDe(geburtsText);
   return (
     <>
+      <RadioGruppe
+        id="anrede"
+        label="Anrede"
+        nebeneinander
+        optionen={Object.entries(ANREDE_LABEL).map(([wert, label]) => ({ wert, label }))}
+        wert={draft.anrede}
+        onChange={(wert) => aendere('anrede', wert as CaseDraft['anrede'])}
+        fehler={fehler['anrede']}
+      />
+      <TextFeld id="vorname" label="Vorname" autoComplete="given-name" wert={draft.vorname} onChange={(w) => aendere('vorname', w)} fehler={fehler['vorname']} />
+      <TextFeld id="nachname" label="Nachname" autoComplete="family-name" wert={draft.nachname} onChange={(w) => aendere('nachname', w)} fehler={fehler['nachname']} />
+      <TextFeld
+        id="geburtsdatum"
+        label="Geburtsdatum"
+        inputMode="numeric"
+        platzhalter="TT.MM.JJJJ"
+        autoComplete="bday"
+        wert={geburtsText}
+        onChange={(wert) => {
+          setGeburtsText(wert);
+          aendere('geburtsdatum', parseDatumDe(wert) ?? '');
+        }}
+        echo={erkannt !== null ? `Gelesen als ${formatDatumDe(erkannt)}` : undefined}
+        fehler={fehler['geburtsdatum']}
+      />
+      <TextFeld id="strasse" label="Straße und Hausnummer" autoComplete="street-address" wert={draft.strasse} onChange={(w) => aendere('strasse', w)} fehler={fehler['strasse']} />
+      <TextFeld id="plz" label="PLZ" inputMode="numeric" autoComplete="postal-code" wert={draft.plz} onChange={(w) => aendere('plz', w)} fehler={fehler['plz']} />
+      <TextFeld id="ort" label="Ort" autoComplete="address-level2" wert={draft.ort} onChange={(w) => aendere('ort', w)} fehler={fehler['ort']} />
       <TextFeld
         id="email"
         label="E-Mail-Adresse"
-        erklaerung="Dorthin schicken wir den Link zu Ihrem Ergebnis. Der Link ist 30 Tage gültig."
+        erklaerung="Dorthin schicken wir Rechnung und Gutachten."
         typ="email"
         inputMode="email"
         autoComplete="email"
@@ -417,34 +541,67 @@ export function SchrittKontakt({ draft, fehler, aendere }: SchrittProps) {
         onChange={(wert) => aendere('email', wert)}
         fehler={fehler['email']}
       />
-      <RadioGruppe
-        id="kontaktWunsch"
-        label="Wie möchten Sie kontaktiert werden?"
-        nebeneinander
-        optionen={[
-          { wert: 'email', label: 'E-Mail' },
-          { wert: 'telefon', label: 'Telefon' },
-        ]}
-        wert={draft.kontaktWunsch}
-        onChange={(wert) => aendere('kontaktWunsch', wert as CaseDraft['kontaktWunsch'])}
-        fehler={fehler['kontaktWunsch']}
+      <TextFeld id="telefon" label="Telefon (optional)" typ="tel" inputMode="tel" autoComplete="tel" wert={draft.telefon} onChange={(w) => aendere('telefon', w)} fehler={fehler['telefon']} />
+    </>
+  );
+}
+
+const SCHRITT_FUER_FELD: Record<string, Schritt> = {
+  Vertrag: 'typ',
+  'Beiträge und Werte': 'beitrag',
+  'Über Sie': 'person',
+};
+
+/** Schritt 11 „Ihre Bestellung“ (Prompt 14, 2): Zusammenfassung, Preisblock, Post, Einwilligungen. */
+export function SchrittBestellung({ draft, fehler, aendere, springeZu, bestellung }: SchrittProps) {
+  return (
+    <>
+      <ZusammenfassungAnsicht draft={draft} />
+      {springeZu !== undefined && (
+        <p className="erklaerung">
+          Stimmt etwas nicht?{' '}
+          {Object.entries(SCHRITT_FUER_FELD).map(([titel, schritt], index) => (
+            <span key={schritt}>
+              {index > 0 ? ' · ' : ''}
+              <button type="button" className="link-knopf" onClick={() => springeZu(schritt)}>
+                {titel} ändern
+              </button>
+            </span>
+          ))}
+        </p>
+      )}
+
+      <h2>Preis</h2>
+      <Preisblock kompakt />
+      <p className="erklaerung">
+        Zahlung vorab: {ZAHLUNG.wege.join(', ')} – abgewickelt über {ZAHLUNG.abwicklung}. {ZAHLUNG.lieferung}
+      </p>
+
+      <Kontrollkaestchen
+        id="postversand"
+        label={`Gutachten zusätzlich per Post (kostenlos, ${POST_WERKTAGE_TEXT})`}
+        angehakt={draft.postversand}
+        onChange={(angehakt) => aendere('postversand', angehakt)}
       />
-      <TextFeld
-        id="telefon"
-        label={draft.kontaktWunsch === 'telefon' ? 'Telefon' : 'Telefon (freiwillig)'}
-        typ="tel"
-        inputMode="tel"
-        autoComplete="tel"
-        wert={draft.telefon}
-        onChange={(wert) => aendere('telefon', wert)}
-        fehler={fehler['telefon']}
-      />
+
+      {bestellung !== undefined && (
+        <TextFeld
+          id="freischaltcode"
+          label="Freischaltcode (Erstkunden-Programm, freiwillig)"
+          wert={bestellung.freischaltcode}
+          onChange={bestellung.setFreischaltcode}
+          autoComplete="off"
+          erklaerung="Mit gültigem Code ist das Gutachten kostenlos; im Gegenzug bitten wir um Ihr Feedback."
+        />
+      )}
+
+      <h2>Einwilligungen</h2>
       <Kontrollkaestchen
         id="einwilligungDatenschutz"
         label={
           <>
-            Ich habe die <a href="/datenschutz">Datenschutzerklärung</a> gelesen und bin einverstanden,
-            dass meine Angaben für die Berechnung verarbeitet werden.
+            Ich habe die <Link href="/datenschutz">Datenschutzerklärung</Link> gelesen und bin einverstanden,
+            dass meine Angaben für Berechnung, Rechnung und Versand verarbeitet werden.
           </>
         }
         angehakt={draft.einwilligungDatenschutz}
@@ -452,11 +609,47 @@ export function SchrittKontakt({ draft, fehler, aendere }: SchrittProps) {
         fehler={fehler['einwilligungDatenschutz']}
       />
       <Kontrollkaestchen
-        id="rechtsschutz"
-        label="Ich habe eine Rechtsschutzversicherung. (freiwillig – Ihr Bericht enthält dann die passenden Hinweise)"
-        angehakt={draft.rechtsschutz}
-        onChange={(angehakt) => aendere('rechtsschutz', angehakt)}
+        id="agbGelesen"
+        label={
+          <>
+            Ich habe die <Link href="/agb">AGB</Link> und die <Link href="/widerrufsbelehrung">Widerrufsbelehrung</Link>{' '}
+            gelesen.
+          </>
+        }
+        angehakt={draft.agbGelesen}
+        onChange={(angehakt) => aendere('agbGelesen', angehakt)}
+        fehler={fehler['agbGelesen']}
       />
+      <Kontrollkaestchen
+        id="ausfuehrungZugestimmt"
+        label="Ich möchte, dass das Gutachten (digitaler Inhalt) sofort erstellt wird. Mir ist bekannt: Mit Beginn der Erstellung erlischt mein Widerrufsrecht."
+        angehakt={draft.ausfuehrungZugestimmt}
+        onChange={(angehakt) => aendere('ausfuehrungZugestimmt', angehakt)}
+        fehler={fehler['ausfuehrungZugestimmt']}
+      />
+      {bestellung !== undefined && (
+        <div className="honigtopf" aria-hidden="true">
+          <label htmlFor="firma_webseite">Firmen-Webseite (bitte leer lassen)</label>
+          <input
+            id="firma_webseite"
+            name="firma_webseite"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={bestellung.honig}
+            onChange={(e) => bestellung.setHonig(e.target.value)}
+          />
+        </div>
+      )}
+      {bestellung?.fallFehler !== undefined && (
+        <div className="hinweis" role="alert">
+          <p style={{ margin: 0 }}>{bestellung.fallFehler}</p>
+        </div>
+      )}
+      <p className="erklaerung">
+        Ihre Rechnungsadresse fragt die Zahlungsseite noch einmal ab. Zur Abwicklung übermitteln wir Name und
+        E-Mail-Adresse an {ZAHLUNG.abwicklung}; mehr dazu in der <Link href="/datenschutz">Datenschutzerklärung</Link>.
+      </p>
     </>
   );
 }

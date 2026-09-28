@@ -1,6 +1,11 @@
 /**
- * Wording-Test für den PDF-Prüfbericht (Prompt 10, Abschnitt 8): Der Bericht
- * bleibt sachlich – hier gilt weiterhin die alte, strengere Liste.
+ * Wording-Test für das PDF-Gutachten (Prompt 10, Abschnitt 8; Prompt 14, 0.6):
+ * Das Gutachten bleibt sachlich – hier gilt weiterhin die alte, strengere
+ * Liste. Seit Prompt 14 heißt das Produkt „Gutachten“; verboten bleiben
+ * „Sachverständigengutachten“ (außer verneint), „öffentlich bestellt“,
+ * „vereidigt“, „staatlich anerkannt“, der alte Name „Prüfbericht“ und jede
+ * Erwähnung einer Versicherung für Rechtskosten (Begriff nur zusammengesetzt,
+ * damit er nirgends im Repo steht).
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -8,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 const SRC = resolve(dirname(fileURLToPath(import.meta.url)), '../src');
-const DATEIEN = ['template.ts', 'zitate.ts'].map((d) => join(SRC, d));
+const DATEIEN = ['template.ts', 'zitate.ts', 'pdf.ts', 'erzeuge-beispiele.ts'].map((d) => join(SRC, d));
 
 const VERBOTEN: { muster: RegExp; grund: string }[] = [
   { muster: /garantier/i, grund: '„garantiert“' },
@@ -18,6 +23,12 @@ const VERBOTEN: { muster: RegExp; grund: string }[] = [
   { muster: /sichern Sie sich/i, grund: 'Verkaufsdruck' },
   { muster: /betrug|betrogen|abgezockt|abzocke/i, grund: 'Betrugs-Vorwurf' },
   { muster: /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, grund: 'Emoji' },
+  {
+    muster: /(?<!kein |keine |keinem |keinen )Sachverständigengutachten|öffentlich bestellt|vereidigt|staatlich anerkannt/i,
+    grund: 'Sachverständigen-Anklang (Prompt 14, 0.6)',
+  },
+  { muster: /Prüfbericht/i, grund: 'alter Produktname „Prüfbericht“ (Prompt 14, 0.6)' },
+  { muster: new RegExp('Rechts' + 'schutz', 'i'), grund: 'Versicherung für Rechtskosten entfällt (Prompt 14, 0.2)' },
 ];
 
 function textInhalt(datei: string): string {
@@ -26,8 +37,8 @@ function textInhalt(datei: string): string {
     .replace(/^\s*\/\/.*$/gm, '');
 }
 
-describe('PDF-Prüfbericht: strenge Liste', () => {
-  it('kein verbotenes Muster in Vorlage und Zitaten', () => {
+describe('PDF-Gutachten: strenge Liste', () => {
+  it('kein verbotenes Muster in Vorlage, Zitaten, Fußzeile und Beispielskript', () => {
     for (const datei of DATEIEN) {
       const inhalt = textInhalt(datei);
       for (const regel of VERBOTEN) {

@@ -13,7 +13,7 @@ export default function WiderrufsbelehrungSeite() {
       <p>
         Diese Belehrung betrifft den Widerruf eines kostenpflichtigen Auftrags an uns
         (Fernabsatz) – nicht den Widerspruch oder Widerruf Ihres Versicherungsvertrags, um
-        den es im Prüfbericht geht.
+        den es im Gutachten geht.
       </p>
       <p>
         Der endgültige Text (Widerrufsrecht, Frist, Folgen, Muster-Widerrufsformular,

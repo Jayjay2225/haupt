@@ -1,7 +1,8 @@
 /**
- * Bestell-Liste für Admin/Freigaben und CSV-Export (Prompt 13, 2.3 und 3).
- * Quelle ist ausschließlich Stripe (Checkout-Sitzungen + Marker in den
- * PaymentIntent-Metadaten) – kein eigener Speicher.
+ * Bestell-Liste für Admin/Freigaben und CSV-Export (Prompt 13, 2.3 und 3;
+ * Prompt 14: Spalte „Post“). Quelle ist ausschließlich Stripe
+ * (Checkout-Sitzungen + Marker in den PaymentIntent-Metadaten) – kein
+ * eigener Speicher.
  */
 import type Stripe from 'stripe';
 import {
@@ -9,6 +10,7 @@ import {
   sitzungsDaten,
   standardAbhaengigkeiten,
   type AuslieferungsMarker,
+  type PostStand,
   type VersandEntscheidung,
 } from './erfuellung';
 
@@ -22,6 +24,11 @@ export interface BestellZeile {
   entscheidung: VersandEntscheidung;
   kennzeichen: string[];
   leadStatus: string;
+  /** Gedruckte Fassung per Post gewählt (Prompt 14, 0.3). */
+  postversand: boolean;
+  /** Stand des Postversands; ohne Postwunsch undefined. */
+  post?: PostStand;
+  postAm?: string;
 }
 
 export async function ladeBestellungen(stripe: Stripe, tage = 30): Promise<BestellZeile[]> {
@@ -39,6 +46,7 @@ export async function ladeBestellungen(stripe: Stripe, tage = 30): Promise<Beste
     } catch {
       // Marker nicht lesbar → Zeile trotzdem zeigen.
     }
+    const postversand = daten.postversand || marker.post !== undefined;
     zeilen.push({
       sitzung: daten.id,
       bestellnummer: daten.bestellnummer,
@@ -48,14 +56,29 @@ export async function ladeBestellungen(stripe: Stripe, tage = 30): Promise<Beste
       marker,
       entscheidung: entscheideVersand(marker, deps.jetzt()),
       kennzeichen: (marker.kennzeichen ?? '').split(';').map((k) => k.trim()).filter((k) => k !== ''),
-      leadStatus: marker.leadStatus ?? 'Bericht gekauft',
+      leadStatus: marker.leadStatus ?? 'Gutachten gekauft',
+      postversand,
+      ...(postversand ? { post: marker.post ?? 'gewuenscht' } : {}),
+      ...(marker.postAm !== undefined ? { postAm: marker.postAm } : {}),
     });
   }
   return zeilen.sort((a, b) => b.bezahltAm.localeCompare(a.bezahltAm));
 }
 
 export function bestellungenAlsCsv(zeilen: BestellZeile[]): string {
-  const kopf = ['bestellnummer', 'kundenname', 'email', 'bezahlt_am', 'erzeugt_am', 'freigegeben_am', 'ausgeliefert_am', 'lead_status', 'kennzeichen'];
+  const kopf = [
+    'bestellnummer',
+    'kundenname',
+    'email',
+    'bezahlt_am',
+    'erzeugt_am',
+    'freigegeben_am',
+    'ausgeliefert_am',
+    'post',
+    'post_am',
+    'lead_status',
+    'kennzeichen',
+  ];
   const feld = (wert: string): string => `"${wert.replace(/"/g, '""')}"`;
   const daten = zeilen.map((z) =>
     [
@@ -66,6 +89,8 @@ export function bestellungenAlsCsv(zeilen: BestellZeile[]): string {
       z.marker.erzeugt ?? '',
       z.marker.freigegeben ?? '',
       z.marker.ausgeliefert ?? '',
+      z.postversand ? (z.post ?? 'gewuenscht') : '',
+      z.postAm ?? '',
       z.leadStatus,
       z.kennzeichen.join('; '),
     ]

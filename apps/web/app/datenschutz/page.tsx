@@ -44,21 +44,30 @@ export default function DatenschutzSeite() {
       </p>
       {VARIANTE.berichtKostenpflichtig && (
         <>
-          <h3>Bestellung des Berichts</h3>
+          <h3>Bestellung des Gutachtens</h3>
           <p>
-            Bei einer Bestellung übermitteln wir Ihren Namen, Ihre E-Mail-Adresse und die Angaben zu Ihrer Police an
-            unseren Zahlungsdienstleister Stripe (Stripe Payments Europe, Ltd., Dublin, Irland). Stripe wickelt die
+            Bei einer Bestellung erheben wir Anrede, Name, Geburtsdatum, Anschrift, E-Mail-Adresse und (freiwillig)
+            Telefonnummer. Das Geburtsdatum dient allein der Berechnung des Risikoanteils in Ihrem Beitrag; die
+            Anschrift der Rechnung und dem Postversand. Namen, E-Mail-Adresse und die Angaben zu Ihrer Police übermitteln
+            wir an unseren Zahlungsdienstleister Stripe (Stripe Payments Europe, Ltd., Dublin, Irland). Stripe wickelt die
             Zahlung ab, erhebt dafür Ihre Rechnungsadresse und Zahlungsdaten und erstellt die Rechnung (Art. 6 Abs. 1
             lit. b DSGVO). Für die Zahlungsabwicklung ist Stripe eigener Verantwortlicher; Einzelheiten stehen in der
             Datenschutzerklärung von Stripe. Zahlen Sie über PayPal oder Klarna, gelten zusätzlich deren
-            Datenschutzhinweise. Nach Zahlungseingang erstellen wir den Bericht und bewahren ihn samt Bestellstatus
-            [[Speicherdauer – festlegen]] auf, um ihn erneut zusenden zu können und gesetzliche Aufbewahrungspflichten
+            Datenschutzhinweise. Nach Zahlungseingang erstellen wir das Gutachten und bewahren es samt Bestellstatus
+            [[Speicherdauer – festlegen]] auf, um es erneut zusenden zu können und gesetzliche Aufbewahrungspflichten
             zu erfüllen (Rechnungen: zehn Jahre, Art. 6 Abs. 1 lit. c DSGVO).
           </p>
           <h3>E-Mails</h3>
           <p>
-            Vertragsbestätigung, Bericht und Rechnung schicken wir per E-Mail über [[E-Mail-Dienst, Sitz – festlegen]]
+            Vertragsbestätigung, Gutachten und Rechnung schicken wir per E-Mail über [[E-Mail-Dienst, Sitz – festlegen]]
             als Auftragsverarbeiter (Art. 28 DSGVO).
+          </p>
+          <h3>Postversand</h3>
+          <p>
+            Wählen Sie bei der Bestellung den kostenlosen Postversand, geben wir Ihren Namen, Ihre Anschrift und das
+            Gutachten samt Beileger an unseren Druck- und Versanddienstleister [[DRUCKDIENST, Sitz – festlegen]] als
+            Auftragsverarbeiter weiter (Art. 28 DSGVO, Art. 6 Abs. 1 lit. b DSGVO). Der Dienstleister druckt, kuvertiert
+            und versendet; er verwendet die Daten für nichts anderes.
           </p>
         </>
       )}
@@ -66,7 +75,7 @@ export default function DatenschutzSeite() {
         <>
           <h3>Kontakt zum Ankauf</h3>
           <p>
-            Nur wenn Sie es auf der Ergebnis-Seite ausdrücklich ankreuzen, geben wir Ihre Kontaktdaten und die Eckdaten
+            Nur wenn Sie es auf der Startseite oder der Ankaufsseite ausdrücklich ankreuzen, geben wir Ihre Kontaktdaten und die Eckdaten
             Ihrer Police an unseren Organisationspartner für den Ankauf [[Partner, Sitz]] weiter (Art. 6 Abs. 1 lit. a
             DSGVO). Diese Einwilligung können Sie jederzeit mit Wirkung für die Zukunft widerrufen. Offenlegung: Wir
             erhalten vom Organisationspartner eine Vergütung, wenn ein Ankauf zustande kommt – nicht aus Ihrem Erlös.
@@ -97,8 +106,9 @@ export default function DatenschutzSeite() {
       <h2>Noch festzulegen</h2>
       <ul className="punkteliste">
         <li>Hosting-Anbieter und E-Mail-Dienst mit Sitz (Auftragsverarbeiter-Verträge)</li>
-        <li>Speicherdauer für Berichte, Bestellstatus und Server-Protokolle; Löschkonzept</li>
+        <li>Speicherdauer für Gutachten, Bestellstatus und Server-Protokolle; Löschkonzept</li>
         <li>Organisationspartner für den Ankauf (Name, Sitz, Vertrag)</li>
+        <li>Druck- und Versanddienstleister für den Postversand (Name, Sitz, Auftragsverarbeitungsvertrag)</li>
       </ul>
     </div>
   );

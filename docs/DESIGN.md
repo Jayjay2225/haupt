@@ -1,9 +1,10 @@
 # Gestaltung: Design B „Nachtblau & Salbei“ (Prompt 12, Abschnitt 4)
 
-Stand 25.09.2026. Ersetzt den Gestaltungsplan aus Prompt 8 (Marine/Orange,
-Archivo/Source Sans – freigegeben 20.09.2026, durch Prompt 12 abgelöst).
-Umsetzung: `apps/web/config/brand.ts` (COLORS), `apps/web/app/globals.css`,
-Bericht in `apps/report/src/template.ts`.
+Stand 28.09.2026 (Prompt 14: Verkehrsampel und grüner Kaufknopf ergänzt).
+Ersetzt den Gestaltungsplan aus Prompt 8 (Marine/Orange, Archivo/Source Sans –
+freigegeben 20.09.2026, durch Prompt 12 abgelöst). Umsetzung:
+`apps/web/config/brand.ts` (COLORS), `apps/web/app/globals.css`, Bericht in
+`apps/report/src/template.ts`.
 
 ## 1. Farb-Token (4.1)
 
@@ -16,12 +17,16 @@ Bericht in `apps/report/src/template.ts`.
 | sage / sageLight | `#7FAF9B` / `#E4EFEA` | Akzente, getönte Abschnitte, Ampel-Pille |
 | line | `#DDE4E6` | Ränder, Trennlinien |
 | cta / ctaHover | `#C24E2B` / `#A9411F` | Hauptknopf (immer weiße Schrift) |
+| **ctaKauf / ctaKaufHover** | `#1B7D45` / `#155F35` | **nur der Kaufknopf** „Detailliertes Gutachten bestellen · 89 €“ und „Zahlungspflichtig bestellen“ (Prompt 14, 1.3); weiße Schrift 19 px/700 |
 | ampelGruen / ampelGelb / ampelRot / ampelAus | `#1E8E4E` / `#D9A400` / `#C62828` / `#B9CCC3` | ausschließlich im Ampel-Element |
+| **ampelGehaeuse / ampelMatt** | `#1E2A33` / `#3A4A55` | Gehäuse und ausgeschaltete Leuchten der Verkehrsampel (Prompt 14, 1.2) |
 | focus | `#14365D` | Fokusring 3 px, 2 px Abstand |
 
-Regeln: Ampelfarben nur im Ampel-Element; auf `cta` und `brand` immer weiße
-Schrift; auf `ampelGelb` immer dunkle (`ink`). Keine Verläufe, keine
-Archivfotos, keine Emojis, keine Straßenampel-Grafik.
+Regeln: Ampelfarben nur im Ampel-Element; auf `cta`, `ctaKauf` und `brand`
+immer weiße Schrift; auf `ampelGelb` immer dunkle (`ink`). Keine Verläufe,
+keine Archivfotos (Stimmungsbilder nur lizenziert, `docs/LIZENZEN.md`), keine
+Emojis. Die Ampel ist seit Prompt 14 eine hochkante Verkehrsampel als
+Inline-SVG auf der Startseite (die Pille bleibt für die Kanzlei-Ergebnisseite).
 
 ## 2. Schrift (4.2)
 
@@ -44,11 +49,28 @@ Archivfotos, keine Emojis, keine Straßenampel-Grafik.
 - Knopf primär `cta`, min. 56 px; sekundär 2 px Rand `brand`, transparent.
 - Eingabefeld min. 52 px, Rand 1 px `line`, Fokus `brand` + Ring, Label 16/600,
   Fehlertext in `ampelRot` nur als Text.
-- **Ampel-Element:** Pille `sageLight` mit drei Punkten 14 px (`ampelAus`),
-  aktiver Punkt in Ergebnisfarbe mit Glow `0 0 0 6px` bei 18 % Alpha;
-  Ergebnis-Seite 40-px-Punkte. Feine Kontur (1 px, ink 35 %) für den
-  Nicht-Text-Kontrast (s. u.). Kein Dauerblinken; `prefers-reduced-motion`
-  schaltet Übergänge ab.
+- **Verkehrsampel (Prompt 14, 1.2 – Startseite):** Inline-SVG `viewBox 0 0
+  120 300`, Gehäuse `ampelGehaeuse` mit Radius 20, drei Leuchten (r 29) in
+  dunkler Fassung `#121B22` mit Blende (Halbschatten oben), Mast angedeutet.
+  Größe Desktop 120 × 300 px, mobil 96 × 240 px. Aus: alle Leuchten
+  `ampelMatt`. An: eine Leuchte in voller Ampelfarbe plus Glow (Weichzeichner
+  ≈ 24 px, 45 % Alpha), Übergang 300 ms; `prefers-reduced-motion` schaltet
+  Übergänge ab. Grau: alle matt, Gehäuse-Rahmen in `sage`, Etikett „zu klein
+  für unser Verfahren“ unter dem Gehäuse. Der Zustand steht immer zusätzlich
+  als Text unter der Ampel und im `aria-label`.
+- **Kaufknopf (Prompt 14, 1.3):** `ctaKauf`, Hover `ctaKaufHover`, weiße
+  Schrift 19 px/700, Pille, min. 56 px; in der Ampel-Karte volle Breite (max.
+  26 rem); gesperrt (55 % Deckkraft) bis die Ampel Grün oder Gelb zeigt. Alle
+  anderen Knöpfe bleiben Koralle/Brandblau.
+- **Info-Symbol „Wo finde ich das?“ (Prompt 14, 1.4):** 44 × 44 px
+  Tippfläche, Symbol 22 px in `brand`, Info-Fenster als natives `<dialog>`
+  (Radius 24, Backdrop brandDeep 45 %), Skizze als Inline-SVG mit Markierung in
+  `sage`/`sageLight` (keine Ampelfarben außerhalb der Ampel).
+- **Ampel-Pille (Kanzlei-Ergebnisseite):** Pille `sageLight` mit drei Punkten
+  14 px (`ampelAus`), aktiver Punkt in Ergebnisfarbe mit Glow `0 0 0 6px` bei
+  18 % Alpha; 40-px-Punkte auf der Ergebnis-Seite. Feine Kontur (1 px, ink
+  35 %) für den Nicht-Text-Kontrast (s. u.). Kein Dauerblinken;
+  `prefers-reduced-motion` schaltet Übergänge ab.
 - Accordion min. 54 px, Chevron `brand`, Trennlinie `#EDF1F0`; Badge
   `sageLight`/`brand` 15/700; Kopfzeile `brand` mit Marke Newsreader 27/600.
 - Mobil: Hauptknopf unten fixiert (`.fix-unten`, safe-area), Tippflächen
@@ -76,6 +98,9 @@ Text (AA: ≥ 4,5:1 normal, ≥ 3:1 groß/fett ab 18,66 px fett bzw. 24 px):
 | weiß auf brand / brandDeep | 12,24 / 15,65 | AAA |
 | **weiß auf cta (Hauptknopf)** | **4,75** | AA normal; Knöpfe sind zudem 19 px/700 (groß: 3:1) |
 | weiß auf ctaHover | 6,06 | AA |
+| **weiß auf ctaKauf (Kaufknopf, Prompt 14)** | **5,16** | AA normal (≥ 4,5:1 nachgewiesen); Knopf 19 px/700 |
+| weiß auf ctaKaufHover | 7,72 | AAA |
+| weiß auf ampelGehaeuse (Verkehrsampel-Gehäuse) | 14,64 | AAA (falls Text) |
 | brand auf bg / surface / sageLight | 11,46 / 12,24 / 10,40 | AAA |
 | ink auf ampelGelb | 7,25 | AA (Regel „auf Gelb dunkle Schrift“) |
 | ampelRot als Fehlertext auf surface / bg | 5,62 / 5,26 | AA |
@@ -85,6 +110,14 @@ Nicht-Text (1.4.11, ≥ 3:1): Grün-Punkt auf sageLight 3,54 ✓, Rot-Punkt 4,77
 Punkte eine 1-px-Kontur in ink/35 % und der Zustand steht zusätzlich als Wort
 neben der Ampel („Gelb“) bzw. im `aria-label` – Information hängt nie an der
 Farbe allein.
+
+Verkehrsampel (Prompt 14, gemessen 28.09.2026): Gehäuse `#1E2A33` auf weißer
+Karte 14,64 ✓. Leuchte an gegen ihre Fassung `#121B22`: Grün 4,18 ✓, Gelb 7,68
+✓, Rot 3,10 ✓; gegen das Gehäuse: Grün 3,51 ✓, Gelb 6,46 ✓, **Rot 2,60** (unter
+3:1) – deshalb liegt jede Leuchte in der dunkleren Fassung, die leuchtende
+Lampe trägt den Glow, und Zustand plus Grund stehen als Text unter der Ampel
+(`ampelKartenText`) und im `aria-label`. Kaufknopf-Sperre wird nicht nur über
+Deckkraft, sondern über `disabled`/`aria-disabled` vermittelt.
 
 ## 6. Bewusst offen
 

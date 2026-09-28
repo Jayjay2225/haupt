@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { VARIANTE } from '@/config/variante';
 import { speichereDraft, type CaseDraft } from '@/lib/draft';
 
 export function FortsetzenClient({ draft }: { draft: CaseDraft }) {
@@ -11,7 +12,8 @@ export function FortsetzenClient({ draft }: { draft: CaseDraft }) {
   useEffect(() => {
     speichereDraft(draft);
     setUebernommen(true);
-    router.replace(draft.eingereichtAm !== '' ? '/rechner/ergebnis' : '/rechner');
+    // Verbraucherprodukt: immer zurück in den Assistenten (keine Ergebnis-Seite, Prompt 14).
+    router.replace(VARIANTE.belehrungsCheck && draft.eingereichtAm !== '' ? '/rechner/ergebnis' : '/rechner');
   }, [draft, router]);
 
   return (

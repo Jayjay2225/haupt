@@ -1,16 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { BESTELLNUMMER_MUSTER, FEHLER_FALL_UNVOLLSTAENDIG, pruefeBestellformular } from '../lib/bestellung';
-import { leererDraft, validiereBis } from '../lib/draft';
+import { BESTELLNUMMER_MUSTER, FEHLER_FALL_UNVOLLSTAENDIG, pruefeBestellung, versandadresse } from '../lib/bestellung';
+import { kundenname, leererDraft, validiereBis } from '../lib/draft';
 import type { CaseDraft } from '../lib/draft';
 import { TEIL_LAENGE, dekodiereFall, fallAlsMetadaten, fallAusMetadaten, kodiereFall } from '../lib/fall-kodierung';
 import { neueBestellnummer } from '../lib/zahlung';
 
-/** Entwurf, der bis zum Schritt „Auszahlungen“ vollständig ist (Golden b als Vorlage). */
+/**
+ * Entwurf, der bis zum Schritt „Auszahlungen“ vollständig ist (Golden b als
+ * Vorlage), dazu „Über Sie“ (Prompt 14, Schritt 10) und die Bestätigungen
+ * des Schritts „Ihre Bestellung“.
+ */
 export function vollstaendigerDraft(): CaseDraft {
   return {
     ...leererDraft(),
-    name: 'Muster Person',
-    email: 'muster@example.org',
     versicherer: 'Allianz Lebensversicherungs-AG',
     vertragsart: 'kapital-lv',
     beginn: '1995-10',
@@ -26,26 +28,49 @@ export function vollstaendigerDraft(): CaseDraft {
     auszahlungenErhalten: 'nein',
     policendarlehen: 'nein',
     buzEnthalten: 'nein',
+    anrede: 'frau',
+    vorname: 'Muster',
+    nachname: 'Person',
+    geburtsdatum: '1960-03-14',
+    strasse: 'Musterstraße 1',
+    plz: '12345',
+    ort: 'Musterstadt',
+    email: 'muster@example.org',
+    einwilligungDatenschutz: true,
+    agbGelesen: true,
+    ausfuehrungZugestimmt: true,
   };
 }
 
-describe('Bestellformular', () => {
+describe('Bestellung (Prompt 14, Schritt 11)', () => {
   it('der Testentwurf ist bis „Auszahlungen“ vollständig', () => {
     expect(validiereBis('auszahlungen', vollstaendigerDraft())).toEqual({});
   });
 
-  it('meldet fehlende Angaben und Bestätigungen einzeln', () => {
-    const fehler = pruefeBestellformular({ name: '', email: 'kein-mail', agbGelesen: false, ausfuehrungZugestimmt: false }, leererDraft());
-    expect(Object.keys(fehler).sort()).toEqual(['agbGelesen', 'ausfuehrungZugestimmt', 'email', 'fall', 'name']);
+  it('meldet Fall, Angaben zur Person und Bestätigungen einzeln', () => {
+    const fehler = pruefeBestellung(leererDraft());
+    expect(Object.keys(fehler).sort()).toEqual(
+      ['agbGelesen', 'anrede', 'ausfuehrungZugestimmt', 'einwilligungDatenschutz', 'email', 'fall', 'geburtsdatum', 'nachname', 'ort', 'plz', 'strasse', 'vorname'].sort(),
+    );
     expect(fehler.fall).toBe(FEHLER_FALL_UNVOLLSTAENDIG);
   });
 
-  it('akzeptiert ein vollständiges Formular mit vollständigem Fall', () => {
-    const fehler = pruefeBestellformular(
-      { name: 'Muster Person', email: 'muster@example.org', agbGelesen: true, ausfuehrungZugestimmt: true },
-      vollstaendigerDraft(),
-    );
-    expect(fehler).toEqual({});
+  it('akzeptiert einen vollständigen Entwurf', () => {
+    expect(pruefeBestellung(vollstaendigerDraft())).toEqual({});
+    expect(kundenname(vollstaendigerDraft())).toBe('Muster Person');
+  });
+
+  it('der Rückkaufswert ist Pflicht – ohne ihn keine Bestellung', () => {
+    expect(pruefeBestellung({ ...vollstaendigerDraft(), rueckkaufswert: '' }).fall).toBe(FEHLER_FALL_UNVOLLSTAENDIG);
+  });
+
+  it('liefert die Versandadresse für die Druckvorlage aus dem Entwurf', () => {
+    expect(versandadresse(vollstaendigerDraft())).toEqual({
+      name: 'Muster Person',
+      strasse: 'Musterstraße 1',
+      plz: '12345',
+      ort: 'Musterstadt',
+    });
   });
 });
 
@@ -61,12 +86,14 @@ describe('Fall-Kodierung für Zahlungs-Metadaten', () => {
     expect(dekodiereFall(teile)).toEqual(draft);
   });
 
-  it('bleibt mit allen Feldern unter der Stripe-Grenze von 50 Metadaten-Schlüsseln', () => {
+  it('bleibt mit allen Feldern (inkl. Anschrift und Postwunsch) unter der Stripe-Grenze von 50 Metadaten-Schlüsseln', () => {
     const draft: CaseDraft = {
       ...vollstaendigerDraft(),
       telefon: '+49 30 1234567',
       ende: '2030-10',
       beitragszahlungBis: '2030-10',
+      postversand: true,
+      beginnUngefaehr: true,
       auszahlungenErhalten: 'ja',
       auszahlungenListe: [
         { monat: '2005-06', betrag: '12.345,67' },
