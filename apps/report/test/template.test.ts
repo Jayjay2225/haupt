@@ -166,6 +166,14 @@ describe('Gutachten (Prompt 14, Abschnitte 0.6 und 3)', () => {
     expect(renderBerichtHtml({ ...beispielBericht(), ankaufHinweis: false })).not.toContain(VERKAUFEN_TITEL);
   });
 
+  it('Seitenumbruch: der Übernahme-Kasten beginnt die letzte Seite, Kästen werden nie über einen Umbruch geteilt', () => {
+    expect(html).toMatch(/\.uebernahme \{ break-before: page;/);
+    expect(html).toMatch(/\.uebernahme, \.verkaufen, \.disclaimer, \.hinweisbox\.annahmen \{ break-inside: avoid;/);
+    // Verweise auf die letzte Seite statt auf eine feste Seitennummer (die Tabellen verschieben die Seitenzahl).
+    expect(html).toContain('anhand Ihrer Unterlagen (letzte Seite)');
+    expect(html).not.toContain('(Seite 7)');
+  });
+
   it('Druckvorlage: Deckblatt mit Name und Anschrift, alle Seiten, einseitiger Beileger zum Ankauf', () => {
     const druck = renderDruckvorlageHtml(beispielBericht(), {
       name: 'Erika Beispiel',

@@ -56,6 +56,9 @@
   .hinweisbox.annahmen strong { display: block; margin-bottom: 1.5mm; }
   .gegenposition { background: #FFFFFF; border: 1pt solid #DDE4E6; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0; }
   .uebernahme { background: #14365D; color: #ffffff; border-radius: 2mm; padding: 4mm 5mm; margin: 4mm 0; }
+  /* Letzte Seite (Prompt 14, 3): der Übernahme-Kasten steht oben, Kästen werden nie über einen Seitenumbruch geteilt. */
+  .uebernahme { break-before: page; page-break-before: always; }
+  .uebernahme, .verkaufen, .disclaimer, .hinweisbox.annahmen { break-inside: avoid; page-break-inside: avoid; }
   .uebernahme .sekundaer { color: #dbe4ee; }
   .verkaufen { border: 1.5pt solid #7FAF9B; border-radius: 2mm; padding: 3.5mm 5mm; margin: 4mm 0; }
   .tabelle { width: 100%; border-collapse: collapse; margin: 3mm 0; font-size: 9.5pt; }
@@ -141,7 +144,7 @@ Musterstraße 1
     <strong>Wichtig:</strong> Alle Werte sind Schätzungen unter offengelegten Annahmen (Seite 3 und 4) auf Basis
     öffentlich verfügbarer Kennzahlen – es wird kein Betrag zugesagt und keine Rechtsberatung im Einzelfall
     erteilt. Ob und auf welchem Weg sich das durchsetzen lässt, prüfen die spezialisierten Anwälte, mit denen
-    wir arbeiten, anhand Ihrer Unterlagen (Seite 7).
+    wir arbeiten, anhand Ihrer Unterlagen (letzte Seite).
   </div>
 </section>
 
@@ -672,7 +675,7 @@ Musterstraße 1
   <h3>Hinweise</h3>
   <ul><li>Bloßer Zeitablauf, jahrelange Prämienzahlung, Beitragsfreistellung oder Kündigung (auch mit ausgezahltem Rückkaufswert) begründen für sich genommen keine Verwirkung – der Versicherer hat die Lage durch die fehlerhafte Belehrung selbst herbeigeführt. <span class="fussnote">[R-VERW-ZEITABLAUF-NEGATIV]</span></li><li>Nutzungsersatz gibt es nur für tatsächlich gezogene Nutzungen; der Vortrag braucht Bezug zur Ertragslage des jeweiligen Versicherers. Deshalb: Nutzungen auf den Sparanteil, Maßstab versichererindividuelle Nettoverzinsung; auf Verwaltungskostenanteile nur bei konkretem Nachweis (Max-Szenario als Obergrenze), nicht anhand der Eigenkapitalrendite. <span class="fussnote">[R-FOLGE-NUTZUNGEN-SPARANTEIL]</span></li><li>Nach erklärtem Widerspruch verjährt der Zahlungsanspruch in drei Jahren ab dem Schluss des Jahres der Widerspruchserklärung (§§ 195, 199 BGB); das Widerspruchsrecht selbst unterliegt keiner Verjährung. <span class="fussnote">[R-FOLGE-VERJAEHRUNG]</span></li><li>Steuern: Auszahlungen und eine Rückabwicklung können steuerliche Folgen haben; einbehaltene Kapitalertragsteuer ist anzurechnen. Dieses Gutachten enthält keine steuerliche Beratung.</li></ul>
   <h3>Empfohlene nächste Schritte</h3>
-  <ul><li>Police und letzte Standmitteilung bereitlegen; falls vorhanden Kündigungs- oder Dynamikschreiben.</li><li>Die Durchsetzung über uns beauftragen (Kasten unten) – die spezialisierten Anwälte, mit denen wir arbeiten, klären, ob und auf welchem Weg sich der Wert durchsetzen lässt.</li><li>Keine Kündigung und keine Erklärung gegenüber dem Versicherer ohne anwaltlichen Rat.</li></ul>
+  <ul><li>Police und letzte Standmitteilung bereitlegen; falls vorhanden Kündigungs- oder Dynamikschreiben.</li><li>Die Durchsetzung über uns beauftragen (Kasten auf der letzten Seite) – die spezialisierten Anwälte, mit denen wir arbeiten, klären, ob und auf welchem Weg sich der Wert durchsetzen lässt.</li><li>Keine Kündigung und keine Erklärung gegenüber dem Versicherer ohne anwaltlichen Rat.</li></ul>
   <div class="uebernahme">
     <p style="margin:0 0 1.5mm"><strong>Nächster Schritt: Wir übernehmen.</strong></p>
     <p style="margin:0 0 1.5mm">

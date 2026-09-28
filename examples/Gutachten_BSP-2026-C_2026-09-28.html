@@ -56,6 +56,9 @@
   .hinweisbox.annahmen strong { display: block; margin-bottom: 1.5mm; }
   .gegenposition { background: #FFFFFF; border: 1pt solid #DDE4E6; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0; }
   .uebernahme { background: #14365D; color: #ffffff; border-radius: 2mm; padding: 4mm 5mm; margin: 4mm 0; }
+  /* Letzte Seite (Prompt 14, 3): der Übernahme-Kasten steht oben, Kästen werden nie über einen Seitenumbruch geteilt. */
+  .uebernahme { break-before: page; page-break-before: always; }
+  .uebernahme, .verkaufen, .disclaimer, .hinweisbox.annahmen { break-inside: avoid; page-break-inside: avoid; }
   .uebernahme .sekundaer { color: #dbe4ee; }
   .verkaufen { border: 1.5pt solid #7FAF9B; border-radius: 2mm; padding: 3.5mm 5mm; margin: 4mm 0; }
   .tabelle { width: 100%; border-collapse: collapse; margin: 3mm 0; font-size: 9.5pt; }
@@ -118,7 +121,7 @@
     <strong>Wichtig:</strong> Alle Werte sind Schätzungen unter offengelegten Annahmen (Seite 3 und 4) auf Basis
     öffentlich verfügbarer Kennzahlen – es wird kein Betrag zugesagt und keine Rechtsberatung im Einzelfall
     erteilt. Ob und auf welchem Weg sich das durchsetzen lässt, prüfen die spezialisierten Anwälte, mit denen
-    wir arbeiten, anhand Ihrer Unterlagen (Seite 7).
+    wir arbeiten, anhand Ihrer Unterlagen (letzte Seite).
   </div>
 </section>
 
@@ -749,7 +752,7 @@
   <h3>Hinweise</h3>
   <ul><li>Steuern: Auszahlungen und eine Rückabwicklung können steuerliche Folgen haben; einbehaltene Kapitalertragsteuer ist anzurechnen. Dieses Gutachten enthält keine steuerliche Beratung.</li></ul>
   <h3>Empfohlene nächste Schritte</h3>
-  <ul><li>Unterlagen bereitlegen: Police und Belehrungstexte (Widerruf nach § 8 Abs. 4 VVG i.d.F. 1990).</li><li>Die Durchsetzung über uns beauftragen (Kasten unten) – die spezialisierten Anwälte, mit denen wir arbeiten, klären, ob und auf welchem Weg sich der Wert durchsetzen lässt.</li><li>Keine Kündigung und keine Erklärung gegenüber dem Versicherer ohne anwaltlichen Rat.</li></ul>
+  <ul><li>Unterlagen bereitlegen: Police und Belehrungstexte (Widerruf nach § 8 Abs. 4 VVG i.d.F. 1990).</li><li>Die Durchsetzung über uns beauftragen (Kasten auf der letzten Seite) – die spezialisierten Anwälte, mit denen wir arbeiten, klären, ob und auf welchem Weg sich der Wert durchsetzen lässt.</li><li>Keine Kündigung und keine Erklärung gegenüber dem Versicherer ohne anwaltlichen Rat.</li></ul>
   <div class="uebernahme">
     <p style="margin:0 0 1.5mm"><strong>Nächster Schritt: Wir übernehmen.</strong></p>
     <p style="margin:0 0 1.5mm">

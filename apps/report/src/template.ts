@@ -435,6 +435,9 @@ function stile(): string {
   .hinweisbox.annahmen strong { display: block; margin-bottom: 1.5mm; }
   .gegenposition { background: ${FARBEN.surface}; border: 1pt solid ${FARBEN.line}; border-radius: 2mm; padding: 3mm 4mm; margin: 3mm 0; }
   .uebernahme { background: ${FARBEN.brand}; color: #ffffff; border-radius: 2mm; padding: 4mm 5mm; margin: 4mm 0; }
+  /* Letzte Seite (Prompt 14, 3): der Übernahme-Kasten steht oben, Kästen werden nie über einen Seitenumbruch geteilt. */
+  .uebernahme { break-before: page; page-break-before: always; }
+  .uebernahme, .verkaufen, .disclaimer, .hinweisbox.annahmen { break-inside: avoid; page-break-inside: avoid; }
   .uebernahme .sekundaer { color: #dbe4ee; }
   .verkaufen { border: 1.5pt solid ${FARBEN.sage}; border-radius: 2mm; padding: 3.5mm 5mm; margin: 4mm 0; }
   .tabelle { width: 100%; border-collapse: collapse; margin: 3mm 0; font-size: 9.5pt; }
@@ -539,7 +542,7 @@ function seitenHtml(b: BerichtInput): string {
     <strong>Wichtig:</strong> Alle Werte sind Schätzungen unter offengelegten Annahmen (Seite 3 und 4) auf Basis
     öffentlich verfügbarer Kennzahlen – es wird kein Betrag zugesagt und keine Rechtsberatung im Einzelfall
     erteilt. Ob und auf welchem Weg sich das durchsetzen lässt, prüfen die spezialisierten Anwälte, mit denen
-    wir arbeiten, anhand Ihrer Unterlagen (Seite 7).
+    wir arbeiten, anhand Ihrer Unterlagen (letzte Seite).
   </div>
 </section>
 
@@ -679,7 +682,7 @@ function seitenHtml(b: BerichtInput): string {
     dokumente.length > 0
       ? `Unterlagen bereitlegen: ${dokumente.map((d) => esc(d)).join('; ')}.`
       : 'Police und letzte Standmitteilung bereitlegen; falls vorhanden Kündigungs- oder Dynamikschreiben.',
-    'Die Durchsetzung über uns beauftragen (Kasten unten) – die spezialisierten Anwälte, mit denen wir arbeiten, klären, ob und auf welchem Weg sich der Wert durchsetzen lässt.',
+    'Die Durchsetzung über uns beauftragen (Kasten auf der letzten Seite) – die spezialisierten Anwälte, mit denen wir arbeiten, klären, ob und auf welchem Weg sich der Wert durchsetzen lässt.',
     'Keine Kündigung und keine Erklärung gegenüber dem Versicherer ohne anwaltlichen Rat.',
   ])}
   <div class="uebernahme">
