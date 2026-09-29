@@ -1,0 +1,114 @@
+{
+  "insurerId": "gothaer-leben",
+  "werte": [
+    {
+      "jahr": 1998,
+      "nettoverzinsung": 7.7,
+      "fundstelle": "S. 2 Zeile „Nettoverzinsung (%)“ (2002…1998: 5,0 / 6,2 / 7,7 / 7,8 / 7,7)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2002, „Geschäftsergebnisse – Fünfjahresvergleich“",
+        "url": "https://web.archive.org/web/20050125155949id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/pdf/2002_konzern/Gothaer_Leben_2002.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2002-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.7
+      },
+      "hinweis": "Fußnote GB 2002 S. 2: Werte 1998–2000 als Addition Gothaer Lebensversicherung a.G. und Veritas Lebensversicherung AG (vor Verschmelzung)"
+    },
+    {
+      "jahr": 1999,
+      "nettoverzinsung": 7.8,
+      "fundstelle": "S. 2 Zeile „Nettoverzinsung (%)“; bestätigt GB 2003 S. 2",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2002, „Geschäftsergebnisse – Fünfjahresvergleich“",
+        "url": "https://web.archive.org/web/20050125155949id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/pdf/2002_konzern/Gothaer_Leben_2002.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2002-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.8
+      },
+      "hinweis": "Fußnote GB 2002 S. 2: Werte 1998–2000 als Addition Gothaer Lebensversicherung a.G. und Veritas Lebensversicherung AG (vor Verschmelzung)"
+    },
+    {
+      "jahr": 2000,
+      "nettoverzinsung": 7.7,
+      "fundstelle": "S. 2 Zeile „Nettoverzinsung (%)“; bestätigt GB 2003 S. 2",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2002, „Geschäftsergebnisse – Fünfjahresvergleich“",
+        "url": "https://web.archive.org/web/20050125155949id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/pdf/2002_konzern/Gothaer_Leben_2002.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2002-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.7
+      },
+      "hinweis": "Fußnote GB 2002 S. 2: Werte 1998–2000 als Addition Gothaer Lebensversicherung a.G. und Veritas Lebensversicherung AG (vor Verschmelzung)"
+    },
+    {
+      "jahr": 2001,
+      "nettoverzinsung": 6.2,
+      "fundstelle": "S. 2; S. 13 („nach 6,2 % im Vorjahr“); bestätigt GB 2003 S. 2 und BPK-Präsentationen 2004/2005",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2002, „Geschäftsergebnisse – Fünfjahresvergleich“",
+        "url": "https://web.archive.org/web/20050125155949id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/pdf/2002_konzern/Gothaer_Leben_2002.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2002-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.2
+      }
+    },
+    {
+      "jahr": 2002,
+      "nettoverzinsung": 5.0,
+      "fundstelle": "S. 2; S. 13 („Nettorendite … beträgt 5,0 %“, nach Verbandsempfehlung); bestätigt GB 2003 S. 2",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2002, „Geschäftsergebnisse – Fünfjahresvergleich“",
+        "url": "https://web.archive.org/web/20050125155949id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/pdf/2002_konzern/Gothaer_Leben_2002.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2002-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.0
+      }
+    },
+    {
+      "jahr": 2003,
+      "nettoverzinsung": 3.5,
+      "fundstelle": "S. 2 „3,5**“; S. 10 („bilanziell nur noch eine Nettoverzinsung von 3,5 % ausweisen“); bestätigt GB 2004 S. 11 und BPK 2004 S. 7/12",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2003, Fünfjahresvergleich und Lagebericht",
+        "url": "https://web.archive.org/web/20060219134919id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/bilanzpressekonferenz_2003/40919_GB_Leben.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2003-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 3.5
+      },
+      "hinweis": "nach vollständigem Abbau stiller Lasten (§ 341b HGB)"
+    },
+    {
+      "jahr": 2004,
+      "nettoverzinsung": 4.3,
+      "fundstelle": "S. 6 („Nettorendite von 4,3 %“); S. 11; bestätigt BPK 2005 S. 28/30",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Gothaer Lebensversicherung AG, Geschäftsbericht 2004",
+        "url": "https://web.archive.org/web/20060219134622id_/http://www.gothaer.de:80/media/gothaer_o/pdf/geschaeftsberichte/bilanzpressekonferenz_2004/Leben.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/gothaer-leben/gb2004-s006.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.3
+      }
+    }
+  ]
+}

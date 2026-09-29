@@ -1,0 +1,4 @@
+{
+  "_hinweis": "Geschichten von Verkäufern (Prompt 14, Abschnitt 5). Erhebung nach docs/GESCHICHTEN-LEITFADEN.md, Freigabe wie bei den Kundenstimmen (docs/freigaben/). Gerendert werden AUSSCHLIESSLICH Einträge mit verified=true UND gefülltem consent_at; ohne solche Einträge bleibt die Sektion ausgeblendet. story_display höchstens 90 Wörter, ohne Beträge und Prozentwerte (auch wenn die Person sie nennt). Keine Bilder in dieser Sektion – Initialen-Avatar.",
+  "geschichten": []
+}

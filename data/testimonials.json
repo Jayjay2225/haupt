@@ -1,0 +1,29 @@
+{
+  "_hinweis": "Kundenstimmen (Prompt 12 Abschnitt 5, freigegeben mit Prompt 13 Abschnitt 0.7 im Wortlaut der Entwürfe). Gerendert werden AUSSCHLIESSLICH Einträge mit verified=true UND gefülltem consent_at. Freigabe-Dokumentation: docs/freigaben/. Die zugrunde liegende Kunden-Einwilligung (Original, Datum, Kanal, Kundenkennung) reicht der Auftraggeber dort nach – Teil der anwaltlichen Abnahme (LEGAL-OPEN-QUESTIONS Nr. 21e).",
+  "stimmen": [
+    {
+      "quote_display": "Ich hätte fast gekündigt. Erst die Rechnung hat gezeigt, was ich damit verschenkt hätte.",
+      "quote_original": "Ich hätte fast gekündigt. Erst die Rechnung hat gezeigt, was ich damit verschenkt hätte.",
+      "name_display": "Manfred",
+      "age": 65,
+      "contract_type": "Kapitallebensversicherung",
+      "consent_text": "Freigabe des Zitats mit Vorname, Alter und Vertragsart zur Veröffentlichung auf renten-rettung.de",
+      "consent_at": "2026-09-25",
+      "consent_channel": "Freigabe durch den Auftraggeber (Prompt 13 vom 25.09.2026); Kunden-Einwilligung liegt beim Auftraggeber, Ablage folgt in docs/freigaben/",
+      "customer_ref": "freigabe-manfred-2026",
+      "verified": true
+    },
+    {
+      "quote_display": "Mit so einem Wert hatte ich nicht gerechnet. Die Aufschlüsselung Jahr für Jahr konnte mein Anwalt sofort nutzen.",
+      "quote_original": "Mit so einem Wert hatte ich nicht gerechnet. Die Aufschlüsselung Jahr für Jahr konnte mein Anwalt sofort nutzen.",
+      "name_display": "Ulla",
+      "age": 59,
+      "contract_type": "private Rentenversicherung",
+      "consent_text": "Freigabe des Zitats mit Vorname, Alter und Vertragsart zur Veröffentlichung auf renten-rettung.de",
+      "consent_at": "2026-09-25",
+      "consent_channel": "Freigabe durch den Auftraggeber (Prompt 13 vom 25.09.2026); Kunden-Einwilligung liegt beim Auftraggeber, Ablage folgt in docs/freigaben/",
+      "customer_ref": "freigabe-ulla-2026",
+      "verified": true
+    }
+  ]
+}

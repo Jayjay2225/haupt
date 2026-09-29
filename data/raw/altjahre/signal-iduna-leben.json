@@ -1,0 +1,80 @@
+{
+  "insurerId": "signal-iduna-leben",
+  "werte": [
+    {
+      "jahr": 1999,
+      "nettoverzinsung": 7.1,
+      "fundstelle": "S. 3 Kennzahlen „Nettoverzinsung der Kapitalanlagen in % 6,9 / 7,1“ (Vorjahr)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "IDUNA Vereinigte Lebensversicherung aG, Geschäftsbericht 2000, Kennzahlen",
+        "url": "https://web.archive.org/web/20060912212324id_/http://www.signal-iduna.de:80/content_media/gb_iduna_leben2000.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/signal-iduna-leben/iduna-leben-gb2000-s003.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.1
+      }
+    },
+    {
+      "jahr": 2000,
+      "nettoverzinsung": 6.9,
+      "fundstelle": "S. 3 Kennzahlen; bestätigt GB 2001 S. 2 („6,4 / 6,9“) und Pressemitteilung 22.05.2002 (presseportal.de/pm/42854/350003)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "IDUNA Vereinigte Lebensversicherung aG, Geschäftsbericht 2000, Kennzahlen",
+        "url": "https://web.archive.org/web/20060912212324id_/http://www.signal-iduna.de:80/content_media/gb_iduna_leben2000.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/signal-iduna-leben/iduna-leben-gb2000-s003.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.9
+      }
+    },
+    {
+      "jahr": 2001,
+      "nettoverzinsung": 6.4,
+      "fundstelle": "S. 2 Kennzahlen „Nettoverzinsung der Kapitalanlagen in % 6,4 / 6,9“; bestätigt Pressemitteilung 22.05.2002 („von 6,9 auf 6,4 Prozent“)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "IDUNA Vereinigte Lebensversicherung aG, Geschäftsbericht 2001, Kennzahlen",
+        "url": "https://web.archive.org/web/20050111063901id_/http://www.signal-iduna.de:80/content_media/IDUNA_Leben.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/signal-iduna-leben/iduna-leben-gb2001-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.4
+      }
+    },
+    {
+      "jahr": 2002,
+      "nettoverzinsung": 3.9,
+      "fundstelle": "S. 3 Kennzahlen „5,5 / 3,9“ (Vorjahr); S. 13 „Nettoverzinsung von 5,5 % (Vorjahr: 3,9 %)“",
+      "quelle": {
+        "typ": "primary",
+        "titel": "IDUNA Vereinigte Lebensversicherung aG, Geschäftsbericht 2003, Kennzahlen und Lagebericht",
+        "url": "https://web.archive.org/web/20040822090845id_/http://www.signal-iduna.de:80/content_media/GB_2003_Iduna_Leben.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/signal-iduna-leben/iduna-leben-gb2003-s003.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 3.9
+      }
+    },
+    {
+      "jahr": 2003,
+      "nettoverzinsung": 5.5,
+      "fundstelle": "S. 3 Kennzahlen; S. 13 Lagebericht",
+      "quelle": {
+        "typ": "primary",
+        "titel": "IDUNA Vereinigte Lebensversicherung aG, Geschäftsbericht 2003, Kennzahlen und Lagebericht",
+        "url": "https://web.archive.org/web/20040822090845id_/http://www.signal-iduna.de:80/content_media/GB_2003_Iduna_Leben.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/signal-iduna-leben/iduna-leben-gb2003-s003.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.5
+      }
+    }
+  ]
+}

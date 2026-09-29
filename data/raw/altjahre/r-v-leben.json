@@ -1,0 +1,125 @@
+{
+  "insurerId": "r-v-leben",
+  "werte": [
+    {
+      "jahr": 2000,
+      "nettoverzinsung": 7.4,
+      "laufendeDurchschnittsverzinsung": 6.8,
+      "fundstelle": "S. 15: „Die Nettoverzinsung belief sich auf 6,3 % gegenüber 7,4 % im Vorjahr“; „laufende Durchschnittsverzinsung … ging … von 6,8 % auf 5,8 % zurück“ (Vorjahreswerte)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2001, Lagebericht Kapitalanlagen",
+        "url": "https://web.archive.org/web/20050505065415id_/http://www.ruv.de:80/de/download/service/pdf/rv_gb2001_leben_ag.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2001-s015.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.4,
+        "laufendeDurchschnittsverzinsung": 6.8
+      },
+      "hinweis": "nur als Vorjahreswerte im GB 2001 belegt (GB 2000 der Leben AG nicht archiviert)"
+    },
+    {
+      "jahr": 2001,
+      "nettoverzinsung": 6.3,
+      "laufendeDurchschnittsverzinsung": 5.8,
+      "fundstelle": "S. 7 und S. 15 (Nettoverzinsung 6,3 %); S. 15 (laufende Durchschnittsverzinsung 5,8 %); bestätigt GB 2002 S. 17 und S. 16",
+      "quelle": {
+        "typ": "primary",
+        "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2001, Lagebericht Kapitalanlagen",
+        "url": "https://web.archive.org/web/20050505065415id_/http://www.ruv.de:80/de/download/service/pdf/rv_gb2001_leben_ag.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2001-s015.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.3,
+        "laufendeDurchschnittsverzinsung": 5.8
+      }
+    },
+    {
+      "jahr": 2002,
+      "nettoverzinsung": 4.2,
+      "laufendeDurchschnittsverzinsung": 5.9,
+      "fundstelle": "S. 17 „belief sich auf 4,2 % nach 6,3 % im Jahr zuvor“; S. 16 „stieg leicht von 5,8 % auf 5,9 %“; Nettoverzinsung bestätigt GB 2003 S. 19",
+      "quelle": {
+        "typ": "primary",
+        "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2002, Lagebericht Kapitalanlagen",
+        "url": "https://web.archive.org/web/20050311081546id_/http://www.ruv.de:80/de/download/service/pdf/geschftsbericht_leben_2002.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2002-s017.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.2,
+        "laufendeDurchschnittsverzinsung": 5.9
+      }
+    },
+    {
+      "jahr": 2003,
+      "nettoverzinsung": 5.1,
+      "laufendeDurchschnittsverzinsung": 5.4,
+      "fundstelle": "S. 9 („lag mit 5,1 % … laufende Durchschnittsverzinsung … 5,4 %“); S. 19 „5,1 % nach 4,2 %“; lfd. Verzinsung bestätigt GB 2004 S. 15",
+      "quelle": {
+        "typ": "primary",
+        "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2003",
+        "url": "https://web.archive.org/web/20050505064255id_/http://www.ruv.de:80/de/download/service/pdf/geschftsbericht_leben_2003.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2003-s009.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.1,
+        "laufendeDurchschnittsverzinsung": 5.4
+      }
+    },
+    {
+      "jahr": 2004,
+      "nettoverzinsung": 5.3,
+      "laufendeDurchschnittsverzinsung": 5.1,
+      "fundstelle": "S. 9 („betrug 5,3 % … ergaben sich 5,1 %“); S. 15; bestätigt GB 2005 S. 17 (lfd. „nach 5,1 %“) und S. 10",
+      "quelle": {
+        "typ": "primary",
+        "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2004",
+        "url": "https://www.ruv.de/dam/jcr:c510a332-e7b9-4f00-b32d-1f16a3dcadc7/geschaeftsbericht_2004_leben.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2004-s009.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.3,
+        "laufendeDurchschnittsverzinsung": 5.1
+      }
+    },
+    {
+      "jahr": 2005,
+      "nettoverzinsung": 6.3,
+      "laufendeDurchschnittsverzinsung": 4.9,
+      "fundstelle": "S. 10 („auf 6,3 % … Durchschnittsverzinsung … 4,9 %“); S. 17; Nettoverzinsung bestätigt GB 2006 S. 20",
+      "quelle": {
+        "typ": "primary",
+        "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2005",
+        "url": "https://www.ruv.de/dam/jcr:03f702bd-b923-4407-90de-206310856c3b/geschaeftsbericht_2005_leben.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2005-s010.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.3,
+        "laufendeDurchschnittsverzinsung": 4.9
+      }
+    },
+    {
+      "jahr": 2006,
+      "nettoverzinsung": 5.2,
+      "laufendeDurchschnittsverzinsung": 4.8,
+      "fundstelle": "S. 10 („5,2 % … laufende Durchschnittsverzinsung … blieb mit 4,8 %“); S. 20",
+      "quelle": {
+        "typ": "primary",
+        "titel": "R+V Lebensversicherung AG, Geschäftsbericht 2006",
+        "url": "https://www.ruv.de/dam/jcr:45cb9a54-a1dd-4e4b-9454-cb5bf83120a1/geschaeftsbericht_2006_leben.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/r-v-leben/gb2006-s010.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.2,
+        "laufendeDurchschnittsverzinsung": 4.8
+      }
+    }
+  ]
+}
