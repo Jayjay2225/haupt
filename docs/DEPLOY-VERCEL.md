@@ -1,4 +1,4 @@
-# Bereitstellung bei Vercel (Stand 21.09.2026)
+# Bereitstellung bei Vercel (Stand 29.09.2026)
 
 Die Website (`apps/web`) ist eine Next.js-Anwendung mit Server-Funktionen (Ampel-Berechnung, Stripe-Bestellung, Webhook mit PDF-Erzeugung). Sie läuft **nicht** auf klassischem Webspace, sondern bei Vercel; `renten-rettung.de` bleibt bei united-domains und zeigt per DNS auf Vercel (Mail-Einträge unverändert – siehe `docs/DOMAIN-UMZUG.md`).
 
@@ -21,9 +21,9 @@ Die Website (`apps/web`) ist eine Next.js-Anwendung mit Server-Funktionen (Ampel
    | `STRIPE_SECRET_KEY` | aus dem Stripe-Dashboard (erst Testschlüssel `sk_test_…`, später `sk_live_…`) |
    | `STRIPE_WEBHOOK_SECRET` | aus Schritt 3 |
    | `STRIPE_STEUERSATZ_ID` | Steuersatz „Umsatzsteuer 19 %, inklusiv“ aus Stripe (`txr_…`) |
-   | `RESEND_API_KEY` | vom E-Mail-Dienst (ohne Schlüssel: Protokoll-Modus, keine Mails) |
+   | `RESEND_API_KEY` | vom E-Mail-Dienst – auf Vercel Pflicht (Production und Preview): ohne Schlüssel scheitert jeder Versand mit einer Fehlermeldung; der Protokoll-Modus (Datei statt Versand) gilt nur lokal |
    | `MAIL_ABSENDER` | `Renten-Rettung <info@renten-rettung.de>` |
-   | `ADMIN_PASSWORT` | frei gewähltes, langes Passwort – schützt die Freigabeliste `/admin` und dient als Schlüssel für manuelle Cron-Aufrufe (Abschnitt 4) |
+   | `ADMIN_PASSWORT` | frei gewähltes, langes Passwort – Anmeldung an der Freigabeliste `/admin` (Formular, HttpOnly-Sitzungs-Cookie für 12 Stunden); der angemeldete Browser darf auch den Cron von Hand anstoßen (Abschnitt 4). Das Passwort steht nie in einer URL |
    | `CRON_SECRET` | zufälliger Wert (z. B. `openssl rand -hex 24`); Vercel sendet ihn bei Cron-Aufrufen automatisch als `Authorization: Bearer …` mit |
    | `NEXT_PUBLIC_PARTNERKANZLEI` | Name und Ort der Partnerkanzlei – erst setzen, wenn entschieden; sonst zeigt „Warum über uns“ den Platzhalter |
    | `NEXT_PUBLIC_GEPRUEFTE_POLICEN` | Zahl geprüfter Policen – **nur mit Beleg** setzen, sonst leer lassen |
@@ -33,7 +33,7 @@ Die Website (`apps/web`) ist eine Next.js-Anwendung mit Server-Funktionen (Ampel
    | `NEXT_PUBLIC_BILD_RUHESTAND` / `NEXT_PUBLIC_BILD_ENKEL` | Pfade der beiden Stimmungsbilder unter `public/bilder/` – **nur nach Lizenznachweis** in `docs/LIZENZEN.md`; leer = Platzhalterrahmen |
    | `NEXT_PUBLIC_PREISVERGLEICH_QUELLE` | Kennung des Belegs in `docs/QUELLEN.md` (z. B. `Q-01`) für den Vergleichssatz im Preisblock; leer = Satz entfällt |
 
-   Nicht setzen: `CHROMIUM_PATH`, `AUSLIEFERUNG_VERZEICHNIS` (auf Vercel automatisch: gepacktes Chromium, `/tmp`).
+   Nicht setzen oder leer lassen (leer zählt wie nicht gesetzt): `CHROMIUM_PATH`, `AUSLIEFERUNG_VERZEICHNIS` (auf Vercel automatisch: gepacktes Chromium, `/tmp`).
 5. „Deploy“. Nach dem Build gibt es eine Vorschauadresse `https://<projekt>.vercel.app` – damit Schritt 3 und 4 testen.
 
 Jeder weitere Push auf den Production-Branch löst automatisch eine neue Bereitstellung aus; kein Hochladen von Hand.
@@ -62,9 +62,11 @@ Der Build ist am 21.09.2026 aus einem frischen Klon mit `pnpm install --frozen-l
 ## 2. Was auf Vercel anders läuft (bereits im Code berücksichtigt)
 
 - **Chromium:** kein installierter Browser; `@sparticuz/chromium` wird beim ersten Aufruf nach `/tmp` entpackt (Kaltstart einige Sekunden). Der Webhook hat dafür `maxDuration = 60`. Keine feste Regionsvorgabe mehr in `apps/web/vercel.json` (Hobby-Tarif erlaubt das nicht) – Region bei Bedarf unter Settings → Functions wählen.
-- **Dateisystem:** nur `/tmp`, nur für die Dauer eines Aufrufs. Der Bestellstatus liegt deshalb vollständig in den Metadaten der Stripe-Zahlung (Markierungen `erzeugt_am`, `freigegeben_am`, `ausgeliefert_am`, dazu Auffälligkeits-Kennzeichen, Lead-Status und seit Prompt 14 der Post-Stand `post_status`/`post_am`); wiederholte Webhook-Zustellungen oder Cron-Läufe erzeugen so keinen zweiten Versand. Gutachten werden nicht dauerhaft abgelegt – bei Bedarf werden sie aus den Falldaten der Zahlungssitzung neu gerechnet (deterministisch, gleiche Versionen); die Druckvorlage für den Postversand lässt sich jederzeit unter `/api/admin/druck?schluessel=…&sitzung=…` neu erzeugen.
+- **Dateisystem:** nur `/tmp`, nur für die Dauer eines Aufrufs. Der Bestellstatus liegt deshalb vollständig in den Metadaten der Stripe-Zahlung (Markierungen `erzeugt_am`, `freigegeben_am`, `ausgeliefert_am`, dazu Auffälligkeits-Kennzeichen, Lead-Status und seit Prompt 14 der Post-Stand `post_status`/`post_am`); wiederholte Webhook-Zustellungen oder Cron-Läufe erzeugen so keinen zweiten Versand. Gutachten werden nicht dauerhaft abgelegt – bei Bedarf werden sie aus den Falldaten der Zahlungssitzung neu gerechnet (deterministisch, gleiche Versionen); die Druckvorlage für den Postversand lässt sich jederzeit aus dem angemeldeten Admin unter `/api/admin/druck?sitzung=…` neu erzeugen.
 - **Ratenbegrenzung** gilt je Funktionsinstanz (weich). Für eine harte Grenze später ein gemeinsamer Speicher.
-- **Basic-Auth-Middleware** läuft am Vercel-Edge.
+- **Basic-Auth-Middleware** läuft am Vercel-Edge (Passwörter mit Umlauten werden als UTF-8 gelesen, Vergleich zeitkonstant).
+- **Upload `/durchsetzung`:** höchstens 5 Dateien, zusammen 4 MB (Body-Limit der Functions 4,5 MB); der Dateityp wird am Inhalt geprüft, abgelehnte Dateien werden benannt.
+- **Cron-Fenster:** Checkout-Sitzungen der letzten 30 Tage (SEPA-Zahlungen kommen Tage später), älteste zuerst, höchstens 5 Versände je Lauf; Bestellungen ohne Phase A (`unbereit`) werden erst nach Ablauf der Auto-Frist versendet.
 
 ## 3. Stripe-Webhook einrichten
 
@@ -74,19 +76,19 @@ Im Stripe-Dashboard → Entwickler → Webhooks → Endpunkt hinzufügen:
 - Den angezeigten Signaturschlüssel (`whsec_…`) als `STRIPE_WEBHOOK_SECRET` bei Vercel eintragen und neu bereitstellen.
 - Außerdem im Dashboard: PayPal und Klarna als Zahlungsmethoden aktivieren; Steuersatz 19 % inklusiv anlegen; Rechnungsangaben (Firma, Anschrift, USt-IdNr. DE815896163) hinterlegen.
 
-Testlauf: Bestellung mit Stripe-Testkarte `4242 4242 4242 4242` – die Vertragsbestätigung muss sofort ankommen (bzw. im Protokoll-Modus in den Vercel-Logs erscheinen); das Gutachten mit Rechnungslink folgt nach Freigabe unter `/admin` oder automatisch über den Cron (Abschnitt 4). Mit angekreuztem Postversand geht zusätzlich der Druckauftrag mit der Druckvorlage an `info@` (Abschnitt 4a).
+Testlauf: Bestellung mit Stripe-Testkarte `4242 4242 4242 4242` – die Vertragsbestätigung muss sofort ankommen; das Gutachten mit Rechnungslink folgt nach Freigabe unter `/admin` oder automatisch über den Cron (Abschnitt 4). Mit angekreuztem Postversand geht zusätzlich der Druckauftrag mit der Druckvorlage an `info@` (Abschnitt 4a).
 
 ## 4. Zwölf-Stunden-Versand (Prompt 13): Cron und Freigabeliste
 
 Seit Prompt 13 wird der Bericht **nicht mehr sofort** versendet. Der Webhook prüft die Zahlung, erzeugt den Bericht probeweise (Plausibilisierung) und setzt die Markierung `erzeugt_am` samt Auffälligkeits-Kennzeichen; versendet wird in einem zweiten Schritt – **spätestens 12 Stunden nach Zahlungseingang** (Zusage auf Website, Danke-Seite und in der Bestätigungs-Mail):
 
-- **Freigabe von Hand:** `/admin?schluessel=<ADMIN_PASSWORT>` zeigt die bezahlten Bestellungen der letzten 30 Tage mit Kennzeichen (z. B. Fondsvertrag, Beginn vor 1994, hoher Branchenwert-Anteil). „Freigeben & senden“ verschickt den Bericht sofort. Dort auch: Lead-Status je Bestellung und CSV-Export.
-- **Automatisch:** ohne Freigabe versendet `GET /api/auslieferung/cron` jede Bestellung, deren Erzeugung mindestens 10 Stunden zurückliegt (2 Stunden Puffer zur 12-Stunden-Zusage). Akzeptiert zwei Berechtigungen: `Authorization: Bearer <CRON_SECRET>` (sendet Vercel bei eigenen Cron-Aufrufen automatisch mit, sobald die Variable gesetzt ist) oder `?schluessel=<ADMIN_PASSWORT>` für manuelle Aufrufe.
+- **Freigabe von Hand:** `/admin` (Anmeldung mit `ADMIN_PASSWORT`, Sitzungs-Cookie) zeigt die bezahlten Bestellungen der letzten 30 Tage mit Kennzeichen (z. B. Fondsvertrag, Beginn vor 1994, hoher Branchenwert-Anteil). „Freigeben & senden“ verschickt den Bericht sofort. Dort auch: Lead-Status je Bestellung und CSV-Export.
+- **Automatisch:** ohne Freigabe versendet `GET /api/auslieferung/cron` jede Bestellung, deren Erzeugung mindestens 10 Stunden zurückliegt (2 Stunden Puffer zur 12-Stunden-Zusage). Akzeptiert zwei Berechtigungen: `Authorization: Bearer <CRON_SECRET>` (sendet Vercel bei eigenen Cron-Aufrufen automatisch mit, sobald die Variable gesetzt ist) oder das Sitzungs-Cookie der Admin-Anmeldung für manuelle Aufrufe.
 
 **Vercel-Hobby-Tarif (aktueller Stand des Repos):** Cron-Jobs dürfen dort nur **einmal täglich** laufen, sonst schlägt die gesamte Bereitstellung fehl (nicht nur der Cron). `apps/web/vercel.json` ist deshalb bewusst auf **einmal täglich, 06:00 UTC** gestellt (`"schedule": "0 6 * * *"`), dazu wurde die Pro-Funktion `"regions": ["fra1"]` entfernt – beides ausschließlich, damit die Bereitstellung auf Hobby zum Testen durchläuft. Das reicht für die 12-Stunden-Zusage **nicht** (im schlechtesten Fall fast 24 Stunden Verzug) und ist als Testkonfiguration gedacht. Zwei Auswege für den Live-Betrieb:
 
 1. **Pro-Tarif**: stündliche Crons sind erlaubt – `"schedule"` zurück auf `"0 * * * *"` stellen.
-2. **Externer Zeitplaner** (z. B. cron-job.org oder ein beliebiger Uptime-Dienst): stündlich `https://renten-rettung.de/api/auslieferung/cron?schluessel=<ADMIN_PASSWORT>` aufrufen (GET). Dann den `crons`-Block aus `apps/web/vercel.json` entfernen oder den täglichen Vercel-Lauf als zusätzliche Absicherung stehen lassen.
+2. **Externer Zeitplaner** (z. B. cron-job.org oder ein beliebiger Uptime-Dienst): stündlich `GET https://renten-rettung.de/api/auslieferung/cron` mit dem Header `Authorization: Bearer <CRON_SECRET>` aufrufen (ohne Header antwortet die Route mit 401; ein URL-Parameter wird nicht akzeptiert). Dann den `crons`-Block aus `apps/web/vercel.json` entfernen oder den täglichen Vercel-Lauf als zusätzliche Absicherung stehen lassen.
 
 Bis eine der beiden Lösungen steht, gilt: Bestellungen zeitnah unter `/admin` von Hand freigeben. Erstkunden-Codes (`EK-…`) sind vom 12-Stunden-Fenster ausgenommen und liefern weiterhin sofort aus.
 
@@ -115,4 +117,4 @@ Erst nach erfolgreichem Test unter der Vorschauadresse und nach `docs/DOMAIN-UMZ
 
 ## 6. Go-live
 
-Wenn alle Punkte aus `docs/DOMAIN-UMZUG.md` Abschnitt 4 abgehakt sind: `BETA_PASSWORT` löschen, `NEXT_PUBLIC_INDEXIERUNG=1` setzen, Stripe auf Live-Schlüssel umstellen (auch den Webhook-Endpunkt im Live-Modus anlegen), neu bereitstellen.
+Wenn alle Punkte aus `docs/DOMAIN-UMZUG.md` Abschnitt 4 abgehakt sind: `BETA_PASSWORT` löschen, `NEXT_PUBLIC_INDEXIERUNG=1` setzen, Stripe auf Live-Schlüssel umstellen (auch den Webhook-Endpunkt im Live-Modus anlegen), `RESEND_API_KEY` gesetzt und eine Testmail angekommen (ohne Schlüssel kein Versand auf Vercel), neu bereitstellen.

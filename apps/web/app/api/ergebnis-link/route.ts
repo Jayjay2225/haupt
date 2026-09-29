@@ -2,7 +2,9 @@
  * „Später weitermachen“-Link per E-Mail (Prompt 12, 3.4; Prompt 14: im Funnel
  * ab Schritt 3 – eine Ergebnis-Seite gibt es in der Privatkunden-Variante
  * nicht mehr). Der Link trägt den Zwischenstand selbst (lib/fortsetzen.ts) –
- * gespeichert wird serverseitig nichts.
+ * gespeichert wird serverseitig nichts. Freigabe über das eigene Link-Häkchen
+ * (`linkEinwilligung`), Empfänger über `empfaenger` – der Entwurf selbst bleibt
+ * unverändert (keine Einwilligung wird stellvertretend gesetzt).
  */
 import { resolve } from 'node:path';
 import { NextResponse } from 'next/server';
@@ -35,8 +37,9 @@ export async function POST(request: Request): Promise<NextResponse> {
       ? (eingabe['draft'] as Record<string, unknown>)
       : {},
   );
-  const email = draft.email.trim();
-  if (!EMAIL_MUSTER.test(email) || !draft.einwilligungDatenschutz) {
+  const empfaenger = typeof eingabe['empfaenger'] === 'string' ? eingabe['empfaenger'].trim() : '';
+  const email = empfaenger !== '' ? empfaenger : draft.email.trim();
+  if (!EMAIL_MUSTER.test(email) || eingabe['linkEinwilligung'] !== true || kundenname(draft).length > 120) {
     return NextResponse.json({ ok: false }, { status: 422 });
   }
   try {
@@ -49,7 +52,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ ok: true });
   } catch (fehler) {
     console.error('weitermachen-link versand fehlgeschlagen:', (fehler as Error).message);
-    // Bewusst kein Fehler an den Client: der Assistent läuft unabhängig davon weiter.
+    // ok:false – der Assistent zeigt dann den Hinweis, dass der Link nicht verschickt wurde.
     return NextResponse.json({ ok: false });
   }
 }

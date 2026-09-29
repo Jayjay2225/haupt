@@ -14,8 +14,13 @@ export interface EmailVorlage {
   text: string;
 }
 
+/** Anrede-Name aus Nutzereingabe: eine Zeile, begrenzt, keine Links oder Adressen (kein Missbrauch als Mail-Relay). */
 function gruss(name: string): string {
-  return name.trim() === '' ? 'Guten Tag,' : `Guten Tag ${name.trim()},`;
+  const n = name.replace(/\s+/g, ' ').trim().slice(0, 80);
+  if (n === '' || /https?:\/\/|www\.|@/i.test(n)) {
+    return 'Guten Tag,';
+  }
+  return `Guten Tag ${n},`;
 }
 
 function abschluss(): string {
@@ -114,8 +119,12 @@ ${abschluss()}`,
 /**
  * Vertragsbestätigung auf dauerhaftem Datenträger (§ 312f BGB) – geht vor Beginn
  * der Ausführung raus: Inhalt, Preis, Anbieter, die abgegebene Zustimmung zur
- * sofortigen Ausführung (digitaler Inhalt) und die Belehrungen. Mit Postversand
- * wird die gedruckte Fassung als kostenlose Zusatzleistung genannt.
+ * sofortigen Ausführung (digitaler Inhalt, Erlöschen des Widerrufsrechts mit
+ * Beginn der Erstellung – derselbe Wortlaut wie das Häkchen in Schritt 11) und
+ * die Belehrungen. Mit Postversand wird die gedruckte Fassung als kostenlose
+ * Zusatzleistung genannt. `sofort`: Gutachten wird im selben Durchlauf erzeugt
+ * und versendet (Erstkunden, Nachholung durch den Cron) – dann verspricht der
+ * Text keine Plausibilisierungsphase, die nicht stattfindet.
  */
 export function vertragsbestaetigung(
   name: string,
@@ -123,9 +132,13 @@ export function vertragsbestaetigung(
   links: { agb: string; widerruf: string },
   preisText?: string,
   postversand: boolean = false,
+  sofort: boolean = false,
 ): EmailVorlage {
   const a = BRAND.anbieterAnschrift;
   const post = postversand ? `Zusätzlich gewählt: gedruckte Fassung per Post, kostenlos (${POST_WERKTAGE_TEXT}).\n` : '';
+  const lieferung = sofort
+    ? 'Das Gutachten folgt in einer eigenen E-Mail – in wenigen Minuten.'
+    : 'Das Gutachten folgt in einer eigenen E-Mail – innerhalb von 12 Stunden; es wird vor dem Versand plausibilisiert.';
   return {
     betreff: `Ihre Bestellung ${bestellnummer}: Bestätigung`,
     text: `${gruss(name)}
@@ -137,19 +150,35 @@ Leistung: ${BRAND.produktname} (PDF) zu Ihrer Lebens- oder Rentenversicherung �
 ${post}Preis: ${preisText ?? `${BERICHT_PREIS_BRUTTO_EUR} € ${BERICHT_PREIS_HINWEIS}, vorab bezahlt. Die Rechnung kommt gesondert.`}
 Anbieter: ${BRAND.anbieter}, ${a.strasse}, ${a.plz} ${a.ort}
 
-Ihre Erklärung bei der Bestellung: Sie haben ausdrücklich verlangt, dass wir das Gutachten (digitaler Inhalt) sofort erstellen, und bestätigt, dass Ihr Widerrufsrecht erlischt, sobald das Gutachten vollständig geliefert ist.
+Ihre Erklärung bei der Bestellung: Sie haben ausdrücklich verlangt, dass wir das Gutachten (digitaler Inhalt) sofort erstellen, und bestätigt, dass Ihr Widerrufsrecht mit Beginn der Erstellung erlischt.
 
 Widerrufsbelehrung: ${links.widerruf}
 AGB: ${links.agb}
 
-Das Gutachten folgt in einer eigenen E-Mail – innerhalb von 12 Stunden; es wird vor dem Versand plausibilisiert.
+${lieferung}
 
 ${abschluss()}`,
   };
 }
 
-/** Zahlung ist da, das Gutachten konnte aber noch nicht erzeugt werden – Kundin/Kunde informieren. */
-export function berichtVerzoegert(name: string, bestellnummer: string): EmailVorlage {
+/**
+ * Das Gutachten konnte noch nicht erzeugt werden – Kundin/Kunde informieren.
+ * Erstkunden haben nichts bezahlt und keinen automatischen Wiederholungsweg;
+ * ihr Text nennt weder eine Zahlung noch eine feste Frist.
+ */
+export function berichtVerzoegert(name: string, bestellnummer: string, erstkunde: boolean = false): EmailVorlage {
+  if (erstkunde) {
+    return {
+      betreff: `Ihre Bestellung ${bestellnummer}: Gutachten folgt`,
+      text: `${gruss(name)}
+
+Ihre Bestellung im Erstkunden-Programm (Bestellnummer ${bestellnummer}) ist angekommen. Beim Erstellen des Gutachtens hakt es gerade technisch. Wir kümmern uns darum und melden uns per E-Mail; Ihr Freischaltcode bleibt gültig.
+
+Fragen? Antworten Sie einfach auf diese E-Mail.
+
+${abschluss()}`,
+    };
+  }
   return {
     betreff: `Ihre Zahlung ist eingegangen – Gutachten ${bestellnummer} folgt`,
     text: `${gruss(name)}
@@ -162,15 +191,28 @@ ${abschluss()}`,
   };
 }
 
-/** Interner Hinweis an den Anbieter, wenn eine bezahlte Bestellung nicht ausgeliefert werden konnte. */
-export function internerFehlerHinweis(bestellnummer: string, fehler: string): EmailVorlage {
+/** Rettungsweg je Auslöser: Phase A (Webhook, 500 → Stripe-Retry), Phase B (Cron/Freigabe) oder Erstkunden-Weg ohne Stripe. */
+export type FehlerWeg = 'webhook' | 'versand' | 'erstkunde';
+
+const RETTUNGSWEG: Record<FehlerWeg, string> = {
+  webhook:
+    'Stripe stellt das Webhook-Ereignis wegen der 500-Antwort automatisch erneut zu; zusätzlich kann es im Stripe-Dashboard (Entwickler → Webhooks → Ereignis → „Erneut senden“) von Hand ausgelöst werden.',
+  versand:
+    'Kein Stripe-Retry (Phase B). Nächster automatischer Versuch: der nächste Lauf von /api/auslieferung/cron (laut apps/web/vercel.json derzeit einmal täglich); sofort nachholen über „Freigeben und senden“ unter /admin.',
+  erstkunde:
+    'Kein automatischer Versuch: Erstkunden-Bestellungen laufen ohne Stripe und werden vom Cron nicht gefunden. Der Freischaltcode ist wieder freigegeben – Kundin bzw. Kunde erneut einlösen lassen oder das Gutachten von Hand erzeugen und senden.',
+};
+
+/** Interner Hinweis an den Anbieter, wenn eine Bestellung nicht ausgeliefert werden konnte – mit dem Rettungsweg des jeweiligen Pfads. */
+export function internerFehlerHinweis(bestellnummer: string, fehler: string, weg: FehlerWeg): EmailVorlage {
+  const kopf = weg === 'erstkunde' ? 'Erstkunden-Code eingelöst (kostenlos)' : 'Zahlung eingegangen';
   return {
     betreff: `[${BRAND.name}] Auslieferung fehlgeschlagen: ${bestellnummer}`,
-    text: `Bestellnummer ${bestellnummer}: Zahlung eingegangen, Gutachten nicht ausgeliefert.
+    text: `Bestellnummer ${bestellnummer}: ${kopf}, Gutachten nicht ausgeliefert.
 
 Fehler: ${fehler}
 
-Rettungsweg: Stripe stellt das Webhook-Ereignis wegen der 500-Antwort automatisch erneut zu; zusätzlich kann es im Stripe-Dashboard (Entwickler → Webhooks → Ereignis → „Erneut senden“) von Hand ausgelöst werden. Bereits erledigte Schritte werden übersprungen. Danach prüfen, ob die Kundin bzw. der Kunde das Gutachten erhalten hat.`,
+Rettungsweg: ${RETTUNGSWEG[weg]} Bereits erledigte Schritte werden übersprungen. Danach prüfen, ob die Kundin bzw. der Kunde das Gutachten erhalten hat.`,
   };
 }
 

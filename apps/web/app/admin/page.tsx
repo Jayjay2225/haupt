@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { adminAutorisiert } from '@/lib/admin';
+import { cookies } from 'next/headers';
+import { ADMIN_COOKIE, adminCookieGueltig } from '@/lib/admin';
 import { ladeBestellungen, type BestellZeile } from '@/lib/admin-liste';
 import { LEAD_STATUS, POST_STAND_LABEL } from '@/lib/erfuellung';
 import { bestellungAktiv, stripeClient } from '@/lib/zahlung';
@@ -7,16 +8,25 @@ import { bestellungAktiv, stripeClient } from '@/lib/zahlung';
 export const metadata: Metadata = { title: 'Freigaben (intern)', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
 
-function zeit(iso: string | undefined): string {
-  return iso === undefined ? '' : iso.slice(0, 16).replace('T', ' ');
+const ZEIT_FORMAT = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'medium', timeStyle: 'short' });
+const UHRZEIT_FORMAT = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', timeStyle: 'short' });
+
+/** ISO-Zeit (UTC aus Stripe/Markern) als deutsche Ortszeit; ungültige Werte unverändert. */
+function zeit(iso: string | undefined, format: Intl.DateTimeFormat = ZEIT_FORMAT): string {
+  if (iso === undefined) {
+    return '';
+  }
+  const datum = new Date(iso);
+  return Number.isNaN(datum.getTime()) ? iso : format.format(datum);
 }
 
 /**
  * Interne Freigabe-Liste (Prompt 13, Abschnitt 3): bezahlte Bestellungen mit
  * Plausibilisierungs-Kennzeichen; Freigabe mit einem Klick, Lead-Status
  * (2.3), Spalte „Post“ (Prompt 14, 3: gewünscht → gedruckt → versendet, mit
- * Datum, Druckvorlage zum Herunterladen) und CSV-Export. Zugang:
- * ?schluessel=ADMIN_PASSWORT (zusätzlich zur Beta-Basic-Auth).
+ * Datum, Druckvorlage zum Herunterladen) und CSV-Export. Zugang: Anmeldung
+ * mit ADMIN_PASSWORT → HttpOnly-Cookie (zusätzlich zur Beta-Basic-Auth); der
+ * Schlüssel steht nie in einer URL.
  */
 export default async function AdminSeite({
   searchParams,
@@ -24,13 +34,26 @@ export default async function AdminSeite({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const schluessel = typeof params['schluessel'] === 'string' ? params['schluessel'] : '';
   const meldung = typeof params['meldung'] === 'string' ? params['meldung'] : '';
-  if (!adminAutorisiert(schluessel)) {
+  const sitzungscookie = (await cookies()).get(ADMIN_COOKIE)?.value;
+  if (!adminCookieGueltig(sitzungscookie)) {
     return (
       <div className="container schmal abschnitt">
         <h1>Interner Bereich.</h1>
-        <p>Zugang nur mit Schlüssel: /admin?schluessel=… (ADMIN_PASSWORT).</p>
+        {meldung !== '' && (
+          <div className="hinweis">
+            <p style={{ margin: 0 }}>{meldung}</p>
+          </div>
+        )}
+        <form method="post" action="/api/admin/anmelden" className="karte" style={{ display: 'grid', gap: '0.75rem', maxWidth: '24rem' }}>
+          <div className="feld">
+            <label htmlFor="admin-schluessel">Schlüssel (ADMIN_PASSWORT)</label>
+            <input id="admin-schluessel" type="password" name="schluessel" autoComplete="current-password" required />
+          </div>
+          <button type="submit" className="knopf haupt">
+            Anmelden
+          </button>
+        </form>
       </div>
     );
   }
@@ -52,15 +75,14 @@ export default async function AdminSeite({
   }
   const offen = zeilen.filter((z) => z.entscheidung === 'warten' || z.entscheidung === 'unbereit');
   const postOffen = zeilen.filter((z) => z.postversand && z.post !== 'versendet');
-  const q = encodeURIComponent(schluessel);
 
   return (
     <div className="container abschnitt">
       <h1>Freigaben.</h1>
       <p className="erklaerung">
         Bezahlte Bestellungen der letzten 30 Tage. Versand: Freigabe-Klick oder automatisch nach 10
-        Stunden (Cron). Protokoll = Marker in den Stripe-Metadaten.{' '}
-        <a href={`/api/admin/leads.csv?schluessel=${q}`}>CSV-Export</a>
+        Stunden (Cron). Protokoll = Marker in den Stripe-Metadaten. Zeiten in deutscher Ortszeit.{' '}
+        <a href="/api/admin/leads.csv">CSV-Export</a>
       </p>
       {meldung !== '' && (
         <div className="hinweis">
@@ -104,7 +126,7 @@ export default async function AdminSeite({
                   {z.entscheidung === 'erledigt'
                     ? `versendet ${zeit(z.marker.ausgeliefert)}`
                     : z.entscheidung === 'warten'
-                      ? `wartet (erzeugt ${z.marker.erzeugt?.slice(11, 16) ?? ''})`
+                      ? `wartet (erzeugt ${zeit(z.marker.erzeugt, UHRZEIT_FORMAT)})`
                       : z.entscheidung === 'unbereit'
                         ? 'noch nicht erzeugt'
                         : 'sendebereit'}
@@ -116,12 +138,9 @@ export default async function AdminSeite({
                         {POST_STAND_LABEL[z.post ?? 'gewuenscht']}
                         {z.postAm !== undefined ? ` ${zeit(z.postAm)}` : ''}
                       </span>
-                      <a href={`/api/admin/druck?schluessel=${q}&sitzung=${encodeURIComponent(z.sitzung)}`}>
-                        Druckvorlage (PDF)
-                      </a>
+                      <a href={`/api/admin/druck?sitzung=${encodeURIComponent(z.sitzung)}`}>Druckvorlage (PDF)</a>
                       {z.post !== 'versendet' && (
                         <form method="post" action="/api/admin/post" style={{ display: 'flex', gap: '0.25rem' }}>
-                          <input type="hidden" name="schluessel" value={schluessel} />
                           <input type="hidden" name="sitzung" value={z.sitzung} />
                           {z.post !== 'gedruckt' && (
                             <button type="submit" name="stand" value="gedruckt" className="knopf zweitrangig klein">
@@ -140,7 +159,6 @@ export default async function AdminSeite({
                 </td>
                 <td>
                   <form method="post" action="/api/admin/lead-status" style={{ display: 'flex', gap: '0.25rem' }}>
-                    <input type="hidden" name="schluessel" value={schluessel} />
                     <input type="hidden" name="sitzung" value={z.sitzung} />
                     <select name="status" defaultValue={z.leadStatus} style={{ minHeight: '2.25rem' }}>
                       {LEAD_STATUS.map((s) => (
@@ -157,7 +175,6 @@ export default async function AdminSeite({
                 <td>
                   {z.entscheidung !== 'erledigt' && (
                     <form method="post" action="/api/admin/freigabe">
-                      <input type="hidden" name="schluessel" value={schluessel} />
                       <input type="hidden" name="sitzung" value={z.sitzung} />
                       <button type="submit" className="knopf haupt klein">
                         Freigeben und senden

@@ -104,10 +104,27 @@ describe('Eignungs-Check – Konstellationen', () => {
     expect(e.benoetigteDokumente.join(' ')).toContain('§ 8 Abs. 4');
   });
 
-  it('7b. Grenzmonat Dezember 2004 (nur Monat bekannt) → höchstens gelb trotz 14-Tage-Belehrung', () => {
-    const e = pruefeEignung(frage({ vertragsschluss: '2004-12', belehrungFrist: '14-tage' }), regelwerk);
+  it('7b. Grenzmonat Dezember 2004 (nur Monat bekannt) mit 14-Tage-Belehrung → höchstens gelb, Datumsdokument nötig', () => {
+    const e = pruefeEignung(
+      frage({ vertragsschluss: '2004-12', belehrungVorhanden: 'ja', belehrungFrist: '14-tage', belehrungForm: 'textform', hervorhebung: 'ja' }),
+      regelwerk,
+    );
     expect(e.ampel).toBe('gelb');
+    expect(regelIds(e)).toContain('R-FEHLER-FRIST-ZU-KURZ');
     expect(e.benoetigteDokumente.join(' ')).toContain('Policierungsdatum');
+  });
+
+  it('7c. Dezember 2004 ohne Belehrung → grün; der genaue Tag ändert nichts, kein Datumsdokument', () => {
+    const e = pruefeEignung(frage({ vertragsschluss: '2004-12' }), regelwerk);
+    expect(e.ampel).toBe('gruen');
+    expect(e.benoetigteDokumente).toEqual([]);
+    expect(e.hinweise.some((h) => h.regelIds.includes('R-FEHLER-FRIST-ZU-KURZ'))).toBe(false);
+  });
+
+  it('7d. Nur Jahr 2004 mit 14-Tage-Belehrung → gelb statt rot; mit 30 Tagen weiter rot', () => {
+    const b = { belehrungVorhanden: 'ja', belehrungForm: 'textform', hervorhebung: 'ja' } as const;
+    expect(pruefeEignung(frage({ vertragsschluss: '2004', belehrungFrist: '14-tage', ...b }), regelwerk).ampel).toBe('gelb');
+    expect(pruefeEignung(frage({ vertragsschluss: '2004', belehrungFrist: '30-tage', ...b }), regelwerk).ampel).toBe('rot');
   });
 
   it('8. Unbekannte Belehrung → gelb, nie grün, mit benötigtem Dokument', () => {
@@ -137,6 +154,20 @@ describe('Eignungs-Check – Konstellationen', () => {
     const e = pruefeEignung(frage({ vertragsart: 'risiko-lv' }), regelwerk);
     expect(e.ampel).toBe('rot');
     expect(regelIds(e)).toContain('R-AUS-RISIKO-LV');
+  });
+
+  it('11b. Reine Risikolebensversicherung vor dem 29.07.1994 → rot (globaler Ausschluss vor dem Regime-Ausschluss)', () => {
+    const e = pruefeEignung(frage({ vertragsart: 'risiko-lv', vertragsschluss: '1990-01' }), regelwerk);
+    expect(e.ampel).toBe('rot');
+    expect(e.regime).toBe('keins');
+    expect(regelIds(e)).toContain('R-AUS-RISIKO-LV');
+    expect(e.benoetigteDokumente).toEqual([]);
+  });
+
+  it('11c. Rückdeckungsversicherung vor 1994 erhält den regimeunabhängigen Hinweis', () => {
+    const e = pruefeEignung(frage({ vertragsart: 'rueckdeckung', vertragsschluss: '1990-01' }), regelwerk);
+    expect(e.ampel).toBe('gelb');
+    expect(e.hinweise.some((h) => h.regelIds.includes('R-HIN-RUECKDECKUNG'))).toBe(true);
   });
 
   it('12. Zustandekommen unbekannt (Altvertrag) → höchstens gelb plus Dokumentbedarf', () => {
@@ -180,6 +211,64 @@ describe('Eignungs-Check – Konstellationen', () => {
     expect(e.ampel).toBe('gelb');
     expect(e.benoetigteDokumente.some((d) => d.includes('Vertragsschluss'))).toBe(true);
     expect(e.regime).toBe('alt-policenmodell');
+  });
+
+  it('15b. Nur Jahr 1994 → höchstens gelb, vorsorglich § 5a-Regime, Datum nachzuweisen', () => {
+    const e = pruefeEignung(frage({ vertragsschluss: '1994' }), regelwerk);
+    expect(e.ampel).toBe('gelb');
+    expect(e.regime).toBe('alt-policenmodell');
+    expect(e.benoetigteDokumente.join(' ')).toContain('Policierungsdatum');
+    expect(regelIds(e)).not.toContain('R-REGIME-VOR1994');
+  });
+
+  it('15c. Nur Jahr außerhalb der Grenzjahre verhält sich wie der Monat der Jahresmitte', () => {
+    expect(pruefeEignung(frage({ vertragsschluss: '2008', belehrungVorhanden: 'ja' }), regelwerk).regime).toBe('neu-2008');
+    expect(pruefeEignung(frage({ vertragsschluss: '1998' }), regelwerk).ampel).toBe(
+      pruefeEignung(frage({ vertragsschluss: '1998-06' }), regelwerk).ampel,
+    );
+  });
+
+  it('17. Belehrung unbekannt mit veralteten Unterangaben (Hervorhebung nein, 14 Tage, 2005) → gelb, keine Unterregeln', () => {
+    const e = pruefeEignung(
+      frage({ vertragsschluss: '2005-06-01', belehrungVorhanden: 'unbekannt', belehrungFrist: '14-tage', hervorhebung: 'nein' }),
+      regelwerk,
+    );
+    expect(e.ampel).toBe('gelb');
+    expect(regelIds(e)).not.toContain('R-FEHLER-HERVORHEBUNG');
+    expect(regelIds(e)).not.toContain('R-FEHLER-FRIST-ZU-KURZ');
+    expect(e.benoetigteDokumente.length).toBeGreaterThan(0);
+  });
+
+  it('18. Belehrung vorhanden, aber Frist „andere“ → gelb mit Begründung und Dokument', () => {
+    const e = pruefeEignung(
+      frage({ belehrungVorhanden: 'ja', hervorhebung: 'ja', belehrungFrist: 'andere', belehrungForm: 'textform' }),
+      regelwerk,
+    );
+    expect(e.ampel).toBe('gelb');
+    expect(regelIds(e)).toContain('R-FEHLER-FRIST-SONST');
+    expect(e.benoetigteDokumente.length).toBeGreaterThan(0);
+  });
+
+  it('19. Belehrung vorhanden, Frist/Form unbekannt → gelb, nie ohne Dokument', () => {
+    const e = pruefeEignung(
+      frage({ belehrungVorhanden: 'ja', hervorhebung: 'ja', belehrungFrist: 'unbekannt', belehrungForm: 'unbekannt' }),
+      regelwerk,
+    );
+    expect(e.ampel).toBe('gelb');
+    expect(regelIds(e)).toEqual(expect.arrayContaining(['R-FEHLER-FRIST-UNBEKANNT', 'R-FEHLER-FORM-UNBEKANNT']));
+    expect(e.benoetigteDokumente.length).toBeGreaterThan(0);
+  });
+
+  it('Regelwerk: versioniert, kein Quellen-Abrufdatum liegt nach dem Stand', () => {
+    expect(regelwerk.version).not.toBe('0.1.0');
+    expect(regelwerk.stand).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    for (const r of regelwerk.regeln) {
+      for (const q of r.quelle) {
+        if (q.abrufdatum !== undefined) {
+          expect(q.abrufdatum <= regelwerk.stand).toBe(true);
+        }
+      }
+    }
   });
 
   it('16. Kündigung/Zeitablauf ist kein Verwirkungsindikator; Fondsvertrag erhält Methodik-Hinweis', () => {

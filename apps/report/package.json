@@ -7,6 +7,7 @@
   "types": "src/index.ts",
   "scripts": {
     "beispiele": "tsx src/erzeuge-beispiele.ts",
+    "schriften": "node scripts/erzeuge-schriften.mjs",
     "typecheck": "tsc --noEmit",
     "vorschau-bild": "tsx scripts/bericht-vorschau.ts"
   },

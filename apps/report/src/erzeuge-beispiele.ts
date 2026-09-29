@@ -70,7 +70,7 @@ const beispiele: Beispiel[] = [
   {
     aktenzeichen: 'BSP-2026-B',
     kundenname: 'Musterfall B (anonymisiert)',
-    versichererAnzeigename: 'Allianz Lebensversicherungs-AG (Kennzahlen: Branchendurchschnitt)',
+    versichererAnzeigename: 'Allianz Lebensversicherungs-AG',
     contract: {
       versichererId: 'allianz-leben',
       vertragsart: 'kapital-lv',

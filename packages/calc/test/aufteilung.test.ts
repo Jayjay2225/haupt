@@ -27,6 +27,42 @@ describe('Beitragsaufteilung', () => {
     expect(spaet.sparanteil).toBeCloseTo(100 - 6 - 3, 6);
   });
 
+  it('überbrückt einen Abschluss vor dem ersten hinterlegten Höchstzillmersatz mit dem frühesten Satz (Näherung, gekennzeichnet)', () => {
+    const input = vertrag({ beginn: '1990-01', stichtag: '1991-12', beitragszahlungBis: '1991-12' });
+    const reihe = baueBeitragsreihe(input).reihe; // 24 × 100 €
+    const { monate, warnungen, annahmen } = teileBeitraegeAuf(reihe, input, daten, defaults, 'basis');
+    // Frühester Satz der Fixture: 40 ‰ ab 1994 – nicht 0 (anspruchserhöhend).
+    expect(monate.reduce((a, m) => a + m.abschluss, 0)).toBeCloseTo(0.04 * 2400, 6);
+    const naeherung = warnungen.find((w) => w.code === 'ZILLMER_NAEHERUNG');
+    expect(naeherung?.text).toContain('gültig ab 1994');
+    expect(naeherung?.text).toContain('40 ‰');
+    expect(warnungen.some((w) => w.code === 'ZILLMER_UNBEKANNT')).toBe(false);
+    expect(annahmen.some((a) => a.code === 'ABSCHLUSS_ZILLMER')).toBe(false);
+  });
+
+  it('setzt Abschlusskosten nur bei leerer Werteliste mit 0 an (ZILLMER_UNBEKANNT)', () => {
+    const ohneZillmer = {
+      ...daten,
+      rechnungsgrundlagen: { ...daten.rechnungsgrundlagen, hoechstzillmersatz: { werte: [] } },
+    };
+    const input = vertrag({ beginn: '1990-01', stichtag: '1991-12', beitragszahlungBis: '1991-12' });
+    const reihe = baueBeitragsreihe(input).reihe;
+    const { monate, warnungen } = teileBeitraegeAuf(reihe, input, ohneZillmer, defaults, 'basis');
+    expect(monate.reduce((a, m) => a + m.abschluss, 0)).toBe(0);
+    expect(warnungen.some((w) => w.code === 'ZILLMER_UNBEKANNT')).toBe(true);
+  });
+
+  it('zählt für den Verwaltungskosten-Fallback Kalenderjahre, nicht Zahlungen; Texte de-DE und deutsch', () => {
+    const input = vertrag({ zahlweise: 'jaehrlich', beginn: '2000-01', stichtag: '2004-12', beitragszahlungBis: '2004-12' });
+    const reihe = baueBeitragsreihe(input).reihe; // 5 Jahresbeiträge
+    const { annahmen } = teileBeitraegeAuf(reihe, input, daten, defaults, 'basis');
+    expect(annahmen.find((a) => a.code === 'VERWALTUNG_FALLBACK')?.text).toContain('Für 5 Kalenderjahr(e)');
+    const risiko = annahmen.find((a) => a.code === 'RISIKOANTEIL_PAUSCHAL')?.text ?? '';
+    expect(risiko).toContain('Kapitallebensversicherung');
+    expect(risiko).not.toContain('kapital-lv');
+    expect(annahmen.find((a) => a.code === 'ABSCHLUSS_ZILLMER')?.text).toContain('40 ‰');
+  });
+
   it('verteilt Abschlusskosten ab 2008 gleichmäßig auf die ersten 60 Monate', () => {
     const input = vertrag({ beginn: '2010-01', stichtag: '2016-12', beitragszahlungBis: '2016-12' });
     const reihe = baueBeitragsreihe(input).reihe;

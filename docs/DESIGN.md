@@ -81,7 +81,9 @@ Inline-SVG auf der Startseite (die Pille bleibt für die Kanzlei-Ergebnisseite).
 Kopfbalken `brand` mit weißer Marke (Newsreader); Überschriften Newsreader in
 `brand`; Text Manrope 11 pt `ink`; Tabellenkopf `brand`/weiß, Zebra `bg`,
 Beträge rechtsbündig; Diagramm „Mehrwert gegenüber Rückkaufswert“ in `cta`,
-Rückkaufswert `muted`, Szenarien `brand`/`sage`; Ampel-Pille in Ampelfarben;
+Rückkaufswert `muted`, Szenarien `brand`/`sage` (als Netto-Wert, damit
+Basis − Rückkaufswert dem Mehrwert-Balken entspricht; Balkenlänge lässt
+Platz für siebenstellige Beträge); Ampel-Pille in Ampelfarben;
 Hinweisflächen `sageLight`; Gegenposition mit Rand `line`.
 PDF-Kopf-/Fußzeile: Chromium rendert sie ohne eingebettete Schriften →
 Systemschrift, Marke fett in `brand`.

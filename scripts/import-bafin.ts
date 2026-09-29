@@ -166,6 +166,8 @@ interface Tabelle {
   datei: string;
   layout: 'A' | 'B';
   spalten: Record<'lfd' | 'rein' | 'abschlussProzent' | 'verwaltungProzent', number>;
+  /** Physische Excel-Zeile der Zeile „Branche“ (Kopfzeile + 1) – für die Fundstelle. */
+  brancheZeileNr: number;
   branche: Map<number, string>;
   unternehmen: Unternehmenszeile[];
 }
@@ -236,7 +238,7 @@ function leseTabelle(jahr: number, datei: string): Tabelle {
     const l = logisch(z);
     unternehmen.push({ rang: Number(rangRoh), kurzname: (l.get(2) ?? '').trim(), zeileNr: nr, werte: l });
   }
-  return { jahr, datei, layout, spalten, branche: brancheWerte, unternehmen };
+  return { jahr, datei, layout, spalten, brancheZeileNr: kopfZeile + 1, branche: brancheWerte, unternehmen };
 }
 
 function zahl(wert: string | undefined): number | null {
@@ -338,7 +340,7 @@ if (befehl === 'namen') {
       daten.branchendurchschnitt.laufendeDurchschnittsverzinsung[String(t.jahr)] = {
         wert: brancheLfd,
         einheit: '%',
-        quelle: quelle(t, -1, t.spalten.lfd, 'Zeile „Branche“, lfd. Verzinsung'),
+        quelle: quelle(t, t.brancheZeileNr, t.spalten.lfd, 'Zeile „Branche“, lfd. Verzinsung'),
         confidence: 'high',
       };
       branchenWerte += 1;

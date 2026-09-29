@@ -16,7 +16,7 @@
 import { BRAND } from '@/config/brand';
 import { VARIANTE } from '@/config/variante';
 import type { HilfeFeld } from '@/content/hilfetexte';
-import { parseDatumDe, parseDecimalDe } from './format';
+import { parseDatumDe, parseDecimalDe, parseProzentDe } from './format';
 
 export const DRAFT_STORAGE_KEY = 'rueckab.rechner.entwurf.v2';
 
@@ -76,7 +76,7 @@ export interface CaseDraft {
   // 4 – „Wann hat der Vertrag begonnen?“ (BRAND.range); „Weiß nicht genau“ → nur Jahr
   beginn: string; // ISO YYYY-MM
   beginnUngefaehr: boolean;
-  // 5 – „Wie hoch war der erste Monatsbeitrag?“ (DM/€-Schalter vor 2002, Schalter „heutiger Beitrag“)
+  // 5 – „Wie hoch war der erste Beitrag?“ (je Zahlungsperiode; DM/€-Schalter vor 2002, Schalter „heutiger Beitrag“)
   erstbeitrag: string;
   erstbeitragWaehrung: Waehrung;
   beitragArt: BeitragArt;
@@ -226,7 +226,7 @@ export const SCHRITT_FRAGE: Record<Schritt, string> = {
   status: 'Läuft der Vertrag noch?',
   versicherer: 'Wer ist der Versicherer?',
   beginn: 'Wann hat der Vertrag begonnen?',
-  beitrag: 'Wie hoch war der erste Monatsbeitrag?',
+  beitrag: 'Wie hoch war der erste Beitrag?',
   dynamik: 'Gab es eine Dynamik?',
   beitragssumme: 'Was steht als eingezahlte Beiträge in der Standmitteilung?',
   rueckkaufswert: 'Wie hoch ist der Rückkaufswert?',
@@ -285,11 +285,13 @@ export function vertragBeendet(draft: CaseDraft): boolean {
 
 /** Eintrittsalter in vollen Jahren aus Geburtsdatum (ISO) und Vertragsbeginn (YYYY-MM). */
 export function eintrittsalter(geburtsdatum: string, beginn: string): number | undefined {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(geburtsdatum) || !MONAT_MUSTER.test(beginn)) {
+  // ISO oder deutsches Datum (TT.MM.JJJJ) – gleiche Lesart wie die Validierung und berechnung.ts.
+  const iso = parseDatumDe(geburtsdatum);
+  if (iso === null || !MONAT_MUSTER.test(beginn)) {
     return undefined;
   }
-  const gJahr = Number(geburtsdatum.slice(0, 4));
-  const gMonat = Number(geburtsdatum.slice(5, 7));
+  const gJahr = Number(iso.slice(0, 4));
+  const gMonat = Number(iso.slice(5, 7));
   const bJahr = Number(beginn.slice(0, 4));
   const bMonat = Number(beginn.slice(5, 7));
   const alter = bJahr - gJahr - (bMonat < gMonat ? 1 : 0);
@@ -337,6 +339,7 @@ export function validiereSchritt(
       if (draft.status === '') {
         fehler['status'] = 'Bitte auswählen, wie es um den Vertrag steht.';
       } else if (
+        draft.status !== 'laufend' &&
         draft.statusDatum !== '' &&
         MONAT_MUSTER.test(draft.beginn) &&
         MONAT_MUSTER.test(draft.statusDatum) &&
@@ -384,7 +387,7 @@ export function validiereSchritt(
       if (draft.dynamik === '') {
         fehler['dynamik'] = 'Bitte angeben, ob der Beitrag jedes Jahr gestiegen ist – „Weiß ich nicht“ geht auch.';
       } else if (draft.dynamik === 'ja') {
-        const satz = parseDecimalDe(draft.dynamikSatz);
+        const satz = parseProzentDe(draft.dynamikSatz);
         if (draft.dynamikSatz.trim() === '' || satz === null || satz <= 0 || satz > 15) {
           fehler['dynamikSatz'] = 'Bitte den Satz in Prozent angeben – meist 3, 5 oder 10.';
         }
@@ -484,7 +487,8 @@ export function validiereSchritt(
           fehler['anrede'] = 'Bitte eine Anrede wählen – „Keine Anrede“ geht auch.';
         }
         const alter = eintrittsalter(draft.geburtsdatum, draft.beginn);
-        if (draft.geburtsdatum === '' || parseDatumDe(draft.geburtsdatum) === null) {
+        // Intern strikt ISO (steps.tsx speichert so); parseDatumDe liefert bei gültigem ISO exakt die Eingabe.
+        if (draft.geburtsdatum === '' || parseDatumDe(draft.geburtsdatum) !== draft.geburtsdatum) {
           fehler['geburtsdatum'] = 'Bitte Ihr Geburtsdatum angeben, zum Beispiel 14.03.1962.';
         } else if (MONAT_MUSTER.test(draft.beginn) && (alter === undefined || alter < 14 || alter > 90)) {
           fehler['geburtsdatum'] = 'Bitte das Geburtsdatum prüfen – es passt nicht zum Vertragsbeginn.';
@@ -555,7 +559,15 @@ export function ladeDraft(): CaseDraft {
   }
 }
 
-/** Nur bekannte Felder mit passendem Typ übernehmen (localStorage, API). */
+/**
+ * Längenschranken bei der Übernahme (localStorage, API): begrenzen die
+ * Fall-Kodierung für die Zahlungs-Metadaten (Stripe: 50 Schlüssel je Objekt)
+ * deterministisch. Legitime Werte sind deutlich kürzer.
+ */
+const MAX_TEXT = 300;
+const MAX_LISTENWERT = 40;
+
+/** Nur bekannte Felder mit passendem Typ übernehmen (localStorage, API), Texte gekappt. */
 export function uebernehmeBekannteFelder(quelle: Record<string, unknown>): CaseDraft {
   const basis = leererDraft();
   for (const schluessel of Object.keys(basis) as (keyof CaseDraft)[]) {
@@ -564,7 +576,8 @@ export function uebernehmeBekannteFelder(quelle: Record<string, unknown>): CaseD
     }
     const wert = quelle[schluessel];
     if (typeof wert === typeof basis[schluessel]) {
-      (basis as unknown as Record<string, unknown>)[schluessel] = wert;
+      (basis as unknown as Record<string, unknown>)[schluessel] =
+        typeof wert === 'string' ? wert.slice(0, MAX_TEXT) : wert;
     }
   }
   const liste = quelle['auszahlungenListe'];
@@ -574,8 +587,8 @@ export function uebernehmeBekannteFelder(quelle: Record<string, unknown>): CaseD
         (e): e is { monat: unknown; betrag: unknown } => typeof e === 'object' && e !== null,
       )
       .map((e) => ({
-        monat: typeof e.monat === 'string' ? e.monat : '',
-        betrag: typeof e.betrag === 'string' ? e.betrag : '',
+        monat: typeof e.monat === 'string' ? e.monat.slice(0, MAX_LISTENWERT) : '',
+        betrag: typeof e.betrag === 'string' ? e.betrag.slice(0, MAX_LISTENWERT) : '',
       }))
       .slice(0, 20);
   }

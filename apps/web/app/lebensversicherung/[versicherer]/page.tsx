@@ -6,6 +6,7 @@ import {
   alleVersicherer,
   branchenNettoReihe,
   insurersDaten,
+  quellenDerBranchenreihe,
   quellenDerUnternehmensreihe,
   unternehmensNettoReihe,
   versichererNachId,
@@ -40,6 +41,17 @@ function jahresbereiche(punkte: Punkt[]): string {
     .join(', ');
 }
 
+/** „1981–1984, 1986–1989“ – fehlende Jahre zwischen den Läufen einer Reihe. */
+function luecken(punkte: Punkt[]): string[] {
+  const teile = laeufe(punkte);
+  return teile.slice(1).map((lauf, i) => {
+    const vorher = teile[i]!;
+    const von = vorher[vorher.length - 1]!.jahr + 1;
+    const bis = lauf[0]!.jahr - 1;
+    return von === bis ? String(von) : `${von}–${bis}`;
+  });
+}
+
 /** Zerlegt eine Jahresreihe in zusammenhängende Läufe (Lücken werden nicht verbunden). */
 function laeufe(punkte: Punkt[]): Punkt[][] {
   const ergebnis: Punkt[][] = [];
@@ -63,11 +75,13 @@ function NettoverzinsungsChart({
   unternehmen,
   name,
   quellen,
+  branchenQuellen,
 }: {
   branche: Punkt[];
   unternehmen: Punkt[];
   name: string;
   quellen: string[];
+  branchenQuellen: string[];
 }) {
   const alle = [...branche, ...unternehmen];
   if (alle.length === 0) {
@@ -81,8 +95,12 @@ function NettoverzinsungsChart({
   const minJahr = Math.min(...alle.map((p) => p.jahr));
   const maxJahr = Math.max(...alle.map((p) => p.jahr));
   const maxWert = Math.max(8, Math.ceil(Math.max(...alle.map((p) => p.wert)) / 2) * 2);
+  // Negative Werte (einzelne Jahre bei wenigen Gesellschaften) liegen sonst im Beschriftungsband;
+  // gerade Untergrenze, damit die 0-Linie im 2er-Raster bleibt.
+  const minWert = Math.min(0, Math.floor(Math.min(...alle.map((p) => p.wert)) / 2) * 2);
   const x = (jahr: number) => links + ((jahr - minJahr) / Math.max(1, maxJahr - minJahr)) * (breite - links - 8);
-  const y = (wert: number) => oben + (1 - wert / maxWert) * (hoehe - oben - unten);
+  const y = (wert: number) => oben + (1 - (wert - minWert) / (maxWert - minWert)) * (hoehe - oben - unten);
+  const branchenLuecken = luecken(branche);
   const koordinaten = (lauf: Punkt[]) => lauf.map((p) => `${x(p.jahr).toFixed(1)},${y(p.wert).toFixed(1)}`).join(' ');
 
   const zeichneReihe = (punkte: Punkt[], farbe: string, gestrichelt: boolean) => {
@@ -100,15 +118,17 @@ function NettoverzinsungsChart({
   };
 
   const gitterWerte: number[] = [];
-  for (let w = 0; w <= maxWert; w += 2) {
+  for (let w = minWert; w <= maxWert; w += 2) {
     gitterWerte.push(w);
   }
   const gitter = gitterWerte
-    .map(
-      (wert) =>
-        `<line x1="${links}" y1="${y(wert).toFixed(1)}" x2="${breite - 8}" y2="${y(wert).toFixed(1)}" stroke="#d7dfe4" stroke-width="1" />` +
-        `<text x="${links - 6}" y="${(y(wert) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="#4a5a66">${wert}</text>`,
-    )
+    .map((wert) => {
+      const nullachse = wert === 0 && minWert < 0;
+      return (
+        `<line x1="${links}" y1="${y(wert).toFixed(1)}" x2="${breite - 8}" y2="${y(wert).toFixed(1)}" stroke="${nullachse ? '#9aa7b1' : '#d7dfe4'}" stroke-width="${nullachse ? 1.5 : 1}" />` +
+        `<text x="${links - 6}" y="${(y(wert) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="#4a5a66">${wert}</text>`
+      );
+    })
     .join('');
   const jahresmarken: string[] = [];
   for (let jahr = Math.ceil(minJahr / 5) * 5; jahr <= maxJahr; jahr += 5) {
@@ -138,8 +158,8 @@ function NettoverzinsungsChart({
       />
       <figcaption className="erklaerung">
         <span style={{ display: 'inline-block', width: '1.6rem', borderTop: `3px dashed ${FARBE_BRANCHE}`, verticalAlign: 'middle', marginRight: '0.4rem' }} />
-        Branchendurchschnitt (Quelle: GDV, „Die deutsche Lebensversicherung in Zahlen 2025“, S. 28; Lücken 1996–1998 nicht
-        verbunden)
+        Branchendurchschnitt ({branchenQuellen.length === 1 ? 'Quelle' : 'Quellen'}: {branchenQuellen.join('; ')}
+        {branchenLuecken.length > 0 ? `; Lücken ${branchenLuecken.join(', ')} nicht verbunden` : ''})
         {unternehmen.length > 0 && (
           <>
             <br />
@@ -209,7 +229,13 @@ export default async function VersichererSeite({ params }: { params: Promise<Par
           </p>
         </div>
       )}
-      <NettoverzinsungsChart branche={branche} unternehmen={unternehmen} name={eintrag.kanonischerName} quellen={quellen} />
+      <NettoverzinsungsChart
+        branche={branche}
+        unternehmen={unternehmen}
+        name={eintrag.kanonischerName}
+        quellen={quellen}
+        branchenQuellen={quellenDerBranchenreihe()}
+      />
       <details>
         <summary>Werte als Tabelle</summary>
         <table className="zusammenfassung" style={{ maxWidth: hatEigeneWerte ? '32rem' : '24rem' }}>

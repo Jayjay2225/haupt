@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDatumDe, formatEuro, formatMonatDe, monatNameDe, parseDecimalDe, parseMonatDe } from '../lib/format';
+import { formatDatumDe, formatEuro, formatMonatDe, heuteBerlin, monatNameDe, parseDecimalDe, parseMonatDe, parseProzentDe } from '../lib/format';
 
 describe('parseDecimalDe', () => {
   it('liest deutsche Beträge mit Tausenderpunkt und Komma', () => {
@@ -24,6 +24,35 @@ describe('parseDecimalDe', () => {
     expect(parseDecimalDe('abc')).toBeNull();
     expect(parseDecimalDe('12,34,56')).toBeNull();
     expect(parseDecimalDe('€')).toBeNull();
+  });
+
+  it('führender Dezimalpunkt ist kein Tausenderpunkt; gemischte Punktfolgen sind Tippfehler', () => {
+    expect(parseDecimalDe('.5')).toBe(0.5);
+    expect(parseDecimalDe(',5')).toBe(0.5);
+    expect(parseDecimalDe('1.234')).toBe(1234);
+    expect(parseDecimalDe('1.234.567,89')).toBe(1234567.89);
+    expect(parseDecimalDe('1.234.56')).toBeNull();
+    expect(parseDecimalDe('1.23')).toBe(1.23);
+    expect(parseDecimalDe('12.3456')).toBeNull();
+  });
+});
+
+describe('parseProzentDe', () => {
+  it('liest Prozentangaben mit und ohne Zeichen', () => {
+    expect(parseProzentDe('5')).toBe(5);
+    expect(parseProzentDe('5 %')).toBe(5);
+    expect(parseProzentDe('5,5%')).toBe(5.5);
+    expect(parseProzentDe('')).toBeNull();
+    expect(parseProzentDe('%')).toBeNull();
+  });
+});
+
+describe('heuteBerlin', () => {
+  it('liefert den Kalendertag in Europe/Berlin, nicht in UTC', () => {
+    expect(heuteBerlin(new Date('2026-06-30T22:30:00.000Z'))).toBe('2026-07-01'); // Sommerzeit: 00:30 am Folgetag
+    expect(heuteBerlin(new Date('2026-01-31T23:30:00.000Z'))).toBe('2026-02-01'); // Winterzeit: 00:30 am Folgetag
+    expect(heuteBerlin(new Date('2026-01-31T22:30:00.000Z'))).toBe('2026-01-31');
+    expect(heuteBerlin(new Date('2026-09-29T12:00:00.000Z'))).toBe('2026-09-29');
   });
 });
 

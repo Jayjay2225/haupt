@@ -13,10 +13,10 @@
  * Kanzlei-Variante (Modell C): Eignungs-Check statt Bestellung, Ende auf der
  * Ergebnis-Seite (/rechner/ergebnis) – unverändert.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BERICHT_PREIS_BRUTTO_EUR } from '@/config/business';
+import { BERICHT_PREIS_BRUTTO_EUR, FORTSETZEN_TAGE } from '@/config/business';
 import { VARIANTE } from '@/config/variante';
 import { ROT_STATUS } from '@/lib/ampel';
 import type { BestellFehler } from '@/lib/bestellung';
@@ -27,6 +27,7 @@ import {
   SCHRITT_HILFESATZ,
   ladeDraft,
   leererDraft,
+  loescheDraft,
   speichereDraft,
   validiereSchritt,
   vertragBeendet,
@@ -35,7 +36,7 @@ import {
   type Schritt,
 } from '@/lib/draft';
 import { WoFindeIchDas } from '../Hilfe';
-import { Kontrollkaestchen, TextFeld } from './fields';
+import { FRAGE_ID, Kontrollkaestchen, TextFeld } from './fields';
 import {
   SchrittAuszahlungen,
   SchrittBeginn,
@@ -83,9 +84,11 @@ interface RechnerFunnelProps {
   startSchritt?: Schritt | undefined;
   /** Zurück von der Zahlungsseite ohne Zahlung. */
   abgebrochen?: boolean | undefined;
+  /** FONDS_MODE === 'anfrage' (serverseitig ermittelt): fondsgebundene Verträge laufen über /anfrage. */
+  fondsAnfrage?: boolean | undefined;
 }
 
-export function RechnerFunnel({ versichererNamen, startSchritt, abgebrochen }: RechnerFunnelProps) {
+export function RechnerFunnel({ versichererNamen, startSchritt, abgebrochen, fondsAnfrage }: RechnerFunnelProps) {
   const router = useRouter();
   const [draft, setDraft] = useState<CaseDraft>(leererDraft);
   const [schrittIndex, setSchrittIndex] = useState(0);
@@ -99,6 +102,8 @@ export function RechnerFunnel({ versichererNamen, startSchritt, abgebrochen }: R
   const [weitermachenEmail, setWeitermachenEmail] = useState('');
   const [weitermachenOk, setWeitermachenOk] = useState(false);
   const [weitermachenHinweis, setWeitermachenHinweis] = useState<string | null>(null);
+  const frageRef = useRef<HTMLHeadingElement>(null);
+  const vorigerIndex = useRef<number | null>(null);
 
   useEffect(() => {
     const geladener = ladeDraft();
@@ -106,10 +111,12 @@ export function RechnerFunnel({ versichererNamen, startSchritt, abgebrochen }: R
     setWeitermachenEmail(geladener.email);
     setGeladen(true);
     if (startSchritt !== undefined) {
-      // Zum gewünschten Schritt springen – oder zum ersten unvollständigen davor.
+      // Zum gewünschten Schritt springen – oder zum ersten unvollständigen davor
+      // bzw. zum Rot-Ende, wenn der Vertrag beendet ist.
       let ziel = SCHRITTE.indexOf(startSchritt);
       for (let index = 0; index < ziel; index += 1) {
-        if (Object.keys(validiereSchritt(SCHRITTE[index] as Schritt, geladener)).length > 0) {
+        const s = SCHRITTE[index] as Schritt;
+        if ((s === 'status' && vertragBeendet(geladener)) || Object.keys(validiereSchritt(s, geladener)).length > 0) {
           ziel = index;
           break;
         }
@@ -123,6 +130,18 @@ export function RechnerFunnel({ versichererNamen, startSchritt, abgebrochen }: R
       speichereDraft(draft);
     }
   }, [draft, geladen]);
+
+  // Nach einem Schrittwechsel den Fokus auf die neue Frage setzen (Screenreader, Tastatur);
+  // nicht beim ersten Laden oder Direkteinstieg.
+  useEffect(() => {
+    if (!geladen) {
+      return;
+    }
+    if (vorigerIndex.current !== null && vorigerIndex.current !== schrittIndex) {
+      frageRef.current?.focus({ preventScroll: true });
+    }
+    vorigerIndex.current = schrittIndex;
+  }, [schrittIndex, geladen]);
 
   const aendere = useCallback(
     <K extends keyof CaseDraft>(feld: K, wert: CaseDraft[K]) => {
@@ -201,8 +220,36 @@ export function RechnerFunnel({ versichererNamen, startSchritt, abgebrochen }: R
     window.scrollTo({ top: 0 });
   }
 
+  /** Alle Eingaben auf diesem Gerät löschen (Zusage im Fußtext und in der Datenschutzerklärung). */
+  function allesLoeschen() {
+    loescheDraft();
+    setDraft(leererDraft());
+    setFehler({});
+    setFallFehler(undefined);
+    setWeitermachenEmail('');
+    setSchrittIndex(0);
+    window.scrollTo({ top: 0 });
+  }
+
+  /** Einwilligungen gelten je Bestellung – nicht in eine spätere Sitzung auf diesem Gerät übernehmen. */
+  function ohneEinwilligungen(): CaseDraft {
+    const bereinigt: CaseDraft = {
+      ...draft,
+      einwilligungDatenschutz: false,
+      agbGelesen: false,
+      ausfuehrungZugestimmt: false,
+    };
+    setDraft(bereinigt);
+    speichereDraft(bereinigt);
+    return bereinigt;
+  }
+
   /** Prüft alle Schritte; springt zum ersten fehlerhaften. Liefert true, wenn alles gültig ist. */
   function allesGueltig(): boolean {
+    if (vertragBeendet(draft)) {
+      springeZu('status'); // zeigt das Rot-Ende
+      return false;
+    }
     for (let index = 0; index < SCHRITTE.length; index += 1) {
       const zuPruefen = SCHRITTE[index] as Schritt;
       const schrittFehler = validiereSchritt(zuPruefen, draft);
@@ -242,10 +289,12 @@ export function RechnerFunnel({ versichererNamen, startSchritt, abgebrochen }: R
       });
       const daten = (await antwort.json()) as { url?: string; erstkunde?: boolean; fehler?: BestellFehler };
       if (antwort.ok && daten.erstkunde === true) {
+        ohneEinwilligungen();
         window.location.assign('/bestellen/danke?ek=1');
         return;
       }
       if (antwort.ok && daten.url !== undefined) {
+        ohneEinwilligungen();
         window.location.assign(daten.url);
         return;
       }
@@ -272,19 +321,30 @@ export function RechnerFunnel({ versichererNamen, startSchritt, abgebrochen }: R
       setWeitermachenHinweis('Bitte E-Mail-Adresse eintragen und das Häkchen setzen.');
       return;
     }
+    // Die Link-Adresse ersetzt nie eine in Schritt 10 eingetragene Gutachten-Adresse;
+    // das Link-Häkchen wird als eigene Einwilligung gesendet, keine Bestell-Einwilligung
+    // wird stellvertretend gesetzt.
     const mitEmail: CaseDraft = { ...draft, email: draft.email.trim() === '' ? email : draft.email };
     setDraft(mitEmail);
-    setWeitermachenHinweis('Der Link ist unterwegs an Ihre E-Mail-Adresse.');
-    setWeitermachenOffen(false);
+    setWeitermachenHinweis('Der Link wird verschickt …');
+    let hinweis = 'Der Link konnte gerade nicht verschickt werden. Ihre Angaben bleiben auf diesem Gerät gespeichert.';
     try {
-      await fetch('/api/ergebnis-link', {
+      const antwort = await fetch('/api/ergebnis-link', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ draft: { ...mitEmail, email, einwilligungDatenschutz: true } }),
+        body: JSON.stringify({ draft: mitEmail, empfaenger: email, linkEinwilligung: true }),
       });
+      const daten = (await antwort.json().catch(() => ({}))) as { ok?: boolean };
+      if (antwort.ok && daten.ok === true) {
+        hinweis = 'Der Link ist unterwegs an Ihre E-Mail-Adresse.';
+        setWeitermachenOffen(false);
+      } else if (antwort.status === 429) {
+        hinweis = 'Zu viele Anfragen von diesem Anschluss – bitte in einer Stunde noch einmal versuchen.';
+      }
     } catch {
-      // Bestmöglich – der Assistent läuft unabhängig davon weiter.
+      // Netzfehler → allgemeiner Hinweis
     }
+    setWeitermachenHinweis(hinweis);
   }
 
   const hatFehler = Object.keys(fehler).length > 0;
@@ -330,7 +390,9 @@ export function RechnerFunnel({ versichererNamen, startSchritt, abgebrochen }: R
           }
         }}
       >
-        <h1 className="assistent-frage">{SCHRITT_FRAGE[schritt]}</h1>
+        <h1 id={FRAGE_ID} ref={frageRef} tabIndex={-1} className="assistent-frage">
+          {SCHRITT_FRAGE[schritt]}
+        </h1>
         <p className="erklaerung" style={{ fontSize: '1.0625rem' }}>
           {SCHRITT_HILFESATZ[schritt]}
         </p>
@@ -344,6 +406,7 @@ export function RechnerFunnel({ versichererNamen, startSchritt, abgebrochen }: R
           fehler={fehler}
           aendere={aendere}
           versichererNamen={versichererNamen}
+          fondsAnfrage={fondsAnfrage}
           springeZu={schritt === 'bestellung' ? springeZu : undefined}
           bestellung={
             schritt === 'bestellung' ? { freischaltcode, setFreischaltcode, honig, setHonig, fallFehler } : undefined
@@ -407,7 +470,7 @@ export function RechnerFunnel({ versichererNamen, startSchritt, abgebrochen }: R
                 id="weitermachen-ok"
                 label={
                   <>
-                    Ja, schickt mir den Link (30 Tage gültig). Einzelheiten in der{' '}
+                    Ja, schickt mir den Link ({FORTSETZEN_TAGE} Tage gültig). Einzelheiten in der{' '}
                     <Link href="/datenschutz">Datenschutzerklärung</Link>.
                   </>
                 }
@@ -430,7 +493,10 @@ export function RechnerFunnel({ versichererNamen, startSchritt, abgebrochen }: R
 
       <p className="erklaerung" style={{ marginTop: '1.5rem' }}>
         Ihre Eingaben bleiben auf diesem Gerät gespeichert, bis Sie sie löschen. Sie können die
-        Seite schließen und später hier weitermachen.
+        Seite schließen und später hier weitermachen.{' '}
+        <button type="button" className="link-knopf" onClick={allesLoeschen} disabled={laeuft}>
+          Angaben auf diesem Gerät löschen
+        </button>
       </p>
     </div>
   );

@@ -1,6 +1,6 @@
 {
-  "version": "0.1.0",
-  "stand": "2026-09-18",
+  "version": "0.2.0",
+  "stand": "2026-09-29",
   "beschreibung": "Maschinenlesbares Regelwerk zum Rechtsrahmen der Rückabwicklung (Prompt 1). Ausgewertet vom Eignungs-Check (packages/eligibility) und nachrichtlich vom Bericht. Bedingungs-Syntax: {alle:[...]}/{eine:[...]} mit Blättern {feld, ist|in} und Datumsvergleichen {feld:'vertragsschluss', vor|ab|zwischen}. Hinweis: Wörtliche Zitate und Details stehen in docs/LEGAL.md; der Primärquellen-Abgleich ist offener Punkt (docs/LEGAL-OPEN-QUESTIONS.md Nr. 1).",
   "regeln": [
     {
@@ -325,6 +325,10 @@
       "bedingung": {
         "alle": [
           {
+            "feld": "belehrungVorhanden",
+            "ist": "ja"
+          },
+          {
             "feld": "hervorhebung",
             "ist": "nein"
           }
@@ -382,6 +386,10 @@
       "bedingung": {
         "alle": [
           {
+            "feld": "belehrungVorhanden",
+            "ist": "ja"
+          },
+          {
             "feld": "belehrungFrist",
             "ist": "14-tage"
           },
@@ -412,6 +420,10 @@
       "regime": "alt",
       "bedingung": {
         "alle": [
+          {
+            "feld": "belehrungVorhanden",
+            "ist": "ja"
+          },
           {
             "feld": "belehrungForm",
             "ist": "schriftform"
@@ -449,6 +461,10 @@
       "bedingung": {
         "alle": [
           {
+            "feld": "belehrungVorhanden",
+            "ist": "ja"
+          },
+          {
             "feld": "belehrungForm",
             "ist": "andere"
           }
@@ -465,6 +481,99 @@
           "typ": "secondary",
           "titel": "EuGH C-355/18 u. a., Tenor Frage 1 (RIS/OGH-Zitat)",
           "url": "https://ris.bka.gv.at/Dokumente/Justiz/JJT_20200424_OGH0002_0070OB00010_20A0000_000/JJT_20200424_OGH0002_0070OB00010_20A0000_000.html",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FEHLER-FRIST-SONST",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "belehrungVorhanden",
+            "ist": "ja"
+          },
+          {
+            "feld": "belehrungFrist",
+            "ist": "andere"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "fehler",
+        "text": "Die Belehrung nennt nach Ihren Angaben eine andere Frist als 14 oder 30 Tage – ob das die Ausübung des Lösungsrechts beeinträchtigt hat, ist anhand des vollständigen Belehrungstexts zu prüfen (Gesamtwürdigung des Einzelfalls).",
+        "benoetigtesDokument": "Police mit vollständigem Belehrungstext"
+      },
+      "gewicht": "unbekannt",
+      "confidence": "medium",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "EuGH C-355/18 u. a., Tenor Frage 1 (RIS/OGH-Zitat)",
+          "url": "https://ris.bka.gv.at/Dokumente/Justiz/JJT_20200424_OGH0002_0070OB00010_20A0000_000/JJT_20200424_OGH0002_0070OB00010_20A0000_000.html",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FEHLER-FRIST-UNBEKANNT",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "belehrungVorhanden",
+            "ist": "ja"
+          },
+          {
+            "feld": "belehrungFrist",
+            "ist": "unbekannt"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "fehler",
+        "text": "Welche Frist die Belehrung nennt, ist nach Ihren Angaben nicht bekannt; davon hängt ab, ob die Belehrung den Anforderungen genügt (14 bzw. 30 Tage je nach Vertragsjahrgang) – bitte anhand des vollständigen Belehrungstexts prüfen.",
+        "benoetigtesDokument": "Police mit vollständigem Belehrungstext"
+      },
+      "gewicht": "unbekannt",
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "§ 5a Abs. 2 Satz 1 VVG a.F. (Wiedergabe in IV ZR 76/11)",
+          "url": "https://lexetius.com/2014,1493",
+          "abrufdatum": "2026-09-18"
+        }
+      ]
+    },
+    {
+      "id": "R-FEHLER-FORM-UNBEKANNT",
+      "regime": "alt",
+      "bedingung": {
+        "alle": [
+          {
+            "feld": "belehrungVorhanden",
+            "ist": "ja"
+          },
+          {
+            "feld": "belehrungForm",
+            "ist": "unbekannt"
+          }
+        ]
+      },
+      "folge": {
+        "typ": "fehler",
+        "text": "Welche Form die Belehrung für den Widerspruch bzw. Rücktritt verlangt, ist nach Ihren Angaben nicht bekannt; Schriftform statt Textform kann je nach Vertragsjahrgang ein Fehler sein – bitte anhand des vollständigen Belehrungstexts prüfen.",
+        "benoetigtesDokument": "Police mit vollständigem Belehrungstext"
+      },
+      "gewicht": "unbekannt",
+      "confidence": "high",
+      "quelle": [
+        {
+          "typ": "secondary",
+          "titel": "§ 5a Abs. 2 Satz 1 VVG a.F. (Wiedergabe in IV ZR 76/11)",
+          "url": "https://lexetius.com/2014,1493",
           "abrufdatum": "2026-09-18"
         }
       ]

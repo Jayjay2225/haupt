@@ -3,6 +3,7 @@
  * Zahlweise, Dynamik ab dem zweiten Vertragsjahr, DM→EUR mit 1,95583,
  * optionale Skalierung auf die Gesamtsumme laut Standmitteilung.
  */
+import { zahlDe } from './format';
 import { monatsIndex } from './monat';
 import type { Annahme, ContractInput, Warnung } from './types';
 
@@ -63,7 +64,7 @@ export function baueBeitragsreihe(input: ContractInput): BeitragsreihenErgebnis 
     erst = erst / DM_KURS;
     annahmen.push({
       code: 'DM_UMRECHNUNG',
-      text: `Erstbeitrag in DM angegeben; Umrechnung mit dem amtlichen Kurs 1 € = ${DM_KURS} DM. Der nominale DM-Beitrag läuft ab 2002 als identischer Euro-Gegenwert weiter.`,
+      text: `Erstbeitrag in DM angegeben; Umrechnung mit dem amtlichen Kurs 1 € = ${zahlDe(DM_KURS, 5)} DM. Der nominale DM-Beitrag läuft ab 2002 als identischer Euro-Gegenwert weiter.`,
     });
   }
   if (erst <= 0) {
@@ -86,11 +87,19 @@ export function baueBeitragsreihe(input: ContractInput): BeitragsreihenErgebnis 
           termine += 1;
         }
       }
-      if (termine > 0 && input.aktuellerBeitrag !== erst) {
+      if (termine > 0 && input.aktuellerBeitrag === erst) {
+        // Beide Beiträge angegeben und gleich: der aktuelle Beitrag belegt, dass
+        // keine Erhöhungen stattfanden (0 % p. a.) – Warnhinweis statt „nicht verwertbar“.
+        satzProzent = 0;
+        warnungen.push({
+          code: 'DYNAMIK_OHNE_ERHOEHUNG',
+          text: `Dynamik ist als aktiv angegeben, der aktuelle Beitrag entspricht jedoch dem Erstbeitrag über ${termine} Erhöhungstermine – die Reihe wird ohne Erhöhungen gerechnet. Bitte Dynamik und Beitragshöhe prüfen.`,
+        });
+      } else if (termine > 0) {
         satzProzent = (Math.pow(input.aktuellerBeitrag / erst, 1 / termine) - 1) * 100;
         annahmen.push({
           code: 'DYNAMIK_HERGELEITET',
-          text: `Dynamiksatz aus Erst- und aktuellem Beitrag über ${termine} Erhöhungstermine geometrisch hergeleitet: ${satzProzent.toFixed(2)} % p. a.`,
+          text: `Dynamiksatz aus Erst- und aktuellem Beitrag über ${termine} Erhöhungstermine geometrisch hergeleitet: ${zahlDe(satzProzent, 2)} % p. a.`,
         });
       }
     }
@@ -138,7 +147,7 @@ export function baueBeitragsreihe(input: ContractInput): BeitragsreihenErgebnis 
       if (Math.abs(faktor - 1) > 0.05) {
         warnungen.push({
           code: 'BEITRAGSREIHE_ABWEICHUNG',
-          text: `Die rekonstruierte Beitragsreihe weicht um ${((faktor - 1) * 100).toFixed(1)} % von der Gesamtsumme laut Standmitteilung ab; die Reihe wurde auf die Mitteilung skaliert. Bitte Zahlweise, Dynamik und Beitragshöhe prüfen.`,
+          text: `Die rekonstruierte Beitragsreihe weicht um ${zahlDe((faktor - 1) * 100, 1)} % von der Gesamtsumme laut Standmitteilung ab; die Reihe wurde auf die Mitteilung skaliert. Bitte Zahlweise, Dynamik und Beitragshöhe prüfen.`,
         });
       }
       for (const b of reihe) {
@@ -146,7 +155,7 @@ export function baueBeitragsreihe(input: ContractInput): BeitragsreihenErgebnis 
       }
       annahmen.push({
         code: 'REIHE_SKALIERT',
-        text: `Beitragsreihe proportional auf die Gesamtsumme laut Standmitteilung skaliert (Faktor ${faktor.toFixed(4)}).`,
+        text: `Beitragsreihe proportional auf die Gesamtsumme laut Standmitteilung skaliert (Faktor ${zahlDe(faktor, 4)}).`,
       });
     }
   }

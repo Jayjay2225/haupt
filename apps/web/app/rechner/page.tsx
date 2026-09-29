@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { RechnerFunnel } from '@/components/funnel/RechnerFunnel';
+import { FONDS_MODE } from '@/config/ampel';
 import { alleVersichererNamen } from '@/lib/insurers-data';
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 export default function RechnerSeite() {
   return (
     <div className="container schmal abschnitt">
-      <RechnerFunnel versichererNamen={alleVersichererNamen()} />
+      <RechnerFunnel versichererNamen={alleVersichererNamen()} fondsAnfrage={FONDS_MODE === 'anfrage'} />
     </div>
   );
 }

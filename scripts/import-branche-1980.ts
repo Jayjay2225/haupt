@@ -89,7 +89,7 @@ export const NETTOVERZINSUNG_LUECKEN = [1981, 1982, 1983, 1984, 1986, 1987, 1988
 /** Spareckzins (SU0022) – Jahresmittel aus Monatswerten, selbst aggregiert. */
 const SPARECKZINS: Record<number, number> = {
   1980: 4.64, 1981: 4.92, 1982: 4.85, 1983: 3.26, 1984: 3.01, 1985: 2.88, 1986: 2.5,
-  1987: 2.11, 1988: 2.01, 1989: 2.43, 1990: 2.81, 1991: 2.82, 1992: 2.81, 1993: 2.54,
+  1987: 2.11, 1988: 2.01, 1989: 2.43, 1990: 2.81, 1991: 2.83, 1992: 2.81, 1993: 2.54,
   1994: 2.1, 1995: 2.04, 1996: 1.99, 1997: 1.71, 1998: 1.56, 1999: 1.31, 2000: 1.25,
   2001: 1.19, 2002: 1.02,
 };
@@ -101,7 +101,7 @@ const SPARECKZINS_QUELLE: Quelle = {
   url: 'https://api.statistiken.bundesbank.de/rest/download/BBIB1/M.DE.B.H.DNB.SPM.K3M.A.N1.11A?format=csv&lang=de',
   dokument: 'Zeitreihe BBIB1.M.DE.B.H.DNB.SPM.K3M.A.N1.11A (Rohdaten: data/raw/bundesbank/su0022_bbib1.csv)',
   fundstelle:
-    'Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet',
+    'Jahresmittel = ungewichtetes arithmetisches Mittel der 12 Monatswerte je Kalenderjahr, kaufmännisch auf zwei Nachkommastellen gerundet (1991: 2,825 → 2,83), selbst aggregiert; Stichproben (1981, 1987, 1988) gegen die Bundesbank-Tabelle „Zinssätze für Spareinlagen mit dreimonatiger Kündigungsfrist“ (bundesbank.de, Blob 615016, Stand 02.09.2026) nachgerechnet',
   abrufdatum: ABRUF,
   hinweis:
     'Konservative Habenzins-Reihe (nur Mindest-/Grundverzinsung); Verkettung: alte Zinsstatistik bis 06/2003, MFI-Statistik ab 01/2003 (vorhandene Einträge ab 2003 unverändert).',
@@ -132,14 +132,22 @@ function main(): void {
   );
 
   if (neueNetto > 0 || neueEinlagen > 0) {
-    daten.data.version = '0.5.0';
+    // Versionierung wie in den übrigen Importern: Minor-Sprung mit Changelog-Eintrag (Prinzip 7).
+    const [major = 0, minor = 0] = String(daten.data.version).split('.').map(Number);
+    daten.data.version = `${major}.${minor + 1}.0`;
     daten.data.stand = ABRUF;
+    daten.data.changelog.push({
+      version: daten.data.version,
+      datum: ABRUF,
+      aenderung: `Branchen-Nettoverzinsung ${neueNetto} Jahr(e) (GDV, DNB-Archiv) und Einlagenzins ${neueEinlagen} Jahresmittel 1980–2002 (Bundesbank SU0022) ergänzt (scripts/import-branche-1980.ts).`,
+    });
   }
   writeFileSync(pfad, `${JSON.stringify(daten, null, 2)}\n`);
   console.log(
     `Nettoverzinsung: ${neueNetto} Jahre ergänzt (Lücken bewusst offen: ${NETTOVERZINSUNG_LUECKEN.join(', ')}).`,
   );
   console.log(`Einlagenzins: ${neueEinlagen} Jahresmittel 1980–2002 ergänzt. data.version ${daten.data.version}.`);
+  console.log('Danach `pnpm data:check` ausführen (data/COVERAGE.md neu erzeugen).');
 }
 
 main();

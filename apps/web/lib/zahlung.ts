@@ -36,7 +36,21 @@ export function stripeClient(): Stripe {
 }
 
 export function basisUrl(): string {
-  return (process.env['NEXT_PUBLIC_BASIS_URL'] ?? 'http://localhost:3000').replace(/\/+$/, '');
+  const konfiguriert = process.env['NEXT_PUBLIC_BASIS_URL'];
+  if (konfiguriert !== undefined && konfiguriert !== '') {
+    return konfiguriert.replace(/\/+$/, '');
+  }
+  // Vercel ohne gesetzte Variable: in Production die Produktionsdomain, in Preview die
+  // Adresse der jeweiligen Bereitstellung (nie die Produktion) – sonst landet die Kundin
+  // nach der Zahlung auf localhost.
+  const vercel =
+    process.env['VERCEL_ENV'] === 'production'
+      ? (process.env['VERCEL_PROJECT_PRODUCTION_URL'] ?? process.env['VERCEL_URL'])
+      : process.env['VERCEL_URL'];
+  if (vercel !== undefined && vercel !== '') {
+    return `https://${vercel}`;
+  }
+  return 'http://localhost:3000';
 }
 
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';

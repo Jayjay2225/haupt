@@ -28,7 +28,7 @@ brand/                  Logo, Farben, Typografie (Gestaltungsplan in docs/DESIGN
 
 ## Entwicklung
 
-Voraussetzungen: Node ≥ 20, pnpm 10.
+Voraussetzungen: Node ≥ 22.6 (für `--experimental-strip-types` in den Datenskripten), pnpm 10.
 
 ```bash
 pnpm install

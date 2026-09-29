@@ -1,11 +1,11 @@
 # Vollständigkeitsreport `data/insurers.json`
 
-Automatisch erzeugt von `scripts/update-insurers.ts` (Stand 2026-09-18, data.version 0.4.0). Nicht von Hand bearbeiten – Beschaffungswege stehen im Abschnitt „Beschaffung“ unten, der aus dem Feld `hinweise` der Gesellschaften und diesem Skript gespeist wird.
+Automatisch erzeugt von `scripts/update-insurers.ts` (Stand 2026-09-29, data.version 0.5.1). Nicht von Hand bearbeiten – Beschaffungswege stehen im Abschnitt „Beschaffung“ unten, der aus dem Feld `hinweise` der Gesellschaften und diesem Skript gespeist wird.
 
 ## Branchendurchschnitt Nettoverzinsung
 
-Vorhanden: 1995–2024 (27 Jahre).
-Fehlend (Soll 1994–2025): 1994, 1996, 1997, 1998, 2025.
+Vorhanden: 1980–2024 (37 Jahre).
+Fehlend (Soll 1994–2025): 2025.
 
 ## Gesellschaften
 
@@ -14,7 +14,7 @@ Fehlend (Soll 1994–2025): 1994, 1996, 1997, 1998, 2025.
 | Allianz Lebensversicherungs-AG | 16 (1995–2024) | 16 Jahre (u. a. 1994, 1997, 1998, 1999, 2000 …) |
 | Alte Leipziger Lebensversicherung a.G. | 14 (2011–2024) | 18 Jahre (u. a. 1994, 1995, 1996, 1997, 1998 …) |
 | AXA Lebensversicherung AG | 22 (1999–2024) | 10 Jahre (u. a. 1994, 1995, 1996, 1997, 1998 …) |
-| BL die Bayerische Lebensversicherung a.G. / Bayern-Versicherung (Versicherungskammer Bayern) | 14 (2011–2024) | 18 Jahre (u. a. 1994, 1995, 1996, 1997, 1998 …) |
+| Bayern-Versicherung Lebensversicherung AG (Versicherungskammer Bayern) | 14 (2011–2024) | 18 Jahre (u. a. 1994, 1995, 1996, 1997, 1998 …) |
 | Continentale Lebensversicherung AG | 14 (2011–2024) | 18 Jahre (u. a. 1994, 1995, 1996, 1997, 1998 …) |
 | Cosmos Lebensversicherungs-AG | 14 (2011–2024) | 18 Jahre (u. a. 1994, 1995, 1996, 1997, 1998 …) |
 | Debeka Lebensversicherungsverein a.G. | 23 (2000–2024) | 9 Jahre (u. a. 1994, 1995, 1996, 1997, 1998 …) |
@@ -48,7 +48,7 @@ Fehlend (Soll 1994–2025): 1994, 1996, 1997, 1998, 2025.
 | Allianz Lebensversicherungs-AG | · | · | · | · | · | ✓ | ✓ | · | · | · | · | · | · | · |
 | Alte Leipziger Lebensversicherung a.G. | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
 | AXA Lebensversicherung AG | · | · | · | · | · | · | · | · | · | ✓ | ✓ | ✓ | ✓ | ✓ |
-| BL die Bayerische Lebensversicherung a.G. / Bayern-Versicherung (Versicherungskammer Bayern) | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| Bayern-Versicherung Lebensversicherung AG (Versicherungskammer Bayern) | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
 | Continentale Lebensversicherung AG | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
 | Cosmos Lebensversicherungs-AG | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
 | Debeka Lebensversicherungsverein a.G. | · | · | · | · | · | · | · | · | · | · | ✓ | ✓ | ✓ | ✓ |
@@ -81,7 +81,7 @@ Jahrgänge vor ca. 2005 sind meist nicht online: Beschaffungsweg dokumentieren (
 - **Allianz Lebensversicherungs-AG:** Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.
 - **Alte Leipziger Lebensversicherung a.G.:** Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.
 - **AXA Lebensversicherung AG:** Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.
-- **BL die Bayerische Lebensversicherung a.G. / Bayern-Versicherung (Versicherungskammer Bayern):** Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.
+- **Bayern-Versicherung Lebensversicherung AG (Versicherungskammer Bayern):** Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.
 - **Continentale Lebensversicherung AG:** Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.
 - **Cosmos Lebensversicherungs-AG:** Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.
 - **Debeka Lebensversicherungsverein a.G.:** Nettoverzinsung/laufende Durchschnittsverzinsung und Kostenquoten 1994–2025 je Jahr aus Geschäftsberichten (Bundesanzeiger) bzw. BaFin-Statistik der Erstversicherungsunternehmen (Einzelunternehmenstabellen; vor 2002 BAV-Jahresberichte) zu beschaffen.

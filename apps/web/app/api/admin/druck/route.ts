@@ -5,7 +5,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { NextResponse } from 'next/server';
-import { adminAutorisiert } from '@/lib/admin';
+import { adminAnfrageAutorisiert } from '@/lib/admin';
 import { erzeugeDruckvorlage, sitzungsDaten } from '@/lib/erfuellung';
 import { bestellungAktiv, stripeClient } from '@/lib/zahlung';
 
@@ -15,9 +15,8 @@ export const maxDuration = 60;
 
 export async function GET(request: Request): Promise<NextResponse> {
   const url = new URL(request.url);
-  const schluessel = url.searchParams.get('schluessel');
   const sitzungId = url.searchParams.get('sitzung') ?? '';
-  if (!adminAutorisiert(schluessel)) {
+  if (!adminAnfrageAutorisiert(request)) {
     return NextResponse.json({ fehler: 'Nicht autorisiert.' }, { status: 401 });
   }
   if (!bestellungAktiv() || sitzungId === '') {

@@ -7,6 +7,7 @@
 import { resolve } from 'node:path';
 import { NextResponse } from 'next/server';
 import { BRAND } from '@/config/brand';
+import { UNTERLAGEN_MAX_DATEIEN, UNTERLAGEN_MAX_GESAMT, UNTERLAGEN_MAX_GESAMT_TEXT } from '@/config/durchsetzung';
 import { auslieferungsVerzeichnis } from '@/lib/erfuellung';
 import { uebernahmeAngefragt } from '@/lib/emails';
 import { begrenzt, clientSchluessel } from '@/lib/ratenlimit';
@@ -16,9 +17,25 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 const EMAIL_MUSTER = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const MAX_DATEIEN = 5;
-const MAX_GESAMT = 20 * 1024 * 1024;
-const ERLAUBTE_TYPEN = new Set(['application/pdf', 'image/jpeg', 'image/png']);
+const PNG_KOPF = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+/**
+ * Dateityp aus Endung UND Dateikopf – der Content-Type des Clients ist frei
+ * wählbar. PDF-Signatur innerhalb der ersten 1024 Byte (Scans mit Vorspann).
+ */
+function erkenneTyp(inhalt: Buffer, name: string): 'application/pdf' | 'image/jpeg' | 'image/png' | undefined {
+  const endung = name.toLowerCase().match(/\.(pdf|jpe?g|png)$/)?.[1];
+  if (endung === 'pdf' && inhalt.subarray(0, 1024).includes('%PDF-')) {
+    return 'application/pdf';
+  }
+  if ((endung === 'jpg' || endung === 'jpeg') && inhalt[0] === 0xff && inhalt[1] === 0xd8 && inhalt[2] === 0xff) {
+    return 'image/jpeg';
+  }
+  if (endung === 'png' && inhalt.subarray(0, 8).equals(PNG_KOPF)) {
+    return 'image/png';
+  }
+  return undefined;
+}
 
 function feld(daten: FormData, name: string, max = 300): string {
   const wert = daten.get(name);
@@ -57,25 +74,44 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
   }
 
-  const anhaenge: MailAnhang[] = [];
-  let gesamt = 0;
   const dateien = daten.getAll('unterlagen').filter((d): d is File => d instanceof File);
-  for (const datei of dateien.slice(0, MAX_DATEIEN)) {
-    if (!ERLAUBTE_TYPEN.has(datei.type)) {
-      continue;
-    }
+  if (dateien.length > UNTERLAGEN_MAX_DATEIEN) {
+    return NextResponse.json(
+      { fehler: `Bitte höchstens ${UNTERLAGEN_MAX_DATEIEN} Dateien senden – Fehlendes können Sie nachreichen.` },
+      { status: 422 },
+    );
+  }
+  const anhaenge: MailAnhang[] = [];
+  const abgelehnt: string[] = [];
+  let gesamt = 0;
+  for (const datei of dateien) {
     gesamt += datei.size;
-    if (gesamt > MAX_GESAMT) {
+    if (gesamt > UNTERLAGEN_MAX_GESAMT) {
       return NextResponse.json(
-        { fehler: 'Die Unterlagen sind zusammen größer als 20 MB. Bitte weniger Dateien senden – Fehlendes können Sie nachreichen.' },
+        {
+          fehler: `Die Unterlagen sind zusammen größer als ${UNTERLAGEN_MAX_GESAMT_TEXT}. Bitte weniger Dateien senden – Fehlendes können Sie nachreichen.`,
+        },
         { status: 422 },
       );
     }
-    anhaenge.push({
-      dateiname: datei.name.replace(/[^\w.\- ]/g, '_').slice(0, 120),
-      inhalt: Buffer.from(await datei.arrayBuffer()),
-      typ: datei.type,
-    });
+    const dateiname = datei.name.replace(/[^\w.\- ]/g, '_').slice(0, 120);
+    const inhalt = Buffer.from(await datei.arrayBuffer());
+    const typ = erkenneTyp(inhalt, datei.name);
+    if (typ === undefined) {
+      abgelehnt.push(dateiname);
+      continue;
+    }
+    // Typ aus der Erkennung, nicht vom Client.
+    anhaenge.push({ dateiname, inhalt, typ });
+  }
+  if (abgelehnt.length > 0) {
+    // Nichts stillschweigend weglassen: die Kundin bzw. der Kunde soll wissen, was nicht ankam.
+    return NextResponse.json(
+      {
+        fehler: `Bitte nur PDF, JPG oder PNG. Nicht übernommen: ${abgelehnt.join(', ')}. Fotos ggf. als JPG speichern – oder einfach nachreichen.`,
+      },
+      { status: 422 },
+    );
   }
 
   const text = [

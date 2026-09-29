@@ -4,6 +4,7 @@
  * (`kennzahlenVon`), sonst Branchendurchschnitt, sonst letzter bekannter
  * Branchenwert mit Warnung.
  */
+import { zahlDe } from './format';
 import type {
   Annahme,
   InsurersDaten,
@@ -70,7 +71,7 @@ export function loeseZinsreihe(
     }
     annahmen.push({
       code: 'ZINS_OVERRIDE',
-      text: `Fester Zinssatz von ${overrideZinsProzent} % p. a. als Override verwendet (Test/Sensitivität).`,
+      text: `Fester Zinssatz von ${zahlDe(overrideZinsProzent, 2)} % p. a. als Override verwendet (Test/Sensitivität).`,
     });
     return { jahre, annahmen, warnungen };
   }
@@ -141,7 +142,7 @@ export function loeseZinsreihe(
       jahre.push({ jahr, satzProzent: fallback.wert, herkunft: 'fallback', kennzeichen: 'estimated_branch' });
       warnungen.push({
         code: 'ZINSREIHE_LUECKE',
-        text: `Für ${jahr} liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert ${fallback.jahr} (${fallback.wert} %) verwendet.`,
+        text: `Für ${jahr} liegt weder ein Unternehmens- noch ein Branchenwert vor; ersatzweise wurde der Branchenwert ${fallback.jahr} (${zahlDe(fallback.wert, 2)} %) verwendet.`,
       });
     } else {
       throw new Error(

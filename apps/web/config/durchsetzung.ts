@@ -17,6 +17,17 @@ export const KANZLEI_NAME = process.env['NEXT_PUBLIC_PARTNERKANZLEI'] ?? '[[KANZ
 /** Belegbare Zahl geprüfter Policen; leer = Platzhalter wird angezeigt. */
 export const GEPRUEFTE_POLICEN = process.env['NEXT_PUBLIC_GEPRUEFTE_POLICEN'] ?? '';
 
+/**
+ * Unterlagen-Upload auf /durchsetzung: Vercel Functions nehmen Request-Bodies
+ * nur bis 4,5 MB an (413 FUNCTION_PAYLOAD_TOO_LARGE, noch vor dem Code); die
+ * Grenze gilt für alle Dateien zusammen samt Multipart-Rahmen. Formular und
+ * API nennen deshalb dieselbe Summe. Größere Unterlagen reicht die Kundin
+ * bzw. der Kunde als Antwort auf die Bestätigungs-E-Mail nach.
+ */
+export const UNTERLAGEN_MAX_DATEIEN = 5;
+export const UNTERLAGEN_MAX_GESAMT = 4 * 1024 * 1024;
+export const UNTERLAGEN_MAX_GESAMT_TEXT = '4 MB';
+
 /** Konditionen der Durchsetzung (Erfolgsbeteiligung, Kostenübernahme). */
 export const KONDITIONEN_PLATZHALTER =
   '[[KONDITIONEN: Erfolgsbeteiligung, Kostenübernahme – von Jack/Kanzlei, vor Beauftragung anwaltlich abgenommen]]';

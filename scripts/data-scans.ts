@@ -56,7 +56,8 @@ interface Bestaetigt {
 interface ReviewEintrag {
   jahr: number;
   kurzname: string;
-  feld: Feld;
+  /** '–' bei Einträgen ohne Feldbezug (ganze Seite strittig). */
+  feld: Feld | '–';
   grund: string;
   bild: string;
 }
@@ -106,6 +107,18 @@ function sammle(): { bestaetigt: Bestaetigt[]; review: ReviewEintrag[]; ohneLesu
       const l2 = liesLesung(join(ordner, `${basis}.lesung2.json`));
       if (l1 === undefined || l2 === undefined) {
         ohneLesung.push(`${jahrOrdner}/${bild}`);
+        continue;
+      }
+      // Beide Lesungen müssen dasselbe Berichtsjahr nennen – und zwar das des Ordners;
+      // sonst würden Werte unter einem falschen Jahr importiert.
+      if (l1.jahr !== l2.jahr || l1.jahr !== Number(jahrOrdner)) {
+        review.push({
+          jahr: Number(jahrOrdner),
+          kurzname: '*',
+          feld: '–',
+          grund: `Berichtsjahr uneinheitlich (Lesung 1: ${l1.jahr}, Lesung 2: ${l2.jahr}, Ordner: ${jahrOrdner})`,
+          bild: `${jahrOrdner}/${bild}`,
+        });
         continue;
       }
       const w2 = new Map(l2.werte.map((w) => [w.kurzname.trim().toUpperCase(), w]));
@@ -189,6 +202,7 @@ if (befehl === 'check') {
   };
   const heute = new Date().toISOString().slice(0, 10);
   let geschrieben = 0;
+  let uebersprungen = 0;
   const unbekannt = new Set<string>();
   for (const b of bestaetigt) {
     const id = mapping[b.kurzname];
@@ -199,6 +213,11 @@ if (befehl === 'check') {
     }
     const jahr = String(b.jahr);
     const eintrag = v.kennzahlen[jahr] ?? {};
+    // Vorhandene Werte (z. B. aus der Aufsichtsstatistik) werden nicht überschrieben.
+    if (eintrag[b.feld] !== undefined) {
+      uebersprungen += 1;
+      continue;
+    }
     eintrag[b.feld] = {
       wert: b.wert,
       einheit: '%',
@@ -219,7 +238,7 @@ if (befehl === 'check') {
   daten.data.stand = heute;
   daten.data.changelog.push({ version: daten.data.version, datum: heute, aenderung: `${geschrieben} Werte aus Bibliotheks-Scans importiert (scripts/data-scans.ts).` });
   writeFileSync(DATEN_PFAD, `${JSON.stringify(daten, null, 2)}\n`);
-  console.log(`importiert: ${geschrieben} Werte → data.version ${daten.data.version}${unbekannt.size > 0 ? `; ohne Mapping: ${[...unbekannt].join(', ')}` : ''}`);
+  console.log(`importiert: ${geschrieben} Werte, ${uebersprungen} bereits vorhanden (nicht überschrieben) → data.version ${daten.data.version}${unbekannt.size > 0 ? `; ohne Mapping: ${[...unbekannt].join(', ')}` : ''}`);
 } else {
   console.error('Aufruf: … <check|import>');
   process.exit(1);

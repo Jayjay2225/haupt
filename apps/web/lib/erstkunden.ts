@@ -5,7 +5,7 @@
  * Konfiguration über die Umgebungsvariable ERSTKUNDEN_CODES, kommagetrennt.
  * Ein Eintrag ist entweder nur der Code (= einmalig, ohne Ablauf) oder
  * `CODE|einmalig|2026-12-31|partner-x` (Felder 2–4 optional, Reihenfolge fest):
- * Art (`einmalig`/`mehrfach`), Ablaufdatum (ISO, letzter gültiger Tag),
+ * Art (`einmalig`/`mehrfach`), Ablaufdatum (ISO, letzter gültiger Tag in deutscher Zeit),
  * Partnerkennung (erscheint in der Bestellnummer nicht, nur im Log).
  *
  * Verwendete Einmal-Codes werden im Auslieferungsordner vermerkt; auf
@@ -15,6 +15,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { auslieferungsVerzeichnis } from './erfuellung';
+import { heuteBerlin } from './format';
 
 export interface FreischaltcodeInfo {
   code: string;
@@ -89,7 +90,8 @@ export function pruefeFreischaltcode(
   if (info === undefined) {
     return 'unbekannt';
   }
-  if (info.ablauf !== '' && jetzt.toISOString().slice(0, 10) > info.ablauf) {
+  // „Letzter gültiger Tag“ meint den Tag in Deutschland, nicht den UTC-Tag.
+  if (info.ablauf !== '' && heuteBerlin(jetzt) > info.ablauf) {
     return 'abgelaufen';
   }
   if (info.art === 'einmalig' && istCodeVerwendet(info.code)) {

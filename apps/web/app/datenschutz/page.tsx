@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { EntwurfHinweis } from '@/components/EntwurfHinweis';
 import { KontaktAdresse } from '@/components/KontaktAdresse';
 import { BRAND } from '@/config/brand';
+import { FORTSETZEN_TAGE } from '@/config/business';
 import { VARIANTE } from '@/config/variante';
 
 export const metadata: Metadata = {
@@ -37,10 +38,21 @@ export default function DatenschutzSeite() {
       </p>
       <h3>Rechner und kostenlose Ampel</h3>
       <p>
-        Ihre Eingaben im Rechner bleiben in Ihrem Browser (localStorage), bis Sie sie löschen. Für die Ampel schickt Ihr
-        Browser die Angaben zur Police einmalig an unseren Server; der rechnet und antwortet, ohne etwas zu speichern
-        (Art. 6 Abs. 1 lit. b DSGVO, vorvertragliche Anfrage). Zum Schutz vor Missbrauch merkt sich der Server Ihre
-        IP-Adresse für kurze Zeit im Arbeitsspeicher (Ratenbegrenzung, Art. 6 Abs. 1 lit. f DSGVO).
+        Ihre Eingaben im Rechner bleiben in Ihrem Browser (localStorage), bis Sie sie löschen; sie verlassen den Browser
+        nur, wenn Sie es auslösen – für die Ampel, für den „Später weitermachen“-Link (beides unten) oder für eine
+        Bestellung (Abschnitt „Bestellung des Gutachtens“). Für die Ampel schickt Ihr Browser die Angaben zur Police
+        einmalig an unseren Server; der rechnet und antwortet, ohne etwas zu speichern (Art. 6 Abs. 1 lit. b DSGVO,
+        vorvertragliche Anfrage). Zum Schutz vor Missbrauch merkt sich der Server Ihre IP-Adresse für kurze Zeit im
+        Arbeitsspeicher (Ratenbegrenzung, Art. 6 Abs. 1 lit. f DSGVO).
+      </p>
+      <h3>„Später weitermachen“-Link</h3>
+      <p>
+        Wählen Sie im Rechner „Später weitermachen – Link per E-Mail“, schickt Ihr Browser Ihren bisherigen Entwurf und
+        die angegebene E-Mail-Adresse einmalig an unseren Server. Der Server verpackt den Entwurf komprimiert in einen
+        Link ({FORTSETZEN_TAGE} Tage gültig) und schickt ihn Ihnen per E-Mail über [[E-Mail-Dienst, Sitz – festlegen]]
+        als Auftragsverarbeiter (Art. 28 DSGVO); bei uns wird dabei nichts gespeichert (Art. 6 Abs. 1 lit. b DSGVO,
+        vorvertragliche Anfrage). Wer den Link kennt, kann die Angaben laden – geben Sie ihn nicht weiter. Zum Schutz
+        vor Missbrauch gilt dieselbe Ratenbegrenzung wie bei der Ampel.
       </p>
       {VARIANTE.berichtKostenpflichtig && (
         <>
@@ -48,9 +60,11 @@ export default function DatenschutzSeite() {
           <p>
             Bei einer Bestellung erheben wir Anrede, Name, Geburtsdatum, Anschrift, E-Mail-Adresse und (freiwillig)
             Telefonnummer. Das Geburtsdatum dient allein der Berechnung des Risikoanteils in Ihrem Beitrag; die
-            Anschrift der Rechnung und dem Postversand. Namen, E-Mail-Adresse und die Angaben zu Ihrer Police übermitteln
-            wir an unseren Zahlungsdienstleister Stripe (Stripe Payments Europe, Ltd., Dublin, Irland). Stripe wickelt die
-            Zahlung ab, erhebt dafür Ihre Rechnungsadresse und Zahlungsdaten und erstellt die Rechnung (Art. 6 Abs. 1
+            Anschrift der Rechnung und dem Postversand. Weil wir keine eigene Datenbank führen, übermitteln wir Ihre
+            Angaben aus dem Rechner – die Angaben zur Police sowie Anrede, Name, Geburtsdatum, Anschrift, E-Mail-Adresse
+            und, falls angegeben, Telefonnummer – komprimiert an unseren Zahlungsdienstleister Stripe (Stripe Payments
+            Europe, Ltd., Dublin, Irland); Stripe hält sie in den Metadaten Ihrer Zahlung, und wir lesen sie nach
+            Zahlungseingang für das Gutachten wieder aus. Stripe wickelt die Zahlung ab, erhebt dafür Ihre Rechnungsadresse und Zahlungsdaten und erstellt die Rechnung (Art. 6 Abs. 1
             lit. b DSGVO). Für die Zahlungsabwicklung ist Stripe eigener Verantwortlicher; Einzelheiten stehen in der
             Datenschutzerklärung von Stripe. Zahlen Sie über PayPal oder Klarna, gelten zusätzlich deren
             Datenschutzhinweise. Nach Zahlungseingang erstellen wir das Gutachten und bewahren es samt Bestellstatus

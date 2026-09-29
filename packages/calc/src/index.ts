@@ -16,4 +16,5 @@ export { teileBeitraegeAuf } from './aufteilung';
 export { loeseZinsreihe, stufenwertFuerMonat } from './zinsreihe';
 export { zinseAuf, zinseLeistungAuf, zinsMap } from './nutzungen';
 export { monatsIndex, indexZuIso, jahrVonIndex, parseMonat } from './monat';
+export { zahlDe, euroDe, monatDe, VERTRAGSART_TEXT, STATUS_TEXT, ZAHLWEISE_TEXT } from './format';
 export type * from './types';

@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { GOOGLE_BESCHREIBUNGEN, GOOGLE_UEBERSCHRIFTEN, META_HAUPTTEXT } from '../content/anzeigen';
 import { BRAND, RANGE_TEXT } from '../config/brand';
+import { alleVersicherer, quellenDerBranchenreihe, quellenDerUnternehmensreihe } from '../lib/insurers-data';
 import { nurVerifizierte } from '../components/Testimonials';
 import { TESTIMONIALS } from '../content/testimonials';
 import {
@@ -28,6 +29,7 @@ import {
   uebernahmeAngefragt,
   vertragsbestaetigung,
 } from '../lib/emails';
+import { textInhalt } from './helfer';
 
 const WEB = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -48,7 +50,10 @@ const OBERFLAECHE = [
   ...dateien(join(WEB, 'app'), ['.tsx']),
   ...dateien(join(WEB, 'components'), ['.tsx']),
   ...dateien(join(WEB, 'content'), ['.ts']),
+  ...dateien(join(WEB, 'app', 'api'), ['.ts']),
   join(WEB, 'lib', 'ampel.ts'),
+  join(WEB, 'lib', 'erfuellung.ts'),
+  join(WEB, 'lib', 'fortsetzen.ts'),
   join(WEB, 'lib', 'emails.ts'),
   join(WEB, 'lib', 'draft.ts'),
   join(WEB, 'lib', 'labels.ts'),
@@ -77,10 +82,11 @@ export const VERBOTEN: { muster: RegExp; grund: string; nurWerbeflaechen?: boole
   { muster: /betrug|betrogen|abgezockt|abzocke|täuschung|getäuscht/i, grund: 'Betrugs-Vorwurf (Linie 2)' },
   // Linie 3: kein Ergebnisversprechen.
   { muster: /garantier/i, grund: '„garantiert“ (Linie 3)' },
-  { muster: /steht Ihnen zu/i, grund: '„steht Ihnen zu“ (Linie 3)' },
+  { muster: /steh(t|en)\s+Ihnen[^\n]{0,40}\bzu\b|Ihnen\s+steh(t|en)[^\n]{0,40}\bzu\b/i, grund: '„steht/stehen Ihnen … zu“ (Linie 3)' },
   { muster: /Ihr Anspruch beträgt/i, grund: '„Ihr Anspruch beträgt“ (Linie 3)' },
   { muster: /(Sie (bekommen|erhalten)|erhalten Sie|bekommen Sie)\s+(garantiert|sicher|mindestens|auf jeden Fall|bis zu)/i, grund: 'Ergebnisversprechen (Linie 3)' },
   { muster: /Anspruch\w*\s+(von|in Höhe von)\s*[\d.]+/i, grund: 'bezifferter Anspruch (Linie 3)' },
+  { muster: /(Sie (bekommen|erhalten)|erhalten Sie|bekommen Sie)\s+[\d.]+\s*€/i, grund: 'bezifferte Zusage (Linie 3)' },
   // Linie 4: keine Prozent-Versprechen außerhalb des gekennzeichneten Musterfalls.
   { muster: /bis zu\s*\d/i, grund: '„bis zu …“-Versprechen (Linie 4)' },
   { muster: /\d+\s*%\s*(mehr|Rendite)/i, grund: 'Prozent-Versprechen (Linie 4)' },
@@ -115,12 +121,6 @@ export const VERBOTEN: { muster: RegExp; grund: string; nurWerbeflaechen?: boole
   { muster: /statt\s*\d+\s*€|<s>|<del>|line-through|Streichpreis/i, grund: 'Streichpreis (Prompt 14, 0.5 / § 11 PAngV)' },
 ];
 
-/** Quelltext ohne Kommentare – geprüft wird nur, was Nutzer sehen können. */
-export function textInhalt(datei: string): string {
-  return readFileSync(datei, 'utf8')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^\s*\/\/.*$/gm, '');
-}
 
 describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
   it('kein verbotenes Muster in den Oberflächentexten', () => {
@@ -139,6 +139,23 @@ describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
       }
     }
     expect(treffer).toEqual([]);
+  });
+
+  it('Quellenangaben der Versicherer-Seiten halten die Linien ein (Anzeigetitel aus insurers.json)', () => {
+    const texte = [quellenDerBranchenreihe().join('; ')];
+    for (const v of alleVersicherer()) {
+      texte.push(quellenDerUnternehmensreihe(v.id).join('; '));
+    }
+    for (const [i, text] of texte.entries()) {
+      for (const regel of VERBOTEN) {
+        if (regel.nurWerbeflaechen === true) {
+          continue;
+        }
+        expect(regel.muster.test(text), `${i === 0 ? 'Branche' : alleVersicherer()[i - 1]?.id}: ${regel.grund}`).toBe(false);
+      }
+    }
+    // Jahrgangsvarianten derselben Aufsichtsstatistik erscheinen nur einmal.
+    expect(quellenDerUnternehmensreihe('allianz-leben').length).toBeLessThanOrEqual(3);
   });
 
   it('E-Mail-Vorlagen halten die Linien ein', () => {

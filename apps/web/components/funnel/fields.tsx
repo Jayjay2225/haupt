@@ -18,13 +18,19 @@ interface BasisProps {
   hilfe?: ReactNode | undefined;
 }
 
+/** id der Frage-Überschrift des Assistenten; Felder mit label="" werden darüber benannt (aria-labelledby). */
+export const FRAGE_ID = 'assistent-frage';
+
 function FeldKopf({ id, label, hilfe }: { id: string; label: string; hilfe?: ReactNode | undefined }) {
+  if (label === '' && hilfe === undefined) {
+    return null;
+  }
   if (hilfe === undefined) {
     return <label htmlFor={id}>{label}</label>;
   }
   return (
     <div className="feld-kopf">
-      <label htmlFor={id}>{label}</label>
+      {label !== '' && <label htmlFor={id}>{label}</label>}
       {hilfe}
     </div>
   );
@@ -71,6 +77,7 @@ export function TextFeld(props: TextFeldProps) {
         value={wert}
         onChange={(ereignis) => onChange(ereignis.target.value)}
         aria-invalid={fehler !== undefined || undefined}
+        aria-labelledby={label === '' ? FRAGE_ID : undefined}
         aria-describedby={beschreibungIds(id, erklaerung, fehler)}
         inputMode={props.inputMode}
         placeholder={props.platzhalter}
@@ -173,7 +180,7 @@ export function MonatsFeld(props: MonatsFeldProps) {
         echo={erkannt !== '' ? erkannt : undefined}
       />
       {offen && (
-        <div className="monat-panel" role="group" aria-label={`Monat und Jahr wählen für: ${label}`}>
+        <div className="monat-panel" role="group" aria-label={label === '' ? 'Monat und Jahr wählen' : `Monat und Jahr wählen für: ${label}`}>
           <div className="jahr-zeile">
             <button type="button" onClick={() => setJahr((j) => Math.max(JAHR_MIN, j - 1))} disabled={jahr <= JAHR_MIN} aria-label="Ein Jahr zurück">
               ‹
@@ -262,9 +269,10 @@ export function RadioGruppe(props: RadioGruppeProps) {
   return (
     <fieldset
       className={fehler === undefined ? 'feld' : 'feld hat-fehler'}
+      aria-labelledby={label === '' ? FRAGE_ID : undefined}
       aria-describedby={beschreibungIds(id, erklaerung, fehler)}
     >
-      <legend>{label}</legend>
+      {label !== '' && <legend>{label}</legend>}
       {props.hilfe !== undefined && <div className="feld-hilfe">{props.hilfe}</div>}
       {erklaerung !== undefined && (
         <p className="erklaerung" id={`${id}-erklaerung`}>

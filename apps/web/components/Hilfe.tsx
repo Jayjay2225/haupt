@@ -58,7 +58,7 @@ export function InfoKnopf({ feld }: { feld: HilfeFeld }) {
           <h3 id={titelId}>
             {HILFE_ZEILE} {hilfe.titel}
           </h3>
-          <p>{hilfe.text}</p>
+          <p>{hilfe.textStartseite ?? hilfe.text}</p>
           <Skizze art={hilfe.skizze} markierung={hilfe.markierung} />
           <p className="erklaerung" style={{ marginTop: '0.5rem' }}>
             Schematische Darstellung – kein echtes Dokument.

@@ -28,6 +28,9 @@ export const AMPEL = {
   // Grau: Basis > RKW, aber RKW < minRueckkaufswert
 } as const;
 
+/** Anzeige der Übernahme-Grenze (de-DE, ohne Cent) – einzige Textquelle für die Zahl. */
+export const MIN_RUECKKAUFSWERT_TEXT = `${AMPEL.uebernahme.minRueckkaufswert.toLocaleString('de-DE')} €`;
+
 /**
  * Der eine Satz zum Rechtsweg (Prompt 13, 2.2) – nur bei Grün und Gelb.
  */

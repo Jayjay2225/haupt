@@ -5,7 +5,7 @@
  * liest den Entwurf und zeigt ihn als Tabelle – nur Anzeige, keine Logik.
  */
 import type { CaseDraft } from '@/lib/draft';
-import { formatDatumDe, formatEuro, monatNameDe, parseDecimalDe } from '@/lib/format';
+import { formatDatumDe, formatEuro, monatNameDe, parseDecimalDe, parseProzentDe } from '@/lib/format';
 import { ANREDE_LABEL, JNU_LABEL, STATUS_LABEL, VERTRAGSART_LABEL, ZAHLWEISE_LABEL, labelOderLeer } from '@/lib/labels';
 
 interface Zeile {
@@ -29,6 +29,32 @@ function betragAnzeige(eingabe: string, waehrung: 'EUR' | 'DM' = 'EUR'): string 
 function monatAnzeige(iso: string): string {
   const name = monatNameDe(iso);
   return name === '' ? '–' : name;
+}
+
+/** Der Rechenkern versteht den Beitrag je Zahlungsperiode – die Beschriftung folgt der Zahlweise. */
+const BEITRAG_BEGRIFF: Record<CaseDraft['zahlweise'], string> = {
+  '': 'Beitrag',
+  monatlich: 'Monatsbeitrag',
+  vierteljaehrlich: 'Vierteljahresbeitrag',
+  halbjaehrlich: 'Halbjahresbeitrag',
+  jaehrlich: 'Jahresbeitrag',
+  einmalbeitrag: 'Einmalbeitrag',
+};
+
+function beitragBegriff(draft: CaseDraft): string {
+  if (draft.zahlweise === 'einmalbeitrag') {
+    return 'Einmalbeitrag';
+  }
+  const begriff = BEITRAG_BEGRIFF[draft.zahlweise];
+  return draft.beitragArt === 'heutiger' && !draft.erstbeitragUnbekannt ? `Heutiger ${begriff}` : `Erster ${begriff}`;
+}
+
+function dynamikAnzeige(draft: CaseDraft): string {
+  if (draft.dynamik !== 'ja') {
+    return labelOderLeer(draft.dynamik, JNU_LABEL);
+  }
+  const satz = parseProzentDe(draft.dynamikSatz);
+  return satz !== null ? `Ja, ${satz.toLocaleString('de-DE')} % pro Jahr` : 'Ja';
 }
 
 function Tabelle({ titel, zeilen }: { titel: string; zeilen: Zeile[] }) {
@@ -57,7 +83,7 @@ export function ZusammenfassungAnsicht({ draft, mitPerson = true }: { draft: Cas
       wert: draft.beginnUngefaehr && draft.beginn !== '' ? `ungefähr ${draft.beginn.slice(0, 4)}` : monatAnzeige(draft.beginn),
     },
   ];
-  if (draft.statusDatum !== '') {
+  if (draft.statusDatum !== '' && draft.status !== '' && draft.status !== 'laufend') {
     vertrag.push({
       begriff: draft.status === 'beitragsfrei' ? 'Beitragsfrei seit' : 'Beendet seit',
       wert: monatAnzeige(draft.statusDatum),
@@ -66,17 +92,11 @@ export function ZusammenfassungAnsicht({ draft, mitPerson = true }: { draft: Cas
 
   const werte: Zeile[] = [
     {
-      begriff: draft.beitragArt === 'heutiger' ? 'Heutiger Monatsbeitrag' : 'Erster Monatsbeitrag',
+      begriff: beitragBegriff(draft),
       wert: draft.erstbeitragUnbekannt ? 'Weiß ich nicht (aus Beitragssumme abgeleitet)' : betragAnzeige(draft.erstbeitrag, draft.erstbeitragWaehrung),
     },
     { begriff: 'Zahlweise', wert: labelOderLeer(draft.zahlweise, ZAHLWEISE_LABEL) },
-    {
-      begriff: 'Dynamik',
-      wert:
-        draft.dynamik === 'ja'
-          ? `Ja${draft.dynamikSatz.trim() !== '' ? `, ${draft.dynamikSatz} % pro Jahr` : ''}`
-          : labelOderLeer(draft.dynamik, JNU_LABEL),
-    },
+    { begriff: 'Dynamik', wert: dynamikAnzeige(draft) },
     { begriff: 'Eingezahlte Beiträge laut Standmitteilung', wert: betragAnzeige(draft.gesamtsummeLautMitteilung) },
     { begriff: 'Rückkaufswert', wert: betragAnzeige(draft.rueckkaufswert) },
   ];

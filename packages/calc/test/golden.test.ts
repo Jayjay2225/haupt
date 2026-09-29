@@ -122,8 +122,22 @@ describe('Golden-Vertrag (b): Kapitallebensversicherung 10/1995 mit Dynamik', ()
     expect(ergebnis.szenarien.basis.wirtschaftlichKeinVorteil).toBe(false);
   });
 
-  it('überbrückt fehlende Branchenjahre (1996–1998, 2025–2026) mit Warnung', () => {
-    expect(ergebnis.warnungen.filter((w) => w.code === 'ZINSREIHE_LUECKE').length).toBeGreaterThan(0);
+  it('überbrückt Jahre ohne Unternehmens- und Branchenwert per Fallback mit je einer Warnung', () => {
+    const zinsreihe = ergebnis.szenarien.basis.zinsreihe;
+    const allianz = daten.insurers.find((v) => v.id === 'allianz-leben');
+    // Erwartung aus den Daten abgeleitet (derzeit 2025–2026), damit die nächste Datenpflege den Test nicht bricht.
+    const erwartet = zinsreihe
+      .map((j) => j.jahr)
+      .filter(
+        (jahr) =>
+          daten.branchendurchschnitt.nettoverzinsung[String(jahr)] === undefined &&
+          allianz?.kennzahlen[String(jahr)]?.nettoverzinsung === undefined,
+      );
+    expect(zinsreihe.filter((j) => j.herkunft === 'fallback').map((j) => j.jahr)).toEqual(erwartet);
+    expect(ergebnis.warnungen.filter((w) => w.code === 'ZINSREIHE_LUECKE')).toHaveLength(erwartet.length);
+    for (const w of ergebnis.warnungen.filter((x) => x.code === 'ZINSREIHE_LUECKE')) {
+      expect(w.text).toMatch(/\(\d+,\d{2} %\)/);
+    }
   });
 
   it('alle drei Szenarien (Snapshot gegen data.version ' + daten.data.version + ')', () => {

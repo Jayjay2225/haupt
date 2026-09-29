@@ -46,6 +46,7 @@ import {
   vertragsbestaetigung,
 } from './emails';
 import { fallAusMetadaten } from './fall-kodierung';
+import { heuteBerlin } from './format';
 import { findeVersichererId, insurersDaten, versichererNachId } from './insurers-data';
 import { sendeMail } from './versand';
 import { basisUrl } from './zahlung';
@@ -120,6 +121,8 @@ export interface AuslieferungsMarker {
   post?: PostStand;
   /** Zeitpunkt der letzten Post-Änderung (ISO). */
   postAm?: string;
+  /** Versand begonnen (ISO-Zeit) – Sperre gegen parallelen Versand (Cron + Freigabe, zwei Zeitplaner). */
+  versandBegonnen?: string;
 }
 
 export const LEAD_STATUS = ['Gutachten gekauft', 'Übernahme angefragt', 'Mandat', 'Vergleich/Urteil'] as const;
@@ -201,7 +204,8 @@ export function gutachtenDaten(daten: SitzungsDaten, jetzt: Date): GutachtenDate
   if (draft === undefined) {
     throw new Error('Falldaten fehlen in der Zahlungssitzung.');
   }
-  const heute = jetzt.toISOString().slice(0, 10);
+  // Kalendertag in deutscher Zeit (Serverless läuft in UTC): Stichtag und „Erstellt am“.
+  const heute = heuteBerlin(jetzt);
   const abbildung = draftZuEingaben(draft, findeVersichererId, heute.slice(0, 7));
   if (abbildung.fehler.length > 0) {
     throw new Error(`Falldaten unvollständig: ${abbildung.fehler.join(' ')}`);
@@ -209,13 +213,19 @@ export function gutachtenDaten(daten: SitzungsDaten, jetzt: Date): GutachtenDate
   const calc = berechneRueckabwicklung(abbildung.contract, insurersDaten, riskDefaults);
   const eligibility = pruefeEignung(abbildung.eligibility, regelwerk);
   const versicherer = versichererNachId(abbildung.contract.versichererId);
+  // Nicht zugeordnete Eingabe trotzdem als Kundenangabe ausweisen (Kennzahlen: Branchendurchschnitt).
+  const eingabeVersicherer = draft.versicherer.trim().slice(0, 80);
   const a = BRAND.anbieterAnschrift;
   const bericht: BerichtInput = {
     marke: BRAND.name,
     aktenzeichen: daten.bestellnummer,
     kundenname: daten.kundenname,
     erstelltAm: heute,
-    versichererAnzeigename: versicherer?.kanonischerName ?? 'nicht benannt (Branchendurchschnitt)',
+    versichererAnzeigename:
+      versicherer?.kanonischerName ??
+      (eingabeVersicherer !== ''
+        ? `${eingabeVersicherer} (nicht zugeordnet – Kennzahlen: Branchendurchschnitt)`
+        : 'nicht benannt (Branchendurchschnitt)'),
     contract: abbildung.contract,
     calc,
     eligibility,
@@ -293,6 +303,7 @@ function markerAusMetadaten(m: Record<string, string>): AuslieferungsMarker {
     ...((m['lead_status'] ?? '') !== '' ? { leadStatus: m['lead_status'] } : {}),
     ...(post !== undefined && (POST_STAENDE as readonly string[]).includes(post) ? { post: post as PostStand } : {}),
     ...((m['post_am'] ?? '') !== '' ? { postAm: m['post_am'] } : {}),
+    ...((m['versand_begonnen_am'] ?? '') !== '' ? { versandBegonnen: m['versand_begonnen_am'] } : {}),
   };
 }
 
@@ -326,6 +337,7 @@ export function standardAbhaengigkeiten(stripe: Stripe): ErfuellungsAbhaengigkei
           ...(patch.leadStatus !== undefined ? { lead_status: patch.leadStatus } : {}),
           ...(patch.post !== undefined ? { post_status: patch.post } : {}),
           ...(patch.postAm !== undefined ? { post_am: patch.postAm } : {}),
+          ...(patch.versandBegonnen !== undefined ? { versand_begonnen_am: patch.versandBegonnen } : {}),
         },
       });
     },
@@ -344,7 +356,7 @@ export function berechneKennzeichen(daten: SitzungsDaten, jetzt: Date): string[]
   if (draft === undefined) {
     return ['Falldaten fehlen'];
   }
-  const abbildung = draftZuEingaben(draft, findeVersichererId, jetzt.toISOString().slice(0, 7));
+  const abbildung = draftZuEingaben(draft, findeVersichererId, heuteBerlin(jetzt).slice(0, 7));
   const kennzeichen: string[] = [];
   if (abbildung.rueckfrageVertragsart) {
     kennzeichen.push('Vertragsart unbekannt – Rückfrage per E-Mail');
@@ -396,6 +408,18 @@ function anschriftZeile(adresse: Versandadresse): string {
 
 export type VersandEntscheidung = 'erledigt' | 'senden' | 'warten' | 'unbereit';
 
+/** Nach dieser Frist gilt eine Versand-Sperre als verwaist (abgebrochener Lauf) und wird ignoriert. */
+export const VERSAND_SPERRE_MS = 10 * 60 * 1000;
+
+/** Ein anderer Aufruf (Cron, Freigabe, zweiter Zeitplaner) versendet gerade? */
+export function versandLaeuft(marker: AuslieferungsMarker, jetzt: Date): boolean {
+  if (marker.versandBegonnen === undefined) {
+    return false;
+  }
+  const seit = jetzt.getTime() - new Date(marker.versandBegonnen).getTime();
+  return Number.isFinite(seit) && seit >= 0 && seit < VERSAND_SPERRE_MS;
+}
+
 /**
  * Versand-Entscheidung (Prompt 13, 3): frühestens nach Freigabe, spätestens
  * `autoVersandNachStunden` nach der Erzeugung – so halten die 12 Stunden.
@@ -408,6 +432,9 @@ export function entscheideVersand(
   if (marker.ausgeliefert !== undefined) {
     return 'erledigt';
   }
+  if (versandLaeuft(marker, jetzt)) {
+    return 'warten';
+  }
   if (marker.erzeugt === undefined) {
     return 'unbereit';
   }
@@ -418,12 +445,17 @@ export function entscheideVersand(
   return erzeugtVor >= autoVersandNachStunden * 60 * 60 * 1000 ? 'senden' : 'warten';
 }
 
-/** Vertragsbestätigung (§ 312f BGB) und ggf. Rückfrage zur Vertragsart – genau einmal. */
+/**
+ * Vertragsbestätigung (§ 312f BGB) und ggf. Rückfrage zur Vertragsart – genau einmal.
+ * `sofort`: das Gutachten wird im selben Durchlauf erzeugt und versendet (kein
+ * Plausibilisierungs-Versprechen im Text).
+ */
 async function sendeBestaetigung(
   daten: SitzungsDaten,
   deps: ErfuellungsAbhaengigkeiten,
   ordner: string,
   preisText: string | undefined,
+  sofort: boolean,
 ): Promise<void> {
   const basis = basisUrl();
   const bestaetigung = vertragsbestaetigung(
@@ -432,6 +464,7 @@ async function sendeBestaetigung(
     { agb: `${basis}/agb`, widerruf: `${basis}/widerrufsbelehrung` },
     preisText,
     daten.postversand,
+    sofort,
   );
   await deps.sendeMail({ an: daten.email, betreff: bestaetigung.betreff, text: bestaetigung.text }, ordner);
   if (rueckfrageNoetig(daten)) {
@@ -470,22 +503,33 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
     speichereStatus(ordner, status);
     return status;
   }
+  if (versandLaeuft(marker, deps.jetzt())) {
+    // Ein paralleler Aufruf (Cron + Freigabe, zwei Zeitplaner) versendet gerade – nicht doppelt senden.
+    return status;
+  }
   if (status.bestaetigungGesendetAm === undefined && marker.bestaetigt !== undefined) {
     status.bestaetigungGesendetAm = marker.bestaetigt;
   }
   if (status.verzoegerungGemeldetAm === undefined && marker.verzoegert !== undefined) {
     status.verzoegerungGemeldetAm = marker.verzoegert;
   }
+  // Phase B rechnet auf Serverless neu: mit dem Zeitpunkt der Phase A, damit Stichtag und
+  // „Erstellt am“ der plausibilisierten Fassung entsprechen (sonst Abweichung am Monatswechsel).
+  const erzeugtLautMarker = marker.erzeugt !== undefined ? new Date(marker.erzeugt) : undefined;
+  const erstellzeit =
+    erzeugtLautMarker !== undefined && !Number.isNaN(erzeugtLautMarker.getTime()) ? erzeugtLautMarker : deps.jetzt();
   mkdirSync(ordner, { recursive: true });
   const erstkunde = daten.bestellnummer.startsWith('EK-');
   try {
-    // Vertragsbestätigung (§ 312f BGB) vor Beginn der Ausführung, genau einmal.
+    // Vertragsbestätigung (§ 312f BGB) vor Beginn der Ausführung, genau einmal. Auf diesem
+    // Pfad folgt das Gutachten sofort (Erstkunden, Nachholung) – kein Plausibilisierungs-Versprechen.
     if (status.bestaetigungGesendetAm === undefined) {
       await sendeBestaetigung(
         daten,
         deps,
         ordner,
         erstkunde ? 'kostenlos im Erstkunden-Programm – als Dank bitten wir nach dem Gutachten um Ihr kurzes Feedback' : undefined,
+        true,
       );
       status.bestaetigungGesendetAm = deps.jetzt().toISOString();
       speichereStatus(ordner, status);
@@ -495,12 +539,29 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
         // Marker optional; Dateistatus trägt innerhalb der Instanz.
       }
     }
+    // Versand reservieren: die Stripe-Metadaten sind der einzige gemeinsame Zustand (Serverless).
+    // Kein Compare-and-Set → ein Restfenster von einer Roundtrip-Zeit bleibt (docs/ASSUMPTIONS.md).
+    const sperre = deps.jetzt().toISOString();
+    try {
+      await deps.setzeMarker(daten, { versandBegonnen: sperre });
+      const aktuell = await deps.holeMarker(daten);
+      if (aktuell.ausgeliefert !== undefined) {
+        status.mailVersendetAm = aktuell.ausgeliefert;
+        speichereStatus(ordner, status);
+        return status;
+      }
+      if (aktuell.versandBegonnen !== undefined && aktuell.versandBegonnen !== sperre) {
+        return status; // ein anderer Aufruf war schneller
+      }
+    } catch {
+      // Marker nicht erreichbar → weiter mit Dateistatus (wie bisher).
+    }
     if (
       status.berichtDatei === undefined ||
       !existsSync(status.berichtDatei) ||
       (daten.postversand && (status.druckDatei === undefined || !existsSync(status.druckDatei)))
     ) {
-      const bericht = await deps.erzeugeBericht(daten, ordner, deps.jetzt());
+      const bericht = await deps.erzeugeBericht(daten, ordner, erstellzeit);
       status.berichtDatei = bericht.pfad;
       if (bericht.druckPfad !== undefined) {
         status.druckDatei = bericht.druckPfad;
@@ -546,13 +607,28 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
         // Postversand: Stand „gewünscht“ sicherstellen (Erstkunden-Weg hat keinen Checkout-Marker).
         ...(daten.postversand && marker.post === undefined ? { post: 'gewuenscht', postAm: status.mailVersendetAm } : {}),
       });
-    } catch {
-      // Markierung fehlgeschlagen: Dateistatus verhindert Doppelversand innerhalb der Instanz.
+    } catch (grund) {
+      // Ohne dauerhaften Marker sieht der nächste Cron-Lauf (andere Instanz, /tmp weg) „senden“ → intern melden.
+      const meldung = `Marker ausgeliefert_am nicht gesetzt: ${(grund as Error).message}`;
+      status.fehler = [...(status.fehler ?? []), `${deps.jetzt().toISOString()}: ${meldung}`];
+      speichereStatus(ordner, status);
+      try {
+        await deps.sendeMail(
+          {
+            an: BRAND.kontaktEmail,
+            betreff: `[${BRAND.name}] Marker fehlt nach Versand: ${daten.bestellnummer}`,
+            text: `Bestellnummer ${daten.bestellnummer}: Das Gutachten wurde um ${status.mailVersendetAm} versendet, aber ${meldung}.\n\nBitte am PaymentIntent ${daten.zahlungId ?? '(unbekannt)'} im Stripe-Dashboard das Metadatum ausgeliefert_am = ${status.mailVersendetAm} eintragen – sonst versendet der nächste Cron-Lauf Gutachten und Druckauftrag erneut.`,
+          },
+          ordner,
+        );
+      } catch {
+        // Letzte Instanz ist das Protokoll (status.json).
+      }
     }
     // Druckauftrag (Prompt 14, 0.3): Druckvorlage an den Anbieter – bestmöglich, ohne den Versand zu gefährden.
     if (daten.postversand && status.druckDatei !== undefined && status.druckauftragGesendetAm === undefined) {
       try {
-        const { adresse } = gutachtenDaten(daten, deps.jetzt());
+        const { adresse } = gutachtenDaten(daten, erstellzeit);
         const auftrag = druckauftrag(daten.bestellnummer, daten.kundenname, anschriftZeile(adresse));
         const druckname = status.druckDatei.split('/').pop() ?? `${daten.bestellnummer}_Druck.pdf`;
         await deps.sendeMail(
@@ -567,8 +643,22 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
         status.druckauftragGesendetAm = deps.jetzt().toISOString();
         speichereStatus(ordner, status);
       } catch (grund) {
-        status.fehler = [...(status.fehler ?? []), `${deps.jetzt().toISOString()}: Druckauftrag: ${(grund as Error).message}`];
+        const meldung = `Druckauftrag nicht gesendet: ${(grund as Error).message}`;
+        status.fehler = [...(status.fehler ?? []), `${deps.jetzt().toISOString()}: ${meldung}`];
         speichereStatus(ordner, status);
+        // Kein Marker, kein Wiederanlauf (jeder weitere Aufruf endet an `ausgeliefert`) → Anbieter informieren.
+        try {
+          await deps.sendeMail(
+            {
+              an: BRAND.kontaktEmail,
+              betreff: `[${BRAND.name}] Druckauftrag fehlgeschlagen: ${daten.bestellnummer}`,
+              text: `Bestellnummer ${daten.bestellnummer}: Das Gutachten ist per E-Mail versendet, aber ${meldung}.\n\nDruckvorlage im Admin neu abrufen (Spalte „Post“ → „Druckvorlage (PDF)“, Sitzung ${daten.id}) und danach den Post-Stand weiterführen.`,
+            },
+            ordner,
+          );
+        } catch {
+          // Letzte Instanz ist das Protokoll (status.json).
+        }
       }
     }
     return status;
@@ -576,9 +666,11 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
     const text = fehler instanceof Error ? fehler.message : String(fehler);
     status.fehler = [...(status.fehler ?? []), `${deps.jetzt().toISOString()}: ${text}`];
     speichereStatus(ordner, status);
-    if (status.verzoegerungGemeldetAm === undefined) {
+    // Verzögerungs-Mail an die Kundin bzw. den Kunden – Erstkunden bekommen ihre Antwort direkt im
+    // Browser („Code bleibt gültig“) und haben keinen automatischen Wiederholungsweg.
+    if (status.verzoegerungGemeldetAm === undefined && !erstkunde) {
       try {
-        const info = berichtVerzoegert(daten.kundenname, daten.bestellnummer);
+        const info = berichtVerzoegert(daten.kundenname, daten.bestellnummer, erstkunde);
         await deps.sendeMail({ an: daten.email, betreff: info.betreff, text: info.text }, ordner);
         status.verzoegerungGemeldetAm = deps.jetzt().toISOString();
         speichereStatus(ordner, status);
@@ -592,7 +684,7 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
       }
     }
     try {
-      const intern = internerFehlerHinweis(daten.bestellnummer, text);
+      const intern = internerFehlerHinweis(daten.bestellnummer, text, erstkunde ? 'erstkunde' : 'versand');
       await deps.sendeMail({ an: BRAND.kontaktEmail, betreff: intern.betreff, text: intern.text }, ordner);
     } catch {
       // Letzte Instanz ist das Protokoll (status.json).
@@ -632,7 +724,7 @@ export async function bereiteBestellungVor(
   try {
     // Vertragsbestätigung (§ 312f BGB) vor Beginn der Ausführung, genau einmal.
     if (status.bestaetigungGesendetAm === undefined && marker.bestaetigt === undefined) {
-      await sendeBestaetigung(daten, deps, ordner, undefined);
+      await sendeBestaetigung(daten, deps, ordner, undefined, false);
       status.bestaetigungGesendetAm = deps.jetzt().toISOString();
       speichereStatus(ordner, status);
       try {
@@ -648,15 +740,17 @@ export async function bereiteBestellungVor(
     if (marker.erzeugt !== undefined) {
       return 'vorbereitet';
     }
-    // Gutachten probeweise erzeugen (Validierung) und plausibilisieren.
-    const bericht = await deps.erzeugeBericht(daten, ordner, deps.jetzt());
+    // Gutachten probeweise erzeugen (Validierung) und plausibilisieren – EIN Zeitpunkt für
+    // Erzeugung, Marker und Kennzeichen; Phase B rechnet mit demselben Zeitpunkt neu.
+    const erstellzeit = deps.jetzt();
+    const bericht = await deps.erzeugeBericht(daten, ordner, erstellzeit);
     status.berichtDatei = bericht.pfad;
     if (bericht.druckPfad !== undefined) {
       status.druckDatei = bericht.druckPfad;
     }
-    status.berichtErstelltAm = deps.jetzt().toISOString();
+    status.berichtErstelltAm = erstellzeit.toISOString();
     speichereStatus(ordner, status);
-    const kennzeichen = berechneKennzeichen(daten, deps.jetzt());
+    const kennzeichen = berechneKennzeichen(daten, erstellzeit);
     try {
       await deps.setzeMarker(daten, {
         erzeugt: status.berichtErstelltAm,
@@ -673,7 +767,7 @@ export async function bereiteBestellungVor(
     status.fehler = [...(status.fehler ?? []), `${deps.jetzt().toISOString()}: ${text}`];
     speichereStatus(ordner, status);
     try {
-      const intern = internerFehlerHinweis(daten.bestellnummer, text);
+      const intern = internerFehlerHinweis(daten.bestellnummer, text, 'webhook');
       await deps.sendeMail({ an: BRAND.kontaktEmail, betreff: intern.betreff, text: intern.text }, ordner);
     } catch {
       // Letzte Instanz ist das Protokoll (status.json).

@@ -31,7 +31,12 @@ function eligibilityFuer(beginn: string) {
   );
 }
 
-function beispielBericht(kundenname = 'Erika Beispiel', beginn = '2004-12'): BerichtInput {
+function beispielBericht(
+  kundenname = 'Erika Beispiel',
+  beginn = '2004-12',
+  vertrag: Partial<ContractInput> = {},
+  ohneRueckkaufswert = false,
+): BerichtInput {
   const contract: ContractInput = {
     versichererId: 'unbekannt',
     vertragsart: 'private-rv',
@@ -44,7 +49,11 @@ function beispielBericht(kundenname = 'Erika Beispiel', beginn = '2004-12'): Ber
     rueckkaufswert: { betrag: 39857 },
     eintrittsalter: 40,
     stichtag: '2026-09',
+    ...vertrag,
   };
+  if (ohneRueckkaufswert) {
+    delete contract.rueckkaufswert;
+  }
   const calc = berechneRueckabwicklung(contract, daten, defaults);
   return {
     marke: 'Testmarke',
@@ -108,6 +117,48 @@ describe('Berichts-Template (Prompt 12)', () => {
     expect(html).toContain('39.857,00');
   });
 
+  it('Tabelle „Ihre Angaben“ zeigt deutsche Begriffe statt interner Codes', () => {
+    expect(html).toContain('<td>Private Rentenversicherung</td>');
+    expect(html).toContain('<td>jährlich</td>');
+    expect(html).toContain('<td>laufend</td>');
+    expect(html).not.toMatch(/<td>(private-rv|kapital-lv|jaehrlich|gekuendigt|einmalbeitrag)/);
+    const gekuendigt = renderBerichtHtml(
+      beispielBericht('Erika Beispiel', '2004-12', { status: 'gekuendigt', statusDatum: '2025-06', zahlweise: 'vierteljaehrlich' }),
+    );
+    expect(gekuendigt).toContain('<td>gekündigt (seit/zum 06/2025)</td>');
+    expect(gekuendigt).toContain('<td>vierteljährlich</td>');
+  });
+
+  it('beendeter Vertrag mit Rückkaufswert: kein Satz „mangels Angabe“', () => {
+    const gekuendigt = renderBerichtHtml(beispielBericht('Erika Beispiel', '2004-12', { status: 'gekuendigt', statusDatum: '2025-06' }));
+    expect(gekuendigt).not.toContain('mangels Angabe');
+    expect(gekuendigt).toContain('Bei einem beendeten Vertrag entfällt der Vergleich mit dem Rückkaufswert');
+    const ohneRkw = renderBerichtHtml(beispielBericht('Erika Beispiel', '2004-12', {}, true));
+    expect(ohneRkw).toContain('mangels Angabe nicht möglich');
+  });
+
+  it('Szenario-Diagramm: Balken zeigen den Netto-Wert, Basis − Rückkaufswert = Mehrwert-Balken', () => {
+    const b = beispielBericht('Erika Beispiel', '2004-12', {
+      rueckkaufswert: { betrag: 20000 },
+      auszahlungen: [{ monat: '2020-01', betrag: 5000 }],
+    });
+    const basis = b.calc.szenarien.basis;
+    expect(basis.erhalteneLeistungenAufgezinst).toBeGreaterThan(0);
+    expect(basis.nettoanspruch).toBeLessThan(basis.rueckabwicklungswert);
+    const svg = renderBerichtHtml(b);
+    const wert = (label: string): number => {
+      const m = new RegExp(`${label}</text>\\s*<rect[^>]*/>\\s*<text[^>]*class="svg-wert">([^<]+)</text>`).exec(svg);
+      expect(m, label).not.toBeNull();
+      return Number((m as RegExpExecArray)[1]!.replace(/\s*€/, '').replace(/\./g, '').replace(',', '.'));
+    };
+    const basisBalken = wert('Szenario Basis \\(Netto-Wert\\)');
+    const rkwBalken = wert('Aktueller Rückkaufswert');
+    const mehrwertBalken = wert('Mehrwert ggü. Rückkaufswert \\(Basis\\)');
+    expect(basisBalken).toBeCloseTo(basis.nettoanspruch, 2);
+    expect(basisBalken - rkwBalken).toBeCloseTo(basis.mehrwertGegenKuendigung as number, 1);
+    expect(mehrwertBalken).toBeCloseTo(basis.mehrwertGegenKuendigung as number, 2);
+  });
+
   it('escapet Nutzereingaben', () => {
     const boese = renderBerichtHtml(beispielBericht('<script>alert(1)</script>'));
     expect(boese).not.toContain('<script>alert(1)</script>');
@@ -155,9 +206,13 @@ describe('Gutachten (Prompt 14, Abschnitte 0.6 und 3)', () => {
     expect(kasten).toBeLessThan(mit.indexOf('<h2>3. Rechenweg und Annahmen</h2>'));
   });
 
-  it('letzte Seite: „Nächster Schritt: Wir übernehmen.“ oben, darunter „Verkaufen statt kämpfen“ mit renten-rettung.de/verkaufen', () => {
-    const letzteSeite = html.slice(html.lastIndexOf('<section class="seite">'));
+  it('letzte Seite (Grün): „Nächster Schritt: Wir übernehmen.“ oben, darunter „Verkaufen statt kämpfen“ mit renten-rettung.de/verkaufen', () => {
+    // Rückkaufswert 30.000 € → Mehrwert über der Schwelle → Grün; die Standard-Fixture (39.857 €) ist Rot.
+    const gruen = renderBerichtHtml(beispielBericht('Erika Beispiel', '2004-12', { rueckkaufswert: { betrag: 30000 } }));
+    expect(gruen).toContain('Grün – der Vertrag kommt für unser Verfahren in Frage');
+    const letzteSeite = gruen.slice(gruen.lastIndexOf('<section class="seite">'));
     expect(letzteSeite).toContain('Nächster Schritt: Wir übernehmen.');
+    expect(letzteSeite).toContain('Die Durchsetzung über uns beauftragen');
     expect(letzteSeite).toContain(VERKAUFEN_TITEL);
     expect(letzteSeite).toContain('renten-rettung.de/verkaufen');
     expect(letzteSeite.indexOf('Nächster Schritt: Wir übernehmen.')).toBeLessThan(letzteSeite.indexOf(VERKAUFEN_TITEL));
@@ -166,12 +221,33 @@ describe('Gutachten (Prompt 14, Abschnitte 0.6 und 3)', () => {
     expect(renderBerichtHtml({ ...beispielBericht(), ankaufHinweis: false })).not.toContain(VERKAUFEN_TITEL);
   });
 
+  it('letzte Seite (Rot/kein Vorteil): kein Übernahme-Angebot, stattdessen anwaltliche Beratung', () => {
+    expect(html).toContain('Rot – rechnerisch nicht mehr drin als der Rückkaufswert');
+    expect(html).not.toContain('Nächster Schritt: Wir übernehmen.');
+    expect(html).not.toContain('Die Durchsetzung über uns beauftragen');
+    expect(html).toContain('Nächster Schritt: anwaltliche Beratung.');
+    expect(html).toContain('für unser Verfahren kommt der Vertrag nach dieser Schätzung nicht in Frage');
+    // Gekündigter Vertrag: ebenfalls kein Übernahme-Angebot (Rot laut Ampel).
+    const gekuendigt = renderBerichtHtml(beispielBericht('Erika Beispiel', '2004-12', { status: 'gekuendigt', statusDatum: '2025-06' }));
+    expect(gekuendigt).not.toContain('Nächster Schritt: Wir übernehmen.');
+    expect(gekuendigt).toContain('Nächster Schritt: anwaltliche Beratung.');
+    // Der Kasten behält die Klasse, damit er die letzte Seite beginnt.
+    expect(html).toContain('<div class="uebernahme">');
+  });
+
   it('Seitenumbruch: der Übernahme-Kasten beginnt die letzte Seite, Kästen werden nie über einen Umbruch geteilt', () => {
     expect(html).toMatch(/\.uebernahme \{ break-before: page;/);
     expect(html).toMatch(/\.uebernahme, \.verkaufen, \.disclaimer, \.hinweisbox\.annahmen \{ break-inside: avoid;/);
     // Verweise auf die letzte Seite statt auf eine feste Seitennummer (die Tabellen verschieben die Seitenzahl).
     expect(html).toContain('anhand Ihrer Unterlagen (letzte Seite)');
     expect(html).not.toContain('(Seite 7)');
+    // Keine festen Seitenzahlen im sichtbaren Text – Deckblatt und umbrechende Tabellen verschieben sie.
+    const ohneKommentare = (s: string): string => s.replace(/<!--[\s\S]*?-->/g, '');
+    expect(ohneKommentare(html)).not.toMatch(/Seite \d/);
+    expect(html).toContain('(Abschnitt 2 und 3)');
+    const druck = renderDruckvorlageHtml(beispielBericht(), { name: 'Erika Beispiel', strasse: 'Musterstraße 1', plz: '12345', ort: 'Musterstadt' });
+    expect(ohneKommentare(druck)).not.toMatch(/Seite \d/);
+    expect(druck).toContain('Abschnitt 2 und 3 des Gutachtens');
   });
 
   it('Druckvorlage: Deckblatt mit Name und Anschrift, alle Seiten, einseitiger Beileger zum Ankauf', () => {
@@ -194,5 +270,25 @@ describe('Gutachten (Prompt 14, Abschnitte 0.6 und 3)', () => {
     // Beileger ohne Beträge, Prozente oder Aufkäufer-Namen (Ankauf-Regeln).
     const beileger = druck.slice(druck.indexOf('class="seite beileger"'));
     expect(beileger).not.toMatch(/\d+\s*€|%|Prozent|GmbH|\bAG\b/);
+    // Deckblatt: Grün-Fixture nennt den Übernahme-Schritt, die Rot-Fixture nicht.
+    expect(druck).not.toContain('letzten Seite: Wir übernehmen');
+    const gruen = renderDruckvorlageHtml(beispielBericht('Erika Beispiel', '2004-12', { rueckkaufswert: { betrag: 30000 } }), {
+      name: 'Erika Beispiel',
+      strasse: 'Musterstraße 1',
+      plz: '12345',
+      ort: 'Musterstadt',
+    });
+    expect(gruen).toContain('letzten Seite: Wir übernehmen.');
+  });
+
+  it('Druckvorlage in der Kanzlei-Variante (ankaufHinweis=false): kein Beileger, kein Beileger-Satz auf dem Deckblatt', () => {
+    const druck = renderDruckvorlageHtml(
+      { ...beispielBericht(), ankaufHinweis: false },
+      { name: 'Erika Beispiel', strasse: 'Musterstraße 1', plz: '12345', ort: 'Musterstadt' },
+    );
+    expect(druck.match(/<section class="seite/g)).toHaveLength(8); // Deckblatt + 7 Seiten
+    expect(druck).not.toContain('class="seite beileger"');
+    expect(druck).not.toContain('liegt ein Blatt dazu bei');
+    expect(druck).not.toContain(VERKAUFEN_TITEL);
   });
 });

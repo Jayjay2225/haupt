@@ -49,6 +49,37 @@ describe('Beitragsreihe', () => {
     expect(ergebnis.annahmen.some((a) => a.code === 'DYNAMIK_HERGELEITET')).toBe(true);
   });
 
+  it('gleicher Erst- und aktueller Beitrag bei aktiver Dynamik: 0 % mit Warnhinweis, nicht „nicht verwertbar“', () => {
+    const ergebnis = baueBeitragsreihe(
+      vertrag({
+        beginn: '2000-01',
+        stichtag: '2010-01',
+        erstbeitrag: { betrag: 100, waehrung: 'EUR' },
+        aktuellerBeitrag: 100,
+        dynamik: { aktiv: true },
+      }),
+    );
+    expect(ergebnis.dynamiksatzProzent).toBe(0);
+    expect(ergebnis.warnungen.some((w) => w.code === 'DYNAMIK_OHNE_ERHOEHUNG')).toBe(true);
+    expect(ergebnis.warnungen.some((w) => w.code === 'DYNAMIK_UNBEKANNT')).toBe(false);
+    expect(ergebnis.reihe.every((b) => Math.abs(b.betrag - 100) < 1e-9)).toBe(true);
+    // Ohne aktuellen Beitrag bleibt die bisherige Warnung.
+    const ohne = baueBeitragsreihe(vertrag({ dynamik: { aktiv: true } }));
+    expect(ohne.warnungen.some((w) => w.code === 'DYNAMIK_UNBEKANNT')).toBe(true);
+  });
+
+  it('formatiert Zahlen in Annahme- und Warntexten de-DE', () => {
+    const dm = baueBeitragsreihe(vertrag({ erstbeitrag: { betrag: 100, waehrung: 'DM' }, stichtag: '2000-03' }));
+    expect(dm.annahmen.find((a) => a.code === 'DM_UMRECHNUNG')?.text).toContain('1 € = 1,95583 DM');
+    const skaliert = baueBeitragsreihe(vertrag({ stichtag: '2000-12', gesamtsummeLautMitteilung: 1440 }));
+    expect(skaliert.annahmen.find((a) => a.code === 'REIHE_SKALIERT')?.text).toContain('Faktor 1,2000');
+    expect(skaliert.warnungen.find((w) => w.code === 'BEITRAGSREIHE_ABWEICHUNG')?.text).toContain('um 20,0 %');
+    const dynamik = baueBeitragsreihe(
+      vertrag({ beginn: '2000-01', stichtag: '2010-01', beitragszahlungBis: '2010-01', aktuellerBeitrag: 200, dynamik: { aktiv: true } }),
+    );
+    expect(dynamik.annahmen.find((a) => a.code === 'DYNAMIK_HERGELEITET')?.text).toMatch(/: \d+,\d{2} % p\. a\./);
+  });
+
   it('skaliert auf die Gesamtsumme laut Mitteilung und warnt ab 5 % Abweichung', () => {
     const mitWarnung = baueBeitragsreihe(
       vertrag({ stichtag: '2000-12', gesamtsummeLautMitteilung: 1440 }), // 12×100 → Faktor 1,2

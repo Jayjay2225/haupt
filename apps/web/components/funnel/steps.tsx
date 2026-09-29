@@ -48,6 +48,8 @@ export interface SchrittProps {
   springeZu?: ((schritt: Schritt) => void) | undefined;
   /** Schritt 11: Freischaltcode, Honigtopf, API-Fehler. */
   bestellung?: BestellZustand | undefined;
+  /** Schritt 1: fondsgebundene Verträge werden im Anfrage-Modus nicht mit dem Gutachten gerechnet. */
+  fondsAnfrage?: boolean | undefined;
 }
 
 function betragEcho(eingabe: string, waehrung: 'EUR' | 'DM' = 'EUR'): string | undefined {
@@ -70,7 +72,7 @@ const TYP_OPTIONEN: Option[] = [
   { wert: 'unbekannt', label: 'Weiß ich nicht' },
 ];
 
-export function SchrittTyp({ draft, fehler, aendere }: SchrittProps) {
+export function SchrittTyp({ draft, fehler, aendere, fondsAnfrage }: SchrittProps) {
   return (
     <>
       <RadioGruppe
@@ -81,6 +83,15 @@ export function SchrittTyp({ draft, fehler, aendere }: SchrittProps) {
         onChange={(wert) => aendere('vertragsart', wert as CaseDraft['vertragsart'])}
         fehler={fehler['vertragsart']}
       />
+      {draft.vertragsart === 'fonds-lv' && fondsAnfrage === true && (
+        // Früh sagen, was der Server in Schritt 11 ohnehin ablehnt (config/ampel.ts FONDS_MODE).
+        <div className="hinweis" role="status">
+          <p style={{ margin: 0 }}>
+            Fondsgebundene Verträge rechnen wir nicht mit dem Gutachten, sondern prüfen sie individuell.{' '}
+            <Link href="/anfrage">Zur individuellen Anfrage</Link>
+          </p>
+        </div>
+      )}
       {draft.vertragsart === 'unbekannt' && (
         <p className="erklaerung">
           In Ordnung – wir rechnen wie für eine Kapitallebensversicherung (im Gutachten als Annahme
@@ -106,7 +117,13 @@ export function SchrittStatus({ draft, fehler, aendere }: SchrittProps) {
         label=""
         optionen={STATUS_OPTIONEN}
         wert={draft.status}
-        onChange={(wert) => aendere('status', wert as CaseDraft['status'])}
+        onChange={(wert) => {
+          aendere('status', wert as CaseDraft['status']);
+          // Das Monatsfeld gehört nur zu „Beitragsfrei seit …“ – sonst bleibt kein stiller Altwert stehen.
+          if (wert !== 'beitragsfrei') {
+            aendere('statusDatum', '');
+          }
+        }}
         fehler={fehler['status']}
       />
       {draft.status === 'beitragsfrei' && (
@@ -148,6 +165,8 @@ export function SchrittVersicherer({ draft, fehler, aendere, versichererNamen }:
 
 export function SchrittBeginn({ draft, fehler, aendere }: SchrittProps) {
   const [jahrText, setJahrText] = useState(() => (draft.beginnUngefaehr ? draft.beginn.slice(0, 4) : ''));
+  // Exakter Monat vor dem Anhaken – wird bei Abwahl zurückgeschrieben, statt die Jahresmitte als exakt stehen zu lassen.
+  const [exaktVorher, setExaktVorher] = useState('');
   return (
     <>
       {!draft.beginnUngefaehr ? (
@@ -183,9 +202,12 @@ export function SchrittBeginn({ draft, fehler, aendere }: SchrittProps) {
         onChange={(angehakt) => {
           aendere('beginnUngefaehr', angehakt);
           if (angehakt) {
+            setExaktVorher(draft.beginn);
             const jahr = draft.beginn.slice(0, 4);
             setJahrText(jahr);
             aendere('beginn', /^\d{4}$/.test(jahr) ? `${jahr}-${UNGEFAEHR_MONAT}` : '');
+          } else {
+            aendere('beginn', exaktVorher);
           }
         }}
       />
@@ -209,7 +231,8 @@ export function SchrittBeitrag({ draft, fehler, aendere }: SchrittProps) {
     if (vorEuro && !heutiger && draft.erstbeitrag === '' && draft.erstbeitragWaehrung === 'EUR') {
       aendere('erstbeitragWaehrung', 'DM');
     }
-    if (heutiger && draft.erstbeitragWaehrung === 'DM') {
+    // Heutiger Beitrag oder Beginn ab 2002: immer Euro (der Schalter ist dann ausgeblendet).
+    if ((heutiger || !vorEuro) && draft.erstbeitragWaehrung === 'DM') {
       aendere('erstbeitragWaehrung', 'EUR');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -402,7 +425,12 @@ export function SchrittAuszahlungen({ draft, fehler, aendere }: SchrittProps) {
               />
               <TextFeld
                 id={`auszahlung-${index}-betrag`}
-                label="Betrag"
+                label="Betrag in Euro"
+                erklaerung={
+                  eintrag.monat !== '' && eintrag.monat < '2002-01'
+                    ? 'Vor 2002 stand der Betrag meist in DM – bitte in Euro umrechnen (1 € = 1,95583 DM).'
+                    : undefined
+                }
                 inputMode="decimal"
                 platzhalter="zum Beispiel 5.000"
                 wert={eintrag.betrag}
@@ -647,8 +675,10 @@ export function SchrittBestellung({ draft, fehler, aendere, springeZu, bestellun
         </div>
       )}
       <p className="erklaerung">
-        Ihre Rechnungsadresse fragt die Zahlungsseite noch einmal ab. Zur Abwicklung übermitteln wir Name und
-        E-Mail-Adresse an {ZAHLUNG.abwicklung}; mehr dazu in der <Link href="/datenschutz">Datenschutzerklärung</Link>.
+        Ihre Rechnungsadresse fragt die Zahlungsseite noch einmal ab. Zur Abwicklung übermitteln wir Ihren Namen, Ihre
+        E-Mail-Adresse und Ihre Angaben aus dem Rechner – einschließlich Geburtsdatum, Anschrift und, falls angegeben,
+        Telefonnummer – an {ZAHLUNG.abwicklung}; dort bleiben sie mit der Bestellung verknüpft, bis das Gutachten
+        erstellt ist. Mehr dazu in der <Link href="/datenschutz">Datenschutzerklärung</Link>.
       </p>
     </>
   );

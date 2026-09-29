@@ -1,6 +1,6 @@
 /** CSV-Export der Bestell-/Lead-Liste (Prompt 13, 2.3). */
 import { NextResponse } from 'next/server';
-import { adminAutorisiert } from '@/lib/admin';
+import { adminAnfrageAutorisiert } from '@/lib/admin';
 import { bestellungenAlsCsv, ladeBestellungen } from '@/lib/admin-liste';
 import { bestellungAktiv, stripeClient } from '@/lib/zahlung';
 
@@ -8,8 +8,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 export async function GET(request: Request): Promise<NextResponse> {
-  const schluessel = new URL(request.url).searchParams.get('schluessel');
-  if (!adminAutorisiert(schluessel)) {
+  if (!adminAnfrageAutorisiert(request)) {
     return NextResponse.json({ fehler: 'Nicht autorisiert.' }, { status: 401 });
   }
   if (!bestellungAktiv()) {

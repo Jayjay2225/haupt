@@ -12,8 +12,10 @@
  * Belehrungsbewertung erscheint nur in der Kanzlei-Variante (belehrungsCheck).
  *
  * Postversand (Prompt 14, 3): `renderDruckvorlageHtml` liefert dieselben
- * Seiten mit Deckblatt (Name, Adresse) und einseitigem Beileger zum Ankauf.
+ * Seiten mit Deckblatt (Name, Adresse) und einseitigem Beileger zum Ankauf
+ * (der Beileger entfällt bei ankaufHinweis=false, Kanzlei-Variante).
  */
+import { STATUS_TEXT, VERTRAGSART_TEXT, ZAHLWEISE_TEXT } from '@rueckab/calc';
 import type { CalcResult, ContractInput, Jahreszeile, JahresZins, SzenarioName } from '@rueckab/calc';
 import type { EligibilityResult } from '@rueckab/eligibility';
 import ansatzpunkteJson from '../../../config/ansatzpunkte.json';
@@ -173,6 +175,9 @@ function svgBeitragsaufteilung(calc: CalcResult): string {
 /**
  * Szenario-Vergleich (4.5): Rückkaufswert in Grau (muted), Szenarien in
  * Brand/Salbei, „Mehrwert gegenüber Rückkaufswert“ (Basis) in CTA-Orange.
+ * Die Szenarien werden als Netto-Wert (nettoanspruch) gezeichnet, damit
+ * Basis − Rückkaufswert dem Mehrwert-Balken (mehrwertGegenKuendigung des
+ * Rechenkerns) entspricht; ohne erhaltene Leistungen ist Netto = Brutto.
  */
 function svgSzenarioVergleich(calc: CalcResult, rueckkaufswert: number | undefined): string {
   const reihen: { label: string; wert: number; farbe: string }[] = [];
@@ -183,8 +188,8 @@ function svgSzenarioVergleich(calc: CalcResult, rueckkaufswert: number | undefin
     const bezeichnung =
       name === 'min' ? 'Szenario konservativ' : name === 'max' ? 'Szenario maximal' : 'Szenario Basis';
     reihen.push({
-      label: bezeichnung,
-      wert: calc.szenarien[name].rueckabwicklungswert,
+      label: `${bezeichnung} (Netto-Wert)`,
+      wert: calc.szenarien[name].nettoanspruch,
       farbe: name === 'basis' ? FARBEN.brand : FARBEN.sage,
     });
   }
@@ -194,7 +199,8 @@ function svgSzenarioVergleich(calc: CalcResult, rueckkaufswert: number | undefin
   }
   const max = Math.max(...reihen.map((r) => r.wert), 1);
   const breite = 660;
-  const balkenMax = 380;
+  // 340 statt 380: Platz für siebenstellige Beträge rechts neben dem längsten Balken (viewBox 660).
+  const balkenMax = 340;
   const zeilenhoehe = 34;
   const balken = reihen
     .map((r, i) => {
@@ -207,7 +213,7 @@ function svgSzenarioVergleich(calc: CalcResult, rueckkaufswert: number | undefin
     })
     .join('');
   return `
-    <figure class="diagramm" role="img" aria-label="Vergleich von Rückkaufswert und geschätztem Rückabwicklungswert in den drei Szenarien">
+    <figure class="diagramm" role="img" aria-label="Vergleich von Rückkaufswert und geschätztem Netto-Wert (Rückabwicklungswert abzüglich erhaltener Leistungen) in den drei Szenarien">
       <svg viewBox="0 0 ${breite} ${reihen.length * zeilenhoehe}" width="100%" height="${reihen.length * zeilenhoehe}">
         ${balken}
       </svg>
@@ -220,12 +226,12 @@ function angabenTabelle(b: BerichtInput): string {
     ['Auftrags-/Aktenzeichen', b.aktenzeichen],
     ['Name', b.kundenname],
     ['Versicherer (Angabe laut Police)', b.versichererAnzeigename],
-    ['Vertragsart', c.vertragsart],
+    ['Vertragsart', VERTRAGSART_TEXT[c.vertragsart]],
     ['Vertragsbeginn', formatMonat(c.beginn)],
     ['Geplantes Vertragsende', c.ende !== undefined ? formatMonat(c.ende) : '–'],
-    ['Stand des Vertrags', c.status + (c.statusDatum !== undefined ? ` (seit/zum ${formatMonat(c.statusDatum)})` : '')],
+    ['Stand des Vertrags', STATUS_TEXT[c.status] + (c.statusDatum !== undefined ? ` (seit/zum ${formatMonat(c.statusDatum)})` : '')],
     ['Beitragszahlung bis', c.beitragszahlungBis !== undefined ? formatMonat(c.beitragszahlungBis) : '– (laufend bzw. bis Stichtag)'],
-    ['Zahlweise', c.zahlweise],
+    ['Zahlweise', ZAHLWEISE_TEXT[c.zahlweise]],
     [
       'Erstbeitrag',
       `${formatZahl(c.erstbeitrag.betrag)} ${c.erstbeitrag.waehrung}` +
@@ -260,7 +266,7 @@ function annahmenKasten(b: BerichtInput): string {
   const annahmen = b.annahmenKunde ?? [];
   const inhalt =
     annahmen.length === 0
-      ? '<p style="margin:0">Alle Angaben lagen vor; ergänzende Annahmen aus „Weiß ich nicht“-Antworten waren nicht nötig. Die allgemeinen Annahmen der Rechenmethode stehen auf Seite 4.</p>'
+      ? '<p style="margin:0">Alle Angaben lagen vor; ergänzende Annahmen aus „Weiß ich nicht“-Antworten waren nicht nötig. Die allgemeinen Annahmen der Rechenmethode stehen in Abschnitt 3 (Rechenweg und Annahmen).</p>'
       : `${liste(annahmen.map((a) => esc(a)))}
     <p style="margin:0">Jede dieser Annahmen ist im Gutachten so gekennzeichnet. Mit den genauen Werten aus Police und Standmitteilung wird die Zahl präziser – schicken Sie sie uns einfach nach.</p>`;
   return `<div class="hinweisbox annahmen"><strong>Ihre Angaben und unsere Annahmen</strong>${inhalt}</div>`;
@@ -490,6 +496,19 @@ ${inhalt}
 </html>`;
 }
 
+/** Übernahme-Ampel des Berichts mit den übergebenen bzw. Standard-Schwellen (Seite 1 und Deckblatt). */
+function ampelFuer(b: BerichtInput): WirtschaftlicheAmpel {
+  const schwelle = b.ampelSchwellen?.mehrwertMinAbsolut ?? 5000;
+  const minRueckkaufswert = b.ampelSchwellen?.minRueckkaufswert ?? 30000;
+  return wirtschaftlicheAmpel(b.calc, b.contract, schwelle, minRueckkaufswert);
+}
+
+/** Übernahme nur bei Grün/Gelb: bei Rot/Grau wird kein Auftrag angeboten (Prompt 13, 1). */
+function uebernahmeMoeglich(b: BerichtInput): boolean {
+  const farbe = ampelFuer(b).farbe;
+  return farbe === 'gruen' || farbe === 'gelb';
+}
+
 /** Die sieben Seiten des Gutachtens (ohne Deckblatt/Beileger). */
 function seitenHtml(b: BerichtInput): string {
   const basis = b.calc.szenarien.basis;
@@ -497,9 +516,9 @@ function seitenHtml(b: BerichtInput): string {
   const max = b.calc.szenarien.max;
   const rkw = b.contract.rueckkaufswert?.betrag;
   const belehrungsCheck = b.belehrungsCheck === true;
-  const schwelle = b.ampelSchwellen?.mehrwertMinAbsolut ?? 5000;
-  const minRueckkaufswert = b.ampelSchwellen?.minRueckkaufswert ?? 30000;
-  const ampel = wirtschaftlicheAmpel(b.calc, b.contract, schwelle, minRueckkaufswert);
+  const ampel = ampelFuer(b);
+  const uebernahme = uebernahmeMoeglich(b);
+  const beendet = b.contract.status === 'gekuendigt' || b.contract.status === 'abgelaufen';
   const durchsetzungUrl = b.durchsetzungUrl ?? '/durchsetzung';
   const keinVorteil = basis.wirtschaftlichKeinVorteil === true;
   const regimeB = b.eligibility.regime === 'alt-antragsmodell';
@@ -509,12 +528,16 @@ function seitenHtml(b: BerichtInput): string {
       : ZITATE_REGIME_ALT
     : ZITATE_METHODIK;
 
+  // Der Rechenkern setzt den Mehrwert nur für laufende/beitragsfreie Verträge; bei beendeten
+  // Verträgen fehlt er auch dann, wenn ein Rückkaufswert angegeben wurde.
   const mehrwertSatz =
     basis.mehrwertGegenKuendigung === undefined
-      ? 'Ein Vergleich mit dem Rückkaufswert war mangels Angabe nicht möglich; bei beendeten Verträgen zählt der Netto-Wert über das bereits Erhaltene hinaus.'
+      ? beendet
+        ? 'Bei einem beendeten Vertrag entfällt der Vergleich mit dem Rückkaufswert; maßgeblich ist der geschätzte Netto-Wert über das bereits Erhaltene hinaus (Abschnitt 5).'
+        : 'Ein Vergleich mit dem Rückkaufswert war mangels Angabe nicht möglich.'
       : keinVorteil
         ? `Nach dieser Schätzung ist gegenüber dem aktuellen Rückkaufswert <strong>rechnerisch kein Vorteil erkennbar</strong> (Basis-Szenario: ${formatEuro(basis.mehrwertGegenKuendigung)}).`
-        : `Gegenüber dem aktuellen Rückkaufswert ergäbe sich im Basis-Szenario ein geschätzter Mehrwert von <strong>${formatEuro(basis.mehrwertGegenKuendigung)}</strong> – unter den auf Seite 3 und 4 genannten Annahmen.`;
+        : `Gegenüber dem aktuellen Rückkaufswert ergäbe sich im Basis-Szenario ein geschätzter Mehrwert von <strong>${formatEuro(basis.mehrwertGegenKuendigung)}</strong> – unter den in Abschnitt 2 und 3 genannten Angaben und Annahmen.`;
 
   const dokumente = b.eligibility.benoetigteDokumente;
 
@@ -539,7 +562,7 @@ function seitenHtml(b: BerichtInput): string {
   <p>${mehrwertSatz}</p>
   <p class="ampel"><span class="punkt" style="background:${ampel.punktFarbe}"></span> ${esc(ampel.label)}</p>
   <div class="hinweisbox">
-    <strong>Wichtig:</strong> Alle Werte sind Schätzungen unter offengelegten Annahmen (Seite 3 und 4) auf Basis
+    <strong>Wichtig:</strong> Alle Werte sind Schätzungen unter offengelegten Annahmen (Abschnitt 2 und 3) auf Basis
     öffentlich verfügbarer Kennzahlen – es wird kein Betrag zugesagt und keine Rechtsberatung im Einzelfall
     erteilt. Ob und auf welchem Weg sich das durchsetzen lässt, prüfen die spezialisierten Anwälte, mit denen
     wir arbeiten, anhand Ihrer Unterlagen (letzte Seite).
@@ -572,7 +595,7 @@ function seitenHtml(b: BerichtInput): string {
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:6mm">
     <div>${liste([
       'eine automatisierte versicherungsmathematische Auswertung: strukturiert, nachvollziehbar, in drei Szenarien',
-      'jede Kennzahl mit Quelle und Herkunft (Seite 4–5)',
+      'jede Kennzahl mit Quelle und Herkunft (Abschnitt 4 und 5)',
       'die Grundlage für unser Verfahren – die Anwälte, mit denen wir arbeiten, rechnen darauf auf',
     ])}</div>
     <div>${liste([
@@ -682,10 +705,14 @@ function seitenHtml(b: BerichtInput): string {
     dokumente.length > 0
       ? `Unterlagen bereitlegen: ${dokumente.map((d) => esc(d)).join('; ')}.`
       : 'Police und letzte Standmitteilung bereitlegen; falls vorhanden Kündigungs- oder Dynamikschreiben.',
-    'Die Durchsetzung über uns beauftragen (Kasten auf der letzten Seite) – die spezialisierten Anwälte, mit denen wir arbeiten, klären, ob und auf welchem Weg sich der Wert durchsetzen lässt.',
+    uebernahme
+      ? 'Die Durchsetzung über uns beauftragen (Kasten auf der letzten Seite) – die spezialisierten Anwälte, mit denen wir arbeiten, klären, ob und auf welchem Weg sich der Wert durchsetzen lässt.'
+      : 'Lassen Sie sich anwaltlich beraten, ob und auf welchem Weg sich der Wert durchsetzen lässt – für unser Verfahren kommt der Vertrag nach dieser Schätzung nicht in Frage.',
     'Keine Kündigung und keine Erklärung gegenüber dem Versicherer ohne anwaltlichen Rat.',
   ])}
-  <div class="uebernahme">
+  ${
+    uebernahme
+      ? `<div class="uebernahme">
     <p style="margin:0 0 1.5mm"><strong>Nächster Schritt: Wir übernehmen.</strong></p>
     <p style="margin:0 0 1.5mm">
       Spezialisierte Anwälte setzen sich für Sie mit dem Versicherer auseinander – Sie müssen nichts
@@ -693,7 +720,16 @@ function seitenHtml(b: BerichtInput): string {
       <strong>${esc(durchsetzungUrl)}</strong> (oder antworten Sie auf die E-Mail mit diesem Gutachten).
     </p>
     <p style="margin:0" class="sekundaer">Konditionen: ${esc(b.konditionenText ?? '[[KONDITIONEN]]')}</p>
-  </div>
+  </div>`
+      : `<div class="uebernahme">
+    <p style="margin:0 0 1.5mm"><strong>Nächster Schritt: anwaltliche Beratung.</strong></p>
+    <p style="margin:0">
+      Für unser Verfahren kommt der Vertrag nach dieser Schätzung nicht in Frage (${esc(ampel.label)}).
+      Lassen Sie sich anwaltlich beraten; Fragen zu diesem Gutachten beantworten wir gern – antworten Sie
+      auf die E-Mail mit diesem Gutachten.
+    </p>
+  </div>`
+  }
   ${verkaufenBlock(b)}
   <div class="disclaimer">
     <strong>Rechtlicher Hinweis:</strong> Dieses Gutachten ist eine automatisierte versicherungsmathematische
@@ -730,11 +766,12 @@ function deckblattHtml(b: BerichtInput, adresse: Anschrift): string {
     Quelle – und die Gegenposition des Versicherers.
   </p>
   <p>
-    Der nächste Schritt steht auf der letzten Seite: Wir übernehmen. Wenn Sie lieber verkaufen als streiten,
-    liegt ein Blatt dazu bei.
+    Der nächste Schritt steht auf der letzten Seite${uebernahmeMoeglich(b) ? ': Wir übernehmen' : ''}.${
+      b.ankaufHinweis === false ? '' : ' Wenn Sie lieber verkaufen als streiten, liegt ein Blatt dazu bei.'
+    }
   </p>
   <p>Freundliche Grüße<br>Ihr Team von ${esc(b.marke)}</p>
-  <p class="fussnote">Schätzung mit Bandbreite, keine Rechtsberatung. Alle Angaben und Annahmen: Seite 3 und 4.</p>
+  <p class="fussnote">Schätzung mit Bandbreite, keine Rechtsberatung. Alle Angaben und Annahmen: Abschnitt 2 und 3 des Gutachtens.</p>
 </section>`;
 }
 
@@ -766,7 +803,11 @@ function beilegerHtml(b: BerichtInput): string {
 </section>`;
 }
 
-/** Druckvorlage für den Postversand (Prompt 14, 3): Deckblatt, Gutachten, Beileger – A4, beidseitig druckbar. */
+/**
+ * Druckvorlage für den Postversand (Prompt 14, 3): Deckblatt, Gutachten, Beileger – A4, beidseitig
+ * druckbar. Der Beileger entfällt bei ankaufHinweis=false (Kanzlei-Variante ohne Ankauf).
+ */
 export function renderDruckvorlageHtml(b: BerichtInput, adresse: Anschrift): string {
-  return dokument(`Gutachten ${b.aktenzeichen} – Druckvorlage`, deckblattHtml(b, adresse) + seitenHtml(b) + beilegerHtml(b));
+  const beileger = b.ankaufHinweis === false ? '' : beilegerHtml(b);
+  return dokument(`Gutachten ${b.aktenzeichen} – Druckvorlage`, deckblattHtml(b, adresse) + seitenHtml(b) + beileger);
 }

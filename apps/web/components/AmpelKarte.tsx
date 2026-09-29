@@ -14,15 +14,16 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { RANGE_TEXT } from '@/config/brand';
 import { BERICHT_PREIS_BRUTTO_EUR } from '@/config/business';
 import { ANKAUF_MIN_RUECKKAUFSWERT } from '@/config/durchsetzung';
 import { VARIANTE } from '@/config/variante';
 import { Ampel, type AmpelZustand } from './Ampel';
 import { InfoKnopf } from './Hilfe';
 import { VerkaufenKarte } from './VerkaufenKarte';
-import { MonatsFeld, TextFeld } from './funnel/fields';
+import { MonatsFeld, RadioGruppe, TextFeld } from './funnel/fields';
 import { ampelKartenText, type UebernahmeAmpel } from '@/lib/ampel';
-import { BEGINN_MAX, BEGINN_MIN, ladeDraft, speichereDraft } from '@/lib/draft';
+import { BEGINN_MAX, BEGINN_MIN, ladeDraft, speichereDraft, type Waehrung } from '@/lib/draft';
 import { formatEuro, parseDecimalDe } from '@/lib/format';
 
 export const KAUFKNOPF_TEXT = `Detailliertes Gutachten bestellen · ${BERICHT_PREIS_BRUTTO_EUR} €`;
@@ -31,12 +32,17 @@ export const KAUFKNOPF_UNTERZEILE = 'Innerhalb von 12 Stunden per E-Mail. Auf Wu
 /** Verzögerung nach der letzten Eingabe, bevor gerechnet wird (Prompt 14, 1.2). */
 const VERZOEGERUNG_MS = 400;
 
-function betragEcho(eingabe: string): string | undefined {
+function betragEcho(eingabe: string, waehrung: Waehrung = 'EUR'): string | undefined {
   if (eingabe.trim() === '') {
     return undefined;
   }
   const wert = parseDecimalDe(eingabe);
-  return wert === null ? undefined : `Gelesen als ${formatEuro(wert)}`;
+  if (wert === null) {
+    return undefined;
+  }
+  return waehrung === 'DM'
+    ? `Gelesen als ${wert.toLocaleString('de-DE', { minimumFractionDigits: 2 })} DM`
+    : `Gelesen als ${formatEuro(wert)}`;
 }
 
 interface VorschauAntwort {
@@ -55,9 +61,18 @@ export function AmpelKarte({ versichererNamen }: { versichererNamen: string[] })
   const [ergebnis, setErgebnis] = useState<VorschauAntwort | null>(null);
   const [rechnet, setRechnet] = useState(false);
   const [einwilligungAnkauf, setEinwilligungAnkauf] = useState(false);
+  // Vor 2002 stand der erste Beitrag laut Police meist in DM (docs/ASSUMPTIONS.md Nr. 58):
+  // Vorauswahl DM, auf der Karte umschaltbar; Echo, Platzhalter, Vorschau-Anfrage und
+  // Funnel-Entwurf nutzen dieselbe Währung.
+  const [waehrungWahl, setWaehrungWahl] = useState<Waehrung>('DM');
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const laufend = useRef<AbortController | null>(null);
 
+  const beginnGesetzt = /^\d{4}-\d{2}$/.test(beginn);
   const beginnImZeitraum = beginn >= BEGINN_MIN && beginn <= BEGINN_MAX;
+  const beginnAusserhalb = beginnGesetzt && !beginnImZeitraum;
+  const vorEuro = beginnGesetzt && beginn < '2002-01';
+  const waehrung: Waehrung = vorEuro ? waehrungWahl : 'EUR';
   const vollstaendig =
     versicherer.trim() !== '' &&
     beginnImZeitraum &&
@@ -66,20 +81,26 @@ export function AmpelKarte({ versichererNamen }: { versichererNamen: string[] })
 
   // Sobald alle vier Felder brauchbar sind: Ampel anspringen lassen (verzögert,
   // damit nicht jeder Tastendruck eine Anfrage auslöst). Kein Absenden nötig.
+  // Eine noch laufende Anfrage gehört zu alten Eingaben und wird verworfen.
   useEffect(() => {
     if (timer.current !== null) {
       clearTimeout(timer.current);
     }
+    laufend.current?.abort();
+    laufend.current = null;
+    setRechnet(false);
     if (!vollstaendig) {
       setErgebnis(null);
       return undefined;
     }
     timer.current = setTimeout(() => {
+      const steuerung = new AbortController();
+      laufend.current = steuerung;
       setRechnet(true);
-      const waehrung = beginn < '2002-01' ? 'DM' : 'EUR';
       fetch('/api/vorschau', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
+        signal: steuerung.signal,
         body: JSON.stringify({
           version: 2,
           versicherer,
@@ -95,10 +116,22 @@ export function AmpelKarte({ versichererNamen }: { versichererNamen: string[] })
       })
         .then(async (antwort) => {
           const daten = (await antwort.json()) as VorschauAntwort;
+          if (steuerung.signal.aborted) {
+            return;
+          }
           setErgebnis(antwort.ok && daten.ampel !== undefined ? daten : null);
         })
-        .catch(() => setErgebnis(null))
-        .finally(() => setRechnet(false));
+        .catch(() => {
+          if (!steuerung.signal.aborted) {
+            setErgebnis(null);
+          }
+        })
+        .finally(() => {
+          if (laufend.current === steuerung) {
+            laufend.current = null;
+            setRechnet(false);
+          }
+        });
     }, VERZOEGERUNG_MS);
     return () => {
       if (timer.current !== null) {
@@ -106,7 +139,7 @@ export function AmpelKarte({ versichererNamen }: { versichererNamen: string[] })
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [versicherer, beginn, monatsbeitrag, rueckkaufswert, vollstaendig]);
+  }, [versicherer, beginn, monatsbeitrag, rueckkaufswert, waehrung, vollstaendig]);
 
   const ampel = ergebnis?.ampel ?? null;
   const zustand: AmpelZustand = ampel !== null ? ampel.ampel : 'aus';
@@ -130,7 +163,7 @@ export function AmpelKarte({ versichererNamen }: { versichererNamen: string[] })
       beginnUngefaehr: false,
       zahlweise: 'monatlich',
       erstbeitrag: monatsbeitrag,
-      erstbeitragWaehrung: beginn < '2002-01' ? 'DM' : 'EUR',
+      erstbeitragWaehrung: waehrung,
       beitragArt: 'erster',
       erstbeitragUnbekannt: false,
       rueckkaufswert,
@@ -183,11 +216,25 @@ export function AmpelKarte({ versichererNamen }: { versichererNamen: string[] })
           label="Monatsbeitrag"
           hilfe={<InfoKnopf feld="beitrag" />}
           inputMode="decimal"
-          platzhalter="z. B. 100 €"
+          platzhalter={waehrung === 'DM' ? 'erster Beitrag, z. B. 150 DM' : 'z. B. 100 €'}
           wert={monatsbeitrag}
           onChange={setMonatsbeitrag}
-          echo={betragEcho(monatsbeitrag)}
+          echo={betragEcho(monatsbeitrag, waehrung)}
         />
+        {vorEuro && (
+          <RadioGruppe
+            id="ak-waehrung"
+            label="Währung des Beitrags"
+            erklaerung="Vor 2002 stand der Beitrag meist in DM."
+            nebeneinander
+            optionen={[
+              { wert: 'DM', label: 'DM' },
+              { wert: 'EUR', label: 'Euro' },
+            ]}
+            wert={waehrungWahl}
+            onChange={(wert) => setWaehrungWahl(wert as Waehrung)}
+          />
+        )}
         <TextFeld
           id="ak-rueckkaufswert"
           label="Rückkaufswert laut Standmitteilung"
@@ -203,7 +250,16 @@ export function AmpelKarte({ versichererNamen }: { versichererNamen: string[] })
       <div className="ampel-bereich">
         <Ampel zustand={zustand} variante="verkehr" />
         <p className="ampel-kartentext" aria-live="polite">
-          {rechnet ? 'Wir rechnen …' : ampelKartenText(ampel)}
+          {rechnet ? (
+            'Wir rechnen …'
+          ) : beginnAusserhalb ? (
+            <>
+              Wir rechnen Verträge mit Beginn {RANGE_TEXT}. Für andere Jahrgänge:{' '}
+              <Link href="/anfrage">individuelle Prüfung anfragen</Link>.
+            </>
+          ) : (
+            ampelKartenText(ampel)
+          )}
         </p>
       </div>
 
@@ -226,7 +282,8 @@ export function AmpelKarte({ versichererNamen }: { versichererNamen: string[] })
         </p>
       )}
       <p className="erklaerung" style={{ textAlign: 'center', margin: '0.75rem 0 0' }}>
-        Keine Anmeldung. Ihre Angaben bleiben bei Ihnen, bis Sie das Gutachten bestellen.
+        Keine Anmeldung. Für die Ampel rechnet unser Server Ihre vier Angaben durch, ohne sie zu speichern –
+        persönliche Daten geben Sie erst mit der Bestellung an.
       </p>
     </form>
   );

@@ -9,6 +9,7 @@
  */
 import { baueBeitragsreihe } from './beitragsreihe';
 import { teileBeitraegeAuf, type MonatsAufteilung } from './aufteilung';
+import { euroDe, monatDe } from './format';
 import { monatsIndex, jahrVonIndex } from './monat';
 import { zinseAuf, zinseLeistungAuf, zinsMap } from './nutzungen';
 import { loeseZinsreihe } from './zinsreihe';
@@ -71,12 +72,16 @@ export function berechneRueckabwicklung(
 
   // Erhaltene Leistungen inkl. Gegenverzinsung (szenariounabhängig).
   const leistungen: Geldleistung[] = [...(input.auszahlungen ?? []), ...(input.policendarlehen ?? [])];
-  if (input.status === 'gekuendigt' && input.rueckkaufswert !== undefined) {
+  // Beendete Verträge: der ausgezahlte Rückkaufswert (gekündigt) bzw. die
+  // Ablaufleistung (abgelaufen) steht im Feld rueckkaufswert und wird wie eine
+  // erhaltene Leistung gegengerechnet (CALC-SPEC Abschnitt 5).
+  if ((input.status === 'gekuendigt' || input.status === 'abgelaufen') && input.rueckkaufswert !== undefined) {
     const monat = input.statusDatum ?? input.stichtag;
+    const bezeichnung = input.status === 'gekuendigt' ? 'der Rückkaufswert' : 'die Ablaufleistung';
     leistungen.push({ monat, betrag: input.rueckkaufswert.betrag });
     s.annahmen.set('RKW_ALS_LEISTUNG', {
       code: 'RKW_ALS_LEISTUNG',
-      text: `Der Vertrag ist gekündigt; der Rückkaufswert (${input.rueckkaufswert.betrag.toFixed(2)} €) wurde als erhaltene Leistung zum ${monat} angerechnet. Falls er zusätzlich unter „Auszahlungen" erfasst wurde, bitte doppelte Erfassung korrigieren.`,
+      text: `Der Vertrag ist beendet; ${bezeichnung} (${euroDe(input.rueckkaufswert.betrag)}) wurde als erhaltene Leistung zum ${monatDe(monat)} angerechnet. Falls der Betrag zusätzlich unter „Auszahlungen“ erfasst wurde, bitte doppelte Erfassung korrigieren.`,
     });
   }
   if ((input.policendarlehen ?? []).length > 0) {
@@ -158,10 +163,13 @@ export function berechneRueckabwicklung(
       stichtagIndex,
     ).nutzungen;
     const alleSaetzeNichtNegativ = zinsen.jahre.every((j) => j.satzProzent >= 0);
-    if (aufgezinst.nutzungen > obergrenze + 0.01 || (alleSaetzeNichtNegativ && aufgezinst.nutzungen < -0.01)) {
+    // Bei durchweg negativer Reihe ist die „Obergrenze“ negativ und der Vergleich
+    // sinnlos; die untere Grenze 0 gilt nur bei nicht-negativen Sätzen.
+    const obergrenzeGeprueft = Math.max(0, obergrenze);
+    if (aufgezinst.nutzungen > obergrenzeGeprueft + 0.01 || (alleSaetzeNichtNegativ && aufgezinst.nutzungen < -0.01)) {
       s.warnungen.set(`PLAUSIBILITAET_NUTZUNGEN:${name}`, {
         code: 'PLAUSIBILITAET_NUTZUNGEN',
-        text: `Szenario ${name}: Die berechneten Nutzungen (${rund(aufgezinst.nutzungen)} €) liegen außerhalb der aus der Zinsreihe ableitbaren Bandbreite (0 … ${rund(obergrenze)} €) – Ergebnis manuell prüfen.`,
+        text: `Szenario ${name}: Die berechneten Nutzungen (${euroDe(aufgezinst.nutzungen)}) liegen außerhalb der aus der Zinsreihe ableitbaren Bandbreite (0 … ${euroDe(obergrenzeGeprueft)}) – Ergebnis manuell prüfen.`,
       });
     }
 

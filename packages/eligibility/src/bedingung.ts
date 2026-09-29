@@ -7,10 +7,14 @@ import type { Bedingung, BedingungsKnoten, EligibilityInput } from './types';
 
 /**
  * Normalisiert die Vertragsschluss-Angabe für Datumsvergleiche.
- * Ist nur der Monat bekannt (YYYY-MM), wird die Monatsmitte angesetzt;
- * Grenzmonate behandelt der Aufrufer gesondert (Hinweis „Tag entscheidet").
+ * Ist nur das Jahr bekannt (YYYY), wird die Jahresmitte angesetzt; ist nur
+ * der Monat bekannt (YYYY-MM), die Monatsmitte. Grenzjahre und Grenzmonate
+ * (1994, 2004) behandelt der Aufrufer gesondert (Hinweis „Tag entscheidet").
  */
 export function vergleichsdatum(vertragsschluss: string): string {
+  if (/^\d{4}$/.test(vertragsschluss)) {
+    return `${vertragsschluss}-07-01`;
+  }
   if (/^\d{4}-\d{2}$/.test(vertragsschluss)) {
     return `${vertragsschluss}-15`;
   }

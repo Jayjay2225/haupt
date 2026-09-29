@@ -99,9 +99,44 @@ describe('Eigenschaften der Berechnung', () => {
         stichtag: '2009-12',
       }),
     );
-    expect(ergebnis.annahmen.some((a) => a.code === 'RKW_ALS_LEISTUNG')).toBe(true);
+    const annahme = ergebnis.annahmen.find((a) => a.code === 'RKW_ALS_LEISTUNG');
+    expect(annahme).toBeDefined();
+    // Text de-DE: Betrag 5.000,00 €, Monat 01/2008 (nicht 5000.00 / 2008-01).
+    expect(annahme?.text).toContain('der Rückkaufswert (5.000,00 €)');
+    expect(annahme?.text).toContain('zum 01/2008');
     expect(ergebnis.szenarien.basis.erhalteneLeistungenAufgezinst).toBeGreaterThan(5000);
     expect(ergebnis.szenarien.basis.mehrwertGegenKuendigung).toBeUndefined();
+  });
+
+  it('rechnet bei abgelaufenen Verträgen die Ablaufleistung (Feld rueckkaufswert) als erhaltene Leistung an', () => {
+    const ergebnis = alt(
+      vertrag({
+        status: 'abgelaufen',
+        statusDatum: '2008-01',
+        rueckkaufswert: { betrag: 5000 },
+        stichtag: '2009-12',
+      }),
+    );
+    const annahme = ergebnis.annahmen.find((a) => a.code === 'RKW_ALS_LEISTUNG');
+    expect(annahme?.text).toContain('die Ablaufleistung (5.000,00 €)');
+    expect(ergebnis.szenarien.basis.erhalteneLeistungenAufgezinst).toBeGreaterThan(5000);
+    expect(ergebnis.szenarien.basis.nettoanspruch).toBeLessThan(ergebnis.szenarien.basis.rueckabwicklungswert);
+    expect(ergebnis.szenarien.basis.mehrwertGegenKuendigung).toBeUndefined();
+    // Gleiche Gegenrechnung wie bei Kündigung (die Beitragsreihe endet bei „abgelaufen“ einen Monat später).
+    const gekuendigt = alt(
+      vertrag({ status: 'gekuendigt', statusDatum: '2008-01', rueckkaufswert: { betrag: 5000 }, stichtag: '2009-12' }),
+    );
+    expect(ergebnis.szenarien.basis.erhalteneLeistungenAufgezinst).toBeCloseTo(
+      gekuendigt.szenarien.basis.erhalteneLeistungenAufgezinst,
+      6,
+    );
+  });
+
+  it('löst bei durchweg negativer Zinsreihe keinen Plausibilitäts-Fehlalarm aus', () => {
+    const ergebnis = alt(vertrag({ szenarioOverrides: { zinssatzProzent: -3 }, stichtag: '2010-01' }));
+    expect(ergebnis.szenarien.basis.nutzungen).toBeLessThan(0);
+    expect(ergebnis.warnungen.some((w) => w.code === 'PLAUSIBILITAET_NUTZUNGEN')).toBe(false);
+    expect(ergebnis.annahmen.find((a) => a.code === 'ZINS_OVERRIDE')?.text).toContain('-3,00 % p. a.');
   });
 
   it('setzt das Kein-Vorteil-Flag, wenn der Basiswert unter dem Rückkaufswert liegt', () => {

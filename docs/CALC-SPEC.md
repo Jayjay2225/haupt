@@ -1,6 +1,6 @@
 # CALC-SPEC – Spezifikation des Rechenkerns `packages/calc`
 
-Stand: 18.09.2026 · Gilt für `calc.version` 0.2.x. Reine Funktionen, keine I/O; alle Daten (Versichererkennzahlen, Referenzzinsen, Risiko-Defaults, Rechtsregeln) werden als Parameter übergeben. Ergebnis ist deterministisch: gleiche Eingaben → gleiches Ergebnis; `calc.version` und `data.version` stehen im Ergebnis.
+Stand: 29.09.2026 · Gilt für `calc.version` 0.3.x. Reine Funktionen, keine I/O; alle Daten (Versichererkennzahlen, Referenzzinsen, Risiko-Defaults, Rechtsregeln) werden als Parameter übergeben. Ergebnis ist deterministisch: gleiche Eingaben → gleiches Ergebnis; `calc.version` und `data.version` stehen im Ergebnis.
 
 Methodische Leitplanken (CLAUDE.md, Prinzip 2): Nutzungen nur auf den Sparanteil (im Max-Szenario zusätzlich auf den Verwaltungskostenanteil), Maßstab ist die Nettoverzinsung der Kapitalanlagen des jeweiligen Versicherers. Keine Aufzinsung des Vollbeitrags, keine Rohüberschussquoten. Rechtliche Fundstellen: `docs/LEGAL.md` und `data/legal-rules.json`.
 
@@ -19,10 +19,10 @@ Methodische Leitplanken (CLAUDE.md, Prinzip 2): Nutzungen nur auf den Sparanteil
 | `zahlweise` | `monatlich \| vierteljaehrlich \| halbjaehrlich \| jaehrlich \| einmalbeitrag` | ja | |
 | `erstbeitrag` | { betrag, waehrung: EUR\|DM } | ja** | Beitrag je Zahlungsperiode zu Beginn |
 | `aktuellerBeitrag` | number (EUR) | nein** | je Zahlungsperiode; ** mind. eines von Erst-/aktuellem Beitrag |
-| `dynamik` | { aktiv, satzProzent?, ausgesetzteJahre?[] } | ja | Satz optional → Herleitung aus Erst-/aktuellem Beitrag (s. 2.2) |
+| `dynamik` | { aktiv, satzProzent?, ausgesetzteVertragsjahre?[] } | ja | Satz optional → Herleitung aus Erst-/aktuellem Beitrag (s. 2.2) |
 | `gesamtsummeLautMitteilung` | number (EUR) | nein | skaliert die Reihe (s. 2.3) |
 | `status` | `laufend \| beitragsfrei \| gekuendigt \| abgelaufen` + `statusDatum` (ISO-Monat, außer laufend) | ja | |
-| `rueckkaufswert` | { betrag, standMonat? } | nein | aktueller RKW (laufend) bzw. Auszahlbetrag (gekündigt) |
+| `rueckkaufswert` | { betrag, standMonat? } | nein | aktueller RKW (laufend/beitragsfrei) bzw. ausgezahlter Betrag (gekündigt: Rückkaufswert, abgelaufen: Ablaufleistung) – bei beendeten Verträgen als erhaltene Leistung gegengerechnet (s. 5) |
 | `auszahlungen` | { monat, betrag }[] | nein | Teilauszahlungen, Gewinnentnahmen, ausgezahlter RKW |
 | `policendarlehen` | { monat, betrag }[] | nein | wie Auszahlung behandelt (s. 5) |
 | `buzBeitragsanteilProzent` | number | nein | Anteil des Gesamtbeitrags für BUZ; 100 % Risikoanteil |
@@ -41,7 +41,7 @@ Methodische Leitplanken (CLAUDE.md, Prinzip 2): Nutzungen nur auf den Sparanteil
 Monate `m = 0 … T` von `beginn` bis `stichtag` (einschließlich). Beiträge fließen am Periodenbeginn: monatlich → jeden Monat; vierteljährlich → alle 3 Monate ab `beitragszahlungVon`; usw.; `einmalbeitrag` → genau ein Beitrag im Startmonat. Beitragsfluss endet mit `beitragszahlungBis` bzw. `statusDatum` bei `beitragsfrei`/`gekuendigt`.
 
 ### 2.2 Dynamik
-Erhöhung jeweils zum Jahrestag des Vertragsbeginns, erstmals zu Beginn des 2. Vertragsjahres; ausgesetzte Jahre überspringen die Erhöhung. Ist `dynamik.satzProzent` nicht angegeben, aber Erst- und aktueller Beitrag vorhanden, wird der Satz geometrisch hergeleitet: `satz = (aktuell/erst)^(1/n) − 1` über die `n` erfolgten Erhöhungstermine; Herleitung erscheint als Annahme. Ist nur ein Beitrag bekannt, gilt er konstant (Annahme, Warnung wenn `dynamik.aktiv`).
+Erhöhung jeweils zum Jahrestag des Vertragsbeginns, erstmals zu Beginn des 2. Vertragsjahres; ausgesetzte Jahre überspringen die Erhöhung. Ist `dynamik.satzProzent` nicht angegeben, aber Erst- und aktueller Beitrag vorhanden, wird der Satz geometrisch hergeleitet: `satz = (aktuell/erst)^(1/n) − 1` über die `n` erfolgten Erhöhungstermine; Herleitung erscheint als Annahme. Ist nur ein Beitrag bekannt, gilt er konstant (Annahme, Warnung `DYNAMIK_UNBEKANNT` wenn `dynamik.aktiv`). Sind beide Beiträge bekannt und gleich, obwohl Erhöhungstermine vorlagen, wird mit 0 % gerechnet und die Warnung `DYNAMIK_OHNE_ERHOEHUNG` (widersprüchliche Angaben) ausgegeben.
 
 ### 2.3 DM und Skalierung
 DM-Beträge werden mit 1,95583 in EUR umgerechnet (amtlicher Kurs; betrifft Beiträge mit Fälligkeit bis 31.12.2001, praktisch die gesamte Reihe, da der nominale DM-Beitrag ab 2002 als identischer EUR-Gegenwert weiterläuft). Liegt `gesamtsummeLautMitteilung` vor: Skalierungsfaktor `f = Mitteilung / Σ Reihe` auf alle Beiträge; bei `|f − 1| > 5 %` Warnung `BEITRAGSREIHE_ABWEICHUNG` (Reihe wird trotzdem skaliert – die Mitteilung des Versicherers ist die bessere Evidenz).
@@ -52,7 +52,7 @@ Reihenfolge je Beitrag `b_m` (Monat `m`, Kalenderjahr `j`):
 
 1. **BUZ:** `buz_m = b_m · buzBeitragsanteil` → zu 100 % Risikoanteil.
 2. **Risikoanteil Hauptversicherung:** `risiko_m = (b_m − buz_m) · r_risiko`; `r_risiko` aus Vertragsunterlagen (Override) oder `risk-defaults` nach Vertragsart und Eintrittsalter-Band; szenarioabhängig `high` (Min) / `mid` (Basis) / `low` (Max).
-3. **Abschlusskostenanteil (Zillmerung):** Gesamtbetrag `AK = min(zillmersatz(j₀) · Beitragssumme, akQuote(Versicherer, j₀) · Beitragssumme)` mit `j₀` = Abschlussjahr, Beitragssumme = Σ der planmäßigen Beiträge (vor Skalierung auf den Stichtag, gedeckelt auf die tatsächlich betrachtete Reihe). Verteilung: Vertragsschluss **bis 2007** → Tilgung aus den ersten Beiträgen (je Beitrag max. der nach Risikoanteil verbleibende Teil, bis `AK` verbraucht ist); **ab 2008** → gleichmäßig auf die ersten 60 Monate. Fehlt die versichererindividuelle Abschlusskostenquote, gilt der Höchstzillmersatz allein (Annahme, markiert).
+3. **Abschlusskostenanteil (Zillmerung):** Gesamtbetrag `AK = min(zillmersatz(j₀) · Beitragssumme, akQuote(Versicherer, j₀) · Beitragssumme)` mit `j₀` = Abschlussjahr, Beitragssumme = Σ der planmäßigen Beiträge (vor Skalierung auf den Stichtag, gedeckelt auf die tatsächlich betrachtete Reihe). Verteilung: Vertragsschluss **bis 2007** → Tilgung aus den ersten Beiträgen (je Beitrag max. der nach Risikoanteil verbleibende Teil, bis `AK` verbraucht ist); **ab 2008** → gleichmäßig auf die ersten 60 Monate. Fehlt die versichererindividuelle Abschlusskostenquote, gilt der Höchstzillmersatz allein (Annahme, markiert). Liegt der Abschluss vor dem ersten hinterlegten Höchstzillmersatz (derzeit vor 1994), gilt der früheste hinterlegte Satz als anspruchsmindernde Näherung (Warnung `ZILLMER_NAEHERUNG`); nur bei leerer Werteliste werden die Abschlusskosten mit 0 angesetzt (Warnung `ZILLMER_UNBEKANNT`, anspruchserhöhend).
 4. **Verwaltungskostenanteil:** `vw_m = (b_m − buz_m) · vwQuote(Versicherer, j)`; fehlt die Quote, Fallback aus `risk-defaults` (estimate, markiert).
 5. **Sparanteil:** `spar_m = b_m − buz_m − risiko_m − ak_m − vw_m`, mindestens 0 (bei Unterschreitung Warnung `SPARANTEIL_NEGATIV`, Kostenanteile werden anteilig gekürzt: erst Verwaltung, dann Abschluss).
 
@@ -77,7 +77,7 @@ Zinsquelle je Jahr: Kennzahl des Versicherers unter Beachtung der Rechtsnachfolg
 
 ## 5. Gegenrechnung erhaltener Leistungen
 
-Jede erhaltene Leistung `L` (ausgezahlter Rückkaufswert bei `gekuendigt`, Teilauszahlungen, Policendarlehen) wird vom Auszahlungsmonat bis zum Stichtag mit dem Referenz-Einlagenzins (Bundesbank-Reihe aus `insurers.json`; monatlich `r/12`) aufgezinst und vom Rückabwicklungswert abgezogen (Nutzungen, die der Versicherungsnehmer selbst aus erhaltenen Geldern ziehen konnte). Policendarlehen werden wie Auszahlungen behandelt; die Rückzahlungsseite (Zins/Tilgung an den Versicherer) ist nicht modelliert → Hinweis im Ergebnis, Einzelfallprüfung.
+Jede erhaltene Leistung `L` (Betrag im Feld `rueckkaufswert` bei `gekuendigt` – ausgezahlter Rückkaufswert – und bei `abgelaufen` – Ablaufleistung –, Teilauszahlungen, Policendarlehen) wird vom Auszahlungsmonat bis zum Stichtag mit dem Referenz-Einlagenzins (Bundesbank-Reihe aus `insurers.json`; monatlich `r/12`) aufgezinst und vom Rückabwicklungswert abgezogen (Nutzungen, die der Versicherungsnehmer selbst aus erhaltenen Geldern ziehen konnte). Policendarlehen werden wie Auszahlungen behandelt; die Rückzahlungsseite (Zins/Tilgung an den Versicherer) ist nicht modelliert → Hinweis im Ergebnis, Einzelfallprüfung.
 
 ## 6. Ergebnis je Szenario
 
@@ -85,27 +85,26 @@ Jede erhaltene Leistung `L` (ausgezahlter Rückkaufswert bei `gekuendigt`, Teila
 erstattungsfaehigeBeitraege = Σ b_m − Σ buz_m − Σ risiko_m
 rueckabwicklungswert        = erstattungsfaehigeBeitraege + Nutzungen
 nettoanspruch               = rueckabwicklungswert − Σ aufgezinste erhaltene Leistungen
-mehrwertGegenKuendigung     = rueckabwicklungswert − aktueller Rückkaufswert   (nur laufend/beitragsfrei)
+mehrwertGegenKuendigung     = nettoanspruch − aktueller Rückkaufswert   (nur laufend/beitragsfrei; Vergleichsmaßstab ist der Netto-Anspruch, weil erhaltene Auszahlungen bei einer Kündigung ebenfalls behalten würden – Checkup 22.09.2026 Nr. 7)
 ```
 
 Abschluss- und Verwaltungskostenanteile mindern die **Rückzahlung nicht** (sie bleiben in `erstattungsfaehigeBeitraege` enthalten); sie steuern nur die **Nutzungsbasis** (s. 4). Ist `mehrwertGegenKuendigung ≤ 0` im Basis-Szenario, setzt der Kern das Flag `wirtschaftlichKeinVorteil` („wirtschaftlich kein Vorteil erkennbar“) – der Bericht muss das prominent ausgeben.
 
-**Regime ab 01.01.2008 (Widerruf § 8/§ 9/§ 152 VVG n.F.):** Der Kern rechnet die § 5a-Methodik nicht; er liefert eine vereinfachte Gegenüberstellung (Rückkaufswert nach § 169 VVG als Anker, ggf. zzgl. Prämien des ersten Jahres bei fehlender Belehrung) mit dem Hinweis, dass der Anspruch in der Regel deutlich geringer ausfällt; Details `docs/LEGAL.md` Abschnitt C.
+**Keine Regime-Sonderpfade (seit Prompt 12, 25.09.2026):** Dieselbe Formel gilt für alle Vertragsjahrgänge 1980–2020; welche rechtliche Grundlage im Einzelfall trägt, prüft der Rechtsanwalt (`docs/LEGAL.md`).
 
 ## 7. Ausgabe `CalcResult`
 
-- `szenarien.{min,basis,max}`: Beträge aus Abschnitt 6 + `nutzungenProzentDerBeitraege` (nur zusammen mit der Zinsreihe auszuweisen, nie als Schlagzeile).
-- `jahrestabelle[]` (Basis-Szenario): Jahr, Beiträge, BUZ, Risiko, Abschluss, Verwaltung, Sparanteil, verwendeter Zinssatz + Quellenherkunft (`insurer | branche | fallback`), Nutzungen des Jahres, kumulierter Stand.
-- `annahmen[]`: jede getroffene Annahme mit Grund (Risiko-Default, Zins-Fallback, Dynamik-Herleitung, Skalierung …).
-- `datenherkunft`: verwendete Zinsreihe je Jahr mit Quelle/`source_type`/`confidence` (aus insurers.json durchgereicht).
-- `warnungen[]`: Codes s. o. plus `PLAUSIBILITAET_NUTZUNGEN` (s. 8).
-- `meta`: `calcVersion`, `dataVersion`, `stichtag`, `regime`.
+- `szenarien.{min,basis,max}`: Beträge aus Abschnitt 6 (`summeBeitraege`, `summeBuz`, `summeRisiko`, `summeAbschluss`, `summeVerwaltung`, `summeSparanteil`, `erstattungsfaehigeBeitraege`, `nutzungen`, `rueckabwicklungswert`, `erhalteneLeistungenAufgezinst`, `nettoanspruch`, `mehrwertGegenKuendigung?`, `wirtschaftlichKeinVorteil?` nur im Basis-Szenario) + `nutzungenProzentDerBeitraege` (nur zusammen mit der Zinsreihe auszuweisen, nie als Schlagzeile) + `nutzungenNachHerkunft` (Nutzungen je Zinsherkunft `insurer | branche | fallback | override`) + `anteilUnternehmenswerteProzent` (Anteil der Nutzungen aus Unternehmenswerten, eine Nachkommastelle; im Bericht „Datenbasis der Nutzungen“) + `zinsreihe[]` (je Jahr `satzProzent`, `herkunft`, optional `kennzeichen: 'estimated_branch'` für Branchen-/Näherungsjahre, optional `quelle` – die aus insurers.json durchgereichte `Quelle` mit Typ, Titel, URL/Dokument, Abrufdatum; `confidence` wird nicht durchgereicht).
+- `jahrestabelle[]` (Basis-Szenario): Jahr, Beiträge, BUZ, Risiko, Abschluss, Verwaltung, Sparanteil, verwendeter Zinssatz + Quellenherkunft (`insurer | branche | fallback | override`; `override` nur bei `szenarioOverrides.zinssatzProzent`, Annahme `ZINS_OVERRIDE`), Nutzungen des Jahres, kumulierter Stand.
+- `annahmen[]`: jede getroffene Annahme mit Grund (Risiko-Default, Zins-Fallback, Dynamik-Herleitung, Skalierung …). Texte sind nutzersichtbar (Gutachten) und daher de-DE formatiert (1.234,56 €, MM/JJJJ); intern bleiben Werte Zahlen und Daten ISO.
+- `warnungen[]`: Codes s. o. plus `PLAUSIBILITAET_NUTZUNGEN` (s. 8), `ZILLMER_NAEHERUNG`, `DYNAMIK_OHNE_ERHOEHUNG`.
+- `meta`: `calcVersion`, `dataVersion`, `stichtag` (kein Regime-Feld seit Prompt 12).
 
-Rundung: intern volle Gleitkommagenauigkeit, Ausgabefelder auf Cent gerundet; die Jahrestabelle summiert sich nach Rundung konsistent (Restdifferenz ≤ 1 Cent pro Zeile wird der letzten Spalte zugeschlagen).
+Rundung: intern volle Gleitkommagenauigkeit, Ausgabefelder auf Cent gerundet; in der Jahrestabelle wird jede Spalte unabhängig gerundet, daher kann die Spaltensumme einer Zeile um bis zu ±0,01 € von `beitraege` abweichen (kein Ausgleich).
 
 ## 8. Plausibilitätsgrenzen
 
-`nutzungenProzentDerBeitraege` muss innerhalb der Bandbreite liegen, die sich aus der verwendeten Zinsreihe ergibt: Obergrenze = hypothetische Vollbeitrags-Aufzinsung mit dem Maximum der Reihe, Untergrenze = 0. Verletzung → Warnung `PLAUSIBILITAET_NUTZUNGEN` und Testfehler in der CI.
+`nutzungenProzentDerBeitraege` muss innerhalb der Bandbreite liegen, die sich aus der verwendeten Zinsreihe ergibt: Obergrenze = hypothetische Vollbeitrags-Aufzinsung mit dem Maximum der Reihe (mindestens 0), Untergrenze = 0 – die Untergrenze gilt nur bei durchweg nicht-negativen Sätzen, bei negativer Reihe entfällt der Vergleich (Nutzungen sind dann zulässig negativ). Verletzung → Warnung `PLAUSIBILITAET_NUTZUNGEN` und Testfehler in der CI.
 
 ## 9. Tests (Prompt 3)
 
@@ -116,9 +115,9 @@ Rundung: intern volle Gleitkommagenauigkeit, Ausgabefelder auf Cent gerundet; di
 
 Fixture-Daten sind ausdrücklich Testdaten (synthetische, als solche gekennzeichnete Reihen) – sie sind **nicht** Teil von `data/insurers.json` und erscheinen in keinem Bericht. Die Golden-Tests laufen dagegen gegen die echte `data/insurers.json` und frieren deren Stand ein (Snapshot bricht bei Datenänderung bewusst).
 
-## 10. Golden-Ergebnisse (Stand data.version 0.5.0, calc.version 0.2.0, Stichtag 09/2026)
+## 10. Golden-Ergebnisse (Stand data.version 0.5.1, calc.version 0.3.0, Stichtag 09/2026)
 
-Vertrag (a) rechnet mangels Unternehmenskennzahlen (`versichererId: unbekannt`) mit dem **Branchendurchschnitt** (als Schätzung markiert). Vertrag (b) nutzt ab 2011 die aus der BaFin-Tabelle 160 importierten Kennzahlen der Allianz Lebensversicherungs-AG (Nettoverzinsung Basis/Max, laufende Durchschnittsverzinsung Min), davor den Branchendurchschnitt. Fehlende Jahre 1996–1998 und 2025–2026 werden per Fallback überbrückt (Warnung `ZINSREIHE_LUECKE`). Im Min-Szenario gilt für Branchenjahre ab 2011 der kleinere Wert aus Branchen-Nettoverzinsung und Branchen-laufender Verzinsung. Die mit data.version 0.4.0 ergänzten Allianz-Werte 1995/1996 ändern Vertrag (b) nicht (Zillmer-Jahre ohne Sparanteil). **Korrektur 22.09.2026:** Der Lücken-Fallback verwendet jetzt den zeitlich nächstliegenden früheren Branchenwert zum jeweiligen Lückenjahr (2025/2026 → Branchenwert 2024) statt fälschlich des zuletzt benutzten Branchenjahres vor den Unternehmensjahren (2010) – dadurch sind die Nutzungen von Vertrag (b) gegenüber dem vorigen Stand gesunken. **Prompt 12 (25.09.2026):** Der Rechenkern kennt keine Regime-Sonderpfade mehr – dieselbe Formel für alle Jahrgänge 1980–2020; Branchen- und Näherungsjahre tragen das Datenkennzeichen `estimated_branch`. Mit data.version 0.5.0 sind die Branchenjahre 1996–1998 jetzt belegt (GDV, 7,37/7,46/7,57 %) statt per Fallback auf 1995 (7,37 %) überbrückt – Vertrag (b) steigt dadurch minimal (Basis +2,47 €). Am Reihenanfang darf der Fallback zusätzlich den nächstliegenden SPÄTEREN Branchenwert nehmen (nötig für 1981–1984/1986–1989, solange dort nur 1980/1985 belegt sind; data/DATA_REPORT.md).
+Vertrag (a) rechnet mangels Unternehmenskennzahlen (`versichererId: unbekannt`) mit dem **Branchendurchschnitt** (als Schätzung markiert). Vertrag (b) nutzt ab 2011 die aus der BaFin-Tabelle 160 importierten Kennzahlen der Allianz Lebensversicherungs-AG (Nettoverzinsung Basis/Max, laufende Durchschnittsverzinsung Min), davor den Branchendurchschnitt. Fehlende Jahre (derzeit 2025–2026) werden per Fallback überbrückt (Warnung `ZINSREIHE_LUECKE`; der Golden-Test leitet die erwarteten Lückenjahre aus den Daten ab). Im Min-Szenario gilt für Branchenjahre ab 2011 der kleinere Wert aus Branchen-Nettoverzinsung und Branchen-laufender Verzinsung. Die mit data.version 0.4.0 ergänzten Allianz-Werte 1995/1996 ändern Vertrag (b) nicht (Zillmer-Jahre ohne Sparanteil). **Korrektur 22.09.2026:** Der Lücken-Fallback verwendet jetzt den zeitlich nächstliegenden früheren Branchenwert zum jeweiligen Lückenjahr (2025/2026 → Branchenwert 2024) statt fälschlich des zuletzt benutzten Branchenjahres vor den Unternehmensjahren (2010) – dadurch sind die Nutzungen von Vertrag (b) gegenüber dem vorigen Stand gesunken. **Prompt 12 (25.09.2026):** Der Rechenkern kennt keine Regime-Sonderpfade mehr – dieselbe Formel für alle Jahrgänge 1980–2020; Branchen- und Näherungsjahre tragen das Datenkennzeichen `estimated_branch`. Mit data.version 0.5.0 sind die Branchenjahre 1996–1998 jetzt belegt (GDV, 7,37/7,46/7,57 %) statt per Fallback auf 1995 (7,37 %) überbrückt – Vertrag (b) steigt dadurch minimal (Basis +2,47 €). Am Reihenanfang darf der Fallback zusätzlich den nächstliegenden SPÄTEREN Branchenwert nehmen (nötig für 1981–1984/1986–1989, solange dort nur 1980/1985 belegt sind; data/DATA_REPORT.md).
 
 **Vertrag (a) – private RV, Beginn 12/2004, 1.200 € jährlich, 25.600 € eingezahlt, Rückkaufswert 39.857 €:**
 
@@ -139,3 +138,5 @@ Bewertung: In allen drei Szenarien liegt der Rückabwicklungswert **unter** dem 
 | Max | 426.271,35 € | 241.190,56 € | 667.461,91 € | +356.803,91 € |
 
 Bewertung: Deutlicher rechnerischer Mehrwert in allen Szenarien (Nutzungen 55,5–61,5 % der Beiträge – getragen von den hohen Nettoverzinsungen der 1990er/2000er und den über dem Branchendurchschnitt liegenden Allianz-Werten ab 2011). Gegenüber data.version 0.1.0 (nur Branchendurchschnitt) sind die Nutzungen im Basis-Szenario um rund 35.000 € gestiegen; der Bericht weist den Anteil der Nutzungen aus Unternehmens-, Branchen- und Näherungswerten aus („Datenbasis der Nutzungen“). Im Bericht zwingend mit Annahmenliste (pauschaler Risikoanteil, Branchendurchschnitt vor 2011, Zins-Lücken) und ohne Anspruchszusage auszuweisen.
+
+**Code-Prüfung 29.09.2026 (calc.version 0.3.0, data.version 0.5.1):** Golden (a) und (b) sind unverändert (Abschluss 2004 bzw. 1995 – Höchstzillmersatz hinterlegt). Verträge mit Abschluss vor 1994 sinken durch die Zillmer-Näherung (Abschnitt 3): Musterfall C (Kapital-LV 06/1986, 150 DM monatlich) rechnet im Basis-Szenario jetzt mit 35.635,00 € € erstattungsfähigen Beiträgen, 55.905,02 € € Nutzungen und 91.540,02 € € Rückabwicklungswert (`examples/Gutachten_BSP-2026-C_2026-09-28.html`). Die Datenversion 0.5.1 ändert keine Rechenwerte (Namenskorrektur, Fundstellen, Einlagenzins 1991 2,82 → 2,83 wirkt nur auf die Gegenverzinsung erhaltener Leistungen im Jahr 1991).

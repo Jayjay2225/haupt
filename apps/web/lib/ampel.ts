@@ -12,7 +12,7 @@
  * keine Spanne (Prompt 13, 0.4).
  */
 import type { CalcResult } from '@rueckab/calc';
-import { AMPEL } from '@/config/ampel';
+import { AMPEL, MIN_RUECKKAUFSWERT_TEXT } from '@/config/ampel';
 
 export type AmpelFarbe = 'gruen' | 'gelb' | 'rot' | 'grau';
 
@@ -78,8 +78,7 @@ export function bestimmeUebernahmeAmpel(
       ampel: 'grau',
       grund: 'zu-klein',
       titel: 'Ihr Vertrag ist für unser Verfahren zu klein.',
-      zeile:
-        'Wir übernehmen Fälle ab 30.000 € Rückkaufswert. Lassen Sie sich von einem Anwalt Ihrer Wahl oder der Verbraucherzentrale beraten.',
+      zeile: `Wir übernehmen Fälle ab ${MIN_RUECKKAUFSWERT_TEXT} Rückkaufswert. Lassen Sie sich von einem Anwalt Ihrer Wahl oder der Verbraucherzentrale beraten.`,
     };
   }
 

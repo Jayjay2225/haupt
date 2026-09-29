@@ -1,15 +1,19 @@
 /**
- * Versand-Cron (Prompt 13, Abschnitt 3): stündlich von Vercel aufgerufen
- * (vercel.json → crons). Sucht bezahlte Bestellungen der letzten 3 Tage bei
- * Stripe, entscheidet je Bestellung (Freigabe erteilt ODER älter als die
- * Auto-Frist) und versendet den Bericht. Zustand ausschließlich in den
- * Stripe-Metadaten – kein eigener Speicher nötig.
+ * Versand-Cron (Prompt 13, Abschnitt 3): von Vercel aufgerufen (vercel.json →
+ * crons; auf dem Hobby-Plan täglich, live stündlich). Sucht bezahlte
+ * Bestellungen der letzten 30 Tage bei Stripe (gleiches Fenster wie die
+ * Admin-Liste – SEPA-Zahlungen werden erst Tage nach der Sitzung bestätigt),
+ * bearbeitet die ältesten zuerst, entscheidet je Bestellung (Freigabe erteilt
+ * ODER älter als die Auto-Frist) und versendet den Bericht. Zustand
+ * ausschließlich in den Stripe-Metadaten – kein eigener Speicher nötig.
  *
- * Auth: Vercel-Cron sendet `Authorization: Bearer ${CRON_SECRET}`;
- * alternativ manueller Aufruf mit ?schluessel=ADMIN_PASSWORT.
+ * Auth: Vercel-Cron sendet `Authorization: Bearer ${CRON_SECRET}`; ein
+ * manueller Anstoß geht aus dem angemeldeten Admin-Browser (Cookie).
  */
+import type Stripe from 'stripe';
 import { NextResponse } from 'next/server';
 import { cronAutorisiert } from '@/lib/admin';
+import { BERICHT_VERSAND } from '@/config/business';
 import {
   entscheideVersand,
   sitzungsDaten,
@@ -33,26 +37,39 @@ export async function GET(request: Request): Promise<NextResponse> {
   }
   const stripe = stripeClient();
   const deps = standardAbhaengigkeiten(stripe);
-  const seit = Math.floor(Date.now() / 1000) - 3 * 24 * 60 * 60;
+  // `created` ist die Erstellung der Sitzung, nicht der Zahlungseingang: 30 Tage wie die Admin-Liste.
+  const seit = Math.floor(Date.now() / 1000) - 30 * 24 * 60 * 60;
   const ergebnis = { geprueft: 0, versendet: 0, wartet: 0, fehler: [] as string[] };
   let versendet = 0;
 
+  // Erst sammeln, dann älteste zuerst: Stripe liefert neueste zuerst, und bei mehr als
+  // MAX_JE_LAUF sendebereiten Bestellungen müssen die fristkritischen zuerst raus.
+  const kandidaten: Stripe.Checkout.Session[] = [];
   for await (const sitzung of stripe.checkout.sessions.list({
     created: { gte: seit },
     limit: 100,
     expand: ['data.payment_intent'],
   })) {
-    if (sitzung.payment_status !== 'paid' || (sitzung.metadata?.['bestellnummer'] ?? '') === '') {
-      continue;
+    if (sitzung.payment_status === 'paid' && (sitzung.metadata?.['bestellnummer'] ?? '') !== '') {
+      kandidaten.push(sitzung);
     }
+  }
+  kandidaten.sort((a, b) => a.created - b.created);
+
+  for (const sitzung of kandidaten) {
     ergebnis.geprueft += 1;
     try {
       const daten = sitzungsDaten(sitzung);
       const marker = await deps.holeMarker(daten);
-      const entscheidung = entscheideVersand(marker, deps.jetzt());
-      if (entscheidung === 'senden' || entscheidung === 'unbereit') {
-        // 'unbereit' (Phase A verpasst, z. B. Webhook-Ausfall): nachholen und
-        // direkt versenden – die Auto-Frist ist dann ohnehin überschritten.
+      const jetzt = deps.jetzt();
+      const entscheidung = entscheideVersand(marker, jetzt);
+      // 'unbereit' = Phase A (noch) nicht abgeschlossen: der Webhook läuft gerade oder Stripe
+      // stellt erneut zu. Erst nachholen, wenn die Auto-Frist seit Zahlungseingang (Marker
+      // `bestaetigt`, sonst Sitzungserstellung) abgelaufen ist – vorher bleiben Freigabefenster
+      // und Stripe-Retry erhalten.
+      const anker = marker.bestaetigt !== undefined ? new Date(marker.bestaetigt).getTime() : sitzung.created * 1000;
+      const fristAbgelaufen = jetzt.getTime() - anker >= BERICHT_VERSAND.autoVersandNachStunden * 60 * 60 * 1000;
+      if (entscheidung === 'senden' || (entscheidung === 'unbereit' && fristAbgelaufen)) {
         if (versendet >= MAX_JE_LAUF) {
           ergebnis.wartet += 1;
           continue;
@@ -64,7 +81,7 @@ export async function GET(request: Request): Promise<NextResponse> {
         } else {
           ergebnis.fehler.push(daten.bestellnummer);
         }
-      } else if (entscheidung === 'warten') {
+      } else if (entscheidung === 'warten' || entscheidung === 'unbereit') {
         ergebnis.wartet += 1;
       }
     } catch (fehler) {

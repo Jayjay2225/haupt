@@ -6,27 +6,31 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   LEAD_STATUS,
   POST_STAENDE,
+  VERSAND_SPERRE_MS,
   bereiteBestellungVor,
   berechneKennzeichen,
   entscheideVersand,
   erfuelleBestellung,
+  gutachtenDaten,
   ladeStatus,
   rueckfrageNoetig,
   sitzungsDaten,
   verarbeiteStripeEreignis,
+  versandLaeuft,
   versendeBericht,
 } from '../lib/erfuellung';
 import type { AuslieferungsMarker, ErfuellungsAbhaengigkeiten, SitzungsDaten } from '../lib/erfuellung';
 import type { CaseDraft } from '../lib/draft';
 import { fallAlsMetadaten } from '../lib/fall-kodierung';
 import type { MailNachricht } from '../lib/versand';
-import { vollstaendigerDraft } from './bestellung.test';
+import { vollstaendigerDraft } from './helfer';
 
 const JETZT = new Date('2026-09-20T10:00:00.000Z');
 
 interface SitzungsOptionen {
   post?: boolean;
   draft?: CaseDraft;
+  bestellnummer?: string;
 }
 
 function fakeSitzung(payment_status: 'paid' | 'unpaid' = 'paid', optionen: SitzungsOptionen = {}): Stripe.Checkout.Session {
@@ -40,7 +44,7 @@ function fakeSitzung(payment_status: 'paid' | 'unpaid' = 'paid', optionen: Sitzu
     customer_details: { email: 'muster@example.org', name: 'Muster Person' },
     payment_intent: 'pi_123',
     metadata: {
-      bestellnummer: 'RR-2026-ABCDEF',
+      bestellnummer: optionen.bestellnummer ?? 'RR-2026-ABCDEF',
       kundenname: 'Muster Person',
       post: optionen.post === true ? '1' : '0',
       ...fallAlsMetadaten(draft),
@@ -57,19 +61,22 @@ interface Protokoll {
   berichte: number;
   druckvorlagen: number;
   marker: AuslieferungsMarker;
+  /** Zeitpunkte, mit denen erzeugeBericht aufgerufen wurde (Stichtag/„Erstellt am“). */
+  erstellzeiten: Date[];
 }
 
 function neuesProtokoll(): Protokoll {
-  return { mails: [], berichte: 0, druckvorlagen: 0, marker: {} };
+  return { mails: [], berichte: 0, druckvorlagen: 0, marker: {}, erstellzeiten: [] };
 }
 
 function fakeAbhaengigkeiten(protokoll: Protokoll, berichtFehler?: string): ErfuellungsAbhaengigkeiten {
   return {
-    erzeugeBericht: async (daten: SitzungsDaten, ordner: string) => {
+    erzeugeBericht: async (daten: SitzungsDaten, ordner: string, jetzt: Date) => {
       if (berichtFehler !== undefined) {
         throw new Error(berichtFehler);
       }
       protokoll.berichte += 1;
+      protokoll.erstellzeiten.push(jetzt);
       const pfad = join(ordner, 'Gutachten_RR-2026-ABCDEF.pdf');
       writeFileSync(pfad, '%PDF-1.4 test');
       if (daten.postversand) {
@@ -233,12 +240,106 @@ describe('Zweiphasige Auslieferung (Prompt 13, Abschnitt 3; Prompt 14: Gutachten
     expect(LEAD_STATUS).not.toContain('Bericht gekauft');
   });
 
-  it('Erstkunden-Weg bleibt direkt (erfuelleBestellung liefert sofort aus)', async () => {
+  it('Erstkunden-Weg (EK-…) bleibt direkt: sofortige Auslieferung mit Erstkunden-Texten statt Preis', async () => {
     const protokoll = neuesProtokoll();
     const deps = fakeAbhaengigkeiten(protokoll);
-    const status = await erfuelleBestellung(sitzungsDaten(fakeSitzung()), deps);
+    const status = await erfuelleBestellung(sitzungsDaten(fakeSitzung('paid', { bestellnummer: 'EK-CODE1' })), deps);
     expect(status.mailVersendetAm).toBe(JETZT.toISOString());
     expect(protokoll.mails).toHaveLength(2);
+    expect(protokoll.mails[0]?.text).toContain('Erstkunden-Programm');
+    expect(protokoll.mails[0]?.text).not.toContain('vorab bezahlt');
+    expect(protokoll.mails[1]?.betreff).toBe('Ihr Gutachten ist da');
+    expect(protokoll.mails[1]?.text).toContain('Als Erstkunde zahlen Sie nichts');
+  });
+
+  it('Erstkunden-Fehlerpfad: keine Zahlungs-Mail an den Gratis-Kunden, interner Hinweis nennt den Erstkunden-Weg', async () => {
+    const protokoll = neuesProtokoll();
+    const deps = fakeAbhaengigkeiten(protokoll, 'Chromium nicht gefunden');
+    const status = await erfuelleBestellung(sitzungsDaten(fakeSitzung('paid', { bestellnummer: 'EK-CODE1' })), deps);
+    expect(status.mailVersendetAm).toBeUndefined();
+    expect(status.fehler?.[0]).toContain('Chromium nicht gefunden');
+    // Bestätigung an den Kunden, danach nur die interne Meldung – keine „Ihre Zahlung ist eingegangen“-Mail.
+    expect(protokoll.mails.map((m) => m.an)).toEqual(['muster@example.org', 'info@renten-rettung.de']);
+    expect(protokoll.mails[0]?.text).toContain('in wenigen Minuten');
+    expect(protokoll.mails[1]?.text).toContain('Erstkunden-Code eingelöst (kostenlos)');
+    expect(protokoll.mails[1]?.text).toContain('Freischaltcode ist wieder freigegeben');
+    expect(protokoll.marker.verzoegert).toBeUndefined();
+  });
+
+  it('Versand-Sperre: ein laufender paralleler Versand wird nicht wiederholt, eine verwaiste Sperre schon', async () => {
+    const protokoll = neuesProtokoll();
+    const deps = fakeAbhaengigkeiten(protokoll);
+    const daten = sitzungsDaten(fakeSitzung());
+    expect(await bereiteBestellungVor(daten, deps)).toBe('vorbereitet');
+    protokoll.marker.versandBegonnen = new Date(JETZT.getTime() - 60 * 1000).toISOString();
+    expect(versandLaeuft(protokoll.marker, JETZT)).toBe(true);
+    expect(entscheideVersand({ ...protokoll.marker, freigegeben: JETZT.toISOString() }, JETZT)).toBe('warten');
+    const mails = protokoll.mails.length;
+    const status = await versendeBericht(daten, deps);
+    expect(status.mailVersendetAm).toBeUndefined();
+    expect(protokoll.mails).toHaveLength(mails);
+    // Sperre älter als VERSAND_SPERRE_MS gilt als abgebrochener Lauf.
+    protokoll.marker.versandBegonnen = new Date(JETZT.getTime() - VERSAND_SPERRE_MS - 1000).toISOString();
+    expect(versandLaeuft(protokoll.marker, JETZT)).toBe(false);
+    const nachher = await versendeBericht(daten, deps);
+    expect(nachher.mailVersendetAm).toBe(JETZT.toISOString());
+    expect(protokoll.marker.versandBegonnen).toBe(JETZT.toISOString());
+    expect(protokoll.marker.ausgeliefert).toBe(JETZT.toISOString());
+  });
+
+  it('Phase B rechnet mit dem Zeitpunkt der Phase A (Marker erzeugt_am), nicht mit „jetzt“', async () => {
+    const protokoll = neuesProtokoll();
+    const deps = fakeAbhaengigkeiten(protokoll);
+    const daten = sitzungsDaten(fakeSitzung());
+    expect(await bereiteBestellungVor(daten, deps)).toBe('vorbereitet');
+    expect(protokoll.erstellzeiten[0]?.toISOString()).toBe(JETZT.toISOString());
+    // Andere Instanz: Dateistatus weg, Marker aus Phase A liegt in der Vergangenheit.
+    const phaseA = '2026-08-31T21:00:00.000Z';
+    protokoll.marker.erzeugt = phaseA;
+    process.env['AUSLIEFERUNG_VERZEICHNIS'] = mkdtempSync(join(tmpdir(), 'rr-instanz2-'));
+    const spaeter = { ...deps, jetzt: () => new Date('2026-09-01T09:00:00.000Z') };
+    const status = await versendeBericht(daten, spaeter);
+    expect(status.mailVersendetAm).toBe('2026-09-01T09:00:00.000Z');
+    expect(protokoll.erstellzeiten[1]?.toISOString()).toBe(phaseA);
+  });
+
+  it('fehlender Marker nach dem Versand wird intern gemeldet (kein stiller Doppelversand-Risiko)', async () => {
+    const protokoll = neuesProtokoll();
+    const basis = fakeAbhaengigkeiten(protokoll);
+    const deps: ErfuellungsAbhaengigkeiten = {
+      ...basis,
+      setzeMarker: async (daten, patch) => {
+        if (patch.ausgeliefert !== undefined) {
+          throw new Error('Stripe nicht erreichbar');
+        }
+        await basis.setzeMarker(daten, patch);
+      },
+    };
+    const daten = sitzungsDaten(fakeSitzung());
+    expect(await bereiteBestellungVor(daten, deps)).toBe('vorbereitet');
+    const status = await versendeBericht(daten, deps);
+    expect(status.mailVersendetAm).toBe(JETZT.toISOString());
+    expect(status.fehler?.[0]).toContain('Marker ausgeliefert_am nicht gesetzt');
+    const intern = protokoll.mails.at(-1)!;
+    expect(intern.an).toBe('info@renten-rettung.de');
+    expect(intern.betreff).toContain('Marker fehlt nach Versand');
+    expect(intern.text).toContain('pi_123');
+  });
+
+  it('gutachtenDaten: Kalendertag in Europe/Berlin, Versichererangabe auch ohne Zuordnung', () => {
+    const spaetAbends = new Date('2026-06-30T22:30:00.000Z'); // 00:30 Berliner Zeit am 1. Juli
+    const zugeordnet = gutachtenDaten(sitzungsDaten(fakeSitzung()), spaetAbends);
+    expect(zugeordnet.bericht.erstelltAm).toBe('2026-07-01');
+    expect(zugeordnet.bericht.calc.meta.stichtag).toBe('2026-07');
+    expect(zugeordnet.kopf.datum).toBe('01.07.2026');
+    expect(zugeordnet.bericht.versichererAnzeigename).toBe('Allianz Lebensversicherungs-AG');
+    expect(zugeordnet.bericht.contract.versichererId).toBe('allianz-leben');
+    const fremd = gutachtenDaten(
+      sitzungsDaten(fakeSitzung('paid', { draft: { ...vollstaendigerDraft(), versicherer: 'Unbekannte Kasse 123' } })),
+      JETZT,
+    );
+    expect(fremd.bericht.contract.versichererId).toBe('unbekannt');
+    expect(fremd.bericht.versichererAnzeigename).toBe('Unbekannte Kasse 123 (nicht zugeordnet – Kennzahlen: Branchendurchschnitt)');
   });
 
   it('Phase-A-Fehler: interne Meldung, keine Kunden-Störung, Webhook meldet fehler (Stripe-Retry)', async () => {

@@ -179,16 +179,36 @@ describe('validiereSchritt (Assistent)', () => {
     expect(validiereSchritt('person', { ...basis, plz: '1234' })['plz']).toMatch(/fünfstellig/);
     expect(validiereSchritt('person', { ...basis, anrede: '' })['anrede']).toMatch(/Keine Anrede/);
     // Geburtsdatum 1990 bei Vertragsbeginn 1995: Eintrittsalter 5 → unplausibel.
-    expect(validiereSchritt('person', { ...basis, geburtsdatum: '1990-01-01' })['geburtsdatum']).toMatch(/Vertragsbeginn/);
-    expect(validiereSchritt('person', { ...basis, geburtsdatum: '14.03.1962' })['geburtsdatum']).toMatch(/Geburtsdatum/);
+    expect(validiereSchritt('person', { ...basis, geburtsdatum: '1990-01-01' })['geburtsdatum']).toMatch(/passt nicht zum Vertragsbeginn/);
+    // Intern strikt ISO (das Datumsfeld speichert so); ein anderes Format kann nur über einen manipulierten Link kommen.
+    expect(validiereSchritt('person', { ...basis, geburtsdatum: '14.03.1962' })['geburtsdatum']).toMatch(/Geburtsdatum angeben/);
+    expect(validiereSchritt('person', { ...basis, geburtsdatum: 'abc' })['geburtsdatum']).toMatch(/zum Beispiel 14\.03\.1962/);
+    expect(validiereSchritt('person', { ...basis, geburtsdatum: '1962-03-14' })).toEqual({});
     // Telefon bleibt freiwillig.
     expect(validiereSchritt('person', { ...basis, telefon: '' })).toEqual({});
     expect(kundenname(basis)).toBe('Erik Beispiel');
   });
 
+  it('übernimmt fremde Entwürfe nur feldweise mit Längenbegrenzung (Link, Stripe-Metadaten)', () => {
+    const draft = uebernehmeBekannteFelder({
+      versicherer: 'x'.repeat(1000),
+      beginn: '1995-10',
+      erstbeitrag: 250, // falscher Typ → ignoriert
+      unbekanntesFeld: 'egal',
+      auszahlungenListe: [{ monat: 'm'.repeat(100), betrag: '1.000' }, 'kaputt', null],
+    });
+    expect(draft.versicherer).toHaveLength(300);
+    expect(draft.beginn).toBe('1995-10');
+    expect(draft.erstbeitrag).toBe('');
+    expect('unbekanntesFeld' in draft).toBe(false);
+    expect(draft.auszahlungenListe).toEqual([{ monat: 'm'.repeat(40), betrag: '1.000' }]);
+    expect(draft.version).toBe(2);
+  });
+
   it('Eintrittsalter aus Geburtsdatum und Vertragsbeginn (volle Jahre)', () => {
     expect(eintrittsalter('1960-03-14', '1995-10')).toBe(35);
     expect(eintrittsalter('1960-11-14', '1995-10')).toBe(34);
+    expect(eintrittsalter('14.03.1960', '1995-10')).toBe(35);
     expect(eintrittsalter('', '1995-10')).toBeUndefined();
   });
 
@@ -197,6 +217,8 @@ describe('validiereSchritt (Assistent)', () => {
     expect(validiereSchritt('status', draft)['statusDatum']).toMatch(/vor dem Vertragsbeginn/);
     // Ohne Datum bleibt der Schritt gültig (Datum ist freiwillig).
     expect(validiereSchritt('status', { ...gueltigerDraft(), status: 'gekuendigt', statusDatum: '' })).toEqual({});
+    // Ein stehengebliebenes Datum blockiert einen laufenden Vertrag nicht (das Feld ist dort unsichtbar).
+    expect(validiereSchritt('status', { ...gueltigerDraft(), status: 'laufend', statusDatum: '1935-01' })).toEqual({});
     expect(vertragBeendet({ ...gueltigerDraft(), status: 'gekuendigt' })).toBe(true);
     expect(vertragBeendet({ ...gueltigerDraft(), status: 'abgelaufen' })).toBe(true);
     expect(vertragBeendet({ ...gueltigerDraft(), status: 'beitragsfrei' })).toBe(false);

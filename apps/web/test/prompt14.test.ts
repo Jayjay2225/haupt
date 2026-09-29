@@ -25,7 +25,7 @@ import { berichtVersand } from '../lib/emails';
 import { LEAD_STATUS, POST_STAENDE } from '../lib/erfuellung';
 import { preisblockText, preisblockZeilen } from '../lib/preisblock';
 import { videocallText } from '../lib/videocall';
-import { textInhalt } from './wording.test';
+import { textInhalt } from './helfer';
 
 const WEB = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = resolve(WEB, '../..');

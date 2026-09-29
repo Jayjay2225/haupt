@@ -5,9 +5,10 @@
  *
  * Aufruf: pnpm vorschau:bild
  */
-import { existsSync, readdirSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { chromium } from 'playwright-core';
+import { findeChromium } from '../src/pdf';
 
 const REPO = resolve(import.meta.dirname, '../../..');
 const beispiele = resolve(REPO, 'examples');
@@ -17,21 +18,6 @@ const html = readdirSync(beispiele)
   .pop();
 if (html === undefined) {
   throw new Error('Kein Musterfall-HTML gefunden – erst `pnpm --filter @rueckab/report beispiele` laufen lassen.');
-}
-
-function findeChromium(): string {
-  const kandidaten = [
-    process.env['CHROMIUM_PFAD'] ?? '',
-    '/opt/pw-browsers/chromium',
-    '/usr/bin/chromium',
-    '/usr/bin/chromium-browser',
-  ].filter((k) => k !== '');
-  for (const k of kandidaten) {
-    if (existsSync(k)) {
-      return k;
-    }
-  }
-  throw new Error('Chromium nicht gefunden (CHROMIUM_PFAD setzen).');
 }
 
 const browser = await chromium.launch({

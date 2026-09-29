@@ -16,11 +16,13 @@ export default function WiderrufsbelehrungSeite() {
         den es im Gutachten geht.
       </p>
       <p>
-        Der endgültige Text (Widerrufsrecht, Frist, Folgen, Muster-Widerrufsformular,
-        Erlöschen bei vollständiger Leistung mit Zustimmung) wird zusammen mit den AGB
-        anwaltlich erstellt, sobald das Geschäftsmodell entschieden ist. Solange kein
-        kostenpflichtiges Angebot aktiv ist, kommt über diese Website kein
-        widerrufsfähiger Vertrag zustande.
+        Mit der kostenpflichtigen Bestellung des Gutachtens kommt ein Fernabsatzvertrag
+        zustande; Verbraucherinnen und Verbrauchern steht dabei das gesetzliche
+        Widerrufsrecht zu. Der vollständige Belehrungstext (Widerrufsrecht, Frist, Folgen,
+        Muster-Widerrufsformular) wird anwaltlich erstellt und hier eingesetzt. Wie in der
+        Bestellung erklärt, erlischt das Widerrufsrecht, wenn Sie ausdrücklich zustimmen,
+        dass wir mit der Erstellung des Gutachtens (digitaler Inhalt) sofort beginnen, und
+        Sie die Vertragsbestätigung erhalten haben.
       </p>
     </div>
   );

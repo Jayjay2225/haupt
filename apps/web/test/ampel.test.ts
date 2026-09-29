@@ -12,7 +12,7 @@ import { describe, expect, it } from 'vitest';
 import { berechneRueckabwicklung } from '@rueckab/calc';
 import type { CalcResult, ContractInput, RiskDefaults, SzenarioErgebnis } from '@rueckab/calc';
 import riskJson from '../../../data/risk-defaults.json';
-import { AMPEL, RECHTSWEG_SATZ } from '../config/ampel';
+import { AMPEL, MIN_RUECKKAUFSWERT_TEXT, RECHTSWEG_SATZ } from '../config/ampel';
 import { berichtKaufbar, bestimmeUebernahmeAmpel } from '../lib/ampel';
 import { insurersDaten } from '../lib/insurers-data';
 
@@ -122,7 +122,8 @@ describe('Gratis-Ansicht: nur die Ampel (Prompt 13, 0.4 und 7)', () => {
     }
     // Grau nennt die feste Mindestgrenze (Deck-Wortlaut) – aber kein Fall-Ergebnis.
     const grau = bestimmeUebernahmeAmpel(calcMit(10000), 'laufend', 10000);
-    expect(grau.zeile).toContain('30.000 €');
+    expect(grau.zeile).toContain(MIN_RUECKKAUFSWERT_TEXT);
+    expect(MIN_RUECKKAUFSWERT_TEXT).toBe('30.000 €');
     expect(grau.zeile).not.toMatch(/stelligen Bereich|Größenordnung|Spanne/);
   });
 
@@ -169,10 +170,11 @@ describe('Pflichtfälle aus Prompt 12, 1.6 (echte Datenbasis)', () => {
       .filter((j) => j.kennzeichen === 'estimated_branch');
     expect(markiert.length).toBe(2003 - 1986 + 1);
     const ampel = bestimmeUebernahmeAmpel(calc, contract.status, contract.rueckkaufswert?.betrag);
-    const mehrwert = calc.szenarien.basis.mehrwertGegenKuendigung ?? 0;
-    const erwartet =
-      mehrwert >= AMPEL.gruen.mehrwertMinAbsolut ? 'gruen' : mehrwert > AMPEL.gelb.mehrwertMin ? 'gelb' : 'rot';
-    expect(ampel.ampel).toBe(erwartet);
+    // Feste Erwartung statt Nachrechnung mit derselben Schwellenlogik (sonst tautologisch).
+    expect(calc.szenarien.basis.mehrwertGegenKuendigung).toBeGreaterThan(AMPEL.gruen.mehrwertMinAbsolut);
+    expect(ampel.ampel).toBe('gruen');
+    expect(ampel.grund).toBe('uebernahme');
+    expect(berichtKaufbar(ampel)).toBe(true);
   });
 
   it('Vertrag 03/2015, 100 €, Rückkaufswert nahe Beitragssumme: Gelb, Rot oder Grau (unter 30.000 €)', () => {

@@ -6,7 +6,7 @@
 export type JaNeinUnbekannt = 'ja' | 'nein' | 'unbekannt';
 
 export interface EligibilityInput {
-  /** ISO-Datum (YYYY-MM-DD) oder ISO-Monat (YYYY-MM), falls der Tag unbekannt ist. */
+  /** ISO-Datum (YYYY-MM-DD), ISO-Monat (YYYY-MM) oder nur das Jahr (YYYY), falls Tag bzw. Monat unbekannt sind. */
   vertragsschluss: string;
   vertragsart: 'kapital-lv' | 'private-rv' | 'fonds-lv' | 'fonds-rv' | 'rueckdeckung' | 'risiko-lv' | 'unbekannt';
   zustandekommen: 'policenmodell' | 'antragsmodell' | 'unbekannt';

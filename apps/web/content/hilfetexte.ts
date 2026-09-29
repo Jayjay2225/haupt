@@ -2,7 +2,8 @@
  * Hilfetexte „Wo finde ich das?“ (Prompt 14, Abschnitt 1.4) – ein Text je
  * Feld, Wortlaut aus dem Deck. Auf der Startseite öffnet ein Info-Symbol ein
  * Info-Fenster mit Text und Skizze (components/Hilfe.tsx, components/Skizze.tsx);
- * im Funnel erscheint derselbe Text als aufklappbare Zeile unter dem Feld.
+ * im Funnel erscheint derselbe Text als aufklappbare Zeile unter dem Feld –
+ * sofern kein `textStartseite` gesetzt ist (die Startseiten-Karte hat keine Schalter).
  * Die Skizzen sind schematisch (keine echten Versicherer-Dokumente).
  */
 
@@ -24,6 +25,8 @@ export type SkizzenArt = 'standmitteilung' | 'police' | 'nachtrag' | 'schreiben'
 export interface Hilfetext {
   titel: string;
   text: string;
+  /** Abweichender Text für das Info-Fenster der Startseite (dort gibt es keine Schalter). */
+  textStartseite?: string;
   skizze: SkizzenArt;
   /** Zeile der Skizze, die markiert wird (Beschriftung laut components/Skizze.tsx). */
   markierung: string;
@@ -45,6 +48,8 @@ export const HILFETEXTE: Record<HilfeFeld, Hilfetext> = {
   beitrag: {
     titel: 'Monatsbeitrag',
     text: 'Police: „Beitrag“ oder „Prämie“. Wenn Sie nur Ihren heutigen Beitrag kennen: eingeben und „heutiger Beitrag“ wählen. Vor 2002 in DM? Schalter umstellen.',
+    textStartseite:
+      'Police: „Beitrag“ oder „Prämie“ – für die Ampel der erste Monatsbeitrag. Bei Verträgen mit Beginn vor 2002 lesen wir ihn als DM, umschaltbar unter dem Feld; Sie sehen die gelesene Zahl unter dem Feld. Im Rechner können Sie stattdessen Ihren heutigen Beitrag angeben.',
     skizze: 'police',
     markierung: 'Beitrag',
   },

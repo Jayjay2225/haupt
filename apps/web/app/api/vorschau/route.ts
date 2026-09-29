@@ -21,6 +21,7 @@ import { VARIANTE } from '@/config/variante';
 import { bestimmeUebernahmeAmpel, berichtKaufbar, type UebernahmeAmpel } from '@/lib/ampel';
 import { draftZuEingaben } from '@/lib/berechnung';
 import { uebernehmeBekannteFelder } from '@/lib/draft';
+import { heuteBerlin } from '@/lib/format';
 import { findeVersichererId, insurersDaten } from '@/lib/insurers-data';
 import { begrenzt, clientSchluessel } from '@/lib/ratenlimit';
 
@@ -86,7 +87,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   const draft = uebernehmeBekannteFelder(roh as Record<string, unknown>);
-  const stichtag = new Date().toISOString().slice(0, 7);
+  const stichtag = heuteBerlin().slice(0, 7);
   try {
     const abbildung = draftZuEingaben(draft, findeVersichererId, stichtag);
     if (abbildung.fehler.length > 0) {

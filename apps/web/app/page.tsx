@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { BRAND, RANGE_TEXT } from '@/config/brand';
+import { MIN_RUECKKAUFSWERT_TEXT } from '@/config/ampel';
 import { BERICHT_PREIS_BRUTTO_EUR, POST_WERKTAGE_TEXT } from '@/config/business';
 import { GEPRUEFTE_POLICEN, KANZLEI_NAME } from '@/config/durchsetzung';
 import { VARIANTE } from '@/config/variante';
@@ -145,7 +146,7 @@ export default function Startseite() {
             <h2 id="gutachten-titel">Das steckt in Ihrem Gutachten</h2>
             <ul className="punkteliste merkmal-liste">
               <li>
-                <strong>Ihre Zahl.</strong> Was Ihr Vertrag rechnerisch wert ist – auf den Euro.
+                <strong>Ihre Zahl.</strong> Was Ihr Vertrag rechnerisch wert sein könnte – als Schätzung mit Bandbreite.
               </li>
               <li>
                 <strong>Der Vergleich.</strong> Rückkaufswert gegen Rechnung, als Balken. Sie sehen sofort,
@@ -253,7 +254,7 @@ export default function Startseite() {
             </p>
           </details>
           <details>
-            <summary>Was, wenn mein Rückkaufswert unter 30.000 € liegt?</summary>
+            <summary>Was, wenn mein Rückkaufswert unter {MIN_RUECKKAUFSWERT_TEXT} liegt?</summary>
             <p>
               Dann ist Ihr Vertrag für unser Verfahren zu klein. Lassen Sie sich von einem Anwalt
               Ihrer Wahl oder der Verbraucherzentrale beraten.

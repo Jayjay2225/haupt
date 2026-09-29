@@ -9,11 +9,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { BRAND } from '@/config/brand';
-import { KONDITIONEN_PLATZHALTER } from '@/config/durchsetzung';
+import {
+  KONDITIONEN_PLATZHALTER,
+  UNTERLAGEN_MAX_DATEIEN,
+  UNTERLAGEN_MAX_GESAMT,
+  UNTERLAGEN_MAX_GESAMT_TEXT,
+} from '@/config/durchsetzung';
 import { Kontrollkaestchen, TextFeld } from './funnel/fields';
 
-const MAX_DATEIEN = 5;
-const MAX_GROESSE = 8 * 1024 * 1024; // je Datei; die API begrenzt zusätzlich die Summe.
+/** Muss zur Prüfung in app/api/durchsetzung/route.ts passen (dort zusätzlich über den Dateikopf). */
+const ERLAUBTE_ENDUNG = /\.(pdf|jpe?g|png)$/i;
 
 export function DurchsetzungFormular() {
   const [name, setName] = useState('');
@@ -32,10 +37,35 @@ export function DurchsetzungFormular() {
     if (liste === null) {
       return;
     }
-    const neu = [...liste].filter((d) => d.size <= MAX_GROESSE).slice(0, MAX_DATEIEN);
+    setFehler(null);
+    const alle = [...liste];
+    const neu: File[] = [];
+    const falscherTyp: string[] = [];
+    let summe = 0;
+    for (const datei of alle) {
+      if (!ERLAUBTE_ENDUNG.test(datei.name)) {
+        falscherTyp.push(datei.name);
+        continue;
+      }
+      if (neu.length >= UNTERLAGEN_MAX_DATEIEN || summe + datei.size > UNTERLAGEN_MAX_GESAMT) {
+        continue;
+      }
+      neu.push(datei);
+      summe += datei.size;
+    }
     setDateien(neu);
-    if ([...liste].some((d) => d.size > MAX_GROESSE)) {
-      setFehler('Einzelne Dateien sind größer als 8 MB und wurden weggelassen.');
+    const hinweise: string[] = [];
+    if (falscherTyp.length > 0) {
+      hinweise.push(`Bitte nur PDF, JPG oder PNG – weggelassen: ${falscherTyp.join(', ')}.`);
+    }
+    const zuViel = alle.length - falscherTyp.length - neu.length;
+    if (zuViel > 0) {
+      hinweise.push(
+        `Die Unterlagen dürfen zusammen höchstens ${UNTERLAGEN_MAX_GESAMT_TEXT} groß sein (bis zu ${UNTERLAGEN_MAX_DATEIEN} Dateien); ${zuViel} Datei(en) wurden weggelassen – Fehlendes reichen Sie einfach nach.`,
+      );
+    }
+    if (hinweise.length > 0) {
+      setFehler(hinweise.join(' '));
     }
   }
 
@@ -65,7 +95,16 @@ export function DurchsetzungFormular() {
         daten.append('unterlagen', datei);
       }
       const antwort = await fetch('/api/durchsetzung', { method: 'POST', body: daten });
-      const json = (await antwort.json()) as { ok?: boolean; fehler?: string };
+      if (antwort.status === 413) {
+        // Die Plattform lehnt zu große Anfragen ab, bevor unsere Route läuft (kein JSON in der Antwort).
+        setFehler(
+          `Die Unterlagen sind zu groß (zusammen höchstens ${UNTERLAGEN_MAX_GESAMT_TEXT}). Bitte weniger oder kleinere Dateien senden – Fehlendes reichen Sie einfach nach.`,
+        );
+        setStand('offen');
+        return;
+      }
+      const istJson = antwort.headers.get('content-type')?.includes('application/json') ?? false;
+      const json: { ok?: boolean; fehler?: string } = istJson ? await antwort.json() : {};
       if (!antwort.ok || json.ok !== true) {
         setFehler(json.fehler ?? 'Das hat gerade nicht geklappt. Bitte später erneut versuchen.');
         setStand('offen');
@@ -113,7 +152,9 @@ export function DurchsetzungFormular() {
       />
       <div className="feld">
         <label htmlFor="du-unterlagen">Unterlagen (Police, letzte Standmitteilung – PDF oder Foto)</label>
-        <p className="erklaerung">Bis zu {MAX_DATEIEN} Dateien, je höchstens 8 MB. Fehlendes reichen Sie einfach nach.</p>
+        <p className="erklaerung">
+          Bis zu {UNTERLAGEN_MAX_DATEIEN} Dateien, zusammen höchstens {UNTERLAGEN_MAX_GESAMT_TEXT}. Fehlendes reichen Sie einfach nach.
+        </p>
         <input
           id="du-unterlagen"
           type="file"

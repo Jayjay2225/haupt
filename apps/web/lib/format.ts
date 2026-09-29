@@ -24,17 +24,39 @@ export function parseDecimalDe(eingabe: string): number | null {
     return null;
   }
   // Ein einzelner Punkt mit ein bis zwei Nachkommastellen ist ein (englischer)
-  // Dezimalpunkt, kein Tausendertrennzeichen: „12345.67“ → 12345,67.
-  if (/^-?\d+\.\d{1,2}$/.test(bereinigt)) {
+  // Dezimalpunkt, kein Tausendertrennzeichen: „12345.67“ → 12345,67, „.5“ → 0,5.
+  if (/^-?\d*\.\d{1,2}$/.test(bereinigt)) {
     const direkt = Number(bereinigt);
     return Number.isFinite(direkt) ? direkt : null;
   }
-  if (!/^-?[\d.]*,?\d*$/.test(bereinigt) || !/\d/.test(bereinigt)) {
+  // Tausenderpunkte nur als Dreiergruppen hinter mindestens einer Ziffer; gemischte
+  // Punktfolgen wie „1.234.56“ sind Tippfehler und werden nicht stillschweigend gelesen.
+  if (!/^-?(?:\d+(?:\.\d{3})*)?(?:,\d*)?$/.test(bereinigt) || !/\d/.test(bereinigt)) {
     return null;
   }
   const normalisiert = bereinigt.replace(/\./g, '').replace(',', '.');
   const wert = Number(normalisiert);
   return Number.isFinite(wert) ? wert : null;
+}
+
+/**
+ * Kalendertag (ISO YYYY-MM-DD) zum Zeitpunkt `jetzt` in Europe/Berlin – Serverless
+ * läuft in UTC; Stichtag, „Erstellt am“ und Ablauftage meinen den deutschen Tag.
+ */
+export function heuteBerlin(jetzt: Date = new Date()): string {
+  const teile = new Intl.DateTimeFormat('de-DE', {
+    timeZone: 'Europe/Berlin',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(jetzt);
+  const wert = (typ: Intl.DateTimeFormatPartTypes): string => teile.find((t) => t.type === typ)?.value ?? '';
+  return `${wert('year')}-${wert('month')}-${wert('day')}`;
+}
+
+/** Prozentangabe, wie Menschen sie tippen: „5“, „5 %“, „5,5%“ → Zahl; sonst null. */
+export function parseProzentDe(eingabe: string): number | null {
+  return parseDecimalDe(eingabe.replace(/%/g, ''));
 }
 
 /**

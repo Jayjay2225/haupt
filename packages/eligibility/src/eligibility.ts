@@ -47,28 +47,34 @@ export function pruefeEignung(input: EligibilityInput, regelwerk: Regelwerk): El
     }
   };
 
-  // Grenzmonate: Bei Monatsangabe entscheidet der genaue Tag (vor der
-  // Regime-Prüfung erfasst, damit der Hinweis auch bei Ausschluss erscheint).
-  const grenzmonatJuli94 = input.vertragsschluss === '1994-07';
+  // Grenzmonate und Grenzjahre: Bei Monats- oder Jahresangabe entscheidet der
+  // genaue Tag (vor der Regime-Prüfung erfasst, damit der Hinweis auch bei
+  // Ausschluss erscheint).
+  const nurJahr = /^\d{4}$/.test(input.vertragsschluss);
+  const grenzmonatJuli94 = input.vertragsschluss === '1994-07' || input.vertragsschluss === '1994';
   if (grenzmonatJuli94) {
     hinweise.push({
-      text: 'Vertragsschluss im Juli 1994: Maßgeblich ist der genaue Tag (Stichtag 29.07.1994). Die Einordnung unterstellt vorsorglich einen Vertragsschluss ab dem 29.07.1994; die Ampel bleibt höchstens Gelb, bis das genaue Datum anhand der Police belegt ist.',
+      text: `Vertragsschluss ${nurJahr ? 'nur mit Jahresangabe 1994' : 'im Juli 1994'}: Maßgeblich ist der genaue Tag (Stichtag 29.07.1994). Die Einordnung unterstellt vorsorglich einen Vertragsschluss ab dem 29.07.1994; die Ampel bleibt höchstens Gelb, bis das genaue Datum anhand der Police belegt ist.`,
       regelIds: ['R-REGIME-VOR1994', 'R-REGIME-A'],
     });
     benoetigteDokumente.add('Police mit genauem Vertragsschluss- bzw. Policierungsdatum');
-  }
-  // Für die Regelauswertung wird der Grenzmonat vorsorglich in den
-  // Anwendungsbereich gelegt (Kappung auf Gelb unten).
-  if (grenzmonatJuli94) {
+    // Für die Regelauswertung vorsorglich in den Anwendungsbereich legen (Kappung auf Gelb unten).
     input = { ...input, vertragsschluss: '1994-07-29' };
   }
-  const grenzmonatDez04 = input.vertragsschluss === '2004-12';
+  // Dezember 2004: nur die 14-Tage-Angabe hängt am genauen Tag (R-FEHLER-FRIST-ZU-KURZ
+  // ab 08.12.2004, R-OK-BELEHRUNG davor) – ohne 14-Tage-Belehrung ändert der Tag nichts.
+  const grenzmonatDez04 =
+    (input.vertragsschluss === '2004-12' || input.vertragsschluss === '2004') && input.belehrungFrist === '14-tage';
   if (grenzmonatDez04) {
     hinweise.push({
-      text: 'Vertragsschluss im Dezember 2004: Für die maßgebliche Widerspruchsfrist (14 oder 30 Tage) entscheidet der genaue Tag (Gesetzesänderung zum 08.12.2004). Die Ampel bleibt höchstens Gelb, bis das genaue Datum anhand der Police belegt ist.',
+      text: `Vertragsschluss ${nurJahr ? 'nur mit Jahresangabe 2004' : 'im Dezember 2004'}: Für die maßgebliche Widerspruchsfrist (14 oder 30 Tage) entscheidet der genaue Tag (Gesetzesänderung zum 08.12.2004). Die Einordnung unterstellt vorsorglich einen Vertragsschluss ab dem 08.12.2004; die Ampel bleibt höchstens Gelb, bis das genaue Datum anhand der Police belegt ist.`,
       regelIds: ['R-FEHLER-FRIST-ZU-KURZ'],
     });
     benoetigteDokumente.add('Police mit genauem Vertragsschluss- bzw. Policierungsdatum');
+    if (nurJahr) {
+      // Wie beim Monat Dezember (Monatsmitte liegt nach dem 08.12.): vorsorglich in den Anwendungsbereich der 30-Tage-Frist legen.
+      input = { ...input, vertragsschluss: '2004-12-08' };
+    }
   }
 
   // 1. Regime bestimmen (Regeln mit folge.typ regime/ausschluss auf Regime-Ebene).
@@ -93,6 +99,24 @@ export function pruefeEignung(input: EligibilityInput, regelwerk: Regelwerk): El
     rulesStand: regelwerk.stand,
   };
 
+  // 2. Globale Ausschlüsse (z. B. reine Risikolebensversicherung) gelten für
+  //    jedes Regime – auch vor dem 29.07.1994, wo der Regime-Ausschluss sonst
+  //    zur Gelb-Einordnung mit Prüfweg führt.
+  for (const regel of regelwerk.regeln) {
+    if (regel.folge.typ === 'ausschluss' && regel.regime === 'alle' && passt(regel)) {
+      nutze(regel, begruendungen);
+      return {
+        ampel: 'rot',
+        regime,
+        begruendungen,
+        hinweise,
+        benoetigteDokumente: [...benoetigteDokumente],
+        angewendeteRegeln: angewendet,
+        meta,
+      };
+    }
+  }
+
   if (regimeAusschluss !== undefined) {
     nutze(regimeAusschluss, begruendungen);
     // Vor dem 29.07.1994 ist der Policenmodell-Widerspruch ausgeschlossen, der
@@ -105,6 +129,12 @@ export function pruefeEignung(input: EligibilityInput, regelwerk: Regelwerk): El
         regelIds: ['R-REGIME-VOR1994'],
       });
       benoetigteDokumente.add('Police und Belehrungstexte (Widerruf nach § 8 Abs. 4 VVG i.d.F. 1990)');
+      // Regimeunabhängige Hinweise (z. B. Rückdeckung) gelten auch hier.
+      for (const regel of regelwerk.regeln) {
+        if (regel.folge.typ === 'hinweis' && regel.regime === 'alle' && passt(regel)) {
+          nutze(regel, hinweise);
+        }
+      }
       return {
         ampel: 'gelb',
         regime: 'keins',
@@ -124,22 +154,6 @@ export function pruefeEignung(input: EligibilityInput, regelwerk: Regelwerk): El
       angewendeteRegeln: angewendet,
       meta,
     };
-  }
-
-  // 2. Globale Ausschlüsse (z. B. reine Risikolebensversicherung).
-  for (const regel of regelwerk.regeln) {
-    if (regel.folge.typ === 'ausschluss' && regel.regime === 'alle' && passt(regel)) {
-      nutze(regel, begruendungen);
-      return {
-        ampel: 'rot',
-        regime,
-        begruendungen,
-        hinweise,
-        benoetigteDokumente: [...benoetigteDokumente],
-        angewendeteRegeln: angewendet,
-        meta,
-      };
-    }
   }
 
   // 3. Hinweis- und Methodik-Regeln (regime-gefiltert) einsammeln.

@@ -3,6 +3,7 @@
  * Sparanteil (CALC-SPEC Abschnitt 3).
  */
 import type { BeitragsMonat } from './beitragsreihe';
+import { VERTRAGSART_TEXT, zahlDe } from './format';
 import { jahrVonIndex, indexZuIso } from './monat';
 import { stufenwertFuerMonat } from './zinsreihe';
 import type {
@@ -54,7 +55,7 @@ function risikoanteilAusDefaults(
     prozent,
     annahme: {
       code: 'RISIKOANTEIL_PAUSCHAL',
-      text: `Risikoanteil pauschal ${prozent} % des Beitrags (Vertragsart ${input.vertragsart}, ${alterText}, Szenarioband ${szenario}); Modellannahme aus data/risk-defaults.json, durch Vertragswerte ersetzbar.`,
+      text: `Risikoanteil pauschal ${zahlDe(prozent, 0, 2)} % des Beitrags (${VERTRAGSART_TEXT[input.vertragsart]}, ${alterText}, Szenarioband ${szenario}); Modellannahme aus data/risk-defaults.json, durch Vertragswerte ersetzbar.`,
     },
   };
 }
@@ -102,7 +103,7 @@ export function teileBeitraegeAuf(
     risikoProzent = overrides.risikoanteilProzent;
     annahmen.push({
       code: 'RISIKOANTEIL_OVERRIDE',
-      text: `Risikoanteil per Override auf ${risikoProzent} % gesetzt.`,
+      text: `Risikoanteil per Override auf ${zahlDe(risikoProzent, 0, 2)} % gesetzt.`,
     });
   } else {
     const ergebnis = risikoanteilAusDefaults(defaults, input, szenario);
@@ -119,10 +120,21 @@ export function teileBeitraegeAuf(
     annahmen.push({ code: 'ABSCHLUSS_OVERRIDE', text: 'Abschlusskosten per Override auf 0 gesetzt.' });
   } else if (reihe.length > 0) {
     const abschlussjahr = jahrVonIndex(reihe[0]!.index);
-    const zillmerPromille = stufenwertFuerMonat(
-      daten.rechnungsgrundlagen.hoechstzillmersatz.werte,
-      indexZuIso(reihe[0]!.index),
-    );
+    const zillmerWerte = daten.rechnungsgrundlagen.hoechstzillmersatz.werte;
+    let zillmerPromille = stufenwertFuerMonat(zillmerWerte, indexZuIso(reihe[0]!.index));
+    // Lücke am Reihenanfang (Abschluss vor dem ersten hinterlegten Satz, derzeit
+    // vor 1994): wie beim Zinsreihen-Fallback den nächstliegenden SPÄTEREN Wert
+    // nehmen – konservativ (Abschlusskosten mindern den Sparanteil) und als
+    // Näherung gekennzeichnet. Abschlusskosten mit 0 anzusetzen wäre
+    // anspruchserhöhend und bleibt der leeren Werteliste vorbehalten.
+    let naeherungAb: string | undefined;
+    if (zillmerPromille === undefined) {
+      const fruehester = [...zillmerWerte].sort((a, b) => a.gueltigAb.localeCompare(b.gueltigAb))[0];
+      if (fruehester !== undefined) {
+        zillmerPromille = fruehester.wert;
+        naeherungAb = fruehester.gueltigAb.slice(0, 4);
+      }
+    }
     if (zillmerPromille === undefined) {
       warnungen.push({
         code: 'ZILLMER_UNBEKANNT',
@@ -136,12 +148,17 @@ export function teileBeitraegeAuf(
         satz = akQuote.wert / 100;
         annahmen.push({
           code: 'ABSCHLUSS_QUOTE_DECKEL',
-          text: `Abschlusskosten mit der Abschlusskostenquote des Versicherers (${akQuote.wert} % der Beitragssumme) statt des Höchstzillmersatzes angesetzt.`,
+          text: `Abschlusskosten mit der Abschlusskostenquote des Versicherers (${zahlDe(akQuote.wert, 0, 2)} % der Beitragssumme) statt des Höchstzillmersatzes angesetzt.`,
+        });
+      } else if (naeherungAb !== undefined) {
+        warnungen.push({
+          code: 'ZILLMER_NAEHERUNG',
+          text: `Für das Abschlussjahr ${abschlussjahr} ist kein Höchstzillmersatz hinterlegt; ersatzweise wurde der früheste hinterlegte Satz (${zahlDe(zillmerPromille, 0, 2)} ‰ der Beitragssumme, gültig ab ${naeherungAb}) angesetzt – Näherung, anspruchsmindernd.`,
         });
       } else {
         annahmen.push({
           code: 'ABSCHLUSS_ZILLMER',
-          text: `Abschlusskosten mit dem Höchstzillmersatz von ${zillmerPromille} ‰ der Beitragssumme angesetzt (Abschlussjahr ${abschlussjahr}).`,
+          text: `Abschlusskosten mit dem Höchstzillmersatz von ${zahlDe(zillmerPromille, 0, 2)} ‰ der Beitragssumme angesetzt (Abschlussjahr ${abschlussjahr}).`,
         });
       }
       abschlussGesamt = satz * beitragssumme;
@@ -164,7 +181,7 @@ export function teileBeitraegeAuf(
   }
 
   let abschlussRest = abschlussGesamt;
-  let verwaltungFallbackJahre = 0;
+  const verwaltungFallbackJahre = new Set<number>();
   let gekuerzt = false;
   const monate: MonatsAufteilung[] = [];
 
@@ -193,7 +210,7 @@ export function teileBeitraegeAuf(
       overrides.verwaltungskostenProzent,
     );
     if (vq.fallback) {
-      verwaltungFallbackJahre += 1;
+      verwaltungFallbackJahre.add(jahr);
     }
     let verwaltung = haupt * (vq.prozent / 100);
     if (verwaltung > rest) {
@@ -213,10 +230,10 @@ export function teileBeitraegeAuf(
     });
   }
 
-  if (verwaltungFallbackJahre > 0) {
+  if (verwaltungFallbackJahre.size > 0) {
     annahmen.push({
       code: 'VERWALTUNG_FALLBACK',
-      text: `Für ${verwaltungFallbackJahre} Beitragsmonat(e) lag keine Verwaltungskostenquote des Versicherers vor; Fallback aus data/risk-defaults.json (Modellannahme).`,
+      text: `Für ${verwaltungFallbackJahre.size} Kalenderjahr(e) lag keine Verwaltungskostenquote des Versicherers vor; Fallback aus data/risk-defaults.json (Modellannahme).`,
     });
   }
   if (gekuerzt) {

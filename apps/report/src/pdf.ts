@@ -14,6 +14,12 @@ interface Start {
   args: string[];
 }
 
+/** CHROMIUM_PATH aus der Umgebung; leer zählt wie nicht gesetzt (Konvention wie AUSLIEFERUNG_VERZEICHNIS, RESEND_API_KEY). */
+function chromiumPfadAusEnv(): string | undefined {
+  const wert = process.env['CHROMIUM_PATH'];
+  return wert !== undefined && wert !== '' ? wert : undefined;
+}
+
 /**
  * Chromium-Start ermitteln: lokal ein installiertes Chromium (CHROMIUM_PATH,
  * Playwright-Verzeichnis); in Serverless-Umgebungen (Vercel/AWS Lambda,
@@ -22,17 +28,19 @@ interface Start {
  */
 async function chromiumStart(): Promise<Start> {
   const serverless = process.env['VERCEL'] !== undefined || process.env['AWS_LAMBDA_FUNCTION_NAME'] !== undefined;
-  if (serverless && process.env['CHROMIUM_PATH'] === undefined) {
+  if (serverless && chromiumPfadAusEnv() === undefined) {
     const paket = await import('@sparticuz/chromium');
     return { executablePath: await paket.default.executablePath(), args: [...paket.default.args, '--font-render-hinting=none'] };
   }
   return { executablePath: findeChromium(), args: ['--no-sandbox', '--disable-dev-shm-usage', '--font-render-hinting=none'] };
 }
 
-function findeChromium(): string {
+/** Lokal installiertes Chromium (CHROMIUM_PATH, Playwright-Verzeichnis) – auch vom Vorschau-Skript genutzt. */
+export function findeChromium(): string {
   const kandidaten: string[] = [];
-  if (process.env['CHROMIUM_PATH'] !== undefined) {
-    kandidaten.push(process.env['CHROMIUM_PATH']);
+  const eigenerPfad = chromiumPfadAusEnv();
+  if (eigenerPfad !== undefined) {
+    kandidaten.push(eigenerPfad);
   }
   kandidaten.push('/opt/pw-browsers/chromium');
   try {

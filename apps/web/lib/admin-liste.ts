@@ -52,7 +52,9 @@ export async function ladeBestellungen(stripe: Stripe, tage = 30): Promise<Beste
       bestellnummer: daten.bestellnummer,
       kundenname: daten.kundenname,
       email: daten.email,
-      bezahltAm: new Date(sitzung.created * 1000).toISOString(),
+      // Zahlungseingang ≈ Marker `bestaetigt` (Webhook nach payment_status 'paid'); Rückfall: Sitzungs-Erstellung
+      // (bei SEPA liegt der Zahlungseingang Tage nach der Sitzung).
+      bezahltAm: marker.bestaetigt ?? new Date(sitzung.created * 1000).toISOString(),
       marker,
       entscheidung: entscheideVersand(marker, deps.jetzt()),
       kennzeichen: (marker.kennzeichen ?? '').split(';').map((k) => k.trim()).filter((k) => k !== ''),
@@ -79,7 +81,11 @@ export function bestellungenAlsCsv(zeilen: BestellZeile[]): string {
     'lead_status',
     'kennzeichen',
   ];
-  const feld = (wert: string): string => `"${wert.replace(/"/g, '""')}"`;
+  /** CSV-Feld: `"` verdoppeln; Formel-Auslöser (=, +, -, @, Tab, CR) am Feldanfang entschärfen (CSV-Injektion in Tabellenprogrammen). */
+  const feld = (wert: string): string => {
+    const sicher = /^[=+\-@\t\r]/.test(wert) ? `'${wert}` : wert;
+    return `"${sicher.replace(/"/g, '""')}"`;
+  };
   const daten = zeilen.map((z) =>
     [
       z.bestellnummer,
@@ -97,5 +103,6 @@ export function bestellungenAlsCsv(zeilen: BestellZeile[]): string {
       .map(feld)
       .join(';'),
   );
-  return [kopf.join(';'), ...daten].join('\n');
+  // UTF-8-BOM: Excel (Windows) erkennt die Kodierung einer heruntergeladenen CSV nur daran.
+  return `\uFEFF${[kopf.join(';'), ...daten].join('\n')}`;
 }

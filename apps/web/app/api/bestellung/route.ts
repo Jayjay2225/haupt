@@ -14,6 +14,7 @@ import { berichtKaufbar, bestimmeUebernahmeAmpel } from '@/lib/ampel';
 import { draftZuEingaben } from '@/lib/berechnung';
 import { pruefeBestellung } from '@/lib/bestellung';
 import { BEGINN_MAX, BEGINN_MIN, kundenname, uebernehmeBekannteFelder } from '@/lib/draft';
+import { heuteBerlin } from '@/lib/format';
 import { findeVersichererId, insurersDaten } from '@/lib/insurers-data';
 import { begrenzt, clientSchluessel } from '@/lib/ratenlimit';
 import { erfuelleBestellung, erzeugeBericht } from '@/lib/erfuellung';
@@ -67,7 +68,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   // Verträge laufen im Anfrage-Modus (config/ampel.ts) über die individuelle
   // Prüfung, nicht über das Gutachten; der Zeitraum ist auf BRAND.range begrenzt.
   try {
-    const abbildung = draftZuEingaben(draft, findeVersichererId, new Date().toISOString().slice(0, 7));
+    const abbildung = draftZuEingaben(draft, findeVersichererId, heuteBerlin().slice(0, 7));
     if (abbildung.fehler.length > 0) {
       return NextResponse.json({ fehler: { fall: abbildung.fehler.join(' ') } }, { status: 422 });
     }
