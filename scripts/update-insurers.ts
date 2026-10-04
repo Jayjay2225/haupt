@@ -208,11 +208,34 @@ export function schreibeCoverage(daten: InsurersDaten): string {
       fehlendBranche.push(jahr);
     }
   }
+  // Lücken innerhalb der vorhandenen Spanne (der Rechenkern überbrückt sie als gekennzeichnete Näherung).
+  const luecken: number[] = [];
+  for (let jahr = branchenJahre[0] ?? 0; jahr <= (branchenJahre[branchenJahre.length - 1] ?? -1); jahr += 1) {
+    if (!branchenJahre.includes(jahr)) {
+      luecken.push(jahr);
+    }
+  }
+  const bereiche = (jahre: number[]): string => {
+    const teile: string[] = [];
+    for (let i = 0; i < jahre.length; i += 1) {
+      const von = jahre[i]!;
+      while (i + 1 < jahre.length && jahre[i + 1] === jahre[i]! + 1) {
+        i += 1;
+      }
+      const bis = jahre[i]!;
+      teile.push(von === bis ? String(von) : `${von}–${bis}`);
+    }
+    return teile.join(', ');
+  };
   zeilen.push('## Branchendurchschnitt Nettoverzinsung');
   zeilen.push('');
   zeilen.push(
     branchenJahre.length > 0
-      ? `Vorhanden: ${branchenJahre[0]}–${branchenJahre[branchenJahre.length - 1]} (${branchenJahre.length} Jahre).`
+      ? `Vorhanden: ${branchenJahre.length} Jahre zwischen ${branchenJahre[0]} und ${branchenJahre[branchenJahre.length - 1]}${
+          luecken.length > 0
+            ? `; Lücken innerhalb der Spanne: ${bereiche(luecken)} (bewusst offen, der Rechenkern überbrückt sie als gekennzeichnete Näherung – data/DATA_REPORT.md).`
+            : ' (lückenlos).'
+        }`
       : 'Noch keine Werte vorhanden.',
   );
   zeilen.push(

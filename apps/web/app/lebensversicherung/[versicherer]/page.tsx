@@ -6,6 +6,7 @@ import {
   alleVersicherer,
   branchenNettoReihe,
   insurersDaten,
+  ohneBehoerde,
   quellenDerBranchenreihe,
   quellenDerUnternehmensreihe,
   unternehmensNettoReihe,
@@ -203,7 +204,7 @@ export default async function VersichererSeite({ params }: { params: Promise<Par
           <ul className="punkteliste">
             {(eintrag.rechtsnachfolge ?? []).map((r) => (
               <li key={r.beschreibung}>
-                {r.beschreibung}{' '}
+                {ohneBehoerde(r.beschreibung)}{' '}
                 <span className="erklaerung">(Angabe wird registerfest verifiziert)</span>
               </li>
             ))}

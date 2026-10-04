@@ -677,8 +677,9 @@ export function SchrittBestellung({ draft, fehler, aendere, springeZu, bestellun
       <p className="erklaerung">
         Ihre Rechnungsadresse fragt die Zahlungsseite noch einmal ab. Zur Abwicklung übermitteln wir Ihren Namen, Ihre
         E-Mail-Adresse und Ihre Angaben aus dem Rechner – einschließlich Geburtsdatum, Anschrift und, falls angegeben,
-        Telefonnummer – an {ZAHLUNG.abwicklung}; dort bleiben sie mit der Bestellung verknüpft, bis das Gutachten
-        erstellt ist. Mehr dazu in der <Link href="/datenschutz">Datenschutzerklärung</Link>.
+        Telefonnummer – an {ZAHLUNG.abwicklung}; dort bleiben sie in den Metadaten Ihrer Zahlung gespeichert und werden
+        für Gutachten und Versand wieder ausgelesen. Speicherdauer und Einzelheiten in der{' '}
+        <Link href="/datenschutz">Datenschutzerklärung</Link>.
       </p>
     </>
   );

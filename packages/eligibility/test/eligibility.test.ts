@@ -119,6 +119,25 @@ describe('Eignungs-Check – Konstellationen', () => {
     expect(e.ampel).toBe('gruen');
     expect(e.benoetigteDokumente).toEqual([]);
     expect(e.hinweise.some((h) => h.regelIds.includes('R-FEHLER-FRIST-ZU-KURZ'))).toBe(false);
+    // Stehengebliebene Fristangabe ohne Belehrung zählt nicht (Antwort erst „ja, 14 Tage“, dann „nein“).
+    for (const vertragsschluss of ['2004-12', '2004']) {
+      const alt = pruefeEignung(frage({ vertragsschluss, belehrungVorhanden: 'nein', belehrungFrist: '14-tage' }), regelwerk);
+      expect(alt.ampel).toBe('gruen');
+      expect(alt.benoetigteDokumente).toEqual([]);
+      expect(alt.hinweise.some((h) => h.regelIds.includes('R-FEHLER-FRIST-ZU-KURZ'))).toBe(false);
+    }
+  });
+
+  it('7e. Dezember 2004 mit 14 Tagen UND weiterem wesentlichem Fehler → gelb mit Datumsvorbehalt (die Frist-Begründung hängt am Tag)', () => {
+    const e = pruefeEignung(
+      frage({ vertragsschluss: '2004-12', belehrungVorhanden: 'ja', belehrungFrist: '14-tage', belehrungForm: 'textform', hervorhebung: 'nein' }),
+      regelwerk,
+    );
+    expect(e.ampel).toBe('gelb');
+    expect(e.benoetigteDokumente).toContain('Police mit genauem Vertragsschluss- bzw. Policierungsdatum');
+    expect(e.hinweise.some((h) => h.regelIds.includes('R-FEHLER-FRIST-ZU-KURZ'))).toBe(true);
+    expect(regelIds(e)).toContain('R-FEHLER-HERVORHEBUNG');
+    expect(regelIds(e)).toContain('R-FEHLER-FRIST-ZU-KURZ');
   });
 
   it('7d. Nur Jahr 2004 mit 14-Tage-Belehrung → gelb statt rot; mit 30 Tagen weiter rot', () => {
@@ -162,6 +181,10 @@ describe('Eignungs-Check – Konstellationen', () => {
     expect(e.regime).toBe('keins');
     expect(regelIds(e)).toContain('R-AUS-RISIKO-LV');
     expect(e.benoetigteDokumente).toEqual([]);
+    // Grenzjahr 1994: Rot bleibt Rot; der Grenzjahr-Hinweis erscheint auch beim Ausschluss (gewollt seit Prompt 4).
+    const grenz = pruefeEignung(frage({ vertragsart: 'risiko-lv', vertragsschluss: '1994' }), regelwerk);
+    expect(grenz.ampel).toBe('rot');
+    expect(regelIds(grenz)).toContain('R-AUS-RISIKO-LV');
   });
 
   it('11c. Rückdeckungsversicherung vor 1994 erhält den regimeunabhängigen Hinweis', () => {
@@ -219,6 +242,22 @@ describe('Eignungs-Check – Konstellationen', () => {
     expect(e.regime).toBe('alt-policenmodell');
     expect(e.benoetigteDokumente.join(' ')).toContain('Policierungsdatum');
     expect(regelIds(e)).not.toContain('R-REGIME-VOR1994');
+    // Auch mit ordnungsgemäßer Belehrung (sonst Rot) bleibt es Gelb: vor dem 29.07.1994 wäre es Gelb mit Prüfweg.
+    for (const vertragsschluss of ['1994', '1994-07']) {
+      const ok = pruefeEignung(
+        frage({ vertragsschluss, belehrungVorhanden: 'ja', belehrungFrist: '14-tage', belehrungForm: 'schriftform', hervorhebung: 'ja' }),
+        regelwerk,
+      );
+      expect(ok.ampel).toBe('gelb');
+      expect(regelIds(ok)).toContain('R-OK-BELEHRUNG');
+      expect(ok.benoetigteDokumente.join(' ')).toContain('Policierungsdatum');
+    }
+    expect(
+      pruefeEignung(
+        frage({ vertragsschluss: '1994-06', belehrungVorhanden: 'ja', belehrungFrist: '14-tage', belehrungForm: 'schriftform', hervorhebung: 'ja' }),
+        regelwerk,
+      ).ampel,
+    ).toBe('gelb');
   });
 
   it('15c. Nur Jahr außerhalb der Grenzjahre verhält sich wie der Monat der Jahresmitte', () => {

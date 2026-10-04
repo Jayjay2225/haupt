@@ -4,7 +4,7 @@
  * ohne Zahlungsbehauptung, interner Rettungsweg je Auslöser.
  */
 import { describe, expect, it } from 'vitest';
-import { berichtVerzoegert, internerFehlerHinweis, spaeterWeitermachen, vertragsbestaetigung } from '../lib/emails';
+import { berichtVersand, berichtVerzoegert, internerFehlerHinweis, spaeterWeitermachen, vertragsbestaetigung } from '../lib/emails';
 
 const LINKS = { agb: 'https://x.example/agb', widerruf: 'https://x.example/w' };
 
@@ -35,7 +35,21 @@ describe('Vertragsbestätigung', () => {
   it('gibt die Kundenerklärung wie in Schritt 11 wieder (Erlöschen mit Beginn der Erstellung)', () => {
     const text = vertragsbestaetigung('M', 'RR-1', LINKS).text;
     expect(text).toContain('Ihr Widerrufsrecht mit Beginn der Erstellung erlischt');
-    expect(text).not.toContain('sobald vollständig');
+    expect(text).not.toContain('vollständig geliefert');
+  });
+});
+
+describe('Gutachten-Mail', () => {
+  it('bietet die Übernahme nur an, wenn das Gutachten sie anbietet', () => {
+    const mit = berichtVersand('M', 'RR-1', 'https://x.example/r', false, 'https://x.example/d', false, true).text;
+    expect(mit).toContain('Nächster Schritt: Wir übernehmen.');
+    expect(mit).toContain('https://x.example/d');
+    const ohne = berichtVersand('M', 'RR-1', 'https://x.example/r', false, 'https://x.example/d', false, false).text;
+    expect(ohne).not.toContain('Wir übernehmen');
+    expect(ohne).not.toContain('Durchsetzung beauftragen');
+    expect(ohne).toContain('letzten Seite des Gutachtens');
+    // Standard (ohne Angabe) bleibt das Übernahme-Angebot – wie bisherige Aufrufer.
+    expect(berichtVersand('M', 'RR-1').text).toContain('Wir übernehmen');
   });
 });
 

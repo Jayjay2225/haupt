@@ -53,8 +53,9 @@ describe('Beitragsaufteilung', () => {
   });
 
   it('zählt für den Verwaltungskosten-Fallback Kalenderjahre, nicht Zahlungen; Texte de-DE und deutsch', () => {
-    const input = vertrag({ zahlweise: 'jaehrlich', beginn: '2000-01', stichtag: '2004-12', beitragszahlungBis: '2004-12' });
-    const reihe = baueBeitragsreihe(input).reihe; // 5 Jahresbeiträge
+    const input = vertrag({ zahlweise: 'monatlich', beginn: '2000-01', stichtag: '2004-12', beitragszahlungBis: '2004-12' });
+    const reihe = baueBeitragsreihe(input).reihe;
+    expect(reihe).toHaveLength(60); // 60 Zahlungen in 5 Kalenderjahren
     const { annahmen } = teileBeitraegeAuf(reihe, input, daten, defaults, 'basis');
     expect(annahmen.find((a) => a.code === 'VERWALTUNG_FALLBACK')?.text).toContain('Für 5 Kalenderjahr(e)');
     const risiko = annahmen.find((a) => a.code === 'RISIKOANTEIL_PAUSCHAL')?.text ?? '';

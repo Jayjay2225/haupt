@@ -67,16 +67,16 @@ function vormonat(iso: string): string {
  * Datums, ausgezahlt → der Monat selbst, sonst Stichtag.
  */
 function letzterZahlmonat(draft: CaseDraft, stichtag: string): string {
+  let monat = stichtag;
   if (draft.beitragszahlungBis !== '') {
-    return draft.beitragszahlungBis;
+    monat = draft.beitragszahlungBis;
+  } else if (draft.statusDatum !== '' && (draft.status === 'beitragsfrei' || draft.status === 'gekuendigt')) {
+    monat = vormonat(draft.statusDatum);
+  } else if (draft.statusDatum !== '' && draft.status === 'abgelaufen') {
+    monat = draft.statusDatum;
   }
-  if (draft.statusDatum !== '' && (draft.status === 'beitragsfrei' || draft.status === 'gekuendigt')) {
-    return vormonat(draft.statusDatum);
-  }
-  if (draft.statusDatum !== '' && draft.status === 'abgelaufen') {
-    return draft.statusDatum;
-  }
-  return stichtag;
+  // Wie der Rechenkern: nie über den Stichtag hinaus (ISO-Monate sind als Text vergleichbar).
+  return monat > stichtag ? stichtag : monat;
 }
 
 export function draftZuEingaben(
@@ -114,7 +114,7 @@ export function draftZuEingaben(
 
   const gesamtsumme = parseDecimalDe(draft.gesamtsummeLautMitteilung);
   const dynamikSatz = parseProzentDe(draft.dynamikSatz);
-  // Zahlungen je Jahr (leere Zahlweise gilt im Kern als monatlich, Einmalbeitrag als eine Zahlung).
+  // Zahlungen je Jahr (leere Zahlweise gilt im Kern als monatlich; der Einmalbeitrag wird unten gesondert behandelt).
   const jeJahr = draft.zahlweise === '' || draft.zahlweise === 'einmalbeitrag' ? 12 : ZAHLUNGEN_JE_JAHR[draft.zahlweise];
   // Dynamiksatz als Dezimalzahl – bei Einmalbeitrag ohne Wirkung, wie im Rechenkern.
   const satz =
@@ -153,8 +153,10 @@ export function draftZuEingaben(
     // demselben Wachstum wie im Rechenkern – so bleibt dessen Skalierung nahe Faktor 1 und es
     // entsteht kein unberechtigter Abweichungs-Warnhinweis.
     const monate = monateZwischen(draft.beginn, letzterZahlmonat(draft, stichtag));
-    const zahlungen = Math.max(1, Math.round((monate / 12) * jeJahr));
     const periode = 12 / jeJahr;
+    // Gleiche Zählung wie der Rechenkern (beitragsreihe.ts: vom Beginn bis zum letzten Zahlmonat je
+    // Periode); ein Einmalbeitrag ist genau eine Zahlung in Höhe der Beitragssumme.
+    const zahlungen = draft.zahlweise === 'einmalbeitrag' ? 1 : Math.max(1, Math.floor((monate - 1) / periode) + 1);
     let faktoren = 0;
     for (let k = 0; k < zahlungen; k += 1) {
       const vertragsjahr = Math.floor((k * periode) / 12) + 1;
@@ -177,7 +179,7 @@ export function draftZuEingaben(
       : { aktiv: false };
   if (draft.dynamik === 'ja' && (dynamikSatz === null || dynamikSatz <= 0)) {
     zusatzAnnahmen.push(
-      'Annahme: Eine Dynamik wurde angegeben, aber ohne Satz; gerechnet wurde ohne Erhöhungen (konservativ). Mit dem Satz aus Police oder Nachträgen wird die Zahl präziser.',
+      'Annahme: Eine Dynamik wurde angegeben, aber ohne Satz; gerechnet wurde ohne Erhöhungen. Mit dem Satz aus Police oder Nachträgen wird die Zahl präziser.',
     );
   }
   if (draft.dynamik === 'unbekannt') {
@@ -229,7 +231,12 @@ export function draftZuEingaben(
     draft.statusDatum === ''
   ) {
     zusatzAnnahmen.push(
-      'Annahme: Der Vertrag ist beendet, aber ohne Datum; gerechnet wurde so, als wären die Beiträge bis zum Stichtag weitergezahlt worden, und die erhaltenen Beträge wurden ohne Gegenverzinsung angesetzt. Beides lässt die Schätzung eher zu hoch ausfallen – mit dem Datum der Beendigung wird sie deutlich genauer.',
+      'Annahme: Der Vertrag ist beendet, aber ohne Datum; gerechnet wurde so, als wären die Beiträge bis zum Stichtag weitergezahlt worden, und die erhaltenen Beträge wurden ohne Gegenverzinsung angesetzt. Die Abweichung kann in beide Richtungen gehen – mit dem Datum der Beendigung wird die Schätzung deutlich genauer.',
+    );
+  }
+  if (draft.status === 'beitragsfrei' && draft.statusDatum === '') {
+    zusatzAnnahmen.push(
+      'Annahme: Der Vertrag ist beitragsfrei, aber ohne Datum; gerechnet wurde so, als wären die Beiträge bis zum Stichtag weitergezahlt worden. Mit dem Datum der Beitragsfreistellung aus dem Schreiben des Versicherers wird die Schätzung deutlich genauer.',
     );
   }
 

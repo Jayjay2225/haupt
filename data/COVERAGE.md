@@ -4,7 +4,7 @@ Automatisch erzeugt von `scripts/update-insurers.ts` (Stand 2026-09-29, data.ver
 
 ## Branchendurchschnitt Nettoverzinsung
 
-Vorhanden: 1980–2024 (37 Jahre).
+Vorhanden: 37 Jahre zwischen 1980 und 2024; Lücken innerhalb der Spanne: 1981–1984, 1986–1989 (bewusst offen, der Rechenkern überbrückt sie als gekennzeichnete Näherung – data/DATA_REPORT.md).
 Fehlend (Soll 1994–2025): 2025.
 
 ## Gesellschaften

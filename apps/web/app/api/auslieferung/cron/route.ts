@@ -64,11 +64,17 @@ export async function GET(request: Request): Promise<NextResponse> {
       const jetzt = deps.jetzt();
       const entscheidung = entscheideVersand(marker, jetzt);
       // 'unbereit' = Phase A (noch) nicht abgeschlossen: der Webhook läuft gerade oder Stripe
-      // stellt erneut zu. Erst nachholen, wenn die Auto-Frist seit Zahlungseingang (Marker
-      // `bestaetigt`, sonst Sitzungserstellung) abgelaufen ist – vorher bleiben Freigabefenster
-      // und Stripe-Retry erhalten.
-      const anker = marker.bestaetigt !== undefined ? new Date(marker.bestaetigt).getTime() : sitzung.created * 1000;
-      const fristAbgelaufen = jetzt.getTime() - anker >= BERICHT_VERSAND.autoVersandNachStunden * 60 * 60 * 1000;
+      // stellt erneut zu. Erst nachholen, wenn die Auto-Frist seit dem Zahlungseingang (Marker
+      // `bestaetigt`) abgelaufen ist. Fehlt der Marker, ist die Sitzungserstellung kein Anker
+      // (SEPA wird Tage später bestätigt): dann merkt sich der Cron den ersten Sichtkontakt
+      // (`gesehen_am`) und holt frühestens eine Auto-Frist später nach – Freigabefenster und
+      // Stripe-Retry bleiben erhalten.
+      let anker = marker.bestaetigt !== undefined ? Date.parse(marker.bestaetigt) : marker.gesehen !== undefined ? Date.parse(marker.gesehen) : Number.NaN;
+      if (entscheidung === 'unbereit' && Number.isNaN(anker)) {
+        await deps.setzeMarker(daten, { gesehen: jetzt.toISOString() });
+        anker = jetzt.getTime();
+      }
+      const fristAbgelaufen = !Number.isNaN(anker) && jetzt.getTime() - anker >= BERICHT_VERSAND.autoVersandNachStunden * 60 * 60 * 1000;
       if (entscheidung === 'senden' || (entscheidung === 'unbereit' && fristAbgelaufen)) {
         if (versendet >= MAX_JE_LAUF) {
           ergebnis.wartet += 1;

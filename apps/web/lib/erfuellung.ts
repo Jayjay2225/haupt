@@ -26,7 +26,7 @@ import { berechneRueckabwicklung } from '@rueckab/calc';
 import type { RiskDefaults } from '@rueckab/calc';
 import { pruefeEignung } from '@rueckab/eligibility';
 import type { Regelwerk } from '@rueckab/eligibility';
-import { formatDatum, htmlZuPdf, renderBerichtHtml, renderDruckvorlageHtml } from '@rueckab/report';
+import { formatDatum, htmlZuPdf, renderBerichtHtml, renderDruckvorlageHtml, uebernahmeMoeglich } from '@rueckab/report';
 import type { BerichtInput, KopfzeilenDaten } from '@rueckab/report';
 import riskJson from '../../../data/risk-defaults.json';
 import rulesJson from '../../../data/legal-rules.json';
@@ -70,6 +70,8 @@ export interface AuslieferungsStatus {
   mailWeg?: string;
   druckauftragGesendetAm?: string;
   verzoegerungGemeldetAm?: string;
+  /** Übernahme-Angebot im Gutachten (Grün/Gelb-knapp) – steuert den Text der Versand-Mail. */
+  uebernahme?: boolean;
   fehler?: string[];
 }
 
@@ -91,6 +93,8 @@ export interface Berichtsdatei {
   /** Druckvorlage (A4, beidseitig) – nur bei Postversand. */
   druckPfad?: string;
   druckDateiname?: string;
+  /** Bietet das Gutachten die Übernahme an (Ampel Grün oder Gelb-knapp)? Die Versand-Mail folgt dem Gutachten. */
+  uebernahme?: boolean;
 }
 
 /** Stand des Postversands (Admin-Spalte „Post“, Prompt 14, 3). */
@@ -123,6 +127,8 @@ export interface AuslieferungsMarker {
   postAm?: string;
   /** Versand begonnen (ISO-Zeit) – Sperre gegen parallelen Versand (Cron + Freigabe, zwei Zeitplaner). */
   versandBegonnen?: string;
+  /** Vom Cron erstmals ohne Phase A gesehen (ISO-Zeit) – Anker für die Nachholfrist, wenn kein Bestätigungs-Marker vorliegt. */
+  gesehen?: string;
 }
 
 export const LEAD_STATUS = ['Gutachten gekauft', 'Übernahme angefragt', 'Mandat', 'Vergleich/Urteil'] as const;
@@ -267,7 +273,7 @@ export async function erzeugeBericht(daten: SitzungsDaten, ordner: string, jetzt
   writeFileSync(resolve(ordner, `${name}.html`), html);
   const pfad = resolve(ordner, `${name}.pdf`);
   await htmlZuPdf(html, pfad, kopf);
-  const ergebnis: Berichtsdatei = { pfad, dateiname: `${name}.pdf` };
+  const ergebnis: Berichtsdatei = { pfad, dateiname: `${name}.pdf`, uebernahme: uebernahmeMoeglich(bericht) };
   if (daten.postversand) {
     const druckHtml = renderDruckvorlageHtml(bericht, adresse);
     writeFileSync(resolve(ordner, `${name}_Druck.html`), druckHtml);
@@ -304,6 +310,7 @@ function markerAusMetadaten(m: Record<string, string>): AuslieferungsMarker {
     ...(post !== undefined && (POST_STAENDE as readonly string[]).includes(post) ? { post: post as PostStand } : {}),
     ...((m['post_am'] ?? '') !== '' ? { postAm: m['post_am'] } : {}),
     ...((m['versand_begonnen_am'] ?? '') !== '' ? { versandBegonnen: m['versand_begonnen_am'] } : {}),
+    ...((m['gesehen_am'] ?? '') !== '' ? { gesehen: m['gesehen_am'] } : {}),
   };
 }
 
@@ -338,6 +345,7 @@ export function standardAbhaengigkeiten(stripe: Stripe): ErfuellungsAbhaengigkei
           ...(patch.post !== undefined ? { post_status: patch.post } : {}),
           ...(patch.postAm !== undefined ? { post_am: patch.postAm } : {}),
           ...(patch.versandBegonnen !== undefined ? { versand_begonnen_am: patch.versandBegonnen } : {}),
+          ...(patch.gesehen !== undefined ? { gesehen_am: patch.gesehen } : {}),
         },
       });
     },
@@ -566,6 +574,9 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
       if (bericht.druckPfad !== undefined) {
         status.druckDatei = bericht.druckPfad;
       }
+      if (bericht.uebernahme !== undefined) {
+        status.uebernahme = bericht.uebernahme;
+      }
       status.berichtErstelltAm = deps.jetzt().toISOString();
       speichereStatus(ordner, status);
     }
@@ -587,6 +598,7 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
       erstkunde,
       `${basisUrl()}/durchsetzung`,
       daten.postversand,
+      status.uebernahme ?? true,
     );
     const dateiname = status.berichtDatei.split('/').pop() ?? `${daten.bestellnummer}.pdf`;
     const ergebnis = await deps.sendeMail(
@@ -666,9 +678,10 @@ export async function erfuelleBestellung(daten: SitzungsDaten, deps: Erfuellungs
     const text = fehler instanceof Error ? fehler.message : String(fehler);
     status.fehler = [...(status.fehler ?? []), `${deps.jetzt().toISOString()}: ${text}`];
     speichereStatus(ordner, status);
-    // Verzögerungs-Mail an die Kundin bzw. den Kunden – Erstkunden bekommen ihre Antwort direkt im
-    // Browser („Code bleibt gültig“) und haben keinen automatischen Wiederholungsweg.
-    if (status.verzoegerungGemeldetAm === undefined && !erstkunde) {
+    // Verzögerungs-Mail an die Kundin bzw. den Kunden – auf dem Erstkunden-Weg in der Fassung
+    // ohne Zahlungs- und Fristbehauptung („Freischaltcode bleibt gültig“), weil die Bestätigung
+    // dort „in wenigen Minuten“ zugesagt hat.
+    if (status.verzoegerungGemeldetAm === undefined) {
       try {
         const info = berichtVerzoegert(daten.kundenname, daten.bestellnummer, erstkunde);
         await deps.sendeMail({ an: daten.email, betreff: info.betreff, text: info.text }, ordner);
@@ -747,6 +760,9 @@ export async function bereiteBestellungVor(
     status.berichtDatei = bericht.pfad;
     if (bericht.druckPfad !== undefined) {
       status.druckDatei = bericht.druckPfad;
+    }
+    if (bericht.uebernahme !== undefined) {
+      status.uebernahme = bericht.uebernahme;
     }
     status.berichtErstelltAm = erstellzeit.toISOString();
     speichereStatus(ordner, status);

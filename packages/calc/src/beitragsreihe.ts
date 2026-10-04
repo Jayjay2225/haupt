@@ -70,6 +70,9 @@ export function baueBeitragsreihe(input: ContractInput): BeitragsreihenErgebnis 
   if (erst <= 0) {
     throw new Error('Erstbeitrag muss größer 0 sein.');
   }
+  // Cent-genauer Vergleich: bei DM-Erstbeiträgen ist `erst` ein ungerundeter Quotient
+  // (100 DM = 51,129… €), der aktuelle Beitrag wird in Euro auf Cent angegeben.
+  const centGleich = (a: number, b: number): boolean => Math.round(a * 100) === Math.round(b * 100);
 
   // Dynamiksatz bestimmen.
   let satz = 0;
@@ -87,31 +90,34 @@ export function baueBeitragsreihe(input: ContractInput): BeitragsreihenErgebnis 
           termine += 1;
         }
       }
-      if (termine > 0 && input.aktuellerBeitrag === erst) {
-        // Beide Beiträge angegeben und gleich: der aktuelle Beitrag belegt, dass
-        // keine Erhöhungen stattfanden (0 % p. a.) – Warnhinweis statt „nicht verwertbar“.
-        satzProzent = 0;
-        warnungen.push({
-          code: 'DYNAMIK_OHNE_ERHOEHUNG',
-          text: `Dynamik ist als aktiv angegeben, der aktuelle Beitrag entspricht jedoch dem Erstbeitrag über ${termine} Erhöhungstermine – die Reihe wird ohne Erhöhungen gerechnet. Bitte Dynamik und Beitragshöhe prüfen.`,
-        });
-      } else if (termine > 0) {
-        satzProzent = (Math.pow(input.aktuellerBeitrag / erst, 1 / termine) - 1) * 100;
-        annahmen.push({
-          code: 'DYNAMIK_HERGELEITET',
-          text: `Dynamiksatz aus Erst- und aktuellem Beitrag über ${termine} Erhöhungstermine geometrisch hergeleitet: ${zahlDe(satzProzent, 2)} % p. a.`,
-        });
+      if (termine > 0) {
+        const hergeleitet = (Math.pow(input.aktuellerBeitrag / erst, 1 / termine) - 1) * 100;
+        if (centGleich(input.aktuellerBeitrag, erst) || Math.abs(hergeleitet) < 0.005) {
+          // Beiträge cent-gleich (oder Satz rundet auf 0,00 %): der aktuelle Beitrag belegt, dass
+          // keine Erhöhungen stattfanden – Warnhinweis statt „nicht verwertbar“.
+          satzProzent = 0;
+          warnungen.push({
+            code: 'DYNAMIK_OHNE_ERHOEHUNG',
+            text: `Dynamik ist als aktiv angegeben, der aktuelle Beitrag entspricht jedoch dem Erstbeitrag über ${termine} Erhöhungstermine – die Reihe wird ohne Erhöhungen gerechnet. Bitte Dynamik und Beitragshöhe prüfen.`,
+          });
+        } else {
+          satzProzent = hergeleitet;
+          annahmen.push({
+            code: 'DYNAMIK_HERGELEITET',
+            text: `Dynamiksatz aus Erst- und aktuellem Beitrag über ${termine} Erhöhungstermine geometrisch hergeleitet: ${zahlDe(satzProzent, 2)} % p. a.`,
+          });
+        }
       }
     }
     if (satzProzent === undefined) {
       warnungen.push({
         code: 'DYNAMIK_UNBEKANNT',
-        text: 'Dynamik ist aktiv, aber weder Satz noch aktueller Beitrag verwertbar – die Reihe wird ohne Erhöhungen gerechnet (konservativ).',
+        text: 'Dynamik ist aktiv, aber weder Satz noch aktueller Beitrag verwertbar – die Reihe wird ohne Erhöhungen gerechnet; mit Beitragssumme wird sie darauf skaliert, die Schätzung kann dann eher zu hoch ausfallen. Bitte den Dynamiksatz nachtragen.',
       });
       satzProzent = 0;
     }
     satz = satzProzent / 100;
-  } else if (!input.dynamik.aktiv && input.aktuellerBeitrag !== undefined && input.aktuellerBeitrag !== erst) {
+  } else if (!input.dynamik.aktiv && input.aktuellerBeitrag !== undefined && !centGleich(input.aktuellerBeitrag, erst)) {
     annahmen.push({
       code: 'BEITRAG_KONSTANT',
       text: 'Ohne Dynamik wird der Erstbeitrag als konstant angesetzt; der abweichende aktuelle Beitrag blieb unberücksichtigt.',

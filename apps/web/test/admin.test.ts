@@ -49,12 +49,24 @@ describe('Admin-Anmeldung und Sitzung', () => {
     expect(adminAutorisiert(undefined)).toBe(false);
   });
 
-  it('Cookie-Wert ist eine Ableitung, nicht das Passwort', () => {
-    expect(adminToken()).not.toContain('sehr-geheim');
-    expect(adminToken()).toMatch(/^[0-9a-f]{64}$/);
-    expect(adminCookieGueltig(adminToken())).toBe(true);
+  it('Cookie-Wert ist eine Ableitung mit Ablauf, nicht das Passwort', () => {
+    const JETZT = Date.parse('2026-09-29T12:00:00.000Z');
+    const token = adminToken(JETZT);
+    expect(token).not.toContain('sehr-geheim');
+    expect(token).toMatch(/^\d+\.[0-9a-f]{64}$/);
+    expect(adminCookieGueltig(token, JETZT)).toBe(true);
+    expect(adminCookieGueltig(token, JETZT + 11 * 60 * 60 * 1000)).toBe(true);
+    // Serverseitiger Ablauf nach ADMIN_SITZUNG_SEKUNDEN – unabhängig vom Browser-Cookie.
+    expect(adminCookieGueltig(token, JETZT + 13 * 60 * 60 * 1000)).toBe(false);
+    // Manipulierter Ablauf oder fremde Signatur gelten nicht.
+    const [, sig] = token.split('.');
+    expect(adminCookieGueltig(`${JETZT + 99 * 60 * 60 * 1000}.${sig}`, JETZT)).toBe(false);
+    expect(adminCookieGueltig(`${JETZT + 60_000}.${'a'.repeat(64)}`, JETZT)).toBe(false);
     expect(adminCookieGueltig('sehr-geheim')).toBe(false);
     expect(adminCookieGueltig(null)).toBe(false);
+    // Anderes Passwort → andere Signatur.
+    process.env['ADMIN_PASSWORT'] = 'anderes';
+    expect(adminCookieGueltig(token, JETZT)).toBe(false);
   });
 
   it('liest das Sitzungs-Cookie aus dem Cookie-Header (URL-kodiert, zwischen anderen Cookies)', () => {

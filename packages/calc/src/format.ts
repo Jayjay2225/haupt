@@ -21,7 +21,9 @@ export function zahlDe(x: number, nachkommastellen = 2, maxNachkommastellen = na
     });
     formate.set(schluessel, format);
   }
-  return format.format(x);
+  const text = format.format(x);
+  // Werte, die auf 0 runden, ohne Minuszeichen („-0,00“ → „0,00“).
+  return /^-0(?:,0+)?$/.test(text) ? text.slice(1) : text;
 }
 
 /** Betrag in Euro (1.234,56 €). */
@@ -49,6 +51,14 @@ export const STATUS_TEXT: Record<Vertragsstatus, string> = {
   beitragsfrei: 'beitragsfrei',
   gekuendigt: 'gekündigt',
   abgelaufen: 'abgelaufen/ausgezahlt',
+};
+
+/** Bezeichnung des Betrags im Feld `rueckkaufswert` je Vertragsstand (Gutachten, Angabentabelle). */
+export const RUECKKAUFSWERT_TEXT: Record<Vertragsstatus, string> = {
+  laufend: 'Aktueller Rückkaufswert',
+  beitragsfrei: 'Aktueller Rückkaufswert',
+  gekuendigt: 'Ausgezahlter Rückkaufswert',
+  abgelaufen: 'Ausgezahlte Ablaufleistung',
 };
 
 export const ZAHLWEISE_TEXT: Record<Zahlweise, string> = {

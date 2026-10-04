@@ -66,6 +66,21 @@ describe('Beitragsreihe', () => {
     // Ohne aktuellen Beitrag bleibt die bisherige Warnung.
     const ohne = baueBeitragsreihe(vertrag({ dynamik: { aktiv: true } }));
     expect(ohne.warnungen.some((w) => w.code === 'DYNAMIK_UNBEKANNT')).toBe(true);
+    // DM-Erstbeitrag: der umgerechnete Wert ist kein Cent-Betrag – Vergleich cent-genau.
+    for (const [dm, euro] of [[100, 51.13], [150, 76.69]] as const) {
+      const dmFall = baueBeitragsreihe(
+        vertrag({ beginn: '1995-01', stichtag: '2005-01', erstbeitrag: { betrag: dm, waehrung: 'DM' }, aktuellerBeitrag: euro, dynamik: { aktiv: true } }),
+      );
+      expect(dmFall.dynamiksatzProzent).toBe(0);
+      expect(dmFall.warnungen.some((w) => w.code === 'DYNAMIK_OHNE_ERHOEHUNG')).toBe(true);
+      expect(dmFall.annahmen.some((a) => a.code === 'DYNAMIK_HERGELEITET')).toBe(false);
+    }
+    // Ohne Dynamik gilt der cent-gleiche aktuelle Beitrag nicht als abweichend.
+    const konstant = baueBeitragsreihe(vertrag({ erstbeitrag: { betrag: 100, waehrung: 'DM' }, aktuellerBeitrag: 51.13 }));
+    expect(konstant.annahmen.some((a) => a.code === 'BEITRAG_KONSTANT')).toBe(false);
+    // Eine echte, kleine Erhöhung bleibt eine Herleitung.
+    const klein = baueBeitragsreihe(vertrag({ beginn: '2000-01', stichtag: '2010-01', aktuellerBeitrag: 100.1, dynamik: { aktiv: true } }));
+    expect(klein.annahmen.some((a) => a.code === 'DYNAMIK_HERGELEITET')).toBe(true);
   });
 
   it('formatiert Zahlen in Annahme- und Warntexten de-DE', () => {

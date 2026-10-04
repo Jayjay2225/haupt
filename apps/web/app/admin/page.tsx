@@ -25,8 +25,8 @@ function zeit(iso: string | undefined, format: Intl.DateTimeFormat = ZEIT_FORMAT
  * Plausibilisierungs-Kennzeichen; Freigabe mit einem Klick, Lead-Status
  * (2.3), Spalte „Post“ (Prompt 14, 3: gewünscht → gedruckt → versendet, mit
  * Datum, Druckvorlage zum Herunterladen) und CSV-Export. Zugang: Anmeldung
- * mit ADMIN_PASSWORT → HttpOnly-Cookie (zusätzlich zur Beta-Basic-Auth); der
- * Schlüssel steht nie in einer URL.
+ * mit ADMIN_PASSWORT → HttpOnly-Cookie mit Ablauf (zusätzlich zur
+ * Beta-Basic-Auth), Abmelden-Knopf; der Schlüssel steht nie in einer URL.
  */
 export default async function AdminSeite({
   searchParams,
@@ -84,6 +84,11 @@ export default async function AdminSeite({
         Stunden (Cron). Protokoll = Marker in den Stripe-Metadaten. Zeiten in deutscher Ortszeit.{' '}
         <a href="/api/admin/leads.csv">CSV-Export</a>
       </p>
+      <form method="post" action="/api/admin/abmelden" style={{ marginBottom: '1rem' }}>
+        <button type="submit" className="knopf">
+          Abmelden
+        </button>
+      </form>
       {meldung !== '' && (
         <div className="hinweis">
           <p style={{ margin: 0 }}>{meldung}</p>

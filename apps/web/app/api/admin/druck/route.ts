@@ -6,7 +6,8 @@
 import { readFileSync } from 'node:fs';
 import { NextResponse } from 'next/server';
 import { adminAnfrageAutorisiert } from '@/lib/admin';
-import { erzeugeDruckvorlage, sitzungsDaten } from '@/lib/erfuellung';
+import { erzeugeDruckvorlage, sitzungsDaten, standardAbhaengigkeiten } from '@/lib/erfuellung';
+import type { AuslieferungsMarker } from '@/lib/erfuellung';
 import { bestellungAktiv, stripeClient } from '@/lib/zahlung';
 
 export const runtime = 'nodejs';
@@ -23,9 +24,17 @@ export async function GET(request: Request): Promise<NextResponse> {
     return NextResponse.json({ fehler: 'Ungültige Anfrage.' }, { status: 400 });
   }
   try {
-    const sitzung = await stripeClient().checkout.sessions.retrieve(sitzungId);
+    const stripe = stripeClient();
+    const sitzung = await stripe.checkout.sessions.retrieve(sitzungId);
     const daten = sitzungsDaten(sitzung);
-    const datei = await erzeugeDruckvorlage(daten, new Date());
+    // Mit dem Zeitpunkt der Phase A rechnen (Marker erzeugt_am), damit die gedruckte Fassung der
+    // versendeten entspricht – das Deckblatt sichert „inhaltlich identisch“ zu.
+    const marker = await standardAbhaengigkeiten(stripe)
+      .holeMarker(daten)
+      .catch((): AuslieferungsMarker => ({}));
+    const erzeugt = marker.erzeugt !== undefined ? new Date(marker.erzeugt) : undefined;
+    const zeit = erzeugt !== undefined && !Number.isNaN(erzeugt.getTime()) ? erzeugt : new Date();
+    const datei = await erzeugeDruckvorlage(daten, zeit);
     return new NextResponse(readFileSync(datei.pfad), {
       headers: {
         'content-type': 'application/pdf',

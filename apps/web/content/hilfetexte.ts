@@ -3,7 +3,7 @@
  * Feld, Wortlaut aus dem Deck. Auf der Startseite öffnet ein Info-Symbol ein
  * Info-Fenster mit Text und Skizze (components/Hilfe.tsx, components/Skizze.tsx);
  * im Funnel erscheint derselbe Text als aufklappbare Zeile unter dem Feld –
- * sofern kein `textStartseite` gesetzt ist (die Startseiten-Karte hat keine Schalter).
+ * sofern kein `textStartseite` gesetzt ist (die Startseiten-Karte hat keinen Schalter „heutiger Beitrag“; DM/Euro ist dort bei Beginn vor 2002 umschaltbar).
  * Die Skizzen sind schematisch (keine echten Versicherer-Dokumente).
  */
 
@@ -25,7 +25,7 @@ export type SkizzenArt = 'standmitteilung' | 'police' | 'nachtrag' | 'schreiben'
 export interface Hilfetext {
   titel: string;
   text: string;
-  /** Abweichender Text für das Info-Fenster der Startseite (dort gibt es keine Schalter). */
+  /** Abweichender Text für das Info-Fenster der Startseite (dort gibt es keinen Schalter „heutiger Beitrag“). */
   textStartseite?: string;
   skizze: SkizzenArt;
   /** Zeile der Skizze, die markiert wird (Beschriftung laut components/Skizze.tsx). */

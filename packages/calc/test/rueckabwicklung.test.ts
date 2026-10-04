@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { berechneRueckabwicklung } from '../src/rueckabwicklung';
 import { zinseAuf } from '../src/nutzungen';
 import { monatsIndex } from '../src/monat';
+import { euroDe, monatDe, zahlDe } from '../src/format';
 import { riskDefaults, testDaten, vertrag } from './fixtures';
 import type { CalcResult, ContractInput } from '../src/types';
 
@@ -137,6 +138,17 @@ describe('Eigenschaften der Berechnung', () => {
     expect(ergebnis.szenarien.basis.nutzungen).toBeLessThan(0);
     expect(ergebnis.warnungen.some((w) => w.code === 'PLAUSIBILITAET_NUTZUNGEN')).toBe(false);
     expect(ergebnis.annahmen.find((a) => a.code === 'ZINS_OVERRIDE')?.text).toContain('-3,00 % p. a.');
+  });
+
+  it('zahlDe: de-DE, feste Nachkommastellen, keine negative Null', () => {
+    expect(zahlDe(1234.5)).toBe('1.234,50');
+    expect(zahlDe(-0.0018, 2)).toBe('0,00');
+    expect(zahlDe(-0.005, 2)).toBe('-0,01');
+    expect(zahlDe(-1.5, 2)).toBe('-1,50');
+    expect(zahlDe(5, 0, 2)).toBe('5');
+    expect(zahlDe(5.25, 0, 2)).toBe('5,25');
+    expect(euroDe(40000)).toBe('40.000,00 €');
+    expect(monatDe('2008-01')).toBe('01/2008');
   });
 
   it('setzt das Kein-Vorteil-Flag, wenn der Basiswert unter dem Rückkaufswert liegt', () => {

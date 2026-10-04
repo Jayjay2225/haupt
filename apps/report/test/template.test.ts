@@ -6,7 +6,7 @@ import { berechneRueckabwicklung } from '@rueckab/calc';
 import type { ContractInput, InsurersDaten, RiskDefaults } from '@rueckab/calc';
 import { pruefeEignung } from '@rueckab/eligibility';
 import type { Regelwerk } from '@rueckab/eligibility';
-import { GUTACHTEN_UNTERZEILE, VERKAUFEN_TITEL, renderBerichtHtml, renderDruckvorlageHtml, type BerichtInput } from '../src/template';
+import { GUTACHTEN_UNTERZEILE, VERKAUFEN_TITEL, renderBerichtHtml, renderDruckvorlageHtml, uebernahmeMoeglich, type BerichtInput } from '../src/template';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const daten = JSON.parse(readFileSync(resolve(REPO, 'data/insurers.json'), 'utf8')) as InsurersDaten;
@@ -127,6 +127,16 @@ describe('Berichts-Template (Prompt 12)', () => {
     );
     expect(gekuendigt).toContain('<td>gekündigt (seit/zum 06/2025)</td>');
     expect(gekuendigt).toContain('<td>vierteljährlich</td>');
+    // Der Betrag im Feld Rückkaufswert heißt bei beendeten Verträgen anders – wie im Rechenkern.
+    expect(gekuendigt).toContain('<th scope="row">Ausgezahlter Rückkaufswert</th>');
+    expect(gekuendigt).not.toContain('Aktueller Rückkaufswert');
+    expect(gekuendigt).not.toContain('Zum Vergleich – aktueller Rückkaufswert');
+    expect(gekuendigt).toContain('Ausgezahlter Rückkaufswert (bereits erhalten)');
+    const abgelaufen = renderBerichtHtml(beispielBericht('Erika Beispiel', '2004-12', { status: 'abgelaufen', statusDatum: '2025-06' }));
+    expect(abgelaufen).toContain('<th scope="row">Ausgezahlte Ablaufleistung</th>');
+    // Diagramm: kein Rückkaufswert-Balken neben Netto-Balken, die den Betrag schon abziehen.
+    expect(gekuendigt).not.toContain('Aktueller Rückkaufswert</text>');
+    expect(gekuendigt).toContain('aria-label="Geschätzter Netto-Wert');
   });
 
   it('beendeter Vertrag mit Rückkaufswert: kein Satz „mangels Angabe“', () => {
@@ -227,6 +237,22 @@ describe('Gutachten (Prompt 14, Abschnitte 0.6 und 3)', () => {
     expect(html).not.toContain('Die Durchsetzung über uns beauftragen');
     expect(html).toContain('Nächster Schritt: anwaltliche Beratung.');
     expect(html).toContain('für unser Verfahren kommt der Vertrag nach dieser Schätzung nicht in Frage');
+    // Auch Seite 1 und Abschnitt 1 behaupten keine Prüfung durch unsere Anwälte mehr.
+    expect(html).not.toContain('mit denen wir arbeiten, anhand Ihrer Unterlagen (letzte Seite)');
+    expect(html).not.toContain('Grundlage für unser Verfahren');
+    expect(html).toContain('prüft ein Rechtsanwalt Ihrer Wahl anhand Ihrer Unterlagen (letzte Seite)');
+    const gruen = renderBerichtHtml(beispielBericht('Erika Beispiel', '2004-12', { rueckkaufswert: { betrag: 30000 } }));
+    expect(gruen).toContain('mit denen wir arbeiten, anhand Ihrer Unterlagen (letzte Seite)');
+    expect(gruen).toContain('Grundlage für unser Verfahren');
+    // Ohne Rückkaufswert: kein Übernahme-Angebot, sondern Bitte um die Standmitteilung (wie berichtKaufbar der Website).
+    const ohneRkw = renderBerichtHtml(beispielBericht('Erika Beispiel', '2004-12', {}, true));
+    expect(ohneRkw).toContain('Gelb – ohne Rückkaufswert kein Vergleich möglich');
+    expect(ohneRkw).not.toContain('Nächster Schritt: Wir übernehmen.');
+    expect(ohneRkw).toContain('Nächster Schritt: Rückkaufswert nachreichen.');
+    expect(ohneRkw).not.toContain('Grundlage für unser Verfahren');
+    expect(uebernahmeMoeglich(beispielBericht('Erika Beispiel', '2004-12', {}, true))).toBe(false);
+    expect(uebernahmeMoeglich(beispielBericht('Erika Beispiel', '2004-12', { rueckkaufswert: { betrag: 30000 } }))).toBe(true);
+    expect(uebernahmeMoeglich(beispielBericht())).toBe(false);
     // Gekündigter Vertrag: ebenfalls kein Übernahme-Angebot (Rot laut Ampel).
     const gekuendigt = renderBerichtHtml(beispielBericht('Erika Beispiel', '2004-12', { status: 'gekuendigt', statusDatum: '2025-06' }));
     expect(gekuendigt).not.toContain('Nächster Schritt: Wir übernehmen.');

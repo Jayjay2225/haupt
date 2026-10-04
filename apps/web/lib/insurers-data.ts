@@ -54,10 +54,21 @@ const GENERISCHE_EINGABEN = new Set([
   'rv',
   'police',
   'vertrag',
+  'deutsche',
+  'deutscher',
+  'deutschland',
   // nach der Bindestrich-Normalisierung (siehe normalisiereName)
   'versicherungs ag',
   'lebensversicherungs ag',
 ]);
+
+/** Reine Gattungs-/Rechtsformphrasen („Lebensversicherung a.G.“, „Versicherungsverein“, „Versicherungs“). */
+const GENERISCH_MUSTER =
+  /^(?:(?:die|der|das) )?(?:lebens|renten)?versicherung(?:s|en)?(?:verein)?(?: ?(?:ag|a\.? ?g\.?|aktiengesellschaft|se|gmbh|auf gegenseitigkeit))?$/;
+
+function regexSicher(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 /** Kleinschreibung, Bindestriche als Leerzeichen, Leerraum vereinheitlicht – für Eingabe und Kandidaten gleich. */
 function normalisiereName(s: string): string {
@@ -75,15 +86,17 @@ function normalisiereName(s: string): string {
  */
 export function findeVersichererId(eingabe: string): string {
   const gesucht = normalisiereName(eingabe);
-  if (gesucht === '' || gesucht.length < 3 || GENERISCHE_EINGABEN.has(gesucht)) {
+  if (gesucht === '' || gesucht.length < 3 || GENERISCHE_EINGABEN.has(gesucht) || GENERISCH_MUSTER.test(gesucht)) {
     return 'unbekannt';
   }
   // Drei Zeichen: exakt oder als erstes Wort. Ab vier Zeichen: 1. exakter
-  // Name/Altname, 2. Namensanfang, 3. Teilzeichenkette (ab 6 Zeichen).
+  // Name/Altname, 2. Namensanfang, 3. Teilzeichenkette (ab 6 Zeichen) nur an
+  // Wortgrenzen – „deutsche“ trifft nicht „Deutscher Herold“.
+  const wortTreffer = new RegExp(`(^| )${regexSicher(gesucht)}( |$)`);
   const pruefungen: ((n: string) => boolean)[] =
     gesucht.length < 4
       ? [(n) => n === gesucht || n.startsWith(`${gesucht} `)]
-      : [(n) => n === gesucht, (n) => n.startsWith(gesucht), (n) => gesucht.length >= 6 && n.includes(gesucht)];
+      : [(n) => n === gesucht, (n) => n.startsWith(gesucht), (n) => gesucht.length >= 6 && wortTreffer.test(n)];
   for (const pruefung of pruefungen) {
     for (const v of insurersDaten.insurers) {
       const kandidaten = [v.kanonischerName, ...v.altnamen].map(normalisiereName);
@@ -129,8 +142,17 @@ export function anzeigeTitel(titel: string): string {
   if (/^BaFin, Statistik der Erstversicherungsunternehmen \d{4}, Lebensversicherer, Tabelle 160/.test(titel)) {
     return 'Aufsichtsstatistik der Erstversicherungsunternehmen (Lebensversicherer, Tabelle 160, Reinverzinsung = Nettoverzinsung der Kapitalanlagen)';
   }
-  return titel
-    .replace(/^([^,/]+?) \/ [^,]+, /, '$1 u. a., ')
+  return ohneBehoerde(titel.replace(/^([^,/]+?) \/ [^,]+, /, '$1 u. a., '));
+}
+
+/**
+ * Datentexte für die Website ohne Behördennamen (Wording-Regel „keine Behördennennung“):
+ * Quellentitel, Rechtsnachfolge-Beschreibungen. Die Originaltexte bleiben in data/insurers.json.
+ */
+export function ohneBehoerde(text: string): string {
+  return text
+    .replace(/BaFin-Kurznamen?/g, 'Kurzname in der Aufsichtsstatistik')
+    .replace(/BaFin-Statistik/g, 'Aufsichtsstatistik')
     .replace(/Bundesanstalt für Finanzdienstleistungsaufsicht|\bBaFin\b/g, 'Versicherungsaufsicht');
 }
 

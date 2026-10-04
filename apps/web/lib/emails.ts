@@ -56,7 +56,15 @@ export function berichtVersand(
   erstkunde: boolean = false,
   durchsetzungLink?: string,
   postversand: boolean = false,
+  uebernahme: boolean = true,
 ): EmailVorlage {
+  // Die Mail folgt dem Gutachten: Übernahme nur, wenn der Übernahme-Kasten auf der letzten Seite steht.
+  const naechsterSchritt = uebernahme
+    ? `Nächster Schritt: Wir übernehmen. Spezialisierte Anwälte setzen sich für Sie mit dem Versicherer auseinander – Sie müssen nichts selbst verhandeln. Antworten Sie auf diese E-Mail oder klicken Sie hier:
+
+Durchsetzung beauftragen:
+${durchsetzungLink ?? '/durchsetzung'}`
+    : 'Nächster Schritt: Was nach dieser Schätzung sinnvoll ist, steht mit Begründung auf der letzten Seite des Gutachtens. Fragen dazu beantworten wir gern – antworten Sie einfach auf diese E-Mail.';
   const rechnung = erstkunde
     ? 'Als Erstkunde zahlen Sie nichts. Im Gegenzug bitten wir Sie: Antworten Sie kurz auf diese E-Mail – war das Gutachten verständlich, hat es Ihnen weitergeholfen? Wenn Sie mögen, geben Sie uns ein Zitat mit Vorname, Alter und Vertragsart frei; erst mit Ihrer dokumentierten Einwilligung zeigen wir es.'
     : rechnungLink === undefined
@@ -71,10 +79,7 @@ export function berichtVersand(
 
 Ihre Zahl steht im Anhang (Bestellnummer ${aktenzeichen}): Jahr für Jahr aufgeschlüsselt, jede Rendite mit Quelle – und die Gegenposition des Versicherers.${post}
 
-Nächster Schritt: Wir übernehmen. Spezialisierte Anwälte setzen sich für Sie mit dem Versicherer auseinander – Sie müssen nichts selbst verhandeln. Antworten Sie auf diese E-Mail oder klicken Sie hier:
-
-Durchsetzung beauftragen:
-${durchsetzungLink ?? '/durchsetzung'}
+${naechsterSchritt}
 
 ${rechnung}
 

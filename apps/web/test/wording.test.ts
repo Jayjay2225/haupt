@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { GOOGLE_BESCHREIBUNGEN, GOOGLE_UEBERSCHRIFTEN, META_HAUPTTEXT } from '../content/anzeigen';
 import { BRAND, RANGE_TEXT } from '../config/brand';
-import { alleVersicherer, quellenDerBranchenreihe, quellenDerUnternehmensreihe } from '../lib/insurers-data';
+import { alleVersicherer, insurersDaten, ohneBehoerde, quellenDerBranchenreihe, quellenDerUnternehmensreihe } from '../lib/insurers-data';
 import { nurVerifizierte } from '../components/Testimonials';
 import { TESTIMONIALS } from '../content/testimonials';
 import {
@@ -142,16 +142,21 @@ describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
   });
 
   it('Quellenangaben der Versicherer-Seiten halten die Linien ein (Anzeigetitel aus insurers.json)', () => {
-    const texte = [quellenDerBranchenreihe().join('; ')];
+    const texte: { wo: string; text: string }[] = [{ wo: 'Branche', text: quellenDerBranchenreihe().join('; ') }];
     for (const v of alleVersicherer()) {
-      texte.push(quellenDerUnternehmensreihe(v.id).join('; '));
+      texte.push({ wo: v.id, text: quellenDerUnternehmensreihe(v.id).join('; ') });
     }
-    for (const [i, text] of texte.entries()) {
+    // Rechtsnachfolge-Texte und Altnamen werden auf den Versichererseiten gerendert.
+    for (const v of insurersDaten.insurers) {
+      texte.push({ wo: `${v.id} (Historie)`, text: (v.rechtsnachfolge ?? []).map((r) => ohneBehoerde(r.beschreibung)).join(' ') });
+      texte.push({ wo: `${v.id} (Altnamen)`, text: v.altnamen.join('; ') });
+    }
+    for (const { wo, text } of texte) {
       for (const regel of VERBOTEN) {
         if (regel.nurWerbeflaechen === true) {
           continue;
         }
-        expect(regel.muster.test(text), `${i === 0 ? 'Branche' : alleVersicherer()[i - 1]?.id}: ${regel.grund}`).toBe(false);
+        expect(regel.muster.test(text), `${wo}: ${regel.grund}`).toBe(false);
       }
     }
     // Jahrgangsvarianten derselben Aufsichtsstatistik erscheinen nur einmal.
@@ -163,6 +168,7 @@ describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
       spaeterWeitermachen('Muster', 'https://x.example/f'),
       berichtVersand('Muster', 'RR-2026-ABCDEF', 'https://x.example/r'),
       berichtVersand('Muster', 'RR-2026-ABCDEF', 'https://x.example/r', false, 'https://x.example/d', true),
+      berichtVersand('Muster', 'RR-2026-ABCDEF', 'https://x.example/r', false, 'https://x.example/d', false, false),
       berichtVersand('Muster', 'EK-CODE1', undefined, true),
       vertragsbestaetigung('Muster', 'RR-2026-ABCDEF', { agb: 'https://x.example/agb', widerruf: 'https://x.example/w' }),
       vertragsbestaetigung('Muster', 'RR-2026-ABCDEF', { agb: 'https://x.example/agb', widerruf: 'https://x.example/w' }, undefined, true),

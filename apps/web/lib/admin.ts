@@ -2,10 +2,12 @@
  * Zugriffsschutz für Admin- und Cron-Endpunkte (Prompt 13, Abschnitt 3).
  * Beta-weit liegt zusätzlich die Basic-Auth-Middleware davor (BETA_PASSWORT).
  *
- * Der Admin-Schlüssel reist nie in einer URL oder einem Formularfeld: Die
- * Anmeldung (/api/admin/anmelden) setzt ein HttpOnly-Cookie mit einem aus dem
- * Passwort abgeleiteten Wert (HMAC) – so liegt das Passwort selbst weder in
- * Browser-Verlauf, Referer noch Server-Logs. Alle Vergleiche sind zeitkonstant.
+ * Der Admin-Schlüssel reist nie in einer URL: Die Anmeldung (/api/admin/anmelden)
+ * setzt ein HttpOnly-Cookie mit einem aus dem Passwort abgeleiteten Wert
+ * (Ablaufzeitpunkt + HMAC über Passwort und Ablauf) – so liegt das Passwort
+ * selbst weder in Browser-Verlauf, Referer noch Server-Logs, und die Sitzung
+ * endet serverseitig nach ADMIN_SITZUNG_SEKUNDEN bzw. per /api/admin/abmelden.
+ * Alle Vergleiche sind zeitkonstant.
  */
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
@@ -26,9 +28,14 @@ function gleich(a: string, b: string): boolean {
   return x.length === y.length && timingSafeEqual(x, y);
 }
 
-/** Cookie-Wert: Ableitung aus dem Passwort, damit das Passwort selbst nie im Cookie liegt. */
-export function adminToken(): string {
-  return createHmac('sha256', passwort()).update('admin-sitzung').digest('hex');
+function signatur(ablauf: number): string {
+  return createHmac('sha256', passwort()).update(`admin-sitzung:${ablauf}`).digest('hex');
+}
+
+/** Cookie-Wert `<Ablauf ms>.<HMAC>`: Ableitung aus Passwort und Ablauf – das Passwort liegt nie im Cookie. */
+export function adminToken(jetzt: number = Date.now()): string {
+  const ablauf = jetzt + ADMIN_SITZUNG_SEKUNDEN * 1000;
+  return `${ablauf}.${signatur(ablauf)}`;
 }
 
 /** Anmeldung: eingegebener Schlüssel muss ADMIN_PASSWORT treffen; ohne konfiguriertes Passwort nur lokal (Entwicklung). */
@@ -40,12 +47,23 @@ export function adminAutorisiert(schluessel: string | null | undefined): boolean
   return typeof schluessel === 'string' && gleich(schluessel, admin);
 }
 
-/** Gültige Admin-Sitzung (Cookie-Wert)? */
-export function adminCookieGueltig(wert: string | null | undefined): boolean {
+/** Gültige Admin-Sitzung (Cookie-Wert)? Prüft Ablauf und Signatur. */
+export function adminCookieGueltig(wert: string | null | undefined, jetzt: number = Date.now()): boolean {
   if (passwort() === '') {
     return process.env['VERCEL'] === undefined;
   }
-  return typeof wert === 'string' && gleich(wert, adminToken());
+  if (typeof wert !== 'string') {
+    return false;
+  }
+  const teile = /^(\d{1,16})\.([0-9a-f]{64})$/.exec(wert);
+  if (teile === null) {
+    return false;
+  }
+  const ablauf = Number(teile[1]);
+  if (!Number.isFinite(ablauf) || ablauf <= jetzt || ablauf > jetzt + ADMIN_SITZUNG_SEKUNDEN * 1000 + 60_000) {
+    return false;
+  }
+  return gleich(teile[2] ?? '', signatur(ablauf));
 }
 
 /** Liest den Cookie-Wert aus dem Cookie-Header (eigener Parser, damit Seite und Routen identisch prüfen). */

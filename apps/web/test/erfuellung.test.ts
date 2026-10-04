@@ -258,12 +258,32 @@ describe('Zweiphasige Auslieferung (Prompt 13, Abschnitt 3; Prompt 14: Gutachten
     const status = await erfuelleBestellung(sitzungsDaten(fakeSitzung('paid', { bestellnummer: 'EK-CODE1' })), deps);
     expect(status.mailVersendetAm).toBeUndefined();
     expect(status.fehler?.[0]).toContain('Chromium nicht gefunden');
-    // Bestätigung an den Kunden, danach nur die interne Meldung – keine „Ihre Zahlung ist eingegangen“-Mail.
-    expect(protokoll.mails.map((m) => m.an)).toEqual(['muster@example.org', 'info@renten-rettung.de']);
+    // Bestätigung an den Kunden, dann die Erstkunden-Verzögerung (ohne Zahlungs-/Fristbehauptung), dann die interne Meldung.
+    expect(protokoll.mails.map((m) => m.an)).toEqual(['muster@example.org', 'muster@example.org', 'info@renten-rettung.de']);
     expect(protokoll.mails[0]?.text).toContain('in wenigen Minuten');
-    expect(protokoll.mails[1]?.text).toContain('Erstkunden-Code eingelöst (kostenlos)');
-    expect(protokoll.mails[1]?.text).toContain('Freischaltcode ist wieder freigegeben');
-    expect(protokoll.marker.verzoegert).toBeUndefined();
+    expect(protokoll.mails[1]?.betreff).toBe('Ihre Bestellung EK-CODE1: Gutachten folgt');
+    expect(protokoll.mails[1]?.text).toContain('Freischaltcode bleibt gültig');
+    expect(protokoll.mails[1]?.text).not.toMatch(/Zahlung|Werktag/);
+    expect(protokoll.mails[2]?.text).toContain('Erstkunden-Code eingelöst (kostenlos)');
+    expect(protokoll.mails[2]?.text).toContain('Freischaltcode ist wieder freigegeben');
+    expect(status.verzoegerungGemeldetAm).toBe(JETZT.toISOString());
+  });
+
+  it('Versand-Mail folgt dem Gutachten: ohne Übernahme-Angebot kein „Wir übernehmen“', async () => {
+    const protokoll = neuesProtokoll();
+    const basis = fakeAbhaengigkeiten(protokoll);
+    const deps: ErfuellungsAbhaengigkeiten = {
+      ...basis,
+      erzeugeBericht: async (daten, ordner, jetzt) => ({ ...(await basis.erzeugeBericht(daten, ordner, jetzt)), uebernahme: false }),
+    };
+    const daten = sitzungsDaten(fakeSitzung());
+    expect(await bereiteBestellungVor(daten, deps)).toBe('vorbereitet');
+    const status = await versendeBericht(daten, deps);
+    expect(status.uebernahme).toBe(false);
+    const mail = protokoll.mails.at(-1)!;
+    expect(mail.betreff).toBe('Ihr Gutachten ist da');
+    expect(mail.text).not.toContain('Wir übernehmen');
+    expect(mail.text).toContain('letzten Seite des Gutachtens');
   });
 
   it('Versand-Sperre: ein laufender paralleler Versand wird nicht wiederholt, eine verwaiste Sperre schon', async () => {

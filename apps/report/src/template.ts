@@ -15,7 +15,7 @@
  * Seiten mit Deckblatt (Name, Adresse) und einseitigem Beileger zum Ankauf
  * (der Beileger entfällt bei ankaufHinweis=false, Kanzlei-Variante).
  */
-import { STATUS_TEXT, VERTRAGSART_TEXT, ZAHLWEISE_TEXT } from '@rueckab/calc';
+import { RUECKKAUFSWERT_TEXT, STATUS_TEXT, VERTRAGSART_TEXT, ZAHLWEISE_TEXT } from '@rueckab/calc';
 import type { CalcResult, ContractInput, Jahreszeile, JahresZins, SzenarioName } from '@rueckab/calc';
 import type { EligibilityResult } from '@rueckab/eligibility';
 import ansatzpunkteJson from '../../../config/ansatzpunkte.json';
@@ -94,8 +94,12 @@ const ANSATZPUNKTE = ansatzpunkteJson as unknown as Ansatzpunkte;
 
 type AmpelFarbe = 'gruen' | 'gelb' | 'rot' | 'grau';
 
+/** Grund der Ampel – wie `grund` in apps/web/lib/ampel.ts; Übernahme nur bei 'uebernahme' und 'knapp'. */
+type AmpelGrund = 'status' | 'ohne-rueckkaufswert' | 'zu-klein' | 'uebernahme' | 'knapp' | 'kein-vorteil';
+
 interface WirtschaftlicheAmpel {
   farbe: AmpelFarbe;
+  grund: AmpelGrund;
   label: string;
   punktFarbe: string;
 }
@@ -113,23 +117,23 @@ function wirtschaftlicheAmpel(
   const basis = calc.szenarien.basis;
   const beendet = contract.status === 'gekuendigt' || contract.status === 'abgelaufen';
   if (beendet) {
-    return { farbe: 'rot', label: 'Rot – gekündigte oder ausgezahlte Verträge übernehmen wir nicht', punktFarbe: FARBEN.ampelRot };
+    return { farbe: 'rot', grund: 'status', label: 'Rot – gekündigte oder ausgezahlte Verträge übernehmen wir nicht', punktFarbe: FARBEN.ampelRot };
   }
   const mehrwert = basis.mehrwertGegenKuendigung;
   const rkw = contract.rueckkaufswert?.betrag;
   if (mehrwert === undefined || rkw === undefined) {
-    return { farbe: 'gelb', label: 'Gelb – ohne Rückkaufswert kein Vergleich möglich', punktFarbe: FARBEN.ampelGelb };
+    return { farbe: 'gelb', grund: 'ohne-rueckkaufswert', label: 'Gelb – ohne Rückkaufswert kein Vergleich möglich', punktFarbe: FARBEN.ampelGelb };
   }
   if (rkw < minRueckkaufswert && mehrwert > 0) {
-    return { farbe: 'grau', label: 'Grau – für unser Verfahren zu klein (unter der Mindestgrenze)', punktFarbe: FARBEN.ampelAus };
+    return { farbe: 'grau', grund: 'zu-klein', label: 'Grau – für unser Verfahren zu klein (unter der Mindestgrenze)', punktFarbe: FARBEN.ampelAus };
   }
   if (mehrwert >= schwelle) {
-    return { farbe: 'gruen', label: 'Grün – der Vertrag kommt für unser Verfahren in Frage', punktFarbe: FARBEN.ampelGruen };
+    return { farbe: 'gruen', grund: 'uebernahme', label: 'Grün – der Vertrag kommt für unser Verfahren in Frage', punktFarbe: FARBEN.ampelGruen };
   }
   if (mehrwert > 0) {
-    return { farbe: 'gelb', label: 'Gelb – knapp; ob es reicht, zeigt dieses Gutachten', punktFarbe: FARBEN.ampelGelb };
+    return { farbe: 'gelb', grund: 'knapp', label: 'Gelb – knapp; ob es reicht, zeigt dieses Gutachten', punktFarbe: FARBEN.ampelGelb };
   }
-  return { farbe: 'rot', label: 'Rot – rechnerisch nicht mehr drin als der Rückkaufswert', punktFarbe: FARBEN.ampelRot };
+  return { farbe: 'rot', grund: 'kein-vorteil', label: 'Rot – rechnerisch nicht mehr drin als der Rückkaufswert', punktFarbe: FARBEN.ampelRot };
 }
 
 function svgBeitragsaufteilung(calc: CalcResult): string {
@@ -212,8 +216,12 @@ function svgSzenarioVergleich(calc: CalcResult, rueckkaufswert: number | undefin
         <text x="${(216 + w).toFixed(1)}" y="${y + 21}" class="svg-wert">${formatEuro(r.wert)}</text>`;
     })
     .join('');
+  const beschreibung =
+    rueckkaufswert !== undefined
+      ? 'Vergleich von Rückkaufswert und geschätztem Netto-Wert (Rückabwicklungswert abzüglich erhaltener Leistungen) in den drei Szenarien'
+      : 'Geschätzter Netto-Wert (Rückabwicklungswert abzüglich bereits erhaltener Leistungen) in den drei Szenarien';
   return `
-    <figure class="diagramm" role="img" aria-label="Vergleich von Rückkaufswert und geschätztem Netto-Wert (Rückabwicklungswert abzüglich erhaltener Leistungen) in den drei Szenarien">
+    <figure class="diagramm" role="img" aria-label="${beschreibung}">
       <svg viewBox="0 0 ${breite} ${reihen.length * zeilenhoehe}" width="100%" height="${reihen.length * zeilenhoehe}">
         ${balken}
       </svg>
@@ -243,7 +251,7 @@ function angabenTabelle(b: BerichtInput): string {
       c.dynamik.aktiv ? `ja${c.dynamik.satzProzent !== undefined ? `, ${formatZahl(c.dynamik.satzProzent)} % p. a.` : ''}` : 'nein',
     ],
     ['Eingezahlt laut Standmitteilung', c.gesamtsummeLautMitteilung !== undefined ? formatEuro(c.gesamtsummeLautMitteilung) : '–'],
-    ['Aktueller Rückkaufswert', c.rueckkaufswert !== undefined ? formatEuro(c.rueckkaufswert.betrag) : '–'],
+    [RUECKKAUFSWERT_TEXT[c.status], c.rueckkaufswert !== undefined ? formatEuro(c.rueckkaufswert.betrag) : '–'],
     [
       'Erhaltene Auszahlungen',
       (c.auszahlungen ?? []).length > 0
@@ -503,10 +511,24 @@ function ampelFuer(b: BerichtInput): WirtschaftlicheAmpel {
   return wirtschaftlicheAmpel(b.calc, b.contract, schwelle, minRueckkaufswert);
 }
 
-/** Übernahme nur bei Grün/Gelb: bei Rot/Grau wird kein Auftrag angeboten (Prompt 13, 1). */
-function uebernahmeMoeglich(b: BerichtInput): boolean {
-  const farbe = ampelFuer(b).farbe;
-  return farbe === 'gruen' || farbe === 'gelb';
+/**
+ * Übernahme nur bei Grün und „Gelb – knapp“ (wie `berichtKaufbar` der Website): bei Rot, Grau
+ * und ohne Rückkaufswert wird kein Auftrag angeboten (Prompt 13, 1).
+ */
+export function uebernahmeMoeglich(b: BerichtInput): boolean {
+  const grund = ampelFuer(b).grund;
+  return grund === 'uebernahme' || grund === 'knapp';
+}
+
+/** Satz zur Prüfung des Durchsetzungswegs (Seite 1) – nie eine Prüfung behaupten, die nicht stattfindet. */
+function pruefSatz(ampel: WirtschaftlicheAmpel, uebernahme: boolean): string {
+  if (uebernahme) {
+    return 'Ob und auf welchem Weg sich das durchsetzen lässt, prüfen die spezialisierten Anwälte, mit denen wir arbeiten, anhand Ihrer Unterlagen (letzte Seite).';
+  }
+  if (ampel.grund === 'ohne-rueckkaufswert') {
+    return 'Ob der Vertrag für unser Verfahren in Frage kommt, lässt sich erst mit Ihrem aktuellen Rückkaufswert prüfen (letzte Seite).';
+  }
+  return 'Ob und auf welchem Weg sich das durchsetzen lässt, prüft ein Rechtsanwalt Ihrer Wahl anhand Ihrer Unterlagen (letzte Seite).';
 }
 
 /** Die sieben Seiten des Gutachtens (ohne Deckblatt/Beileger). */
@@ -557,15 +579,15 @@ function seitenHtml(b: BerichtInput): string {
     <p class="sekundaer" style="margin:0">Geschätzter Rückabwicklungswert (Basis-Szenario)</p>
     <p class="zahl">${formatEuro(basis.rueckabwicklungswert)}</p>
     <p class="spanne">Spanne der Szenarien konservativ–maximal: ${formatEuro(min.rueckabwicklungswert)} bis ${formatEuro(max.rueckabwicklungswert)}</p>
-    ${rkw !== undefined ? `<p class="spanne">Zum Vergleich – aktueller Rückkaufswert: <strong>${formatEuro(rkw)}</strong></p>` : ''}
+    ${rkw !== undefined && !beendet ? `<p class="spanne">Zum Vergleich – aktueller Rückkaufswert: <strong>${formatEuro(rkw)}</strong></p>` : ''}
+    ${rkw !== undefined && beendet ? `<p class="spanne">${esc(RUECKKAUFSWERT_TEXT[b.contract.status])} (bereits erhalten): <strong>${formatEuro(rkw)}</strong></p>` : ''}
   </div>
   <p>${mehrwertSatz}</p>
   <p class="ampel"><span class="punkt" style="background:${ampel.punktFarbe}"></span> ${esc(ampel.label)}</p>
   <div class="hinweisbox">
     <strong>Wichtig:</strong> Alle Werte sind Schätzungen unter offengelegten Annahmen (Abschnitt 2 und 3) auf Basis
     öffentlich verfügbarer Kennzahlen – es wird kein Betrag zugesagt und keine Rechtsberatung im Einzelfall
-    erteilt. Ob und auf welchem Weg sich das durchsetzen lässt, prüfen die spezialisierten Anwälte, mit denen
-    wir arbeiten, anhand Ihrer Unterlagen (letzte Seite).
+    erteilt. ${pruefSatz(ampel, uebernahme)}
   </div>
 </section>
 
@@ -596,7 +618,9 @@ function seitenHtml(b: BerichtInput): string {
     <div>${liste([
       'eine automatisierte versicherungsmathematische Auswertung: strukturiert, nachvollziehbar, in drei Szenarien',
       'jede Kennzahl mit Quelle und Herkunft (Abschnitt 4 und 5)',
-      'die Grundlage für unser Verfahren – die Anwälte, mit denen wir arbeiten, rechnen darauf auf',
+      uebernahme
+        ? 'die Grundlage für unser Verfahren – die Anwälte, mit denen wir arbeiten, rechnen darauf auf'
+        : 'eine nachvollziehbare Grundlage für eine anwaltliche Prüfung – jede Zahl mit Quelle',
     ])}</div>
     <div>${liste([
       'kein Sachverständigengutachten, keine Rechtsberatung im Einzelfall und keine Vertretung',
@@ -683,7 +707,7 @@ function seitenHtml(b: BerichtInput): string {
 <!-- Seite 7: Einordnung und nächste Schritte -->
 <section class="seite">
   <h2>6. Einordnung und nächste Schritte</h2>
-  ${svgSzenarioVergleich(b.calc, rkw)}
+  ${svgSzenarioVergleich(b.calc, beendet ? undefined : rkw)}
   ${
     keinVorteil
       ? '<div class="hinweisbox"><strong>Ergebnis:</strong> Nach dieser Schätzung ist rechnerisch kein Vorteil gegenüber dem aktuellen Rückkaufswert erkennbar. Ein Vorgehen „um jeden Preis“ wäre nicht sachgerecht; besprechen Sie Alternativen mit Ihrer Beratung.</div>'
@@ -707,7 +731,9 @@ function seitenHtml(b: BerichtInput): string {
       : 'Police und letzte Standmitteilung bereitlegen; falls vorhanden Kündigungs- oder Dynamikschreiben.',
     uebernahme
       ? 'Die Durchsetzung über uns beauftragen (Kasten auf der letzten Seite) – die spezialisierten Anwälte, mit denen wir arbeiten, klären, ob und auf welchem Weg sich der Wert durchsetzen lässt.'
-      : 'Lassen Sie sich anwaltlich beraten, ob und auf welchem Weg sich der Wert durchsetzen lässt – für unser Verfahren kommt der Vertrag nach dieser Schätzung nicht in Frage.',
+      : ampel.grund === 'ohne-rueckkaufswert'
+        ? 'Den aktuellen Rückkaufswert (letzte Standmitteilung) nachreichen – erst damit lässt sich prüfen, ob der Vertrag für unser Verfahren in Frage kommt (Kasten auf der letzten Seite).'
+        : 'Lassen Sie sich anwaltlich beraten, ob und auf welchem Weg sich der Wert durchsetzen lässt – für unser Verfahren kommt der Vertrag nach dieser Schätzung nicht in Frage.',
     'Keine Kündigung und keine Erklärung gegenüber dem Versicherer ohne anwaltlichen Rat.',
   ])}
   ${
@@ -721,7 +747,16 @@ function seitenHtml(b: BerichtInput): string {
     </p>
     <p style="margin:0" class="sekundaer">Konditionen: ${esc(b.konditionenText ?? '[[KONDITIONEN]]')}</p>
   </div>`
-      : `<div class="uebernahme">
+      : ampel.grund === 'ohne-rueckkaufswert'
+        ? `<div class="uebernahme">
+    <p style="margin:0 0 1.5mm"><strong>Nächster Schritt: Rückkaufswert nachreichen.</strong></p>
+    <p style="margin:0">
+      Ohne Ihren aktuellen Rückkaufswert können wir nicht prüfen, ob der Vertrag für unser Verfahren in Frage
+      kommt. Schicken Sie uns die letzte Standmitteilung als Antwort auf die E-Mail mit diesem Gutachten – wir
+      ergänzen den Vergleich.
+    </p>
+  </div>`
+        : `<div class="uebernahme">
     <p style="margin:0 0 1.5mm"><strong>Nächster Schritt: anwaltliche Beratung.</strong></p>
     <p style="margin:0">
       Für unser Verfahren kommt der Vertrag nach dieser Schätzung nicht in Frage (${esc(ampel.label)}).

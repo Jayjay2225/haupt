@@ -86,6 +86,46 @@ describe('draftZuEingaben', () => {
     // Beendet ohne Datum: Annahme benennt die Wirkung.
     const ohne = draftZuEingaben(draft({ status: 'gekuendigt', statusDatum: '' }), findeVersichererId, STICHTAG);
     expect(ohne.zusatzAnnahmen.join(' ')).toContain('bis zum Stichtag weitergezahlt');
+    // Beitragsfrei ohne Datum: dieselbe Rechenweise – mit Annahme.
+    const freiOhne = draftZuEingaben(draft({ status: 'beitragsfrei', statusDatum: '' }), findeVersichererId, STICHTAG);
+    expect(freiOhne.zusatzAnnahmen.join(' ')).toContain('beitragsfrei, aber ohne Datum');
+    // Ein Datum nach dem Stichtag zählt wie der Stichtag (Rechenkern deckelt ebenso).
+    const zukunft = draftZuEingaben(
+      draft({ beitragArt: 'heutiger', erstbeitrag: '200', dynamik: 'ja', dynamikSatz: '5', status: 'beitragsfrei', statusDatum: '2027-05' }),
+      findeVersichererId,
+      STICHTAG,
+    );
+    const reihe = baueBeitragsreihe(zukunft.contract).reihe;
+    expect(reihe[reihe.length - 1]!.betrag).toBeCloseTo(200, 1);
+  });
+
+  it('unbekannter Erstbeitrag: Zahlungszählung wie der Rechenkern für alle Zahlweisen, Einmalbeitrag = eine Zahlung', () => {
+    const faelle: [CaseDraft['zahlweise'], string, string][] = [
+      ['jaehrlich', '2010-12', '2015-01'],
+      ['halbjaehrlich', '2010-12', '2015-01'],
+      ['vierteljaehrlich', '1995-10', '2018-03'],
+      ['jaehrlich', '1995-10', '2018-03'],
+    ];
+    for (const [zahlweise, beginn, statusDatum] of faelle) {
+      const e = draftZuEingaben(
+        draft({ zahlweise, beginn, status: 'beitragsfrei', statusDatum, dynamik: 'ja', dynamikSatz: '5', erstbeitragUnbekannt: true, erstbeitrag: '', gesamtsummeLautMitteilung: '40.000' }),
+        findeVersichererId,
+        STICHTAG,
+      );
+      expect(e.fehler).toEqual([]);
+      const calc = berechneRueckabwicklung(e.contract, insurersDaten, riskDefaults);
+      expect(calc.warnungen.some((w) => w.code === 'BEITRAGSREIHE_ABWEICHUNG'), `${zahlweise} ${beginn}`).toBe(false);
+      const skaliert = calc.annahmen.find((a) => a.code === 'REIHE_SKALIERT')?.text ?? '';
+      expect(skaliert, `${zahlweise} ${beginn}: ${skaliert}`).toMatch(/Faktor (1,0000|0,9999|1,0001)\)/);
+    }
+    const einmal = draftZuEingaben(
+      draft({ zahlweise: 'einmalbeitrag', erstbeitragUnbekannt: true, erstbeitrag: '', gesamtsummeLautMitteilung: '50.000' }),
+      findeVersichererId,
+      STICHTAG,
+    );
+    expect(einmal.contract.erstbeitrag.betrag).toBe(50000);
+    const calcEinmal = berechneRueckabwicklung(einmal.contract, insurersDaten, riskDefaults);
+    expect(calcEinmal.warnungen.some((w) => w.code === 'BEITRAGSREIHE_ABWEICHUNG')).toBe(false);
   });
 
   it('DM-Kennzeichen gilt nur für Verträge vor 2002', () => {
@@ -97,7 +137,7 @@ describe('draftZuEingaben', () => {
     expect(draftZuEingaben(draft({ dynamik: 'ja', dynamikSatz: '5 %' }), findeVersichererId, STICHTAG).contract.dynamik).toEqual({ aktiv: true, satzProzent: 5 });
     const ohne = draftZuEingaben(draft({ dynamik: 'ja', dynamikSatz: '' }), findeVersichererId, STICHTAG);
     expect(ohne.contract.dynamik).toEqual({ aktiv: true });
-    expect(ohne.zusatzAnnahmen.join(' ')).toContain('gerechnet wurde ohne Erhöhungen (konservativ)');
+    expect(ohne.zusatzAnnahmen.join(' ')).toContain('gerechnet wurde ohne Erhöhungen');
   });
 
   it('nur Jahr bekannt: Jahresmitte in die Rechnung, Jahr in den Eignungs-Check', () => {

@@ -52,7 +52,8 @@ export default function DatenschutzSeite() {
         Link ({FORTSETZEN_TAGE} Tage gültig) und schickt ihn Ihnen per E-Mail über [[E-Mail-Dienst, Sitz – festlegen]]
         als Auftragsverarbeiter (Art. 28 DSGVO); bei uns wird dabei nichts gespeichert (Art. 6 Abs. 1 lit. b DSGVO,
         vorvertragliche Anfrage). Wer den Link kennt, kann die Angaben laden – geben Sie ihn nicht weiter. Zum Schutz
-        vor Missbrauch gilt dieselbe Ratenbegrenzung wie bei der Ampel.
+        vor Missbrauch gilt eine Ratenbegrenzung nach demselben Verfahren wie bei der Ampel (IP-Adresse kurzzeitig im
+        Arbeitsspeicher), hier mit höchstens fünf Links je Stunde.
       </p>
       {VARIANTE.berichtKostenpflichtig && (
         <>

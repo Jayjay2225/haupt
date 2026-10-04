@@ -61,10 +61,15 @@ export function pruefeEignung(input: EligibilityInput, regelwerk: Regelwerk): El
     // Für die Regelauswertung vorsorglich in den Anwendungsbereich legen (Kappung auf Gelb unten).
     input = { ...input, vertragsschluss: '1994-07-29' };
   }
-  // Dezember 2004: nur die 14-Tage-Angabe hängt am genauen Tag (R-FEHLER-FRIST-ZU-KURZ
-  // ab 08.12.2004, R-OK-BELEHRUNG davor) – ohne 14-Tage-Belehrung ändert der Tag nichts.
+  // Dezember 2004: nur die 14-Tage-Angabe einer VORHANDENEN Belehrung hängt am genauen Tag
+  // (R-FEHLER-FRIST-ZU-KURZ ab 08.12.2004, R-OK-BELEHRUNG davor). Eine stehengebliebene
+  // Fristangabe ohne Belehrung zählt nicht (wie die Guards im Regelwerk). Der Hinweis legt die
+  // Annahme „ab 08.12.2004“ offen, weil die Begründung zur Frist daran hängt – auch wenn ein
+  // weiterer Fehler die Ampel ohnehin trägt (Kappung auf Gelb unten).
   const grenzmonatDez04 =
-    (input.vertragsschluss === '2004-12' || input.vertragsschluss === '2004') && input.belehrungFrist === '14-tage';
+    (input.vertragsschluss === '2004-12' || input.vertragsschluss === '2004') &&
+    input.belehrungVorhanden === 'ja' &&
+    input.belehrungFrist === '14-tage';
   if (grenzmonatDez04) {
     hinweise.push({
       text: `Vertragsschluss ${nurJahr ? 'nur mit Jahresangabe 2004' : 'im Dezember 2004'}: Für die maßgebliche Widerspruchsfrist (14 oder 30 Tage) entscheidet der genaue Tag (Gesetzesänderung zum 08.12.2004). Die Einordnung unterstellt vorsorglich einen Vertragsschluss ab dem 08.12.2004; die Ampel bleibt höchstens Gelb, bis das genaue Datum anhand der Police belegt ist.`,
@@ -248,7 +253,14 @@ export function pruefeEignung(input: EligibilityInput, regelwerk: Regelwerk): El
     ampel = 'gelb';
     benoetigteDokumente.add(DOKUMENT_ZUSTANDEKOMMEN);
   }
-  if (ampel === 'gruen' && (grenzmonatJuli94 || grenzmonatDez04)) {
+  // Grenzjahr 1994: Lag der Vertragsschluss doch vor dem 29.07.1994, wäre das Ergebnis Gelb mit
+  // Prüfweg (R-REGIME-VOR1994) – deshalb ist bei unbekanntem Tag Gelb das einzig belastbare
+  // Ergebnis, auch wenn die § 5a-Prüfung Rot (ordnungsgemäße Belehrung) ergibt.
+  if (grenzmonatJuli94) {
+    ampel = 'gelb';
+  }
+  // Dezember 2004: Kappung auf Gelb, solange der genaue Tag fehlt (Hinweis und Datumsdokument oben).
+  if (grenzmonatDez04 && ampel === 'gruen') {
     ampel = 'gelb';
   }
   if (regime === 'alt-unbekannt') {

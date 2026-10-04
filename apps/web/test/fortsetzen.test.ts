@@ -4,7 +4,7 @@
  * Einwilligungen (reisen nie mit, werden nie aus dem Link übernommen),
  * die Längenbegrenzung der Felder und der Schutz vor Dekompressionsbomben.
  */
-import { deflateRawSync } from 'node:zlib';
+import { deflateRawSync, inflateRawSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { FORTSETZEN_TAGE } from '../config/business';
 import { leererDraft } from '../lib/draft';
@@ -36,8 +36,12 @@ describe('Fortsetzen-Token', () => {
     expect(ergebnis.draft.agbGelesen).toBe(false);
     expect(ergebnis.draft.ausfuehrungZugestimmt).toBe(false);
     expect(ergebnis.draft.einwilligungAnkaufKontakt).toBe(false);
-    // Und sie stehen auch nicht im Token selbst.
-    expect(token).not.toContain('einwilligung');
+    // Und sie stehen auch nicht in der Nutzlast des Tokens (entpackt geprüft, nicht am base64-Text).
+    const nutzlast = JSON.parse(inflateRawSync(Buffer.from(token, 'base64url')).toString('utf8')) as { d: Record<string, unknown> };
+    for (const feld of ['einwilligungDatenschutz', 'agbGelesen', 'ausfuehrungZugestimmt', 'einwilligungAnkaufKontakt']) {
+      expect(feld in nutzlast.d, feld).toBe(false);
+    }
+    expect(nutzlast.d['versicherer']).toBe('Allianz Lebensversicherungs-AG');
     expect(fortsetzenLink('https://renten-rettung.de', token)).toBe(`https://renten-rettung.de/rechner/fortsetzen?f=${token}`);
   });
 

@@ -233,12 +233,17 @@ if (befehl === 'check') {
     v.kennzahlen[jahr] = eintrag;
     geschrieben += 1;
   }
-  const [major = 0, minor = 0] = daten.data.version.split('.').map(Number);
-  daten.data.version = `${major}.${minor + 1}.0`;
-  daten.data.stand = heute;
-  daten.data.changelog.push({ version: daten.data.version, datum: heute, aenderung: `${geschrieben} Werte aus Bibliotheks-Scans importiert (scripts/data-scans.ts).` });
-  writeFileSync(DATEN_PFAD, `${JSON.stringify(daten, null, 2)}\n`);
-  console.log(`importiert: ${geschrieben} Werte, ${uebersprungen} bereits vorhanden (nicht überschrieben) → data.version ${daten.data.version}${unbekannt.size > 0 ? `; ohne Mapping: ${[...unbekannt].join(', ')}` : ''}`);
+  if (geschrieben === 0) {
+    // Keine Datenänderung → keine neue Version, kein Changelog-Eintrag, Datei unverändert (Prinzip 7).
+    console.log(`importiert: 0 Werte, ${uebersprungen} bereits vorhanden – data/insurers.json unverändert (data.version ${daten.data.version})${unbekannt.size > 0 ? `; ohne Mapping: ${[...unbekannt].join(', ')}` : ''}`);
+  } else {
+    const [major = 0, minor = 0] = daten.data.version.split('.').map(Number);
+    daten.data.version = `${major}.${minor + 1}.0`;
+    daten.data.stand = heute;
+    daten.data.changelog.push({ version: daten.data.version, datum: heute, aenderung: `${geschrieben} Werte aus Bibliotheks-Scans importiert (scripts/data-scans.ts).` });
+    writeFileSync(DATEN_PFAD, `${JSON.stringify(daten, null, 2)}\n`);
+    console.log(`importiert: ${geschrieben} Werte, ${uebersprungen} bereits vorhanden (nicht überschrieben) → data.version ${daten.data.version}${unbekannt.size > 0 ? `; ohne Mapping: ${[...unbekannt].join(', ')}` : ''}`);
+  }
 } else {
   console.error('Aufruf: … <check|import>');
   process.exit(1);
