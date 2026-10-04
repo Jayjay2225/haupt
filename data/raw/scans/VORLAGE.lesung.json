@@ -1,0 +1,11 @@
+{
+  "band": "Geschäftsbericht des Bundesaufsichtsamtes für das Versicherungswesen 1997, Teil B",
+  "seite": 123,
+  "tabelle": "Kennzahlen der Lebensversicherungsunternehmen",
+  "jahr": 1997,
+  "leser": "Kürzel der Person oder Sitzung, z. B. AB-1",
+  "werte": [
+    { "kurzname": "BEISPIEL LEBEN", "nettoverzinsung": 7.2, "laufendeDurchschnittsverzinsung": 6.9 },
+    { "kurzname": "ZWEITES BEISPIEL", "nettoverzinsung": 7.0, "laufendeDurchschnittsverzinsung": null }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "insurerId": "hdi-leben",
+  "werte": [
+    {
+      "jahr": 2000,
+      "nettoverzinsung": 7.7,
+      "fundstelle": "Artikeltext: „Trotzdem konnte Gerling Leben durch Auflösung stiller Reserven die Nettoverzinsung bei 7,7 Prozent halten“",
+      "quelle": {
+        "typ": "secondary",
+        "titel": "Versicherungsmonitor, „Gerling Leben setzt auf SEB und Betriebsrenten“, 23.05.2001 (Quelle laut Artikel: Financial Times Deutschland)",
+        "url": "https://versicherungsmonitor.de/2001/05/23/gerling-leben-setzt-auf-seb-und-betriebsrenten/",
+        "abrufdatum": "2026-09-18"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.7
+      },
+      "hinweis": "Sekundärquelle für die Gerling-Konzern Lebensversicherungs-AG; der Gerling-Konzern-Geschäftsbericht 2001 (S. 70) nennt nur eine Segment-„Verzinsung“ der Lebensversicherungsgruppe von 6,2 % (9,1 %) mit anderer Abgrenzung – nicht verwendet"
+    }
+  ]
+}

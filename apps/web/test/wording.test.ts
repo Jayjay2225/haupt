@@ -1,0 +1,321 @@
+/**
+ * Wording-Test (Prompt 12, Abschnitt 3 – die fünf harten Linien aus
+ * Prompt 10 gelten weiter; Prompt 13, 5 und Prompt 14, 0.2/0.6 erweitern die
+ * Liste): Für Website, Funnel, E-Mails und Anzeigen. Seit Prompt 14 heißt das
+ * Produkt „Gutachten“ – erlaubt; verboten bleiben „Sachverständigengutachten“
+ * (außer verneint), „öffentlich bestellt“, „vereidigt“, „staatlich
+ * anerkannt“, der alte Name „Prüfbericht“ und jede Erwähnung einer
+ * Versicherung für Rechtskosten (der Begriff steht nirgends mehr im Repo,
+ * darum auch hier nur zusammengesetzt). Die alte, breitere Liste gilt für
+ * das PDF (apps/report/test/wording-bericht.test.ts). Der Test liest die
+ * Quelltexte.
+ */
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { dirname, join, resolve, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { describe, expect, it } from 'vitest';
+import { GOOGLE_BESCHREIBUNGEN, GOOGLE_UEBERSCHRIFTEN, META_HAUPTTEXT } from '../content/anzeigen';
+import { BRAND, RANGE_TEXT } from '../config/brand';
+import { alleVersicherer, insurersDaten, ohneBehoerde, quellenDerBranchenreihe, quellenDerUnternehmensreihe } from '../lib/insurers-data';
+import { nurVerifizierte } from '../components/Testimonials';
+import { TESTIMONIALS } from '../content/testimonials';
+import {
+  anfrageEingegangen,
+  berichtVerzoegert,
+  berichtVersand,
+  druckauftrag,
+  rueckfrageVertragsart,
+  spaeterWeitermachen,
+  uebernahmeAngefragt,
+  vertragsbestaetigung,
+} from '../lib/emails';
+import { textInhalt } from './helfer';
+
+const WEB = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+
+function dateien(verzeichnis: string, endungen: string[]): string[] {
+  const ergebnis: string[] = [];
+  for (const eintrag of readdirSync(verzeichnis)) {
+    const pfad = join(verzeichnis, eintrag);
+    if (statSync(pfad).isDirectory()) {
+      ergebnis.push(...dateien(pfad, endungen));
+    } else if (endungen.some((e) => pfad.endsWith(e))) {
+      ergebnis.push(pfad);
+    }
+  }
+  return ergebnis;
+}
+
+const OBERFLAECHE = [
+  ...dateien(join(WEB, 'app'), ['.tsx']),
+  ...dateien(join(WEB, 'components'), ['.tsx']),
+  ...dateien(join(WEB, 'content'), ['.ts']),
+  ...dateien(join(WEB, 'app', 'api'), ['.ts']),
+  join(WEB, 'lib', 'ampel.ts'),
+  join(WEB, 'lib', 'erfuellung.ts'),
+  join(WEB, 'lib', 'fortsetzen.ts'),
+  join(WEB, 'lib', 'emails.ts'),
+  join(WEB, 'lib', 'draft.ts'),
+  join(WEB, 'lib', 'labels.ts'),
+  join(WEB, 'lib', 'bestellung.ts'),
+  join(WEB, 'lib', 'berechnung.ts'),
+  join(WEB, 'lib', 'preisblock.ts'),
+  join(WEB, 'lib', 'videocall.ts'),
+  join(WEB, 'lib', 'erstkunden.ts'),
+  join(WEB, 'lib', 'zahlung.ts'),
+  join(WEB, 'config', 'ampel.ts'),
+  join(WEB, 'config', 'brand.ts'),
+  join(WEB, 'config', 'business.ts'),
+  join(WEB, 'config', 'durchsetzung.ts'),
+];
+
+/** Rechtstexte: Fachbegriffe wie „Widerspruch“ (DSGVO) bleiben dort zulässig. */
+const RECHTSSEITEN = [sep + 'impressum' + sep, sep + 'datenschutz' + sep, sep + 'agb' + sep, sep + 'widerrufsbelehrung' + sep];
+
+/**
+ * Fünf harte Linien (Prompt 10, Abschnitt 1) plus Wortwahl. Linie 1 (keine
+ * erfundenen Kunden) sichern der Testimonials-Test unten und der
+ * Geschichten-Test (prompt14.test.ts) ab.
+ */
+export const VERBOTEN: { muster: RegExp; grund: string; nurWerbeflaechen?: boolean }[] = [
+  // Linie 2: keine Betrugs-Vorwürfe gegen Versicherer, auch nicht als Frage oder Zitat.
+  { muster: /betrug|betrogen|abgezockt|abzocke|täuschung|getäuscht/i, grund: 'Betrugs-Vorwurf (Linie 2)' },
+  // Linie 3: kein Ergebnisversprechen.
+  { muster: /garantier/i, grund: '„garantiert“ (Linie 3)' },
+  { muster: /steh(t|en)\s+Ihnen[^\n]{0,40}\bzu\b|Ihnen\s+steh(t|en)[^\n]{0,40}\bzu\b/i, grund: '„steht/stehen Ihnen … zu“ (Linie 3)' },
+  { muster: /Ihr Anspruch beträgt/i, grund: '„Ihr Anspruch beträgt“ (Linie 3)' },
+  { muster: /(Sie (bekommen|erhalten)|erhalten Sie|bekommen Sie)\s+(garantiert|sicher|mindestens|auf jeden Fall|bis zu)/i, grund: 'Ergebnisversprechen (Linie 3)' },
+  { muster: /Anspruch\w*\s+(von|in Höhe von)\s*[\d.]+/i, grund: 'bezifferter Anspruch (Linie 3)' },
+  { muster: /(Sie (bekommen|erhalten)|erhalten Sie|bekommen Sie)\s+[\d.]+\s*€/i, grund: 'bezifferte Zusage (Linie 3)' },
+  // Linie 4: keine Prozent-Versprechen außerhalb des gekennzeichneten Musterfalls.
+  { muster: /bis zu\s*\d/i, grund: '„bis zu …“-Versprechen (Linie 4)' },
+  { muster: /\d+\s*%\s*(mehr|Rendite)/i, grund: 'Prozent-Versprechen (Linie 4)' },
+  { muster: /\d+\s*%[^.\n]{0,40}Mehrerlös|Mehrerlös[^.\n]{0,40}\d+\s*%/i, grund: 'Prozent-Mehrerlös (Linie 4)' },
+  // Linie 5: keine künstliche Verknappung.
+  { muster: /countdown|nur heute|nur noch heute|nur für kurze Zeit|letzte Chance|Warteliste/i, grund: 'Verknappung (Linie 5)' },
+  // Prompt 14, 0.6: Produktname „Gutachten“ – aber nie mit Sachverständigen-Anklang.
+  {
+    muster: /(?<!kein |keine |keinem |keinen )Sachverständigengutachten|öffentlich bestellt|vereidigt|staatlich anerkannt/i,
+    grund: 'Sachverständigen-Anklang (Prompt 14, 0.6)',
+  },
+  { muster: /Prüfbericht|Pruefbericht/i, grund: 'alter Produktname „Prüfbericht“ (Prompt 14, 0.6: „Gutachten“)' },
+  // Prompt 14, 0.2: die Frage nach einer Versicherung für Rechtskosten ist überall entfernt.
+  { muster: new RegExp('Rechts' + 'schutz', 'i'), grund: 'Versicherung für Rechtskosten (Prompt 14, 0.2: entfällt)' },
+  { muster: /BaFin|Bundesanstalt für Finanzdienstleistungsaufsicht/i, grund: 'Keine Behördennennung' },
+  { muster: /\bErlaubnis\b|\bZulassung\b|\bzugelassen\b/i, grund: 'Erlaubnis-/Zulassungsangabe' },
+  { muster: /Wirtschaftsprüfer/i, grund: 'Abwicklungspartner sind Organisationspartner' },
+  { muster: /\[MARKE\]/, grund: 'Platzhalter „[MARKE]“' },
+  { muster: /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, grund: 'Emoji als Symbol' },
+  // Prompt 12, Abschnitt 0: Rechtsgrundlage ist auf der Website kein Thema mehr.
+  { muster: /§ ?5a|5a VVG/i, grund: '§ 5a auf Web-Flächen (Prompt 12: entfällt)', nurWerbeflaechen: true },
+  { muster: /1994\s*(bis|–|-|und)\s*2007/i, grund: '„1994 bis 2007“ (Prompt 12: Zeitraum ist 1980–2020)', nurWerbeflaechen: true },
+  { muster: /Widerspruchsweg nicht eröffnet/i, grund: 'alter Zonen-Hinweis (Prompt 12: entfällt)' },
+  // Prompt 13, Abschnitt 5: erweiterte Verbotsliste.
+  { muster: /\bnur wir\b/i, grund: 'Alleinstellungs-Behauptung „nur wir“ (Prompt 13)' },
+  { muster: /\b(als|die|der) einzige\w*/i, grund: 'Alleinstellungs-Behauptung „einzige“ (Prompt 13)' },
+  { muster: /garantiert durchsetzen/i, grund: '„garantiert durchsetzen“ (Prompt 13)' },
+  { muster: /\d[\d.]*\s*(geprüfte|Policen|Fälle|Mandate|Erfolge|Kundinnen|Kunden gewonnen)/i, grund: 'Zahl zu Erfolgen/Policen ohne Beleg-Referenz (Prompt 13)' },
+  // Prompt 13, 2.1 „Gestrichen überall“:
+  { muster: /Zum Mitnehmen zum Anwalt|mit dem Bericht in der Hand|Fertig für Anwalt/i, grund: 'gestrichene Anwalts-Selbsthilfe-Phrase (Prompt 13)' },
+  // Prompt 14, 0.5: kein Streichpreis, kein erfundener Referenzpreis.
+  { muster: /statt\s*\d+\s*€|<s>|<del>|line-through|Streichpreis/i, grund: 'Streichpreis (Prompt 14, 0.5 / § 11 PAngV)' },
+];
+
+
+describe('Fünf harte Linien (Website, Funnel, E-Mails, Anzeigen)', () => {
+  it('kein verbotenes Muster in den Oberflächentexten', () => {
+    const treffer: string[] = [];
+    for (const datei of OBERFLAECHE) {
+      const istRechtsseite = RECHTSSEITEN.some((r) => datei.includes(r));
+      const inhalt = textInhalt(datei);
+      for (const regel of VERBOTEN) {
+        if (regel.nurWerbeflaechen === true && istRechtsseite) {
+          continue;
+        }
+        const m = regel.muster.exec(inhalt);
+        if (m !== null) {
+          treffer.push(`${datei.replace(WEB, 'apps/web')}: ${regel.grund} („${m[0]}“)`);
+        }
+      }
+    }
+    expect(treffer).toEqual([]);
+  });
+
+  it('Quellenangaben der Versicherer-Seiten halten die Linien ein (Anzeigetitel aus insurers.json)', () => {
+    const texte: { wo: string; text: string }[] = [{ wo: 'Branche', text: quellenDerBranchenreihe().join('; ') }];
+    for (const v of alleVersicherer()) {
+      texte.push({ wo: v.id, text: quellenDerUnternehmensreihe(v.id).join('; ') });
+    }
+    // Rechtsnachfolge-Texte und Altnamen werden auf den Versichererseiten gerendert.
+    for (const v of insurersDaten.insurers) {
+      texte.push({ wo: `${v.id} (Historie)`, text: (v.rechtsnachfolge ?? []).map((r) => ohneBehoerde(r.beschreibung)).join(' ') });
+      texte.push({ wo: `${v.id} (Altnamen)`, text: v.altnamen.join('; ') });
+    }
+    for (const { wo, text } of texte) {
+      for (const regel of VERBOTEN) {
+        if (regel.nurWerbeflaechen === true) {
+          continue;
+        }
+        expect(regel.muster.test(text), `${wo}: ${regel.grund}`).toBe(false);
+      }
+    }
+    // Jahrgangsvarianten derselben Aufsichtsstatistik erscheinen nur einmal.
+    expect(quellenDerUnternehmensreihe('allianz-leben').length).toBeLessThanOrEqual(3);
+  });
+
+  it('E-Mail-Vorlagen halten die Linien ein', () => {
+    const texte = [
+      spaeterWeitermachen('Muster', 'https://x.example/f'),
+      berichtVersand('Muster', 'RR-2026-ABCDEF', 'https://x.example/r'),
+      berichtVersand('Muster', 'RR-2026-ABCDEF', 'https://x.example/r', false, 'https://x.example/d', true),
+      berichtVersand('Muster', 'RR-2026-ABCDEF', 'https://x.example/r', false, 'https://x.example/d', false, false),
+      berichtVersand('Muster', 'EK-CODE1', undefined, true),
+      vertragsbestaetigung('Muster', 'RR-2026-ABCDEF', { agb: 'https://x.example/agb', widerruf: 'https://x.example/w' }),
+      vertragsbestaetigung('Muster', 'RR-2026-ABCDEF', { agb: 'https://x.example/agb', widerruf: 'https://x.example/w' }, undefined, true),
+      rueckfrageVertragsart('Muster', 'RR-2026-ABCDEF'),
+      uebernahmeAngefragt('Muster'),
+      druckauftrag('RR-2026-ABCDEF', 'Muster Person', 'Musterstraße 1, 12345 Musterstadt'),
+      berichtVerzoegert('Muster', 'RR-2026-ABCDEF'),
+      anfrageEingegangen('Muster'),
+    ]
+      .map((v) => `${v.betreff}\n${v.text}`)
+      .join('\n---\n');
+    for (const regel of VERBOTEN) {
+      expect(regel.muster.test(texte), regel.grund).toBe(false);
+    }
+  });
+
+  it('die Betreffzeilen stimmen (Prompt 12, 3.4 / Prompt 14, 0.6)', () => {
+    expect(berichtVersand('M', 'A-1').betreff).toBe('Ihr Gutachten ist da');
+    expect(spaeterWeitermachen('M', 'x').betreff).toBe('Weitermachen, wo Sie aufgehört haben');
+  });
+
+  it('statische Überschriften bleiben kurz (höchstens acht Wörter)', () => {
+    for (const datei of OBERFLAECHE.filter((d) => d.endsWith('.tsx'))) {
+      const inhalt = textInhalt(datei);
+      const muster = /<h1[^>]*>([^<{]+)</g;
+      let m: RegExpExecArray | null;
+      while ((m = muster.exec(inhalt)) !== null) {
+        const text = m[1]!.trim();
+        if (text !== '') {
+          expect(text.split(/\s+/).length, `${datei}: „${text}“`).toBeLessThanOrEqual(8);
+        }
+      }
+    }
+  });
+
+  it('Ankaufsseite ohne Prozentangaben und ohne Namen eines Aufkäufers', () => {
+    const inhalt = textInhalt(join(WEB, 'app', 'verkaufen', 'page.tsx'));
+    expect(inhalt).not.toMatch(/%|Prozent/);
+    expect(inhalt).not.toMatch(/\bGmbH\b|\bAG\b|\bSE\b/);
+    expect(inhalt).not.toMatch(/Policen Direkt|Partner in Life|cash\.life/i);
+    expect(inhalt).not.toMatch(/Aufsicht/);
+  });
+
+  it('Startseite enthält keine fest verdrahteten Beträge (außer der Übernahme-Grenze 30.000 €)', () => {
+    const roh = readFileSync(join(WEB, 'app', 'page.tsx'), 'utf8').replace(/30\.000\s*€/g, '');
+    expect(roh).not.toMatch(/\d{1,3}\.\d{3}\s*€/);
+  });
+
+  it('„So verdienen wir“ existiert nirgends mehr – weder Text noch Route (Prompt 13, 7)', () => {
+    for (const datei of OBERFLAECHE) {
+      expect(textInhalt(datei), datei).not.toMatch(/So verdienen wir/);
+    }
+    expect(existsSync(join(WEB, 'app', 'so-verdienen-wir'))).toBe(false);
+    // Offenlegung stattdessen in Impressum, Datenschutz und der Einwilligung der Verkaufen-Karte:
+    expect(textInhalt(join(WEB, 'app', 'impressum', 'page.tsx'))).toContain('Offenlegung');
+    expect(textInhalt(join(WEB, 'app', 'datenschutz', 'page.tsx'))).toContain('Vergütung');
+    expect(textInhalt(join(WEB, 'components', 'VerkaufenKarte.tsx'))).toContain('Vergütung');
+  });
+
+  it('erwünschte Übernahme-Formulierungen sind da (Prompt 13, 5)', () => {
+    const startseite = textInhalt(join(WEB, 'app', 'page.tsx'));
+    expect(startseite).toContain('Wir übernehmen');
+    expect(startseite.replace(/\s+/g, ' ')).toContain('müssen nichts selbst verhandeln');
+    expect(textInhalt(join(WEB, 'app', 'durchsetzung', 'page.tsx'))).toContain('Wir übernehmen.');
+  });
+
+  it('Zeitraum: einheitlich 1980 bis 2020 aus config/brand.ts (Prompt 12, 0.1)', () => {
+    expect(BRAND.range).toEqual({ from: 1980, to: 2020 });
+    expect(RANGE_TEXT).toBe('1980 bis 2020');
+    const startseite = readFileSync(join(WEB, 'app', 'page.tsx'), 'utf8');
+    expect(startseite).toContain('RANGE_TEXT');
+  });
+
+  it('Produktname „Gutachten“ aus config/brand.ts – kein Sachverständigen-Anklang (Prompt 14, 0.6)', () => {
+    expect(BRAND.produktname).toBe('Gutachten');
+    const alteRoute = join(WEB, 'app', 'bericht');
+    expect(existsSync(alteRoute)).toBe(false);
+    expect(existsSync(join(WEB, 'app', 'gutachten', 'page.tsx'))).toBe(true);
+  });
+});
+
+describe('Anzeigentexte (Prompt 12, Abschnitt 6)', () => {
+  it('halten die Google-Längen ein (Überschrift ≤ 30, Beschreibung ≤ 90 Zeichen)', () => {
+    for (const u of GOOGLE_UEBERSCHRIFTEN) {
+      expect(u.length, u).toBeLessThanOrEqual(30);
+    }
+    for (const b of GOOGLE_BESCHREIBUNGEN) {
+      expect(b.length, b).toBeLessThanOrEqual(90);
+    }
+    expect(META_HAUPTTEXT.length).toBeGreaterThan(0);
+  });
+
+  it('nennen den Zeitraum 1980 bis 2020 und die Übernahme-Zeilen (Prompt 13, 5 / Prompt 14: Gutachten)', () => {
+    const alles = [...GOOGLE_UEBERSCHRIFTEN, ...GOOGLE_BESCHREIBUNGEN, META_HAUPTTEXT].join('\n');
+    expect(alles).toContain('1980');
+    expect(alles).toContain('2020');
+    expect(alles).not.toMatch(/1994|2007/);
+    expect(GOOGLE_UEBERSCHRIFTEN).toContain('Gutachten in 12 Stunden');
+    expect(GOOGLE_UEBERSCHRIFTEN).toContain('Wir übernehmen Ihren Fall');
+    expect(alles).not.toMatch(/Ergebnis sofort|Prüfbericht/);
+  });
+});
+
+describe('Kundenstimmen (Prompt 12, Abschnitt 5)', () => {
+  it('rendert nichts ohne Prüfvermerk und dokumentierte Einwilligung', () => {
+    expect(
+      nurVerifizierte([
+        {
+          quote_display: 'x',
+          quote_original: 'x',
+          name_display: 'A',
+          age: 60,
+          contract_type: 'Kapitallebensversicherung',
+          consent_text: '',
+          consent_at: '',
+          consent_channel: '',
+          customer_ref: 'k-1',
+          verified: true,
+        },
+        {
+          quote_display: 'x',
+          quote_original: 'x',
+          name_display: 'B',
+          age: 61,
+          contract_type: 'private Rentenversicherung',
+          consent_text: 'ok',
+          consent_at: '2026-09-20T10:00:00Z',
+          consent_channel: 'E-Mail',
+          customer_ref: 'k-2',
+          verified: false,
+        },
+      ]),
+    ).toEqual([]);
+    // Prompt 13, 0.7: Manfred und Ulla sind freigegeben und live.
+    const live = nurVerifizierte(TESTIMONIALS);
+    expect(live.map((t) => t.name_display).sort()).toEqual(['Manfred', 'Ulla']);
+    for (const t of live) {
+      expect(t.consent_at).not.toBe('');
+      expect(t.customer_ref.startsWith('freigabe-')).toBe(true);
+    }
+  });
+
+  it('gerenderte Stimmen brauchen alle Pflichtfelder', () => {
+    for (const t of TESTIMONIALS) {
+      expect(Object.keys(t).sort()).toEqual(
+        ['age', 'consent_at', 'consent_channel', 'consent_text', 'contract_type', 'customer_ref', 'name_display', 'quote_display', 'quote_original', 'verified'].sort(),
+      );
+    }
+  });
+});

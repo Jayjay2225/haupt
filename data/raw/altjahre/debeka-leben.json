@@ -1,0 +1,146 @@
+{
+  "insurerId": "debeka-leben",
+  "werte": [
+    {
+      "jahr": 2000,
+      "nettoverzinsung": 7.4,
+      "fundstelle": "S. 38 Diagramm, Balken 2000 (Debeka 7,4 / Branche 7,5)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Debeka-Gruppe, „Zahlen und Fakten 2008“, S. 38 Balkendiagramm „Nettoverzinsung der Debeka Leben (in %)“ 2000–2008 (Debeka vs. Branche)",
+        "url": "https://web.archive.org/web/20090816025017id_/http://www.debeka.de:80/unternehmen/presse/zahlen_und_fakten_2008.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/debeka-leben/zahlen-fakten-2008-s038.pdf",
+        "hinweis": "Diagrammbeschriftung; die im Diagramm genannten Branchenwerte stimmen mit der GDV-Reihe überein"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.4
+      },
+      "hinweis": "kein Geschäftsbericht 2000 auffindbar; nur Diagrammwert"
+    },
+    {
+      "jahr": 2001,
+      "nettoverzinsung": 6.5,
+      "fundstelle": "S. 7 „Die Nettoverzinsung betrug 6,5 %“; S. 47 (geänderter Lagebericht); bestätigt GB 2002 S. 7 („Vorjahr: 6,5 %“) und Zahlen & Fakten 2008 S. 38",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Debeka Lebensversicherungsverein a.G., Geschäftsbericht 2001, Lagebericht „Kapitalanlagen und -erträge“",
+        "url": "https://web.archive.org/web/20040922012651id_/http://www.debeka.de:80/cms/opencms/download/Website/gb_leben_2001.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/debeka-leben/gb2001-s007.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.5
+      }
+    },
+    {
+      "jahr": 2002,
+      "nettoverzinsung": 6.4,
+      "fundstelle": "S. 7 „Die Nettoverzinsung betrug 6,4 % (Vorjahr: 6,5 %)“; S. 47; bestätigt GB 2003 S. 7",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Debeka Lebensversicherungsverein a.G., Geschäftsbericht 2002, Lagebericht",
+        "url": "https://web.archive.org/web/20040922015204id_/http://www.debeka.de:80/cms/opencms/download/Website/gbleben2002.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/debeka-leben/gb2002-s007.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.4
+      }
+    },
+    {
+      "jahr": 2003,
+      "nettoverzinsung": 6.1,
+      "fundstelle": "S. 7 „Die Nettoverzinsung betrug 6,1 % (Vorjahr: 6,4 %)“; bestätigt Zahlen & Fakten 2008 S. 38",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Debeka Lebensversicherungsverein a.G., Geschäftsbericht 2003, Lagebericht",
+        "url": "https://web.archive.org/web/20040922015923id_/http://www.debeka.de:80/cms/opencms/download/Website/gb_leben_2003.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/debeka-leben/gb2003-s007.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.1
+      }
+    },
+    {
+      "jahr": 2004,
+      "nettoverzinsung": 6.2,
+      "fundstelle": "S. 38 Diagramm, Balken 2004 (Debeka 6,2 / Branche 4,9)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Debeka-Gruppe, „Zahlen und Fakten 2008“, S. 38 Balkendiagramm „Nettoverzinsung der Debeka Leben (in %)“ 2000–2008 (Debeka vs. Branche)",
+        "url": "https://web.archive.org/web/20090816025017id_/http://www.debeka.de:80/unternehmen/presse/zahlen_und_fakten_2008.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/debeka-leben/zahlen-fakten-2008-s038.pdf",
+        "hinweis": "Diagrammbeschriftung; die im Diagramm genannten Branchenwerte stimmen mit der GDV-Reihe überein"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.2
+      },
+      "hinweis": "kein Geschäftsbericht 2004/2005 auffindbar; nur Diagrammwert"
+    },
+    {
+      "jahr": 2005,
+      "nettoverzinsung": 5.7,
+      "fundstelle": "S. 7 „Die Nettoverzinsung lag mit 5,5 % (Vorjahr: 5,7 %) …“; bestätigt Zahlen & Fakten 2008 S. 38",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Debeka Lebensversicherungsverein a.G., Geschäftsbericht 2006, Lagebericht",
+        "url": "https://web.archive.org/web/20091117070608id_/http://www.debeka.de:80/unternehmen/presse/gb_lv_2006.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/debeka-leben/gb2006-s007.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.7
+      }
+    },
+    {
+      "jahr": 2006,
+      "nettoverzinsung": 5.5,
+      "fundstelle": "S. 7 „Die Nettoverzinsung lag mit 5,5 % …“; bestätigt Zahlen & Fakten 2008 S. 38",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Debeka Lebensversicherungsverein a.G., Geschäftsbericht 2006, Lagebericht",
+        "url": "https://web.archive.org/web/20091117070608id_/http://www.debeka.de:80/unternehmen/presse/gb_lv_2006.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/debeka-leben/gb2006-s007.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.5
+      }
+    },
+    {
+      "jahr": 2007,
+      "nettoverzinsung": 5.4,
+      "fundstelle": "S. 38 Diagramm, Balken 2007 (Debeka 5,4 / Branche 4,6)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Debeka-Gruppe, „Zahlen und Fakten 2008“, S. 38 Balkendiagramm „Nettoverzinsung der Debeka Leben (in %)“ 2000–2008 (Debeka vs. Branche)",
+        "url": "https://web.archive.org/web/20090816025017id_/http://www.debeka.de:80/unternehmen/presse/zahlen_und_fakten_2008.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/debeka-leben/zahlen-fakten-2008-s038.pdf",
+        "hinweis": "Diagrammbeschriftung; die im Diagramm genannten Branchenwerte stimmen mit der GDV-Reihe überein"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.4
+      }
+    },
+    {
+      "jahr": 2008,
+      "nettoverzinsung": 4.2,
+      "fundstelle": "S. 38 Diagramm, Balken 2008 (Debeka 4,2 / Branche 3,6)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "Debeka-Gruppe, „Zahlen und Fakten 2008“, S. 38 Balkendiagramm „Nettoverzinsung der Debeka Leben (in %)“ 2000–2008 (Debeka vs. Branche)",
+        "url": "https://web.archive.org/web/20090816025017id_/http://www.debeka.de:80/unternehmen/presse/zahlen_und_fakten_2008.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/debeka-leben/zahlen-fakten-2008-s038.pdf",
+        "hinweis": "Diagrammbeschriftung; die im Diagramm genannten Branchenwerte stimmen mit der GDV-Reihe überein"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.2
+      }
+    }
+  ]
+}

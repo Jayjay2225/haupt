@@ -1,0 +1,28 @@
+{
+  "insurerId": "allianz-leben",
+  "quelle": {
+    "typ": "primary",
+    "titel": "Allianz Lebensversicherungs-AG, Geschäftsbericht 1996 (Teil 1), Abschnitt Kapitalanlagenergebnis",
+    "url": "https://web.archive.org/web/19980505072347id_/http://www.allianz-leben.de:80/download/gb96_t1.pdf",
+    "abrufdatum": "2026-09-18",
+    "dokument": "data/raw/altjahre/dokumente/allianz-leben/gb1996-s018.pdf"
+  },
+  "werte": [
+    {
+      "jahr": 1995,
+      "nettoverzinsung": 7.49,
+      "fundstelle": "S. 18: „Sie liegt mit 7,46 (7,49) Prozent auf dem hohen Niveau des Vorjahres“ – Vorjahreswert 1995 in Klammern",
+      "lesung2": {
+        "nettoverzinsung": 7.49
+      }
+    },
+    {
+      "jahr": 1996,
+      "nettoverzinsung": 7.46,
+      "fundstelle": "S. 18: „zur Stabilisierung der Nettoverzinsung geführt. Sie liegt mit 7,46 (7,49) Prozent …“",
+      "lesung2": {
+        "nettoverzinsung": 7.46
+      }
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "insurerId": "axa-leben",
+  "werte": [
+    {
+      "jahr": 1999,
+      "nettoverzinsung": 8.1,
+      "fundstelle": "S. 39 Tabelle „AXA Colonia Lebensversicherung“, Zeile „Nettoverzinsung laufendes Jahr“ 7,6 / 8,1 (Vorjahr); Fußnote: inkl. Albingia Lebensversicherung",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AXA Colonia Konzern AG, Geschäftsbericht 2000, Abschnitt AXA Colonia Lebensversicherung (Pflichtexemplar ULB Bonn, ePflicht)",
+        "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/120983",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-colonia-konzern-gb2000-s039.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 8.1
+      }
+    },
+    {
+      "jahr": 2000,
+      "nettoverzinsung": 7.6,
+      "fundstelle": "S. 39 Tabelle, Zeile „Nettoverzinsung laufendes Jahr“; bestätigt AXA Leben GB 2001 S. 2 („6,5 / 7,6“) und S. 12",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AXA Colonia Konzern AG, Geschäftsbericht 2000, Abschnitt AXA Colonia Lebensversicherung (Pflichtexemplar ULB Bonn, ePflicht)",
+        "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/120983",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-colonia-konzern-gb2000-s039.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.6
+      }
+    },
+    {
+      "jahr": 2001,
+      "nettoverzinsung": 6.5,
+      "fundstelle": "S. 2 Kennzahlen „Nettoverzinsung des laufenden Geschäftsjahres 6,5 / 7,6“; S. 12 „sank von 7,6% auf 6,5%“; bestätigt GB 2002 S. 2",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AXA Lebensversicherung AG, Geschäftsbericht 2001, Kennzahlen (Pflichtexemplar ULB Bonn, ePflicht)",
+        "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/121063",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-leben-gb2001-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.5
+      }
+    },
+    {
+      "jahr": 2002,
+      "nettoverzinsung": 5.1,
+      "fundstelle": "S. 2 Kennzahlen „5,1 / 6,5“; S. 8; bestätigt GB 2003 S. 2",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AXA Lebensversicherung AG, Geschäftsbericht 2002, Kennzahlen (Pflichtexemplar ULB Bonn, ePflicht)",
+        "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/121065",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-leben-gb2002-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 5.1
+      }
+    },
+    {
+      "jahr": 2003,
+      "nettoverzinsung": 3.9,
+      "fundstelle": "S. 2 Kennzahlen „3,9 / 5,1“; S. 7; bestätigt GB 2004 S. 2",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AXA Lebensversicherung AG, Geschäftsbericht 2003, Kennzahlen (Pflichtexemplar ULB Bonn, ePflicht)",
+        "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/121067",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-leben-gb2003-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 3.9
+      }
+    },
+    {
+      "jahr": 2004,
+      "nettoverzinsung": 3.9,
+      "fundstelle": "S. 2 Kennzahlen „3,9 / 3,9“; S. 8 „konstant bei 3,9%“; bestätigt GB 2005 S. 2",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AXA Lebensversicherung AG, Geschäftsbericht 2004, Kennzahlen (Pflichtexemplar ULB Bonn, ePflicht)",
+        "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/121069",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-leben-gb2004-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 3.9
+      }
+    },
+    {
+      "jahr": 2005,
+      "nettoverzinsung": 4.4,
+      "fundstelle": "S. 2 Kennzahlen „4,4 / 3,9“; S. 10 „betrug 4,4 % (2004: 3,9 %)“ (GDV-Formel); bestätigt GB 2006 S. 2",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AXA Lebensversicherung AG, Geschäftsbericht 2005, Kennzahlen (Pflichtexemplar ULB Bonn, ePflicht)",
+        "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/121071",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-leben-gb2005-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.4
+      }
+    },
+    {
+      "jahr": 2006,
+      "nettoverzinsung": 4.3,
+      "fundstelle": "S. 2 Kennzahlen „Nettoverzinsung des laufenden Geschäftsjahres 4,3“ (Vorjahr 4,4); S. 9",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AXA Lebensversicherung AG, Geschäftsbericht 2006, Kennzahlen (Pflichtexemplar ULB Bonn, ePflicht)",
+        "url": "https://epflicht.ulb.uni-bonn.de/download/pdf/121073",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/axa-leben/axa-leben-gb2006-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.3
+      }
+    }
+  ]
+}

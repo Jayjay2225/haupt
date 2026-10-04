@@ -1,0 +1,65 @@
+{
+  "version": "0.1.0",
+  "stand": "2026-09-18",
+  "beschreibung": "Pauschale Aufteilungs-Defaults für den Rechenkern, wenn Vertragsunterlagen keine genaueren Werte liefern. ALLE Werte in dieser Datei sind Modellannahmen (source_type=estimate): Sie werden im Ergebnis und im Bericht als Annahme ausgewiesen, in drei Bändern (low/mid/high) geführt und über die Szenarien Min/Basis/Max variiert. Aktuarielle Validierung ist ein offener Punkt (docs/LEGAL-OPEN-QUESTIONS.md bzw. docs/REVIEW.md).",
+  "risikoanteilProzent": {
+    "beschreibung": "Anteil des Beitrags der Hauptversicherung, der rechnerisch auf die Risikotragung (Todesfallschutz bzw. Beitragsrückgewähr) entfällt, nach Vertragsart und Eintrittsalter. low = unterer Rand (Max-Szenario), mid = Basis, high = oberer Rand (Min-Szenario).",
+    "begruendung": "Bei gemischten Kapitallebensversicherungen deckt der Risikobeitrag die Differenz zwischen Todesfallleistung und vorhandenem Deckungskapital; er ist in jungen Jahren klein und steigt mit dem Eintrittsalter. Bei privaten Rentenversicherungen ohne zusätzlichen Todesfallschutz (übliche Beitragsrückgewähr in der Aufschubzeit) ist der Risikoanteil nahe null. Fondsgebundene Tarife liegen wegen geringerer Garantieleistungen eher unter den klassischen. Die Bänder sind bewusst breit gewählt, damit das Min-Szenario eine konservative Untergrenze des Anspruchs liefert.",
+    "quelle": {
+      "typ": "estimate",
+      "titel": "Modellannahme des Projekts, aktuariell zu validieren",
+      "dokument": "docs/CALC-SPEC.md Abschnitt 3",
+      "hinweis": "Sobald Vertragsunterlagen (z. B. Kostenausweis, Risikobeitrag laut Police) vorliegen, sind diese als Override zu verwenden."
+    },
+    "vertragsarten": {
+      "kapital-lv": {
+        "baender": [
+          { "bisEintrittsalter": 34, "low": 2, "mid": 4, "high": 7 },
+          { "bisEintrittsalter": 50, "low": 3, "mid": 6, "high": 10 },
+          { "bisEintrittsalter": null, "low": 5, "mid": 10, "high": 15 }
+        ]
+      },
+      "private-rv": {
+        "baender": [
+          { "bisEintrittsalter": null, "low": 0, "mid": 1, "high": 2 }
+        ]
+      },
+      "fonds-lv": {
+        "baender": [
+          { "bisEintrittsalter": 34, "low": 1, "mid": 3, "high": 6 },
+          { "bisEintrittsalter": 50, "low": 2, "mid": 5, "high": 9 },
+          { "bisEintrittsalter": null, "low": 4, "mid": 8, "high": 13 }
+        ]
+      },
+      "fonds-rv": {
+        "baender": [
+          { "bisEintrittsalter": null, "low": 0, "mid": 1, "high": 2 }
+        ]
+      },
+      "rueckdeckung": {
+        "baender": [
+          { "bisEintrittsalter": 34, "low": 2, "mid": 4, "high": 7 },
+          { "bisEintrittsalter": 50, "low": 3, "mid": 6, "high": 10 },
+          { "bisEintrittsalter": null, "low": 5, "mid": 10, "high": 15 }
+        ]
+      }
+    },
+    "defaultEintrittsalter": 40
+  },
+  "buz": {
+    "beschreibung": "Beiträge zu Berufsunfähigkeits-Zusatzversicherungen sind reiner Risikobeitrag.",
+    "risikoanteilProzent": 100
+  },
+  "verwaltungskostenFallbackProzent": {
+    "beschreibung": "Fallback für die Verwaltungskostenquote (in % der Bruttobeiträge), wenn insurers.json für Gesellschaft und Jahr keinen belegten Wert enthält.",
+    "low": 2.0,
+    "mid": 3.0,
+    "high": 4.0,
+    "quelle": {
+      "typ": "estimate",
+      "titel": "Modellannahme des Projekts",
+      "dokument": "docs/CALC-SPEC.md Abschnitt 3",
+      "hinweis": "Durch belegte Branchendurchschnitts- oder Unternehmenswerte aus insurers.json zu ersetzen, sobald beschafft (data/COVERAGE.md)."
+    }
+  }
+}

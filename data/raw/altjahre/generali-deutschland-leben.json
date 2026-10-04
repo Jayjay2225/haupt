@@ -1,0 +1,177 @@
+{
+  "insurerId": "generali-deutschland-leben",
+  "werte": [
+    {
+      "jahr": 1998,
+      "nettoverzinsung": 7.6,
+      "fundstelle": "S. 4, Zeile „Nettoverzinsung in %“ (2002…1998: 4,6 / 6,2 / 7,6 / 7,9 / 7,6), ohne Fondsgebundene Versicherungen",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2002, „Kennzahlen der letzten fünf Geschäftsjahre“ (Nettoverzinsung ohne Fondsgebundene Versicherungen)",
+        "url": "https://web.archive.org/web/20070810012220id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2002-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.6
+      }
+    },
+    {
+      "jahr": 1999,
+      "nettoverzinsung": 7.9,
+      "fundstelle": "S. 4, Zeile „Nettoverzinsung in %“",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2002, „Kennzahlen der letzten fünf Geschäftsjahre“ (Nettoverzinsung ohne Fondsgebundene Versicherungen)",
+        "url": "https://web.archive.org/web/20070810012220id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2002-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.9
+      }
+    },
+    {
+      "jahr": 2000,
+      "nettoverzinsung": 7.6,
+      "fundstelle": "S. 4, Zeile „Nettoverzinsung in %“",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2002, „Kennzahlen der letzten fünf Geschäftsjahre“ (Nettoverzinsung ohne Fondsgebundene Versicherungen)",
+        "url": "https://web.archive.org/web/20070810012220id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2002-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 7.6
+      }
+    },
+    {
+      "jahr": 2001,
+      "nettoverzinsung": 6.2,
+      "laufendeDurchschnittsverzinsung": 6.1,
+      "fundstelle": "Nettoverzinsung: GB 2002 S. 4 und S. 35 („Vorjahr 6,2 %“); lfd. Durchschnittsverzinsung: GB 2003 S. 3 „lfd. Durchschnittsverzinsung (in %) 5,2 / 5,4 / 6,1“",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2002, „Kennzahlen der letzten fünf Geschäftsjahre“ (Nettoverzinsung ohne Fondsgebundene Versicherungen)",
+        "url": "https://web.archive.org/web/20070810012220id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2002-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 6.2,
+        "laufendeDurchschnittsverzinsung": 6.1
+      }
+    },
+    {
+      "jahr": 2002,
+      "nettoverzinsung": 4.6,
+      "laufendeDurchschnittsverzinsung": 5.4,
+      "fundstelle": "Nettoverzinsung: S. 4 und S. 35 „Nettoverzinsung von 4,6 % (Vorjahr 6,2 %)“; lfd. Durchschnittsverzinsung: GB 2003 S. 3",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2002, „Kennzahlen der letzten fünf Geschäftsjahre“ (Nettoverzinsung ohne Fondsgebundene Versicherungen)",
+        "url": "https://web.archive.org/web/20070810012220id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2002-s004.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.6,
+        "laufendeDurchschnittsverzinsung": 5.4
+      },
+      "hinweis": "GB 2003 S. 25 nennt als Vorjahreswert 4,5 % (abweichende Basis); übernommen ist der im GB 2002 selbst ausgewiesene Wert"
+    },
+    {
+      "jahr": 2003,
+      "nettoverzinsung": 4.8,
+      "laufendeDurchschnittsverzinsung": 5.2,
+      "fundstelle": "S. 25 „Nettoverzinsung ohne die Fondsgebundene Lebensversicherung von 4,8 % (Vorjahr 4,5 %)“; lfd. Durchschnittsverzinsung S. 3; Nettoverzinsung bestätigt GB 2005 S. 2",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2003",
+        "url": "https://web.archive.org/web/20040609205553id_/http://www.amv.de:80/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GBAML2003.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2003-s003.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.8,
+        "laufendeDurchschnittsverzinsung": 5.2
+      }
+    },
+    {
+      "jahr": 2004,
+      "nettoverzinsung": 4.1,
+      "fundstelle": "S. 2 Kennzahlen „Nettoverzinsung (in %) 4,5 / 4,1“ (Vorjahr); S. 31 „(Vorjahr: 4,1 %)“; bestätigt GB 2006 S. 2",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2005, Kennzahlen",
+        "url": "https://web.archive.org/web/20061207212728id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GB_AMLeben_2005.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2005-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.1
+      }
+    },
+    {
+      "jahr": 2005,
+      "nettoverzinsung": 4.5,
+      "fundstelle": "S. 2 Kennzahlen; S. 31 „Nettoverzinsung ohne die Fondsgebundene Lebensversicherung von 4,5 %“",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2005, Kennzahlen",
+        "url": "https://web.archive.org/web/20061207212728id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GB_AMLeben_2005.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2005-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.5
+      }
+    },
+    {
+      "jahr": 2006,
+      "nettoverzinsung": 4.5,
+      "fundstelle": "S. 2 Kennzahlen „4,5 / 4,5“; S. 34",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2006, Kennzahlen",
+        "url": "https://web.archive.org/web/20070709221605id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/GB_AMLeben2006_endg_Stand%2002052007_mit%20Umschlag.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2006-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.5
+      }
+    },
+    {
+      "jahr": 2007,
+      "nettoverzinsung": 4.3,
+      "fundstelle": "S. 2 Kennzahlen „Nettoverzinsung (in %) 3,0 / 4,3“ (Vorjahr)",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2008, Kennzahlen",
+        "url": "https://web.archive.org/web/20090424012334id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/AML_GB_2008_0704_eBook_endg%FCltig.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2008-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 4.3
+      }
+    },
+    {
+      "jahr": 2008,
+      "nettoverzinsung": 3.0,
+      "fundstelle": "S. 2 Kennzahlen",
+      "quelle": {
+        "typ": "primary",
+        "titel": "AachenMünchener Lebensversicherung AG, Geschäftsbericht 2008, Kennzahlen",
+        "url": "https://web.archive.org/web/20090424012334id_/http://www.amv.de/internet/amven/amven_inter.nsf/vwfiles/GBAML/$file/AML_GB_2008_0704_eBook_endg%FCltig.pdf",
+        "abrufdatum": "2026-09-18",
+        "dokument": "data/raw/altjahre/dokumente/generali-deutschland-leben/aml-gb2008-s002.pdf"
+      },
+      "lesung2": {
+        "nettoverzinsung": 3.0
+      }
+    }
+  ]
+}

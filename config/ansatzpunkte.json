@@ -1,0 +1,5 @@
+{
+  "_hinweis": "[[ANSATZPUNKTE: von Jack/Kanzlei]] – Inhalt für den optionalen Berichtskasten „Typische Ansatzpunkte für Verträge ab [Jahr]“ (Prompt 12, Abschnitt 1.4). Solange `punkte` leer ist, wird der Kasten NICHT gedruckt. Nichts erfinden: Die Ansatzpunkte liefert die Kanzlei.",
+  "abJahr": null,
+  "punkte": []
+}

@@ -1,0 +1,26 @@
+# Abhängigkeiten
+node_modules/
+
+# Build-Ausgaben
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Auslieferungen (Berichte, Mail-Protokolle) – nie ins Repo
+var/
+
+# Tests & Coverage
+coverage/
+test-results/
+playwright-report/
+
+# Umgebungsvariablen
+.env
+.env.*
+!.env.example
+
+# Logs & Betriebssystem
+*.log
+.DS_Store
